@@ -190,7 +190,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    chips, "terug", het tandwiel, de pauzeknop en de kaartjes in de
    voorvertoning dood aanvoelden. */
 button.btn-go, button.btn-good, button.btn-skip, button.btn-wide,
-button.btn-ghost, button.btn-icon, button.chip, button.pv {
+button.btn-ghost, button.btn-icon, button.gear, button.chip, button.pv {
   transition: transform calc(var(--t-press) * var(--dur)) ease,
               box-shadow calc(var(--t-press) * var(--dur)) ease;
 }
@@ -198,7 +198,7 @@ button.btn-ghost, button.btn-icon, button.chip, button.pv {
   transform: translate(var(--lift-2), var(--lift-2));
   box-shadow: 0 0 0 var(--ink);
 }
-.btn-ghost:active, .btn-icon:active, .chip:active, .pv:active {
+.btn-ghost:active, .btn-icon:active, .gear:active, .chip:active, .pv:active {
   transform: translate(var(--lift-1), var(--lift-1));
   box-shadow: 0 0 0 var(--ink);
 }
@@ -380,22 +380,26 @@ button.btn-ghost, button.btn-icon, button.chip, button.pv {
    ertussen wat minder. */
 #s-title[data-resume="1"] { gap: 4vh; }
 
-/* Gestippeld in plaats van dichtgetrokken: het tandwiel is de enige knop op
-   de titel die geen tik verdraagt, en zijn rand zegt dat nu zelf. */
+/* Het tandwiel vereiste een lange druk van 1,2 s: "zo dwaalt een vierjarige
+   er tijdens het spel niet per ongeluk in." Maar dat kind zou het tandwiel
+   tijdens het spel nooit te zien krijgen -- het staat uitsluitend op dit
+   titelscherm, nooit op het spel- of overdrachtscherm. De bescherming
+   dekte dus een risico af dat op deze plek niet bestaat, en de rekening
+   kwam terecht bij de volwassene, die deze knop elke avond opnieuw indrukt:
+   1,2 seconde wachten voor een handeling die niets onomkeerbaars doet en
+   met "Terug" zo weer ongedaan is. Eén tik, net als elke andere knop op dit
+   scherm; de rand is weer dichtgetrokken in plaats van gestippeld, want
+   gestippeld betekent in deze app "hou vast", en dat hoeft hier niet meer. */
 .gear {
   position: fixed; right: var(--s-4); bottom: max(var(--s-4), env(safe-area-inset-bottom));
   width: 64px; height: 64px;
   display: grid; place-items: center;
   border-radius: 50%;
-  border: var(--line) dashed var(--ink);
+  border: var(--line) solid var(--ink);
   background: var(--paper-2);
-  overflow: hidden;
+  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
 }
-.gear svg { width: 28px; position: relative; z-index: 1; }
-.gear i {                  /* vult op tijdens het vasthouden (in JS getekend) */
-  position: absolute; inset: 0; background: var(--go);
-  transform: scaleY(0); transform-origin: bottom;
-}
+.gear svg { width: 28px; }
 
 /* ============================================================
    5. INSTELLINGEN — het enige scherm met tekst. Voor de volwassene.
@@ -1289,8 +1293,8 @@ input[type=range]::-moz-range-thumb {
        "Beginnen" het lopende spel zonder waarschuwing weggooide. -->
   <button class="btn-ghost" id="btnFresh" hidden>Nieuw spel</button>
 
-  <button class="gear" id="btnGear" aria-label="Instellingen — houd ingedrukt">
-    <i></i><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-gear"/></svg>
+  <button class="gear" id="btnGear" aria-label="Instellingen">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-gear"/></svg>
   </button>
 </section>
 
@@ -1917,9 +1921,11 @@ function holdButton(el, ms, run, paint) {
 const fillY = el => p => { el.style.transform = "scaleY(" + p + ")"; };
 const fillX = el => p => { el.style.transform = "scaleX(" + p + ")"; };
 
-/* Het tandwiel gaat pas open na lang duwen -- zo dwaalt een vierjarige
-   er tijdens het spel niet per ongeluk in. */
-holdButton($("#btnGear"), 1200, openSetup, fillY($("#btnGear i")));
+/* Eén tik, zoals elke andere knop op de titel. Zie de toelichting bij
+   .gear in de stijlen: dit vereiste eerst een lange druk, maar het risico
+   die moest afdekken ("een kind tikt het per ongeluk aan tijdens het spel")
+   speelt hier niet -- het tandwiel bestaat alleen op dit scherm. */
+$("#btnGear").addEventListener("click", () => { Snd.unlock(); openSetup(); });
 
 /* Beginnen is een gewone tik zolang er niets te verliezen valt, en een
    lange druk zodra er een spel loopt dat eraan zou gaan. */

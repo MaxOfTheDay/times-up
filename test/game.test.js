@@ -27,7 +27,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   // Opzetten via het echte instellingenscherm, niet door de toestand te porren:
   // zo testen we meteen dat de instellingen ook echt in het spel belanden.
   async function setup({ tier, size, secs }) {
-    await hold(page, '#btnGear', 1500);
+    await page.click('#btnGear');
     await page.waitForTimeout(150);
     if (await screen() !== 'setup') throw new Error('instellingenscherm ging niet open');
     await page.click(`#tierChips .chip[data-tier="${tier}"]`);
@@ -44,10 +44,14 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   await page.reload();
   await page.waitForTimeout(250);
 
-  // Het tandwiel mag niet opengaan van een gewone tik.
+  // Het tandwiel is een gewone tik: instellingen openen is niets
+  // onomkeerbaars, en het tandwiel bestaat toch al alleen op dit scherm.
   await page.click('#btnGear');
   await page.waitForTimeout(120);
-  ok(await screen() === 'title', 'een korte tik opent de instellingen al');
+  ok(await screen() === 'setup', 'een tik op het tandwiel opent de instellingen niet');
+  await page.click('#btnBack');
+  await page.waitForTimeout(120);
+  ok(await screen() === 'title', 'terug vanuit de instellingen komt niet op de titel uit');
 
   await setup({ tier: 'klein', size: 16, secs: 60 });
   ok(await screen() === 'roundintro', 'na start niet op roundintro');

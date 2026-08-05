@@ -30,11 +30,17 @@ Kleur staat ook nooit alleen: elke toestand heeft er een tweede kanaal bij
 
 ## Wat je moet vasthouden, zegt dat
 
-Alle vier de lange drukken (starten, instellingen, stoppen, opnieuw beginnen)
-lopen via `holdButton()` en dragen hetzelfde stippelstreepje. Die functie
-tekent de voortgang zelf, per frame: een CSS-overgang zou bij
-`prefers-reduced-motion` meteen op vol springen, en het toetsenbord zou de
-druk overslaan.
+Een lange druk is alleen voor wat echt niet ongedaan te maken is: starten
+(de klok mag niet lopen terwijl het toestel nog van hand wisselt), stoppen
+en opnieuw beginnen (allebei een lopend potje weg). Alle drie lopen via
+`holdButton()` en dragen dezelfde gestippelde rand. Die functie tekent de
+voortgang zelf, per frame: een CSS-overgang zou bij `prefers-reduced-motion`
+meteen op vol springen, en het toetsenbord zou de druk overslaan.
+
+Het tandwiel kreeg deze behandeling ooit ook, maar instellingen openen is
+niets onomkeerbaars en het tandwiel bestaat alleen op het titelscherm --
+geen risico dat een lange druk moest afdekken. Hij is nu een gewone tik,
+zoals alles wat niets kost om ongedaan te maken.
 
 Alles staat in `index.html`: geen build, geen externe assets, werkt met de
 wifi uit. Houd dat zo.

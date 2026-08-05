@@ -48,7 +48,7 @@ de kaart gaat onderaan terug. Loopt de stapel leeg, dan stopt de ronde
 meteen — ook midden in een beurt — en gaat de resterende tijd mee naar de
 eerste beurt van de volgende ronde, voor dezelfde ploeg.
 
-De instellingen (houd het knopje rechtsonder ingedrukt) regelen de
+De instellingen (het knopje rechtsonder) regelen de
 moeilijkheid, het aantal kaarten, de tijd per beurt en het geluid. Je ziet
 daar ook het deck van vanavond; tik een kaart aan om ze te vervangen. Het is
 het enige scherm met tekst, en meteen de korte uitleg voor wie Time's Up niet
