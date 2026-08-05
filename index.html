@@ -303,13 +303,27 @@ button.btn-ghost, button.btn-icon, button.gear, button.chip, button.pv {
 
 /* ---- vasthouden om te stoppen ---- */
 /* Ook gestippeld: stoppen is de enige knop op het pauzepaneel die niet op
-   een tik reageert, en is meteen de enige onomkeerbare handeling in de app. */
+   een tik reageert, en is meteen de enige onomkeerbare handeling in de app.
+
+   De stippellijn zelf komt niet van border-style: dashed. CSS verdeelt de
+   streepjes zelf over de omtrek en doet dat per element anders: op deze
+   knop (68 px) vielen ze grof en gelijkmatig, op de brede knop hieronder
+   (bijna de hele schermbreedte) perste diezelfde eigenschap er een rij
+   piepkleine, ongelijke steekjes van -- twee knopen die hetzelfde teken
+   moeten dragen, maar er zichtbaar anders uitzagen. Een SVG-rechthoek met
+   een eigen stroke-dasharray tekent precies de streepjeslengte die is
+   opgegeven, ongeacht hoe groot de knop is; vector-effect="non-scaling-
+   stroke" houdt die lengte ook overeind als de knop breder wordt gerekt. */
 .btn-danger {
   position: relative; overflow: hidden;
   width: 68px; height: 68px; display: grid; place-items: center;
-  border: var(--line-2) dashed var(--danger); background: var(--paper-2);
+  border: none; background: var(--paper-2);
 }
-.btn-danger svg { width: 32px; position: relative; z-index: 1; }
+.btn-danger .dash-frame {
+  position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
+}
+.btn-danger .dash-frame rect { fill: none; stroke: var(--danger); stroke-width: 3; stroke-dasharray: 9 7; }
+.btn-danger svg:not(.dash-frame) { width: 32px; position: relative; z-index: 1; }
 .btn-danger i {
   position: absolute; inset: 0; background: var(--danger);
   transform: scaleY(0); transform-origin: bottom;
@@ -340,7 +354,17 @@ button.btn-ghost, button.btn-icon, button.gear, button.chip, button.pv {
 }
 .btn-wide > * { position: relative; z-index: 1; }
 .btn-wide .warn { display: none; width: 26px; height: 26px; }
-.btn-wide[data-confirm="1"] { background: var(--danger); border-style: dashed; }
+/* De rand verdween in plaats van gestippeld te worden: zie de toelichting
+   bij .btn-danger. Dezelfde SVG-rechthoek, maar dan gestrekt over de volle
+   breedte van de knop (preserveAspectRatio="none") -- de niet-schalende
+   streek zorgt dat de streepjes daarbij hun lengte houden, of de knop nu
+   358 px breed is op een telefoon of ruim het dubbele op een tablet. */
+.btn-wide .dash-frame {
+  position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;
+}
+.btn-wide .dash-frame rect { fill: none; stroke: var(--paper); stroke-width: 3; stroke-dasharray: 11 8; display: none; }
+.btn-wide[data-confirm="1"] { background: var(--danger); border-color: transparent; }
+.btn-wide[data-confirm="1"] .dash-frame rect { display: block; }
 .btn-wide[data-confirm="1"] .warn { display: block; }
 
 .btn-ghost {
@@ -1433,6 +1457,9 @@ input[type=range]::-moz-range-thumb {
        eerst helemaal moest afrollen. -->
   <div class="setup-foot">
     <button class="btn-wide" id="btnGo">
+      <svg class="dash-frame" viewBox="0 0 400 68" preserveAspectRatio="none" aria-hidden="true">
+        <rect x="4" y="4" width="392" height="60" vector-effect="non-scaling-stroke"/>
+      </svg>
       <i class="fill" aria-hidden="true"></i>
       <svg class="warn" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-let-op"/></svg>
       <span id="btnGoLabel">Beginnen</span>
@@ -1631,6 +1658,9 @@ input[type=range]::-moz-range-thumb {
       <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-play"/></svg>
     </button>
     <button class="btn-danger" id="btnStop" aria-label="Spel stoppen — houd ingedrukt">
+      <svg class="dash-frame" viewBox="0 0 68 68" aria-hidden="true">
+        <rect x="2.5" y="2.5" width="63" height="63" vector-effect="non-scaling-stroke"/>
+      </svg>
       <i></i><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-stop"/></svg>
     </button>
   </div>
