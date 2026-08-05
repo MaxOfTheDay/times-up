@@ -1,0 +1,56 @@
+# De tests draaien in een echte browser, dus CI heeft een echte browser nodig.
+# Playwright installeert die zelf; test/browser.js valt daarop terug zodra de
+# vaste paden uit de ontwikkelomgeving niet bestaan.
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Een nieuwe push maakt de vorige run overbodig.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # De browser tussen runs bewaren; het versienummer in de sleutel zorgt
+      # dat een playwright-upgrade vanzelf een nieuwe download afdwingt.
+      - name: Playwright-versie bepalen
+        id: pw
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/playwright'].version")" >> "$GITHUB_OUTPUT"
+
+      - name: Browser uit de cache halen
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+
+      - name: Browser installeren
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      # Uit de cache komt alleen de browser zelf; de systeembibliotheken
+      # eromheen zitten niet in ~/.cache en moeten er altijd bij.
+      - name: Systeembibliotheken installeren
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      # Duurt ruim een halve minuut: één beurt moet echt uitlopen om te zien
+      # wat er gebeurt als de tijd om is.
+      - run: npm test
