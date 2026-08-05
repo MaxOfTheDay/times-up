@@ -355,11 +355,25 @@ button.btn-ghost, button.btn-icon, button.gear, button.chip, button.pv {
    ============================================================ */
 #s-title { justify-content: center; align-items: center; gap: 6vh; }
 
-/* De enige plek waar vermiljoen géén ploeg is: het merk zelf, op een
-   scherm waar nog geen ploegen bestaan. Bewuste uitzondering. */
+/* Dit kaartje stond in vermiljoen: de bedoeling was het merk een eigen
+   gezicht te geven op een scherm waar nog geen ploegen bestaan. Maar het
+   titelscherm is het allereerste wat iedereen ziet, en de allereerste
+   kleur die de app toont was daarmee precies de kleur die verderop "Vos"
+   betekent -- geen bewuste uitzondering meer, gewoon de vroegst mogelijke
+   plek om de regel te breken.
+
+   Het merk heeft geen ploegkleur nodig, maar ook geen eigen kleur om zich
+   te onderscheiden: inkt zelf is al de kleur die verder nergens in de app
+   iets anders betekent. Eén zwarte plaat, in reliëfdruk uitgevoerd --
+   papieren letters en een papieren zandloperframe recht uit de plaat
+   gesneden, met het zand vast in het goud dat ook de knop eronder draagt.
+   Dat is dichter bij de zeefdruk-affiche die de rest van de app al is dan
+   een gekleurd blok ooit was, en scheidt het merk (zwart, stil) meteen van
+   de knop eronder (goud, de enige echte kleur op dit scherm). */
 .wordmark {
   --team: var(--go);
-  background: var(--team-vos);
+  background: var(--ink);
+  border-color: var(--paper);   /* .surface geeft een inkt-rand: onzichtbaar op inkt */
   padding: 22px 30px 26px;
   transform: rotate(-2deg);
   text-align: center;
@@ -367,6 +381,7 @@ button.btn-ghost, button.btn-icon, button.gear, button.chip, button.pv {
 .wordmark b {
   display: block; font-size: clamp(40px, 14vw, 88px); font-weight: 900;
   letter-spacing: .01em; line-height: .9; text-transform: uppercase;
+  color: var(--paper);
 }
 .wordmark svg { width: clamp(40px, 12vw, 66px); margin-bottom: 6px; }
 
@@ -1257,10 +1272,13 @@ input[type=range]::-moz-range-thumb {
     <path d="M18 62 L82 20" stroke="#8C2F1E" stroke-width="13" stroke-linecap="round"/>
   </symbol>
 
+  <!-- Uitsluitend op het merk gebruikt, dus getekend voor zíjn achtergrond:
+       het frame in papier in plaats van inkt, want het staat op een zwarte
+       plaat. Het zand blijft goud -- dezelfde kleur als de knop eronder. -->
   <symbol id="i-glass" viewBox="0 0 100 100">
-    <path d="M22 10 H78 M22 90 H78" stroke="#14110F" stroke-width="10" stroke-linecap="round"/>
+    <path d="M22 10 H78 M22 90 H78" stroke="#F4EBDA" stroke-width="10" stroke-linecap="round"/>
     <path d="M26 12 L50 50 L26 88 H74 L50 50 L74 12 Z"
-          fill="#F2B705" stroke="#14110F" stroke-width="8" stroke-linejoin="round"/>
+          fill="#F2B705" stroke="#F4EBDA" stroke-width="8" stroke-linejoin="round"/>
   </symbol>
 
 </defs></svg>
