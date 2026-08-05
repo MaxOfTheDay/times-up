@@ -31,16 +31,21 @@ Kleur staat ook nooit alleen: elke toestand heeft er een tweede kanaal bij
 ## Wat je moet vasthouden, zegt dat
 
 Een lange druk is alleen voor wat echt niet ongedaan te maken is: starten
-(de klok mag niet lopen terwijl het toestel nog van hand wisselt), stoppen
-en opnieuw beginnen (allebei een lopend potje weg). Alle drie lopen via
-`holdButton()` en dragen dezelfde gestippelde rand. Die functie tekent de
-voortgang zelf, per frame: een CSS-overgang zou bij `prefers-reduced-motion`
-meteen op vol springen, en het toetsenbord zou de druk overslaan.
+(de klok mag niet lopen terwijl het toestel nog van hand wisselt) en
+stoppen (een lopend potje weg). Allebei lopen via `holdButton()` en dragen
+dezelfde gestippelde rand. Die functie tekent de voortgang zelf, per frame:
+een CSS-overgang zou bij `prefers-reduced-motion` meteen op vol springen,
+en het toetsenbord zou de druk overslaan.
 
 Het tandwiel kreeg deze behandeling ooit ook, maar instellingen openen is
 niets onomkeerbaars en het tandwiel bestaat alleen op het titelscherm --
 geen risico dat een lange druk moest afdekken. Hij is nu een gewone tik,
 zoals alles wat niets kost om ongedaan te maken.
+
+"Beginnen" op de instellingen kreeg deze behandeling ooit ook, toen het nog
+een lopend spel kon weggooien. Er bestaat geen lopend spel meer om weg te
+gooien: het titelscherm start altijd vers, er is geen "verder spelen" en
+geen potje overleeft een herlaadbeurt. Die knop is nu ook een gewone tik.
 
 Alles staat in `index.html`: geen build, geen externe assets, werkt met de
 wifi uit. Houd dat zo.

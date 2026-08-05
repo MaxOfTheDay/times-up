@@ -3,7 +3,8 @@
  *
  * Speelt een volledig potje in een echte browser: drie rondes over hetzelfde
  * deck, passen, de klok die afloopt, de ploegen die wisselen, de resterende
- * tijd die meegaat naar de volgende ronde, en een herstart midden in een beurt.
+ * tijd die meegaat naar de volgende ronde, en dat een herlaadbeurt midden in
+ * een beurt niets laat terugkomen -- de titelknop begint altijd vers.
  *
  * Draaien: npm run test:spel     (of npm test voor alles)
  * Duurt ruim 20 seconden: één beurt moet echt uitlopen om te zien wat er
@@ -137,8 +138,6 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   // exact dezelfde kaarten gebruiken.
   ok(seenPerRound[0] === seenPerRound[1] && seenPerRound[1] === seenPerRound[2],
      'de drie rondes gebruiken niet hetzelfde deck');
-  ok(await page.evaluate(() => localStorage.getItem('tijdisom.game')) === null,
-     'afgelopen spel blijft in localStorage staan');
 
   // --- de klok loopt af en geeft de beurt door ---
   // "Opnieuw" begint nu ook echt opnieuw in plaats van naar de titel te
@@ -156,17 +155,20 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(await screen() === 'turnend', 'na tijd om niet op turnend');
   ok(await game(() => window.__tijd.G.team) !== teamBefore, 'ploeg wisselt niet na tijd om');
 
-  // --- herstart midden in een beurt ---
+  // --- herladen midden in een beurt laat niets terugkomen ---
+  // Er bestaat geen "verder spelen" meer: de titelknop begint altijd vers,
+  // dus een potje overleeft geen herlaadbeurt.
   await page.click('#btnTurnNext');
   await page.waitForTimeout(80);
   await hold(page, '#btnHold', 900);
   await page.waitForTimeout(1500);
   await page.reload();
   await page.waitForTimeout(300);
-  ok(await game(() => !!window.__tijd.G), 'lopend spel overleeft een herlaadbeurt niet');
+  ok(await screen() === 'title', 'na een herlaadbeurt komt het spel niet op de titel uit');
+  ok(!await game(() => !!window.__tijd.G), 'lopend spel overleeft een herlaadbeurt');
   await page.click('#btnStart');
   await page.waitForTimeout(100);
-  ok(await screen() === 'handoff', 'herstart komt niet uit op het overdrachtscherm');
+  ok(await screen() === 'roundintro', 'de titelknop na een herlaadbeurt begint geen vers spel');
 
   ok(!errs.length, 'consolefouten: ' + errs.join(' | '));
 

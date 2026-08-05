@@ -339,34 +339,10 @@ button.btn-ghost, button.btn-icon, button.gear, button.chip, button.pv {
   display: grid; place-items: center; gap: var(--s-2);
   grid-auto-flow: column;
 }
-/* Beginnen gooit een lopend spel weg. Dat mag niet van één tik, dus in dat
-   geval -- en alleen dan -- moet je hem vasthouden, en dat zegt de knop op
-   twee manieren: hij kleurt wijnrood, dezelfde kleur als de stopknop, en
-   zijn rand springt van dicht naar gestippeld -- dezelfde overgang die het
-   tandwiel en de stopknop altijd al hebben.
-
-   Hij is dan ook niet groen. Groen betekent in deze app "ja, goed, doe
-   maar"; met een waarschuwingsdriehoek op een groen vlak zeggen de kleur en
-   het teken het tegenovergestelde van elkaar. */
-.btn-wide { position: relative; overflow: hidden; }
-.btn-wide i.fill {
-  position: absolute; inset: 0; background: var(--ink);
-  transform: scaleX(0); transform-origin: left;
-}
-.btn-wide > * { position: relative; z-index: 1; }
-.btn-wide .warn { display: none; width: 26px; height: 26px; }
-/* De rand verdween in plaats van gestippeld te worden: zie de toelichting
-   bij .btn-danger. Dezelfde SVG-rechthoek, maar dan gestrekt over de volle
-   breedte van de knop (preserveAspectRatio="none") -- de niet-schalende
-   streek zorgt dat de streepjes daarbij hun lengte houden, of de knop nu
-   358 px breed is op een telefoon of ruim het dubbele op een tablet. */
-.btn-wide .dash-frame {
-  position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;
-}
-.btn-wide .dash-frame rect { fill: none; stroke: var(--paper); stroke-width: 3; stroke-dasharray: 11 8; display: none; }
-.btn-wide[data-confirm="1"] { background: var(--danger); border-color: transparent; }
-.btn-wide[data-confirm="1"] .dash-frame rect { display: block; }
-.btn-wide[data-confirm="1"] .warn { display: block; }
+/* Beginnen op de instellingen kon vroeger een lopend spel weggooien, en
+   kreeg dan een wijnrode, vast te houden bevestiging. Er bestaat geen
+   lopend spel meer om weg te gooien -- zie load() -- dus deze knop is nu
+   altijd de gewone, groene "ja, goed, doe maar". */
 
 .btn-ghost {
   min-height: 52px; width: 100%; background: var(--paper);
@@ -415,70 +391,11 @@ button.btn-ghost, button.btn-icon, button.gear, button.chip, button.pv {
 }
 .wordmark svg { width: clamp(40px, 12vw, 66px); margin-bottom: 6px; }
 
-/* Loopt er een spel, dan zegt de titelknop niet "spelen" maar "verder":
-   daaronder hangt een half potje van gisteravond. Wie in plaats daarvan
-   opnieuw wil beginnen heeft daar nu een eigen knop voor, in plaats van
-   dat de instellingen het spel stilletjes weggooiden. */
-/* Dit kaartje en de knop "Nieuw spel" eronder waren, ondanks dat het ene
-   informatie is en het andere een echte knop, nagenoeg niet uit elkaar te
-   houden: allebei een rechthoek, dezelfde rand, dezelfde slagschaduw --
-   het enige verschil was een kleurstreepje van een paar pixels dat je
-   moest weten te zoeken. In deze app betekent een slagschaduw overal
-   "dit kun je indrukken, en het vlakt af als je dat doet"; .surface
-   (rand + schaduw) wordt verder in het hele bestand uitsluitend gebruikt
-   voor dingen die je NIET kunt indrukken. Dit kaartje was de enige plek
-   waar dat samenviel met een knop die er precies zo uitziet.
-   Daarom verliest het hier zijn schaduw en de bijbehorende gekleurde
-   misregistratie: plat waar de knop verhoogd is, zodat "heeft dit
-   reliëf" een betrouwbaar antwoord wordt op "kan ik dit aantikken". De
-   ploegkleur die eerst in de schaduw zat staat nu als een streep links,
-   hetzelfde idee als een gekleurde markering langs de rand van een
-   papieren kaart -- zegt nog steeds "dit gaat over de vossen", maar
-   claimt geen knop-gedrag meer. */
-.resume-card {
-  display: none; flex-direction: column; align-items: center; gap: var(--s-2);
-  padding: var(--s-3) var(--s-4);
-}
-/* Compound selector, niet .resume-card alleen: die heeft dezelfde
-   specificiteit als .surface hierboven, en zou dan alleen winnen zolang
-   niemand ooit de volgorde in dit bestand verandert. Dit wint gegarandeerd. */
-.resume-card.surface { box-shadow: none; border-left: var(--line) solid var(--team); }
-#s-title[data-resume="1"] .resume-card { display: flex; }
-/* Het kaartje en de knop erna horen bij elkaar -- de knop zet voort wat
-   het kaartje net heeft aangekondigd -- dus die twee schuiven dichter naar
-   elkaar toe dan de rest van de kolom. */
-#s-title[data-resume="1"] .resume-card { margin-bottom: calc(-1 * var(--s-3)); }
-.resume-card .tag { display: flex; align-items: center; gap: 7px; }
-.resume-card .tag svg { width: 16px; height: 16px; }
-.resume-card .tag b {
-  font-size: 12px; font-weight: 900; text-transform: uppercase;
-  letter-spacing: .14em; color: var(--ink-2);
-}
-.resume-card .who { display: flex; align-items: center; gap: var(--s-3); }
-.resume-card .mascot-sm { width: 52px; display: block; }
-.resume-card .ico {
-  width: 52px; height: 52px; display: grid; place-items: center;
-  border: var(--line-2) solid var(--ink); background: var(--paper-2);
-}
-.resume-card .ico svg { width: 36px; height: 36px; }
-/* Met het kaartje erbij staan er vier dingen onder elkaar; dan mag de lucht
-   ertussen wat minder. */
-#s-title[data-resume="1"] { gap: 4vh; }
-
-/* "Terug" op de instellingen hoort onder een kolom velden van volle
-   breedte en mag dus terecht de hele breedte pakken. Ditzelfde knopje trok
-   hier, op een titelscherm waar verder alles compact en gecentreerd staat
-   (het merk, het kaartje, de ronde knoppen), een rand-tot-rand balk dwars
-   door dat ritme -- en op een smalle telefoon liep die balk zelfs door tot
-   onder de tandwielknop, waar hij hem overlapte. Hij krimpt hier terug tot
-   zijn eigen tekst, net als elk ander compact element op dit scherm, en
-   een kleine marge erboven zet hem zichtbaar apart van de hoofdknop: dat
-   is de andere handeling, niet de volgende stap. */
-#s-title .btn-ghost {
-  width: auto; min-height: 48px;
-  padding: 10px 30px;
-  margin-top: var(--s-1);
-}
+/* De titelknop begint altijd een nieuw spel: er bestaat geen "verder
+   spelen" meer om onderscheid mee te maken, dus dit scherm heeft alleen
+   het merk en de ene knop. Herladen (dicht/terug/vergrendeld scherm) laat
+   nooit een halfgespeeld potje terugkomen -- zie de toelichting bij
+   load() en newGame(). */
 
 /* Het tandwiel vereiste een lange druk van 1,2 s: "zo dwaalt een vierjarige
    er tijdens het spel niet per ongeluk in." Maar dat kind zou het tandwiel
@@ -1197,21 +1114,11 @@ input[type=range]::-moz-range-thumb {
     gap: 1.6vh;
     padding-top: min(1.6vh, 10px); padding-bottom: min(1.6vh, 10px);
   }
-  /* Met het overdrachtskaartje erbij staan er vier dingen onder elkaar in
-     dezelfde beperkte hoogte -- die extra regel wint hier niet van het
-     merk zelf, dus hij snoept eerst van de tussenruimte. */
-  #s-title[data-resume="1"] { gap: 0.6vh; }
   .wordmark {
     padding: min(1.4vh, 12px) min(3.2vw, 22px) min(1.7vh, 16px);
   }
   .wordmark svg { width: min(5.4vh, 36px); margin-bottom: 2px; }
   .wordmark h1 { font-size: min(8.2vh, 44px); }
-  .resume-card { padding: 3px var(--s-3); gap: 3px; }
-  #s-title[data-resume="1"] .resume-card { margin-bottom: -18px; }
-  .resume-card .tag svg { width: 13px; height: 13px; }
-  .resume-card .tag b { font-size: 11px; }
-  .resume-card .mascot-sm, .resume-card .ico { width: 36px; height: 36px; }
-  .resume-card .ico svg { width: 25px; height: 25px; }
 }
 
 /* Groot scherm: de overzichten stonden vol maxima die voor een telefoon
@@ -1325,13 +1232,6 @@ input[type=range]::-moz-range-thumb {
     <path d="M58 26 L86 50 L58 74 Z" fill="#14110F" stroke="#14110F" stroke-width="8" stroke-linejoin="round"/>
   </symbol>
 
-  <!-- let op: staat op "Beginnen" zodra dat een lopend spel zou weggooien -->
-  <symbol id="i-let-op" viewBox="0 0 100 100">
-    <path d="M50 10 L94 86 H6 Z" fill="none" stroke="#F4EBDA" stroke-width="10" stroke-linejoin="round"/>
-    <path d="M50 38 V60" stroke="#F4EBDA" stroke-width="11" stroke-linecap="round"/>
-    <circle cx="50" cy="73" r="6" fill="#F4EBDA"/>
-  </symbol>
-
   <symbol id="i-stop" viewBox="0 0 100 100">
     <g stroke="#14110F" stroke-width="14" stroke-linecap="round">
       <path d="M26 26 L74 74"/><path d="M74 26 L26 74"/>
@@ -1401,36 +1301,9 @@ input[type=range]::-moz-range-thumb {
     <h1>Tijd<br>is Om</h1>
   </div>
 
-  <!-- Ligt er een half potje klaar, dan zegt dit scherm dat. Eerst stond
-       hier hetzelfde mascotte-pijl-opdracht-kaartje als op het
-       einde-beurt-scherm, maar die pijl betekent daar "hierna" -- vlak
-       ná een beurt, met de stand nog vers in het geheugen. Hier is het
-       geheugen juist weg: dit is het scherm waar je een spel van dagen
-       terug weer oppakt, en dan moet de allereerste blik al zeggen "er
-       ligt hier iets", niet een pictogram-grammatica die je toevallig nog
-       kent. Daarom staat er nu een woord bij (net als "Nieuw spel"
-       hieronder: dit scherm is voor de volwassene die opzet, niet voor het
-       kind dat raadt) en hetzelfde pauze-teken als op het echte
-       pauzescherm -- geen nieuw teken om te leren, het teken dat je al
-       kent van precies dit moment. -->
-  <div class="resume-card surface" id="tiNext" aria-hidden="true">
-    <div class="tag">
-      <svg viewBox="0 0 100 100"><use href="#i-pauze"/></svg>
-      <b>Pauze</b>
-    </div>
-    <div class="who">
-      <svg class="mascot-sm" id="tiMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg>
-      <div class="ico"><svg id="tiRound" viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
-    </div>
-  </div>
-
   <button class="btn-go" id="btnStart" aria-label="Spelen">
     <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-play"/></svg>
   </button>
-
-  <!-- Opnieuw beginnen was alleen te doen via de instellingen, waar
-       "Beginnen" het lopende spel zonder waarschuwing weggooide. -->
-  <button class="btn-ghost" id="btnFresh" hidden>Nieuw spel</button>
 
   <button class="gear" id="btnGear" aria-label="Instellingen">
     <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-gear"/></svg>
@@ -1513,14 +1386,7 @@ input[type=range]::-moz-range-thumb {
   <!-- De hoofdknop staat vast onderin: hij stond onder een scherm dat je
        eerst helemaal moest afrollen. -->
   <div class="setup-foot">
-    <button class="btn-wide" id="btnGo">
-      <svg class="dash-frame" viewBox="0 0 400 68" preserveAspectRatio="none" aria-hidden="true">
-        <rect x="4" y="4" width="392" height="60" vector-effect="non-scaling-stroke"/>
-      </svg>
-      <i class="fill" aria-hidden="true"></i>
-      <svg class="warn" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-let-op"/></svg>
-      <span id="btnGoLabel">Beginnen</span>
-    </button>
+    <button class="btn-wide" id="btnGo">Beginnen</button>
     <button class="btn-ghost" id="btnBack">Terug</button>
   </div>
 </section>
@@ -1853,7 +1719,6 @@ const TEAMS = [
 ];
 const ROUNDS = 3;
 const KEY_SET = "tijdisom.settings";
-const KEY_GAME = "tijdisom.game";
 
 let settings = {
   tier: "klein",
@@ -1867,22 +1732,19 @@ let draft = [];        // getrokken kaarten op het instellingenscherm
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 
+/* Er wordt bewust geen lopend spel onthouden: het titelscherm start altijd
+   vers, dus een potje overleeft geen herlaadbeurt, dichtklikken of
+   vergrendeld scherm. Dat is geen gat -- het is de eis dat een kind nooit
+   íets hoeft te lezen om verder te komen: geen "verder spelen" versus
+   "nieuw spel" om tussen te kiezen, gewoon altijd dezelfde ene knop. */
 function load() {
   try {
     const s = JSON.parse(localStorage.getItem(KEY_SET) || "null");
     if (s && typeof s === "object") settings = Object.assign(settings, s);
-    const g = JSON.parse(localStorage.getItem(KEY_GAME) || "null");
-    if (g && Array.isArray(g.deck) && g.deck.length) G = g;
   } catch (e) { /* kapotte opslag: gewoon opnieuw beginnen */ }
 }
 function saveSettings() {
   try { localStorage.setItem(KEY_SET, JSON.stringify(settings)); } catch (e) {}
-}
-function saveGame() {
-  try {
-    if (G) localStorage.setItem(KEY_GAME, JSON.stringify(G));
-    else localStorage.removeItem(KEY_GAME);
-  } catch (e) {}
 }
 
 function shuffle(a) {
@@ -1919,9 +1781,6 @@ function show(name) {
   $$(".screen").forEach(s => s.classList.toggle("on", s.id === "s-" + name));
   if (name !== "play") { stopClock(); releaseWake(); }
 
-  // Beide schermen hangen af van of er nog een spel loopt, en dat verandert
-  // onderweg.
-  if (name === "title") paintTitle();
   if (name === "setup") paintSetup();
 
   /* De focus viel bij elke schermwissel terug op <body>: het element dat
@@ -1949,11 +1808,6 @@ function paintSetup() {
     c.setAttribute("aria-checked", String(Number(c.dataset.size) === settings.size)));
   $("#secs").value = settings.secs;
   $("#secsOut").textContent = settings.secs + "s";
-  // "Beginnen" gooit een lopend spel weg. Dan moet je hem vasthouden.
-  $("#btnGo").dataset.confirm = G ? "1" : "0";
-  $("#btnGo").setAttribute("aria-label",
-    G ? "Nieuw spel beginnen — houd ingedrukt, het lopende spel gaat weg" : "Beginnen");
-  $("#btnGoLabel").textContent = G ? "Opnieuw beginnen" : "Beginnen";
   paintPreview();
 }
 
@@ -2061,10 +1915,8 @@ function holdButton(el, ms, run, paint) {
   ["keyup", "blur"].forEach(ev => el.addEventListener(ev, () => cancel(true)));
 }
 
-/* Een vulling die van onder naar boven loopt (tandwiel, stoppen) of van
-   links naar rechts (de brede beginknop). */
+/* Een vulling die van onder naar boven loopt: stoppen. */
 const fillY = el => p => { el.style.transform = "scaleY(" + p + ")"; };
-const fillX = el => p => { el.style.transform = "scaleX(" + p + ")"; };
 
 /* Eén tik, zoals elke andere knop op de titel. Zie de toelichting bij
    .gear in de stijlen: dit vereiste eerst een lange druk, maar het risico
@@ -2072,13 +1924,7 @@ const fillX = el => p => { el.style.transform = "scaleX(" + p + ")"; };
    speelt hier niet -- het tandwiel bestaat alleen op dit scherm. */
 $("#btnGear").addEventListener("click", () => { Snd.unlock(); openSetup(); });
 
-/* Beginnen is een gewone tik zolang er niets te verliezen valt, en een
-   lange druk zodra er een spel loopt dat eraan zou gaan. */
-$("#btnGo").addEventListener("click", () => {
-  if (G) return;                    // dan geldt de lange druk hieronder
-  Snd.unlock(); newGame();
-});
-holdButton($("#btnGo"), 900, () => { if (G) { Snd.unlock(); newGame(); } }, fillX($("#btnGo .fill")));
+$("#btnGo").addEventListener("click", () => { Snd.unlock(); newGame(); });
 
 /* Te vroeg losgelaten: schudden, én de rand even in waarschuwingskleur.
    Dat tweede is er voor wie beperkte beweging aan heeft: daar valt de
@@ -2112,7 +1958,6 @@ function newGame() {
     pendingMs: settings.secs * 1000,  // wat de volgende beurt meekrijgt
     secs: settings.secs
   };
-  saveGame();
   roundIntro();
 }
 
@@ -2227,7 +2072,6 @@ function handoff() {
       Math.ceil(G.pendingMs / 1000) + " seconden mee uit de vorige ronde");
   }
   show("handoff");
-  saveGame();
 }
 
 /* Ook starten gaat via vasthouden: het toestel wisselt van hand, en een
@@ -2243,7 +2087,7 @@ function handoff() {
 })();
 
 /* ---------- de klok ---------- */
-let clockRaf = null, deadline = 0, lastTickAt = 0, lastSaveAt = 0;
+let clockRaf = null, deadline = 0, lastTickAt = 0;
 
 /* De rand om de kaart is de klok, en het teken erin is zo groot als de
    kaart toelaat. Allebei worden ze van de gemeten kaart afgeleid.
@@ -2356,7 +2200,7 @@ function startTurn() {
   const totalMs = G.secs * 1000;
   const ms = G.pendingMs > 0 ? G.pendingMs : totalMs;
   deadline = performance.now() + ms;
-  lastTickAt = 0; lastSaveAt = performance.now();
+  lastTickAt = 0;
   paintClock(ms, totalMs);
   runClock(totalMs);
 }
@@ -2373,7 +2217,6 @@ function runClock(totalMs) {
       lastTickAt = now;
       Snd.tick(left <= 5000 ? 1900 : left <= 10000 ? 1600 : 1300);
     }
-    if (now - lastSaveAt >= 1000) { lastSaveAt = now; G.pendingMs = Math.max(0, left); saveGame(); }
     clockRaf = requestAnimationFrame(step);
   };
   clockRaf = requestAnimationFrame(step);
@@ -2471,7 +2314,6 @@ $("#btnGoed").addEventListener("click", () => {
   if (!G.pile.length) { endRound(); return; }
   nextCard("goed");
   syncControls();
-  saveGame();
 });
 
 $("#btnPas").addEventListener("click", () => {
@@ -2483,7 +2325,6 @@ $("#btnPas").addEventListener("click", () => {
   G.pile.push(G.card);      // onderop, zonder straf
   nextCard("pas");
   syncControls();
-  saveGame();
 });
 
 /* ---------- einde beurt / ronde ---------- */
@@ -2521,7 +2362,6 @@ function turnEnd() {
   $("#teNext").setAttribute("aria-label",
     "Hierna: " + nxt.naam + " — " + ROUND_WORD[G.round - 1]);
 
-  saveGame();
   show("turnend");
 }
 
@@ -2536,7 +2376,7 @@ function endRound() {
   G.card = null;
   for (let i = 0; i < G.gained; i++) Snd.token(i);
 
-  if (G.round >= ROUNDS) { saveGame(); winner(); return; }
+  if (G.round >= ROUNDS) { winner(); return; }
 
   // Wat elke ploeg deze ronde verdiende, met een gouden rand om de verse
   // fiches: anders zie je alleen een totaal en niet wie de ronde won.
@@ -2547,7 +2387,6 @@ function endRound() {
 
   G.round++;
   G.pile = shuffle(G.deck.map((_, i) => i));
-  saveGame();
   show("roundend");
 }
 
@@ -2670,7 +2509,7 @@ function winner() {
   rays(win === null ? "#F2B705" : TEAMS[win].hex);
   confetti(win === null ? ["#E8452B", "#1B6FC4", "#F2B705"] : [TEAMS[win].hex, "#F2B705"]);
   Snd.fanfare();
-  G = null; saveGame();
+  G = null;
   show("winner");
 }
 
@@ -2795,7 +2634,7 @@ holdButton($("#btnStop"), 1100, () => {
   pauseMs = 0; pauseReturn = null;
   stopClock(); releaseWake();
   $("#pauze").hidden = true;
-  G = null; saveGame();
+  G = null;
   redraw();
   show("title");
 }, fillY($("#btnStop i")));
@@ -2833,36 +2672,15 @@ document.addEventListener("visibilitychange", () => {
 
 /* ==============================================================
    8. START
-   Een herstart midden in een beurt komt terug op het
-   overdrachtscherm, nooit midden in een lopende klok: in de kamer
-   liep die tijd gewoon door.
+   De titelknop begint altijd een vers spel. Er bestaat geen "verder
+   spelen" om van te onderscheiden: dicht, herladen of vergrendelen
+   laat nooit een halfgespeeld potje terugkomen.
    ============================================================== */
 $("#btnStart").addEventListener("click", () => {
   Snd.unlock();
-  if (G) handoff();
-  else { if (!draft.length) redraw(); newGame(); }
+  if (!draft.length) redraw();
+  newGame();
 });
-
-/* De grote knop op de titel betekende de ene avond "nieuw spel" en de
-   andere "verder waar we gebleven waren", zonder enig zichtbaar verschil.
-   Ligt er een half potje klaar, dan zegt het scherm dat nu: de mascotte
-   die aan de beurt is en de opdracht van de ronde staan erbij, en er komt
-   een aparte knop voor wie juist opnieuw wil beginnen. Dat laatste kon
-   alleen via de instellingen, waar "Beginnen" het lopende spel zonder
-   waarschuwing weggooide. */
-function paintTitle() {
-  const on = !!G;
-  $("#s-title").dataset.resume = on ? "1" : "0";
-  $("#btnFresh").hidden = !on;
-  $("#btnStart").setAttribute("aria-label",
-    on ? "Verder spelen — " + TEAMS[G.team].naam + " is aan de beurt" : "Spelen");
-  if (on) {
-    $("#tiNext").style.setProperty("--team", TEAMS[G.team].color);
-    $("#tiMascot").firstElementChild.setAttribute("href", TEAMS[G.team].mascot);
-    $("#tiRound").firstElementChild.setAttribute("href", ROUND_ICON[G.round - 1]);
-  }
-}
-$("#btnFresh").addEventListener("click", () => { Snd.unlock(); openSetup(); });
 
 load();
 Snd.enabled = settings.sound !== false;
