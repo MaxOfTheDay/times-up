@@ -2,7 +2,9 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<!-- user-scalable=no stond hier; het instellingenscherm is het tekstscherm
+     voor de volwassene, en dat mag je kunnen inzoomen. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tijd is Om</title>
 <meta name="description" content="Time's Up voor kinderen die nog niet kunnen lezen.">
 <meta name="theme-color" content="#F4EBDA">
@@ -22,25 +24,74 @@
    Geen verlopen, geen zachte schaduwen, geen pastel.
    ============================================================ */
 
+/* ============================================================
+   1. TEKENS — alles wat een maat of een kleur heeft staat hier,
+   en nergens anders. Een waarde die maar één keer voorkomt hoort
+   ook hier: dan is het een besluit en geen toeval.
+   ============================================================ */
 :root {
-  --paper:     #F4EBDA;
-  --paper-2:   #E7D9C0;
-  --ink:       #14110F;
-  --vermilion: #E8452B;   /* team Vos  */
-  --blue:      #1B6FC4;   /* team Uil  */
-  --marigold:  #F2B705;   /* klok, feest */
-  --leaf:      #2E9E5B;   /* "goed"    */
-  --wine:      #8C2F1E;   /* klok bijna om */
+  /* ---- papier en inkt ---- */
+  --paper:   #F4EBDA;   /* de achtergrond van alles                       */
+  --paper-2: #E7D9C0;   /* verzonken vlakken: putjes, hulpknoppen, tracks */
+  --ink:     #14110F;   /* contour én alle primaire tekst      (15,9:1)   */
+  --ink-2:   #5C5142;   /* bijschriften en uitleg              ( 6,6:1)   */
+  --rule:    #8C8069;   /* scheidingslijnen                    ( 3,3:1)   */
 
-  --line: 4px;            /* contourdikte */
-  --drop: 8px;            /* harde slagschaduw */
-  --shift: 3px;           /* misregistratie van de kleurlaag */
+  /* ---- ploegkleuren: GERESERVEERD ----
+     Rood is Vos, blauw is Uil. Ze staan op de mascotte, op de
+     achtergrond van het overdrachtscherm, op de fiches en op het
+     feest van de winnaar -- en verder nergens.
 
-  --team: var(--vermilion);        /* wordt per beurt gezet */
-  --team-ink: var(--vermilion);
+     Ze deden er vroeger meer: vermiljoen was óók de klok tussen tien
+     en vijf seconden, ronde 3, de streep door de tekstballon, de
+     schuifknop en de vulling van de stopknop; blauw was óók ronde 2.
+     Daardoor betekende rood op één scherm "Vos" en op het volgende
+     "haast je" -- en dan betekent het niets meer. Alles wat geen
+     ploeg is heeft hieronder een eigen kleur gekregen. */
+  --team-vos: #E8452B;
+  --team-uil: #1B6FC4;
 
-  --tap: 64px;            /* ondergrens voor alles wat aangeraakt wordt */
-  --dur: 1;               /* animatieschaal, 0 bij prefers-reduced-motion */
+  /* ---- handeling ---- */
+  --go:       #F2B705;  /* vlak van elke "verder"-knop en de kroon (inkt erop, 10,3:1) */
+  --good:     #2E9E5B;  /* vlak van de geraden-knop                (inkt erop,  5,5:1) */
+  --good-ink: #17693B;  /* hetzelfde groen, maar donker genoeg om tekst te dragen (5,7:1) */
+  --danger:   #8C2F1E;  /* stoppen, en de laatste seconden         ( 7,0:1) */
+
+  /* ---- de klok ----
+     Eén ramp die alleen maar donkerder wordt: goud, gebrand, wijn.
+     Bewust geen vermiljoen: dat is Vos. Deze drie komen uitsluitend
+     voor op de rand van de kaart, en op de kaart komt nooit een
+     ploegkleur -- ze kunnen elkaar dus niet tegenkomen. */
+  --time-3: #A8790B;         /* ruim tijd    ( 3,3:1) */
+  --time-2: #9E4E10;         /* 10 tot 5 s   ( 5,0:1) */
+  --time-1: var(--danger);   /* onder 5 s    ( 7,0:1) */
+
+  --team: var(--team-vos);   /* per beurt gezet; alleen ploegvlakken lezen dit */
+
+  /* ---- lijn en reliëf ----
+     Twee hoogtes, en niet meer: 5 px staat stil, 8 px kun je indrukken.
+     De indruk-verplaatsing ís de schaduw, zodat een vlak van 5 px
+     zichtbaar niet indrukbaar is. */
+  --line:   4px;   /* primaire contour  */
+  --line-2: 3px;   /* verzonken vlakken en hulpknoppen */
+  --lift-1: 5px;   /* stilstaand oppervlak */
+  --lift-2: 8px;   /* indrukbaar oppervlak */
+  --shift:  3px;   /* misregistratie van de kleurlaag */
+
+  /* ---- ruimte ---- */
+  --s-1: 4px; --s-2: 8px;  --s-3: 12px;
+  --s-4: 16px; --s-5: 24px; --s-6: 32px;
+
+  --tap: 48px;     /* niets dat aangeraakt wordt is kleiner dan dit */
+
+  /* ---- beweging ----
+     Niets in de speellus duurt langer dan --t-card: een beurt is
+     twintig seconden en een snelle ploeg scoort om de twee. */
+  --t-press: .09s;
+  --t-card:  .18s;
+  --t-cheer: .32s;
+  --e-pop: cubic-bezier(.2, 1.5, .4, 1);
+  --dur: 1;        /* animatieschaal, 0 bij prefers-reduced-motion */
 
   font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
                Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -48,13 +99,28 @@
 
 /* Animaties helemaal uit, niet alleen traag: de duur delen door --dur
    zou ze bevriezen op hun BEGINbeeld -- de fiches staan daar op
-   scale(0) en zouden dus onzichtbaar blijven. */
+   scale(0) en zouden dus onzichtbaar blijven.
+
+   Let op wat hier NIET onder valt. De vulling van een knop die je moet
+   vasthouden en de ring om de startknop zijn geen versiering maar een
+   voortgangsmeter; die worden in JS per frame getekend en overleven
+   deze regel daarom. Toen ze nog CSS-overgangen waren sprongen ze bij
+   beperkte beweging meteen op vol -- de knop meldde "klaar" terwijl er
+   nog een seconde te gaan was, en dat is erger dan geen meter. */
 @media (prefers-reduced-motion: reduce) {
   :root { --dur: 0; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+/* [hidden] verliest van elke regel die zelf een display zet -- de
+   browserstijl heeft nauwelijks gewicht. Dat is hier drie keer misgegaan
+   (het kaartje met overgedragen tijd, de kaarten onder de stapel, de
+   stilstaande klok in het pauzepaneel), telkens met een element dat
+   verborgen hoorde te zijn en gewoon in beeld bleef staan. Eén regel
+   bovenaan scheelt de volgende keer een zoektocht. */
+[hidden] { display: none !important; }
 
 html, body {
   margin: 0; padding: 0; height: 100%;
@@ -65,47 +131,77 @@ html, body {
   touch-action: manipulation;
 }
 
-body::before {
-  /* Papierkorrel: heel fijne ruis zodat de vlakken niet digitaal-glad ogen. */
-  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+/* Papierkorrel over álles, ook over het overdrachtscherm. Dat scherm
+   heeft een eigen gekleurde achtergrond en lag vroeger bóven de korrel,
+   waardoor het als enige scherm digitaal-glad was en van een andere app
+   leek te komen. */
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: 20; pointer-events: none;
   opacity: .5; mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E");
 }
 
 button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
-:focus-visible { outline: 4px solid var(--marigold); outline-offset: 4px; }
+
+/* De focusring was marigold op papier: 1,54:1, oftewel onzichtbaar --
+   precies voor de mensen die hem het hardst nodig hebben. Zwart haalt
+   15,9:1, en de offset van 4 px laat een reepje papier staan zodat de
+   ring niet opgaat in de eigen contour van de knop. */
+:focus-visible { outline: var(--line) solid var(--ink); outline-offset: var(--s-1); }
 :focus:not(:focus-visible) { outline: none; }
 
 /* ---------- schermen ---------- */
 .screen {
   position: fixed; inset: 0; z-index: 1;
   display: none; flex-direction: column;
-  padding: max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom));
+  padding: max(var(--s-4), env(safe-area-inset-top)) var(--s-4)
+           max(var(--s-4), env(safe-area-inset-bottom));
 }
 .screen.on { display: flex; }
 
-/* ---------- het drukblok: één regel voor alles ----------
+/* ============================================================
+   2. OPPERVLAK — één regel voor elk stuk papier.
    Twee harde schaduwen zonder blur: de kleurlaag een paar pixels
    naar linksboven (de misregistratie van de pers) en de inktlaag
    naar rechtsonder. Bewust géén pseudo-element met z-index:-1 --
    elk element dat toevallig een stacking context maakt (een
    rotatie, een animatie) zou de kleurlaag dan bovenop de kaart
-   leggen in plaats van erachter. */
-.block {
+   leggen in plaats van erachter.
+   ============================================================ */
+.surface {
   position: relative;
   background: var(--paper);
   border: var(--line) solid var(--ink);
   box-shadow:
     calc(var(--shift) * -1) calc(var(--shift) * -1) 0 0 var(--team),
-    var(--drop) var(--drop) 0 0 var(--ink);
+    var(--lift-1) var(--lift-1) 0 0 var(--ink);
 }
 
-/* ---------- knoppen ---------- */
-.press { transition: transform calc(.09s * var(--dur)) ease, box-shadow calc(.09s * var(--dur)) ease; }
-.press:active { transform: translate(var(--drop), var(--drop)); box-shadow: 0 0 0 var(--ink); }
+/* ============================================================
+   3. KNOPPEN
+   ============================================================ */
+/* Elke knop reageert op dezelfde manier op een duw. Dit zat vroeger in
+   een losse klasse die de helft van de knoppen niet had, waardoor de
+   chips, "terug", het tandwiel, de pauzeknop en de kaartjes in de
+   voorvertoning dood aanvoelden. */
+button.btn-go, button.btn-good, button.btn-skip, button.btn-wide,
+button.btn-ghost, button.btn-icon, button.chip, button.pv {
+  transition: transform calc(var(--t-press) * var(--dur)) ease,
+              box-shadow calc(var(--t-press) * var(--dur)) ease;
+}
+.btn-go:active, .btn-good:active, .btn-skip:active, .btn-wide:active {
+  transform: translate(var(--lift-2), var(--lift-2));
+  box-shadow: 0 0 0 var(--ink);
+}
+.btn-ghost:active, .btn-icon:active, .chip:active, .pv:active {
+  transform: translate(var(--lift-1), var(--lift-1));
+  box-shadow: 0 0 0 var(--ink);
+}
 
 /* Knoppen die je moet vasthouden negeren een tik. Zonder terugkoppeling
-   lijkt het toestel dan stuk, dus schudt de knop even: "blijf duwen". */
+   lijkt het toestel dan stuk, dus schudt de knop even: "blijf duwen".
+   Bij beperkte beweging valt de schud weg; daarom zit er een tweede,
+   stilstaand signaal onder: de rand kleurt heel even. */
 @keyframes nudge {
   0%, 100% { transform: translateX(0) rotate(0); }
   20% { transform: translateX(-9px) rotate(-3deg); }
@@ -113,30 +209,155 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   80% { transform: translateX(-5px) rotate(-2deg); }
 }
 .nudge { animation: nudge calc(.42s / max(var(--dur), .001)) ease-in-out; }
+.refuse { border-color: var(--danger) !important; }
 
-.btn-play {                /* het grote ▶ : titel, volgende, opnieuw */
+/* Alles wat je moet vásthouden draagt hetzelfde merkje: een streepje in
+   stippellijn, de rechte versie van de gestippelde ring om de startknop.
+   Dat er iets te houden valt moet je kunnen zien vóór je het fout doet --
+   en het moet er bij alle vier hetzelfde uitzien, anders is het geen teken
+   maar een toevalligheid. De ring, het tandwiel, stoppen en "opnieuw
+   beginnen" zeggen het nu op één manier. */
+.gear::after, .btn-danger::after, .btn-wide[data-confirm="1"]::after {
+  content: ""; position: absolute; left: 50%; bottom: 6px; z-index: 2;
+  transform: translateX(-50%);
+  width: 22px; height: 3px; opacity: .45; pointer-events: none;
+  background: repeating-linear-gradient(to right,
+              currentColor 0 5px, transparent 5px 9px);
+}
+
+/* ---- de grote ronde "verder"-knop ----
+   Titel, ronde-intro, volgende beurt, volgende ronde, opnieuw, verder
+   na pauze: allemaal één tik. */
+.btn-go {
   align-self: center; flex: 0 0 auto;
   width: min(52vw, 21vh, 190px); aspect-ratio: 1;
   border-radius: 50%;
-  background: var(--marigold);
+  background: var(--go);
   border: var(--line) solid var(--ink);
-  box-shadow: var(--drop) var(--drop) 0 var(--ink);
+  box-shadow: var(--lift-2) var(--lift-2) 0 var(--ink);
   display: grid; place-items: center;
 }
-.btn-play svg { width: 44%; }
+.btn-go svg { width: 44%; }
 
-.label {
-  font-weight: 900; text-transform: uppercase; letter-spacing: .06em;
+/* ---- dezelfde knop, maar vasthouden ----
+   Het toestel wisselt van hand; een losse tik mag de klok niet laten
+   lopen. Dat werkte, maar was onzichtbaar: de ring stond in papierwit
+   met de streep volledig weggeschoven, dus je zag pas dát je moest
+   vasthouden nadat je het al fout had gedaan. Nu staat de baan er altijd,
+   in inkt op een kwart doorzichtigheid, met streepjes -- dezelfde taal
+   als een stippellijn: "hier moet nog iets gebeuren". */
+.hold-ring { position: relative; width: min(44vw, 24vh, 190px); aspect-ratio: 1; flex: 0 0 auto; }
+.hold-ring .btn-go { width: 100%; }
+.hold-ring svg.ring {
+  position: absolute; inset: -10px; width: calc(100% + 20px); height: calc(100% + 20px);
+  transform: rotate(-90deg); pointer-events: none;
+}
+.hold-ring .ring circle { fill: none; stroke-width: 8; stroke-linecap: butt; }
+/* De baan in papierwit en de voortgang in inkt. Andersom -- allebei inkt --
+   liep de baan op het vermiljoen van het overdrachtscherm dicht tot een
+   vuile bordeauxrode stippellijn die als vlek las in plaats van als spoor.
+   Licht op een verzadigd vlak zegt "hier moet nog iets komen", en de zwarte
+   boog die hem volloopt is er dan goed van te onderscheiden. */
+.hold-ring .ring .track { stroke: var(--paper); opacity: .6; stroke-dasharray: 10 12; }
+.hold-ring .ring .arc   { stroke: var(--ink); stroke-linecap: round; }
+
+/* ---- geraden ---- */
+.btn-good {
+  width: min(40vw, 20vh, 164px); aspect-ratio: 1;
+  border-radius: 50%; background: var(--good);
+  border: var(--line) solid var(--ink); box-shadow: var(--lift-2) var(--lift-2) 0 var(--ink);
+  display: grid; place-items: center;
+}
+.btn-good svg { width: 52%; }
+
+/* ---- passen ---- */
+.btn-skip {
+  width: 76px; height: 76px;
+  background: var(--paper-2);
+  border: var(--line) solid var(--ink); box-shadow: var(--lift-2) var(--lift-2) 0 var(--ink);
+  display: grid; place-items: center;
+}
+.btn-skip svg { width: 44px; }
+/* Bij de laatste kaart valt er niets meer over te slaan. De knop wordt
+   niet uitgeschakeld -- een uitgeschakelde knop krijgt geen tik binnen
+   en kan dus ook niet antwoorden, en dan lijkt het toestel bevroren op
+   het spannendste moment. Hij blijft leven, schudt, en draagt een
+   streep zodat de toestand ook zonder kleur te zien is. */
+.btn-skip[data-spent="1"] { opacity: .38; }
+.btn-skip[data-spent="1"] .bar { display: block; }
+.btn-skip .bar { display: none; }
+
+/* ---- hulpknop (pauze, terug naar de titel) ----
+   Eén formaat, één plek, op élk scherm van het spel. Vroeger was dit
+   38 px op 62% doorzichtigheid op het spelscherm, 38 px op 85% en een
+   ander vlak op het overdrachtscherm, en op de vier tussenschermen
+   bestond hij niet -- daar kon je het spel dus niet verlaten. */
+.btn-icon {
+  position: absolute; top: max(var(--s-4), env(safe-area-inset-top)); right: var(--s-4);
+  z-index: 3;
+  width: var(--tap); height: var(--tap);
+  display: grid; place-items: center;
+  border: var(--line-2) solid var(--ink); background: var(--paper-2);
+  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
+}
+.btn-icon svg { width: 22px; }
+
+/* ---- vasthouden om te stoppen ---- */
+.btn-danger {
+  position: relative; overflow: hidden;
+  width: 68px; height: 68px; display: grid; place-items: center;
+  border: var(--line-2) solid var(--danger); background: var(--paper-2);
+}
+.btn-danger svg { width: 32px; position: relative; z-index: 1; }
+.btn-danger i {
+  position: absolute; inset: 0; background: var(--danger);
+  transform: scaleY(0); transform-origin: bottom;
+}
+
+/* ---- brede knoppen op het instellingenscherm ---- */
+.btn-wide {
+  min-height: 68px; width: 100%;
+  background: var(--good-ink); color: var(--paper);
+  border: var(--line) solid var(--ink); box-shadow: var(--lift-2) var(--lift-2) 0 var(--ink);
+  font-weight: 900; text-transform: uppercase; letter-spacing: .1em; font-size: 18px;
+  display: grid; place-items: center; gap: var(--s-2);
+  grid-auto-flow: column;
+}
+/* Beginnen gooit een lopend spel weg. Dat mag niet van één tik, dus in dat
+   geval -- en alleen dan -- moet je hem vasthouden.
+
+   En dan is hij ook niet groen. Groen betekent in deze app "ja, goed, doe
+   maar"; met een waarschuwingsdriehoek op een groen vlak zeggen de kleur en
+   het teken het tegenovergestelde van elkaar. Zodra er iets te verliezen
+   valt kleurt de knop wijnrood -- dezelfde kleur als de stopknop en als de
+   laatste seconden. */
+.btn-wide { position: relative; overflow: hidden; }
+.btn-wide i.fill {
+  position: absolute; inset: 0; background: var(--ink);
+  transform: scaleX(0); transform-origin: left;
+}
+.btn-wide > * { position: relative; z-index: 1; }
+.btn-wide .warn { display: none; width: 26px; height: 26px; }
+.btn-wide[data-confirm="1"] { background: var(--danger); }
+.btn-wide[data-confirm="1"] .warn { display: block; }
+
+.btn-ghost {
+  min-height: 52px; width: 100%; background: var(--paper);
+  border: var(--line-2) solid var(--ink); box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
+  font-weight: 900; text-transform: uppercase;
+  letter-spacing: .08em; font-size: 13px;
 }
 
 /* ============================================================
-   TITEL
+   4. TITEL
    ============================================================ */
-#s-title { justify-content: center; align-items: center; gap: 8vh; }
+#s-title { justify-content: center; align-items: center; gap: 6vh; }
 
+/* De enige plek waar vermiljoen géén ploeg is: het merk zelf, op een
+   scherm waar nog geen ploegen bestaan. Bewuste uitzondering. */
 .wordmark {
-  --team: var(--marigold);
-  background: var(--vermilion);
+  --team: var(--go);
+  background: var(--team-vos);
   padding: 22px 30px 26px;
   transform: rotate(-2deg);
   text-align: center;
@@ -147,9 +368,19 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 }
 .wordmark svg { width: clamp(40px, 12vw, 66px); margin-bottom: 6px; }
 
+/* Loopt er een spel, dan zegt de titelknop niet "spelen" maar "verder":
+   daaronder hangt een half potje van gisteravond. Wie in plaats daarvan
+   opnieuw wil beginnen heeft daar nu een eigen knop voor, in plaats van
+   dat de instellingen het spel stilletjes weggooiden. */
+.resume-note { display: none; }
+#s-title[data-resume="1"] .resume-note { display: flex; }
+/* Met het kaartje erbij staan er vier dingen onder elkaar; dan mag de lucht
+   ertussen wat minder. */
+#s-title[data-resume="1"] { gap: 4vh; }
+
 .gear {
-  position: fixed; right: 14px; bottom: max(14px, env(safe-area-inset-bottom));
-  width: var(--tap); height: var(--tap);
+  position: fixed; right: var(--s-4); bottom: max(var(--s-4), env(safe-area-inset-bottom));
+  width: 64px; height: 64px;
   display: grid; place-items: center;
   border-radius: 50%;
   border: var(--line) solid var(--ink);
@@ -157,101 +388,103 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   overflow: hidden;
 }
 .gear svg { width: 28px; position: relative; z-index: 1; }
-.gear i {                  /* vult op tijdens het vasthouden */
-  position: absolute; inset: 0; background: var(--marigold);
+.gear i {                  /* vult op tijdens het vasthouden (in JS getekend) */
+  position: absolute; inset: 0; background: var(--go);
   transform: scaleY(0); transform-origin: bottom;
 }
-.gear.hold i { transition: transform 1.2s linear; transform: scaleY(1); }
 
 /* ============================================================
-   INSTELLINGEN — het enige scherm met tekst. Voor de volwassene.
+   5. INSTELLINGEN — het enige scherm met tekst. Voor de volwassene.
    ============================================================ */
-#s-setup { overflow-y: auto; gap: 18px; padding-bottom: 30px; }
+#s-setup { padding: 0; }
+.setup-scroll {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto;
+  display: flex; flex-direction: column; gap: var(--s-5);
+  padding: max(var(--s-4), env(safe-area-inset-top)) var(--s-4) var(--s-4);
+}
+/* De hoofdknop stond onderaan een scherm dat je eerst helemaal moest
+   afrollen -- op een telefoon was er bij het openen niets van te zien.
+   Nu staat hij vast onderin. */
+.setup-foot {
+  flex: 0 0 auto;
+  display: flex; flex-direction: column; gap: var(--s-2);
+  padding: var(--s-3) var(--s-4) max(var(--s-3), env(safe-area-inset-bottom));
+  background: var(--paper);
+  border-top: var(--line-2) solid var(--rule);
+}
 #s-setup h1 {
   font-size: 26px; font-weight: 900; text-transform: uppercase;
-  letter-spacing: .06em; margin: 6px 0 0;
+  letter-spacing: .06em; margin: var(--s-2) 0 0;
 }
 #s-setup h2 {
   font-size: 13px; font-weight: 900; text-transform: uppercase;
-  letter-spacing: .12em; margin: 0 0 10px; color: #6b5f4e;
+  letter-spacing: .12em; margin: 0 0 10px; color: var(--ink-2);
 }
-.field { margin-top: 4px; }
+.field { margin: 0; border: 0; padding: 0; min-width: 0; }
+.field legend, .legend-label {
+  display: block;
+  font-size: 13px; font-weight: 900; text-transform: uppercase;
+  letter-spacing: .12em; margin: 0 0 10px; padding: 0; color: var(--ink-2);
+}
 .rules {
-  border-left: 6px solid var(--vermilion); padding: 2px 0 2px 14px;
-  font-size: 13.5px; line-height: 1.5; color: #4a4036;
+  border-left: 6px solid var(--go); padding: 2px 0 2px 14px;
+  font-size: 13.5px; line-height: 1.5; color: var(--ink-2);
 }
-.rules p { margin: 0 0 8px; }
+.rules p { margin: 0 0 var(--s-2); }
 .rules b { color: var(--ink); }
-
-.teams-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.team-card {
-  padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 8px;
-}
-.team-card svg { width: 64px; height: 64px; }
-.team-card input {
-  width: 100%; text-align: center; font-weight: 900; text-transform: uppercase;
-  letter-spacing: .06em; font-size: 15px;
-  border: 3px solid var(--ink); background: var(--paper);
-  padding: 8px 4px; min-height: 44px;
-}
 
 .chips { display: flex; flex-wrap: wrap; gap: 10px; }
 .chip {
-  flex: 1 1 auto; min-height: 56px; padding: 8px 14px;
+  flex: 1 1 auto; min-height: 56px; padding: var(--s-2) 14px;
+  position: relative;
   border: var(--line) solid var(--ink); background: var(--paper);
-  box-shadow: 5px 5px 0 var(--ink);
+  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
   font-weight: 900; text-transform: uppercase; letter-spacing: .05em; font-size: 14px;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
-.chip small { display: block; font-size: 11px; letter-spacing: .04em; color: #6b5f4e; font-weight: 700; }
-.chip[aria-pressed="true"] { background: var(--marigold); transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--ink); }
+.chip small { display: block; font-size: 11px; letter-spacing: .04em; color: var(--ink-2); font-weight: 700; }
+.chip[aria-checked="true"] { background: var(--go); }
+/* De keuze hangt niet aan de kleur alleen: er komt een vinkje bij staan. */
+.chip .tick { display: none; position: absolute; top: 3px; right: 3px; width: 16px; height: 16px; }
+.chip[aria-checked="true"] .tick { display: block; }
 
 .slider-row { display: flex; align-items: center; gap: 14px; }
 input[type=range] {
-  flex: 1; height: 44px; -webkit-appearance: none; appearance: none; background: none;
+  flex: 1; height: var(--tap); -webkit-appearance: none; appearance: none; background: none;
 }
-input[type=range]::-webkit-slider-runnable-track { height: 10px; background: var(--paper-2); border: 3px solid var(--ink); }
-input[type=range]::-moz-range-track { height: 10px; background: var(--paper-2); border: 3px solid var(--ink); }
+input[type=range]::-webkit-slider-runnable-track { height: 10px; background: var(--paper-2); border: var(--line-2) solid var(--ink); }
+input[type=range]::-moz-range-track { height: 10px; background: var(--paper-2); border: var(--line-2) solid var(--ink); }
 input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none; width: 34px; height: 34px; margin-top: -15px;
-  background: var(--vermilion); border: var(--line) solid var(--ink); border-radius: 50%;
+  background: var(--go); border: var(--line) solid var(--ink); border-radius: 50%;
 }
 input[type=range]::-moz-range-thumb {
-  width: 34px; height: 34px; background: var(--vermilion);
+  width: 34px; height: 34px; background: var(--go);
   border: var(--line) solid var(--ink); border-radius: 50%;
 }
 .secs { font-weight: 900; font-size: 22px; min-width: 62px; text-align: right; font-variant-numeric: tabular-nums; }
 
+/* Geen eigen rolgebied meer binnen een scherm dat zelf al rolt: dat
+   maakte van de kaartenlijst een kijkgaatje van twee rijen hoog. */
 .preview {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); gap: 8px;
-  max-height: 34vh; overflow-y: auto; padding: 10px;
-  border: 3px dashed #b6a992;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); gap: var(--s-2);
+  padding: 10px;
+  border: var(--line-2) dashed var(--rule);
 }
 .pv {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
-  padding: 6px 2px; border: 2px solid var(--ink); background: var(--paper);
+  padding: 6px 2px; border: var(--line-2) solid var(--ink); background: var(--paper);
+  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
 }
 .pv span { font-size: 26px; line-height: 1.1; }
 .pv small { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; }
-.hint { font-size: 12px; color: #6b5f4e; margin: 8px 0 0; line-height: 1.45; }
-
-.btn-wide {
-  min-height: 68px; width: 100%; margin-top: 6px;
-  background: var(--leaf); color: var(--paper);
-  border: var(--line) solid var(--ink); box-shadow: var(--drop) var(--drop) 0 var(--ink);
-  font-weight: 900; text-transform: uppercase; letter-spacing: .1em; font-size: 18px;
-}
-.btn-ghost {
-  min-height: 52px; width: 100%; background: var(--paper);
-  border: 3px solid var(--ink); font-weight: 900; text-transform: uppercase;
-  letter-spacing: .08em; font-size: 13px;
-}
+.hint { font-size: 12px; color: var(--ink-2); margin: var(--s-2) 0 0; line-height: 1.45; }
 
 /* ============================================================
-   RONDE-INTRO — geen woorden, geen cijfers. Alleen een gebaar.
+   6. RONDE-INTRO — geen woorden op de knoppen, alleen een gebaar.
    ============================================================ */
-#s-roundintro { justify-content: center; align-items: center; gap: 3.4vh; }
-.ri-stage { width: min(62vw, 300px); aspect-ratio: 1; display: grid; place-items: center; }
+#s-roundintro { justify-content: center; align-items: center; gap: 3vh; }
+.ri-stage { width: min(52vw, 26vh, 260px); aspect-ratio: 1; display: grid; place-items: center; }
 .ri-stage svg { width: 100%; height: 100%; overflow: visible; }
 
 /* Het woord erbij. De ballon vertelt het aan wie niet leest, het woord
@@ -263,16 +496,9 @@ input[type=range]::-moz-range-thumb {
   text-transform: uppercase; letter-spacing: .04em; line-height: 1;
 }
 .ri-say p {
-  margin: 8px 0 0; font-size: 14px; font-weight: 700; line-height: 1.4;
-  color: #4a4036;
+  margin: var(--s-2) 0 0; font-size: 14px; font-weight: 700; line-height: 1.4;
+  color: var(--ink-2);
 }
-
-.dots { display: flex; gap: 16px; }
-.dots i {
-  width: 26px; height: 26px; border-radius: 50%;
-  border: var(--line) solid var(--ink); background: var(--paper);
-}
-.dots i.on { background: var(--round, var(--vermilion)); }
 
 /* ronde 1: de drie woorden ratelen achter elkaar door */
 @keyframes say { 0%, 60%, 100% { transform: translateY(0); } 25% { transform: translateY(-9px); } }
@@ -289,7 +515,7 @@ input[type=range]::-moz-range-thumb {
             animation: strike calc(1.2s / max(var(--dur), .001)) ease-in-out infinite; }
 
 /* ============================================================
-   OVERDRACHT — wie is er aan de beurt
+   7. OVERDRACHT — wie is er aan de beurt
    ============================================================ */
 /* Alle maten hier zijn ook aan de hoogte gebonden. Op een kleine telefoon
    (360x640) duwde de opdrachtkaart de startknop anders onder de rand, en
@@ -302,27 +528,19 @@ input[type=range]::-moz-range-thumb {
   padding: min(2.6vh, 22px); display: grid; place-items: center;
   transform: rotate(-1.5deg);
 }
-#s-handoff .mascot-big { width: min(46vw, 32vh, 230px); display: block; }
-.hold-ring { position: relative; width: min(44vw, 24vh, 190px); aspect-ratio: 1; flex: 0 0 auto; }
-.hold-ring .btn-play { width: 100%; }
-.hold-ring svg.ring {
-  position: absolute; inset: -10px; width: calc(100% + 20px); height: calc(100% + 20px);
-  transform: rotate(-90deg); pointer-events: none;
-}
-.hold-ring .ring circle { fill: none; stroke: var(--paper); stroke-width: 8; stroke-linecap: round; }
+#s-handoff .mascot-big { width: min(46vw, 30vh, 230px); display: block; }
 
 /* De opdracht op het overdrachtscherm: pictogram en woord naast elkaar, op
-   papier. Ook hier geen rondekleur -- de mascotte staat er pal boven en
-   blauw naast de blauwe uil las als ploegkleur. */
+   papier. Ook hier geen rondekleur -- de mascotte staat er pal boven. */
 .roundcard {
+  --team: var(--ink);
   display: flex; align-items: center; gap: min(1.8vh, 14px);
   padding: min(1.6vh, 12px) 20px min(1.6vh, 12px) 14px;
-  box-shadow: 6px 6px 0 var(--ink);
 }
 .roundcard .ico {
   width: min(9vh, 74px); height: min(9vh, 74px);
   display: grid; place-items: center;
-  background: var(--paper-2); border: 3px solid var(--ink);
+  background: var(--paper-2); border: var(--line-2) solid var(--ink);
   flex: 0 0 auto;
 }
 .roundcard .ico svg { width: 76%; height: 76%; }
@@ -331,168 +549,202 @@ input[type=range]::-moz-range-thumb {
   letter-spacing: .05em; text-transform: uppercase;
 }
 
-/* Overgedragen tijd: een kaartje waarvan de rand al deels weg is -- precies
-   het beeld dat straks om de echte kaart staat. Hier stond eerst een
-   zandloper met gele bolletjes, maar bolletjes zijn in dit spel punten;
-   dezelfde vorm voor seconden gebruiken las als een score. */
-.carry {
-  position: relative; display: grid; place-items: center;
-  width: min(12vh, 100px); height: min(12vh, 100px);
-  background: var(--paper); border: var(--line) solid var(--ink);
-  box-shadow: 5px 5px 0 var(--ink);
+/* De stand op het moment van overdragen: wie het toestel krijgt wil
+   weten waar het over gaat. Klein, want het is naslag. */
+.mini-score { display: flex; align-items: center; gap: var(--s-3); }
+.mini-score .side { display: flex; align-items: center; gap: var(--s-1); }
+.mini-score .side svg { width: 28px; height: 28px; }
+.mini-score b {
+  font-weight: 900; font-size: 20px; font-variant-numeric: tabular-nums;
+  color: var(--ink);
 }
-.carry[hidden] { display: none; }     /* display:grid wint anders van [hidden] */
+.mini-score .sep { width: 3px; height: 20px; background: var(--ink); opacity: .3; }
+
+/* Overgedragen tijd: een kaartje waarvan de rand al deels weg is -- precies
+   het beeld dat straks om de echte kaart staat. Het hangt nu tegen de
+   startknop aan in plaats van er los boven te zweven, want het gaat over
+   wat er gebeurt als je die knop indrukt. Het getal staat in inkt: in
+   marigold op papier haalde het 1,54:1 en was het onleesbaar. */
+.carry {
+  position: absolute; right: -6px; top: -6px; z-index: 2;
+  display: grid; place-items: center;
+  width: min(9vh, 74px); height: min(9vh, 74px);
+  background: var(--paper); border: var(--line-2) solid var(--ink);
+  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
+}
 .carry .frame { position: absolute; inset: 0; width: 100%; height: 100%; }
 .carry .frame rect { stroke-width: 12; }
 .carry b {
-  font-weight: 900; font-size: min(4.4vh, 36px); font-variant-numeric: tabular-nums;
-  position: relative; color: var(--tcol, var(--ink));
+  font-weight: 900; font-size: min(3.4vh, 26px); font-variant-numeric: tabular-nums;
+  position: relative; color: var(--ink);
 }
 
 /* ============================================================
-   SPEL
+   8. SPEL
    ============================================================ */
-#s-play { gap: 10px; }
+/* Ruimte tussen de kaart en de bediening: met acht pixels raakte de
+   slagschaduw van de kaart de geraden-knop op een tablet. */
+#s-play { gap: var(--s-4); }
 
-/* De balk bovenaan draagt alleen wat je vóór de beurt nodig hebt (wie,
-   welke opdracht) en wat er tijdens de beurt verandert (tijd, gescoord).
-   Links naslag, rechts de teller. */
-.play-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-/* De mascotte hangt op het midden van het opdrachtvakje in plaats van op de
-   bovenrand; zo staan de twee als een groepje bij elkaar. */
-.play-top .who { display: flex; align-items: flex-start; gap: 10px; }
-.play-top .teamchip { margin-top: 4px; }
+/* De balk bovenaan valt in drie groepen uiteen, en die volgorde is de
+   volgorde waarin je ze nodig hebt:
 
-/* De mascotte staat vrij, zonder kader en zonder vlak: wie aan de beurt is
-   heeft het overdrachtscherm net paginagroot verteld, dus hier is het
-   naslag. Met een omkaderd gekleurd blokje leek het even belangrijk als de
-   opdracht ernaast -- twee gelijke badges naast elkaar, en dan lees je
-   allebei niet. De vorm van het dier draagt de ploeg al. */
+     1. wie en wat  -- de mascotte en de opdracht. Staat vast voor de hele
+        beurt; dit is naslag voor wie het toestel net aangereikt kreeg.
+     2. hoe staat het -- de seconden en de fiches van deze beurt. Dit is
+        het enige dat verandert terwijl je speelt, dus het hoort bij elkaar
+        en apart van groep 1.
+     3. pauze -- gereedschap, zelden nodig, uiterst rechts.
+
+   Ze stonden hiervoor door elkaar: de pauzeknop zat ín de klokgroep, pal
+   naast de seconden, alsof hij bij de tijd hoorde. */
+.play-top {
+  display: flex; align-items: flex-start; gap: var(--s-3);
+}
+.play-top .who { display: flex; align-items: flex-start; gap: var(--s-2); }
+/* De twee naslagvakjes zijn even groot en beginnen op dezelfde lijn, zodat
+   ze als één mededeling lezen ("Vos, uitleggen") in plaats van als twee
+   losse dingen van verschillend formaat. */
 .teamchip {
-  width: 46px; height: 46px; display: grid; place-items: center;
+  width: 48px; height: 48px; display: grid; place-items: center;
   flex: 0 0 auto;
 }
 .teamchip svg { width: 100%; height: 100%; }
 
 /* De opdracht van deze ronde, altijd in beeld. Beeld én woord samen: het
-   kind leest de ballon, wie wél leest is meteen zeker. Elke ronde heeft
-   bovendien een eigen kleur, zodat de wissel ook van een afstand opvalt. */
+   kind leest de ballon, wie wél leest is meteen zeker. Geen kleur op de
+   ronde -- de mascotte staat ernaast, en elke kleur die vrij lijkt is hier
+   al van iets anders. */
 .roundchip {
   display: flex; flex-direction: column; align-items: center; gap: 3px;
   flex: 0 0 auto;
 }
-/* Geen kleur op de ronde -- zie de opmerking bij ROUND_COLOR. Zonder vlak
-   en zonder slagschaduw is de chip ook meteen een stuk lichter; het is
-   naslag, geen mededeling. */
 .roundchip .ico {
-  width: 54px; height: 54px; display: grid; place-items: center;
-  border: 3px solid var(--ink); background: var(--paper-2);
+  width: 48px; height: 48px; display: grid; place-items: center;
+  border: var(--line-2) solid var(--ink); background: var(--paper-2);
 }
-.roundchip .ico svg { width: 40px; height: 40px; }
+.roundchip .ico svg { width: 36px; height: 36px; }
 .roundchip b {
   font-size: 10px; font-weight: 900; letter-spacing: .02em;
   text-transform: uppercase; white-space: nowrap;
 }
 
-/* Rechts: de resterende seconden klein (bijzaak, want de kaartrand vertelt
-   het al) en daaronder wat deze beurt al binnen is. Dat laatste stond er
-   niet, terwijl het precies is wat de speler wil weten terwijl hij bezig is. */
-.turnbox { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
-.turnbox .toprow { display: flex; align-items: center; gap: 12px; }
-
-/* Pauze: klein en grijzig, want je hebt hem zelden nodig. Eén tik is genoeg
-   -- pauzeren kost niets en is met één tik terug te draaien; stoppen zit
-   erachter, achter een lange druk. */
-.btn-pauze {
-  width: 38px; height: 38px; flex: 0 0 auto;
-  display: grid; place-items: center;
-  border: 3px solid var(--ink); background: var(--paper-2);
-  opacity: .62;
+/* Groep 2: de seconden met daaronder wat deze beurt al binnen is. Twee
+   getallen over hetzelfde onderwerp, dus recht onder elkaar en samen tegen
+   de rechterkant -- niet het ene naast de pauzeknop en het andere eronder. */
+.turnbox {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+  margin-left: auto; min-width: 0;
 }
-.btn-pauze svg { width: 20px; }
-.btn-pauze.corner {
-  position: absolute; top: max(14px, env(safe-area-inset-top)); right: 14px;
-  background: var(--paper); opacity: .85;
-}
+/* Op het spelscherm staat de pauzeknop in de balk mee in plaats van er
+   los overheen: zo dekte hij de seconden af. Hij komt daarmee op precies
+   dezelfde plek uit als op alle andere schermen. */
+#s-play .btn-icon { position: static; flex: 0 0 auto; }
 
 .overlay {
   position: fixed; inset: 0; z-index: 8;
   display: grid; place-items: center;
   background: rgba(20, 17, 15, .62);
+  padding: var(--s-4);
 }
-.overlay[hidden] { display: none; }
 .overlay .panel {
-  --team: var(--marigold);
-  display: flex; flex-direction: column; align-items: center; gap: 22px;
-  padding: 26px 30px;
+  --team: var(--go);
+  display: flex; flex-direction: column; align-items: center; gap: var(--s-4);
+  padding: var(--s-5) var(--s-6);
+  max-width: 100%; min-width: min(280px, 82vw);
 }
-.btn-stop {
-  position: relative; overflow: hidden;
-  width: 68px; height: 68px; display: grid; place-items: center;
-  border: 3px solid var(--ink); background: var(--paper-2);
+/* Kleiner dan de knop op de andere schermen: hier zit hij in een paneel en
+   moet hij niet het hele vlak opeten. */
+.overlay .panel .btn-go { width: min(40vw, 18vh, 140px); }
+/* Een gepauzeerd spel moet zeggen dát het stilstaat en waar het stond.
+   Het paneel toonde alleen twee pictogrammen op een donker vlak: geen
+   tijd, geen stand, geen woord. */
+.paused-clock { display: flex; align-items: center; gap: var(--s-3); }
+.paused-clock .dial {
+  position: relative; width: 76px; height: 76px; display: grid; place-items: center;
+  border: var(--line) solid var(--ink); background: var(--paper);
 }
-.btn-stop svg { width: 32px; position: relative; z-index: 1; }
-.btn-stop i {
-  position: absolute; inset: 0; background: var(--red-danger, var(--vermilion));
-  transform: scaleY(0); transform-origin: bottom;
+.paused-clock .dial svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.paused-clock .dial b {
+  position: relative; font-weight: 900; font-size: 28px; font-variant-numeric: tabular-nums;
 }
-.btn-stop.hold i { transition: transform 1.1s linear; transform: scaleY(1); }
+.paused-clock .bars { display: flex; gap: 6px; }
+.paused-clock .bars i { width: 10px; height: 34px; background: var(--ink); }
+
 .secs-left {
   font-weight: 900; font-size: 26px; font-variant-numeric: tabular-nums;
-  line-height: 1; color: var(--tcol, var(--ink));
+  line-height: 1; color: var(--ink);
   min-width: 2ch; text-align: right;
 }
+/* De fiches van deze beurt zijn dezelfde munt als die op het scorebord,
+   dus met dezelfde contourdikte -- ze stonden hier op 2 px en daar op 3,
+   waardoor het net twee verschillende dingen leken. Kleiner mogen ze wel:
+   hier tellen ze een beurt, daar een heel spel. */
 .won {
   display: flex; flex-wrap: wrap-reverse; justify-content: flex-end;
-  gap: 4px; max-width: 108px;
+  gap: var(--s-1); max-width: 120px;
 }
 .won i {
-  width: 14px; height: 14px; border-radius: 50%;
-  border: 2px solid var(--ink); background: var(--team);
+  width: 15px; height: 15px; border-radius: 50%;
+  border: var(--line-2) solid var(--ink); background: var(--team);
 }
 @keyframes wonIn { from { transform: scale(0); } to { transform: scale(1); } }
-.won i:last-child { animation: wonIn calc(.22s / max(var(--dur), .001)) cubic-bezier(.2,1.6,.4,1); }
+.won i:last-child { animation: wonIn calc(.22s / max(var(--dur), .001)) var(--e-pop); }
 
-.cardwrap { flex: 1; display: flex; justify-content: center; min-height: 0; }
-/* Vierkant, met het teken zo groot dat het de kaart vult. Hoger dan breed
-   liet het beeld midden in een leeg vlak zweven. */
-/* Kaart en stapelbalkje horen bij elkaar: het balkje is de stapel waar
-   deze kaart vandaan komt, niet zomaar een tweede meter onderaan. */
-.cardstack {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 10px; height: 100%; min-height: 0;
+/* ---- de kaart ----
+   De kaart is nu zo groot als de plek waar ze in ligt, en het teken is
+   zo groot als de kaart. Dat was het niet: de kaart hield op bij 460 px
+   terwijl er op een tablet 744 px ruimte was, en het teken rekende met
+   de vensterhoogte in plaats van met de kaart -- op een iPad stak de
+   emoji 132 px búiten de kaart, dwars over de klokrand heen, en op een
+   iPad Pro 328 px. Twee maatstelsels voor één doosje.
+   De maat van het teken wordt nu in JS van de kaart zelf afgelezen
+   (zie sizeCard), zodat er nog maar één stelsel is. */
+.cardwrap { flex: 1 1 auto; min-height: 0; display: grid; place-items: center; }
+.cardstack { display: grid; place-items: center; width: 100%; height: 100%; min-height: 0; }
+/* De maat komt uit sizeCard(): het grootste vierkant dat in de vrije ruimte
+   past (staand), of de hele ruimte (liggend, waar de kaart breed mag zijn).
+   Met alleen aspect-ratio erop won de flexhoogte het, en werd de kaart een
+   staande rechthoek met het beeld zwevend in het midden -- precies wat het
+   vierkant kwam oplossen. De regels hieronder zijn de terugval voor het
+   ogenblik vóór de eerste meting. */
+.cardslot {
+  position: relative; display: grid; place-items: center;
+  aspect-ratio: 1; max-width: 100%; max-height: 100%;
 }
-/* De kaart groeit mee met de ruimte die er is en blijft vierkant. Met een
-   vaste breedte bleef op een lange telefoon een gat van ruim 120 px tussen
-   de kaart en de knop staan -- veel lucht die niets deed. */
-/* Geen ploegkleur op de kaart. De rand ís de klok en verkleurt van geel naar
-   rood; met de vermiljoenen misregistratie van ploeg Vos erbij liep er rood
-   over rood en werd de rand onleesbaar. De kaart is het neutrale toneel,
-   de ploeg staat in de balk erboven. */
+/* Geen ploegkleur op de kaart. De rand ís de klok en verkleurt van goud
+   naar wijn; met een vermiljoenen misregistratie erbij liep er rood over
+   rood en werd de rand onleesbaar. De kaart is het neutrale toneel, de
+   ploeg staat in de balk erboven. Dat gebeurde vroeger per ongeluk: de
+   kaart droeg de gewone oppervlakteklasse en overschreef daar toevallig,
+   op volgorde in het bestand, de gekleurde schaduwlaag van. Nu draagt ze
+   die klasse niet meer en staat het er met zoveel woorden. */
 .card {
   position: relative;
-  flex: 1 1 auto; min-height: 0;
-  width: auto; height: auto; aspect-ratio: 1;
-  max-width: min(94vw, 460px); max-height: min(94vw, 460px);
+  width: 100%; height: 100%;
   display: grid; place-items: center;
+  overflow: hidden;                       /* het toneel houdt zijn eigen randen */
   background: var(--paper);
-  box-shadow: 7px 7px 0 var(--ink);
+  border: var(--line) solid var(--ink);
+  box-shadow: var(--lift-1) var(--lift-1) 0 0 var(--ink);
 }
 
 /* De klok loopt om de kaart heen in plaats van in een wijzerplaat ernaast.
    De speler staart naar het beeld; de tijd hoort in diezelfde blik te
    zitten, niet op een plek waar je apart heen moet kijken. */
-.timerframe { position: absolute; inset: 0; pointer-events: none; }
+.timerframe { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
 /* De laatste seconden is er van de rand haast niets meer over, juist op het
    moment dat de haast het hoogst is. Daarom klopt de kaart zelf mee. */
 @keyframes hurry { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02) rotate(-.4deg); } }
-.card.hurry { animation: hurry calc(.5s / max(var(--dur), .001)) ease-in-out infinite; }
+.cardslot.hurry { animation: hurry calc(.5s / max(var(--dur), .001)) ease-in-out infinite; }
 .timerframe rect {
-  stroke: var(--marigold); stroke-width: 12; stroke-linecap: butt;
+  stroke-width: 12; stroke-linecap: butt;
   transition: stroke calc(.3s * var(--dur)) linear;
 }
-/* Alleen de beweging, geen box-shadow meer: die draagt nu de stapel eronder
-   en mag niet door de animatie overschreven worden. */
+.card[data-time="ok"]   .timerframe rect { stroke: var(--time-3); }
+.card[data-time="warn"] .timerframe rect { stroke: var(--time-2); }
+.card[data-time="crit"] .timerframe rect { stroke: var(--time-1); }
+
 /* Geraden en gepast zagen er precies hetzelfde uit, terwijl ze het
    tegenovergestelde betekenen. Nu wordt een geraden kaart van de stapel
    gedeeld -- schuin van boven erop -- en zakt een gepaste kaart eerst weg
@@ -507,16 +759,22 @@ input[type=range]::-moz-range-thumb {
   45%  { transform: translateY(16px) scale(.965); }
   100% { transform: translateY(0) scale(1); }
 }
-.card.in   { animation: deal calc(.17s / max(var(--dur), .001)) ease-out; }
+.card.in   { animation: deal calc(var(--t-card) / max(var(--dur), .001)) ease-out; }
 .card.tuck { animation: tuck calc(.28s / max(var(--dur), .001)) ease-in-out; }
-/* Eén kaart, één teken, zo groot als de kaart toelaat. */
-.glyph { font-size: min(46vh, 68vw); line-height: 1; }
+/* Een tik die niet meetelt (twee vingers op dezelfde kaart binnen 280 ms)
+   werd stilletjes weggegooid. Nu knippert de rand één keer, zodat je ziet
+   dát hij binnenkwam. */
+@keyframes seen { 0%, 100% { border-color: var(--ink); } 40% { border-color: var(--go); } }
+.card.seen { animation: seen calc(.24s / max(var(--dur), .001)) ease-out; }
+
+/* Eén kaart, één teken, zo groot als de kaart toelaat. --glyph wordt
+   door sizeCard() van de gemeten kaart afgeleid. */
+.glyph { font-size: var(--glyph, 20vmin); line-height: 1; }
 
 /* De stapel: echte kaarten ónder de bovenste, elk een graadje gedraaid.
    Als box-shadow, keurig uitgelijnd, werd het een streepjespatroon in plaats
    van een stapel -- pas de scheve hoeken maken er iets van dat op tafel
    ligt. Ze verdwijnen één voor één naarmate je opschiet. */
-.cardslot { position: relative; display: grid; place-items: center; min-height: 0; }
 .cardslot .under {
   position: absolute; inset: 0; z-index: -1;
   background: var(--paper); border: var(--line) solid var(--ink);
@@ -525,75 +783,86 @@ input[type=range]::-moz-range-thumb {
 .cardslot .u1 { transform: rotate(1.6deg) translate(3px, 4px); }
 .cardslot .u2 { transform: rotate(-2.2deg) translate(-2px, 7px); }
 .cardslot .u3 { transform: rotate(3deg) translate(5px, 10px); }
-.cardslot .under[hidden] { display: none; }
 
 /* "Goed" heeft even in het midden gestaan, voor duimen van beide handen,
    maar dan schoof hij tot negen pixels van "pas" -- en juist die twee
-   moeten ver uit elkaar. Hij staat weer rechts, waar een rechterduim
-   vanzelf uitkomt; met 156 px breedte haalt een linkerduim de linkerhelft
-   ook makkelijk. "Pas" ligt diagonaal in de andere hoek, met de hele
-   onderrand ertussen. */
+   moeten ver uit elkaar. Hij staat rechts, waar een rechterduim vanzelf
+   uitkomt; "pas" ligt diagonaal in de andere hoek, met de hele onderrand
+   ertussen. */
+/* Nadrukkelijk NIET position:relative. "Pas" hangt aan het scherm, en met
+   een positiehoudende bedieningsstrook eromheen kroop hij daarin terug --
+   liggend belandde hij dan boven op "goed", tot en met het midden van de
+   knop, zodat de hoofdhandeling daar niet meer aan te tikken was. */
 .controls {
-  position: relative;
   display: flex; align-items: flex-end; justify-content: flex-end;
   padding: 0 6px; min-height: min(40vw, 20vh, 164px);
 }
-/* Links onderin, maar niet tegen de rand: die strook is op Android de
-   terugveeg-zone, en een knop die daar half in ligt krijg je soms niet en
-   veegt je soms de app uit. Iets kleiner dan eerst, zodat er meer dode
-   ruimte tussen "pas" en "goed" blijft nu die laatste in het midden staat. */
-.btn-pas {
-  position: absolute; left: 18px; bottom: 4px;
-  width: 76px; height: 76px;
-  background: var(--paper-2);
-  border: var(--line) solid var(--ink); box-shadow: var(--drop) var(--drop) 0 var(--ink);
-  display: grid; place-items: center;
-}
-.btn-pas svg { width: 44px; }
-.btn-goed {                /* groot, rond, midden, groen */
-  width: min(40vw, 20vh, 164px); aspect-ratio: 1;
-  border-radius: 50%; background: var(--leaf);
-  border: var(--line) solid var(--ink); box-shadow: var(--drop) var(--drop) 0 var(--ink);
-  display: grid; place-items: center;
-}
-.btn-goed svg { width: 52%; }
-
-.btn-pas:disabled {
-  opacity: .3; cursor: default;
-  transform: translate(var(--drop), var(--drop)); box-shadow: 0 0 0 var(--ink);
+/* "Pas" hangt aan het scherm, niet aan de bedieningsstrook: linksonder,
+   waar een linkerduim vanzelf uitkomt, terwijl "goed" rechtsonder ligt voor
+   de rechterduim. Zo staan ze in élke stand op dezelfde twee plekken en
+   even ver uit elkaar. Liggend lag "pas" eerder in de rechterkolom, op
+   zestien pixels van "goed" -- precies de nabijheid die de staande stand
+   met zoveel zorg vermijdt.
+   Niet tegen de rand: die strook is op Android de terugveeg-zone, en een
+   knop die daar half in ligt krijg je soms niet en veegt je soms de app
+   uit. */
+.btn-skip {
+  position: absolute; z-index: 2;
+  left: max(18px, env(safe-area-inset-left));
+  /* Twaalf en niet vier: de slagschaduw valt naar rechtsonder en liep
+     anders het scherm af. */
+  bottom: max(12px, env(safe-area-inset-bottom));
 }
 
 /* ============================================================
-   PUNTEN ALS TELBARE FICHES
+   9. PUNTEN ALS TELBARE FICHES
    Vaste rijen van vijf: twee stapels naast elkaar vormen dan hetzelfde
    raster, en zie je wie voorstaat aan de hoogte in plaats van door te
    tellen. Vrij afbrekende rijen maakten 11 tegen 5 tot een rekensom.
    ============================================================ */
-/* De ficheGROOTTE hangt ook van de schermhoogte af: met 32 fiches per ploeg
-   is een stapel zeven rijen hoog, en op een kleine telefoon duwde dat de
-   knop eronder van het scherm. */
 .pile {
   --tok: min(26px, 3.1vh, 6.4vw);
   display: grid; grid-template-columns: repeat(5, var(--tok));
-  gap: calc(var(--tok) * .24); justify-content: center;
+  gap: calc(var(--tok) * .24); justify-content: flex-start;
 }
 .pile i {
   width: var(--tok); height: var(--tok); border-radius: 50%;
-  border: 3px solid var(--ink); background: var(--tc, var(--vermilion));
+  border: var(--line-2) solid var(--ink); background: var(--tc, var(--team-vos));
 }
 /* Wat er deze ronde bij kwam, met een gouden rand: het verschil tussen
    "hoe staan we" en "wat heb ik net verdiend". */
-.pile i.fresh { box-shadow: 0 0 0 3px var(--marigold); }
+.pile i.fresh { box-shadow: 0 0 0 3px var(--go); }
 @keyframes tokenIn { from { transform: scale(0) rotate(-40deg); } to { transform: scale(1) rotate(0); } }
-.pile i.new { animation: tokenIn calc(.3s / max(var(--dur), .001)) cubic-bezier(.2,1.5,.4,1) backwards; }
+.pile i.new { animation: tokenIn calc(var(--t-cheer) / max(var(--dur), .001)) var(--e-pop) backwards; }
 
-/* Beide ploegen krijgen even brede kolommen, anders duwt de ploeg met
-   de meeste fiches de andere scheef en oogt de stand vertekend. */
+/* Beide ploegen krijgen dezelfde drie rijen: kop, stapel, uitsplitsing.
+   Met los uitgelijnde kolommen stond het rondelijstje van de ene ploeg
+   235 px lager dan dat van de andere, en dan valt er niets meer te
+   vergelijken -- terwijl vergelijken het enige is wat dit scherm doet. */
+/* Drie rijen die zich naar hun inhoud voegen. Met een rekbare middenrij
+   stond de uitsplitsing een halve hand onder de stapel te zweven; nu sluit
+   ze aan, en liggen beide ploegen nog steeds op dezelfde lijnen. */
+.side-by-side {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: auto auto auto;
+  align-items: end; justify-items: center;
+  gap: var(--s-2) var(--s-4);
+  width: 100%; max-width: 420px;
+}
 .tally {
-  display: flex; flex-direction: column; align-items: center; gap: min(1.3vh, 10px);
+  display: grid; grid-row: 1 / -1; grid-template-rows: subgrid;
+  justify-items: center; align-items: end;
+  gap: min(1.3vh, 10px);
   width: min(42vw, 172px);
 }
-.tally .head { position: relative; }
+/* Waar subgrid ontbreekt valt het terug op een gewone kolom; dan is de
+   uitlijning niet perfect maar wel leesbaar. */
+@supports not (grid-template-rows: subgrid) {
+  .side-by-side { display: flex; justify-content: center; align-items: flex-end; }
+  .tally { display: flex; flex-direction: column; }
+}
+.tally .head { position: relative; align-self: end; }
 .tally .mascot-sm { width: min(74px, 9vh); display: block; }
 /* Een kroon boven wie voorstaat. Zonder die aanwijzing moet een kind twee
    stapels tellen en vergelijken voor het weet hoe het ervoor staat. */
@@ -605,12 +874,10 @@ input[type=range]::-moz-range-thumb {
   from { transform: translateX(-50%) rotate(-8deg) translateY(-14px) scale(.5); opacity: 0; }
   to   { transform: translateX(-50%) rotate(-8deg) translateY(0) scale(1); opacity: 1; }
 }
-.tally .crown { animation: crownIn calc(.4s / max(var(--dur), .001)) cubic-bezier(.2,1.6,.4,1) backwards; }
-/* Rijen links uitlijnen: twee stapels naast elkaar lezen dan als staafjes,
-   en zie je in één oogopslag wie voorstaat. Gecentreerd moet je tellen. */
-.tally .pile { max-width: 100%; justify-content: flex-start; }
+.tally .crown { animation: crownIn calc(.4s / max(var(--dur), .001)) var(--e-pop) backwards; }
+.tally .pile { max-width: 100%; align-self: end; }
 /* De uitsplitsing per ronde: pictogram + aantal, klein en rustig. */
-.tally .split { display: flex; flex-direction: column; gap: 2px; align-items: center; }
+.tally .foot { display: flex; flex-direction: column; gap: 2px; align-items: center; }
 .tally .sr {
   display: flex; align-items: center; gap: 6px;
   opacity: .55;
@@ -621,24 +888,46 @@ input[type=range]::-moz-range-thumb {
   font-weight: 900; font-size: min(14px, 1.9vh); font-variant-numeric: tabular-nums;
   min-width: 1.4ch; text-align: left;
 }
+/* Het totaal staat er als tekst bij voor wie leest en voor een schermlezer;
+   de stapel is het echte antwoord. Met een streepje erboven leest het als
+   de som van de rondes erboven, in plaats van als een derde herhaling van
+   hetzelfde getal. */
+.tally .num {
+  font-weight: 900; font-size: 15px; color: var(--ink-2); font-variant-numeric: tabular-nums;
+  margin-top: 2px; padding-top: 3px; min-width: 3.5ch; text-align: center;
+  border-top: 2px solid var(--rule);
+}
 
-/* Het getal is bijzaak voor de volwassenen, maar moet wel leesbaar zijn:
-   op .5 doorzichtigheid haalde het de AA-drempel niet. */
-.tally .num { font-weight: 900; font-size: 15px; color: #6b5f4e; font-variant-numeric: tabular-nums; }
+#s-turnend, #s-roundend { justify-content: center; align-items: center; gap: 3vh; }
 
-#s-turnend, #s-roundend { justify-content: center; align-items: center; gap: 3.4vh; }
-.side-by-side { display: flex; gap: 16px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+/* Wie er nu aan de beurt is. Het einde-beurt-scherm wisselde de ploeg
+   stilletjes en toonde daarna twee stapels en een driehoekje: precies op
+   het moment dat het toestel van hand moet wisselen stond er nergens naar
+   wie toe. */
+.next-up {
+  display: flex; align-items: center; gap: var(--s-3);
+  padding: var(--s-2) var(--s-4) var(--s-2) var(--s-2);
+}
+.next-up .mascot-sm { width: min(56px, 7vh); display: block; }
+.next-up .arrow { width: 26px; height: 26px; flex: 0 0 auto; }
+.next-up .ico {
+  width: 44px; height: 44px; display: grid; place-items: center;
+  border: var(--line-2) solid var(--ink); background: var(--paper-2); flex: 0 0 auto;
+}
+.next-up .ico svg { width: 32px; height: 32px; }
 
 /* De voortgang als de drie rondes zelf, niet als drie naamloze stippen.
    Gedane rondes krijgen een vinkje, de volgende staat vooraan in kleur --
    zo weet je meteen wat er hierna komt in plaats van alleen hoeveel er
-   nog te gaan is. */
-.roadmap { display: flex; align-items: flex-end; gap: 6px; }
+   nog te gaan is. Dit stond alleen op het einde-ronde-scherm, terwijl de
+   ronde-intro het met drie naamloze bolletjes deed: twee componenten voor
+   één begrip. Nu staat deze op allebei. */
+.roadmap { display: flex; align-items: flex-end; gap: var(--s-2); }
 /* Vaste kolombreedte: anders duwt het langste woord ("uitbeelden") zijn
    buur opzij en lopen de onderschriften in elkaar. */
 .roadmap .step {
   width: min(29vw, 104px);
-  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  display: flex; flex-direction: column; align-items: center; gap: var(--s-3);
   opacity: .38;
 }
 .roadmap .step .box {
@@ -656,25 +945,27 @@ input[type=range]::-moz-range-thumb {
   content: ""; position: absolute; inset: 0;
   background: var(--paper); opacity: .6;
 }
+/* Het vinkje lag ín het vakje, bovenop het rondepictogram: op 38%
+   doorzichtigheid werd dat een kluwen van ballon en haak waar geen van
+   beide nog uit te halen was. Nu hangt het als een merkje in de hoek. */
 .roadmap .step.done .tick {
-  position: absolute; width: 30px; height: 30px; z-index: 1;
-}
-.roadmap .step.next {
-  opacity: 1;
+  position: absolute; right: -9px; bottom: -9px; width: 26px; height: 26px; z-index: 1;
+  background: var(--paper); border: var(--line-2) solid var(--ink); padding: 2px;
 }
 /* De volgende ronde valt op door formaat en scherpte, niet door kleur: op
    dit scherm staan de mascottes ernaast. */
+.roadmap .step.next { opacity: 1; }
 .roadmap .step.next .box {
   width: 74px; height: 74px; background: var(--paper);
-  box-shadow: 5px 5px 0 var(--ink);
+  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
 }
 .roadmap .step.next .box svg { width: 54px; height: 54px; }
 .roadmap .step.next b { font-size: 11px; }
 @keyframes stepIn { from { transform: translateY(6px) scale(.9); } to { transform: none; } }
-.roadmap .step.next { animation: stepIn calc(.35s / max(var(--dur), .001)) cubic-bezier(.2,1.5,.4,1) backwards; }
+.roadmap .step.next { animation: stepIn calc(var(--t-cheer) / max(var(--dur), .001)) var(--e-pop) backwards; }
 
 /* ============================================================
-   WINNAAR
+   10. WINNAAR
    ============================================================ */
 #s-winner { justify-content: center; align-items: center; gap: 2vh; overflow: hidden; }
 .rays {
@@ -684,23 +975,30 @@ input[type=range]::-moz-range-thumb {
 @keyframes spin { to { transform: rotate(360deg); } }
 .rays svg { width: 160%; height: 160%; animation: spin calc(26s / max(var(--dur), .001)) linear infinite; }
 @keyframes cheer { 0%,100% { transform: scale(1) rotate(-2deg); } 50% { transform: scale(1.07) rotate(2deg); } }
-/* Kleiner dan het aanvoelt: met de kronen erbij werd het scherm te hoog en
-   liep de winnaar boven het beeld uit. */
-#s-winner .mascot-big {
-  width: min(44vw, 17vh, 200px); flex: 0 0 auto;
+/* Er stonden twee dezelfde mascottes op dit scherm: een grote juichende
+   bovenaan en een kleine gekroonde in de stand eronder. Nu groeit de
+   winnaar in de stand zelf, met de kroon erop -- één dier. */
+.tally.winner .mascot-sm {
+  width: min(44vw, 15vh, 170px);
   animation: cheer calc(.9s / max(var(--dur), .001)) ease-in-out infinite;
 }
+.tally.winner .crown { width: 64px; top: -34px; }
+/* Bij gelijkspel juichen ze allebei, even groot. */
+#s-winner[data-draw="1"] .tally .mascot-sm { width: min(34vw, 12vh, 130px); }
 
 @keyframes rain { to { transform: translateY(115vh) rotate(540deg); } }
 .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
+/* Confetti was rond, met een zwarte rand, in ploegkleur -- exact een
+   fiche. Er regenden dus punten over de stand heen. Nu zijn het
+   snippers: even feestelijk, en met geen mogelijkheid te tellen. */
 .confetti i {
-  position: absolute; top: -12vh; width: 26px; height: 26px; border-radius: 50%;
-  border: 3px solid var(--ink);
+  position: absolute; top: -12vh; width: 12px; height: 26px;
+  border: 2px solid var(--ink);
   animation: rain calc(2.6s / max(var(--dur), .001)) linear infinite;
 }
 
 /* ============================================================
-   LIGGEND (tablet): kaart links, bediening rechts
+   11. LIGGEND (tablet): kaart links, bediening rechts
    ============================================================ */
 /* Een telefoon in liggende stand is breed én laag. De balk bovenaan loopt
    daarom over de volle breedte en alleen de kaart en de bediening delen de
@@ -714,45 +1012,97 @@ input[type=range]::-moz-range-thumb {
     grid-template-columns: 1fr auto;
     grid-template-areas: "top top" "card controls";
     grid-template-rows: auto 1fr;
-    gap: 10px 16px;
+    gap: var(--s-2) var(--s-4);
   }
   .play-top { grid-area: top; }
   .cardwrap { grid-area: card; }
-  .cardstack { width: min(100%, 680px); height: 100%; }
-  /* aspect-ratio uit: liggend bepalen breedte én hoogte de kaart, en
-     anders rekt het vierkant zich buiten beeld. */
-  .card {
-    aspect-ratio: auto; max-height: none; max-width: none;
-    height: 100%; width: 100%; min-height: 0;
-  }
-  .glyph { font-size: min(58vh, 46vw); }
-  /* Liggend staan de knoppen onder elkaar in de rechterkolom, dus daar
-     geen absolute hoek maar gewoon in de stroom. */
+  /* Liggend krijgt "goed" een eigen kolom rechts; "pas" blijft linksonder
+     aan het scherm hangen (zie .btn-skip hierboven), zodat de twee duimen
+     hun vaste hoek houden. */
   .controls {
-    grid-area: controls; position: static;
-    flex-direction: column-reverse; align-items: center; justify-content: center;
-    gap: 16px; min-height: 0;
+    grid-area: controls;
+    display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end;
+    min-height: 0; width: min(30vw, 170px); padding: 0;
   }
-  .btn-pas { position: static; width: min(15vh, 84px); height: min(15vh, 84px); }
-  .btn-pas svg { width: 60%; }
-  .btn-goed { width: min(26vh, 148px); }
+  .btn-good { width: min(26vh, 148px); }
+  .btn-skip { width: max(64px, min(15vh, 84px)); height: max(64px, min(15vh, 84px)); }
+  .btn-skip svg { width: 60%; }
 }
 
 /* Laag scherm (telefoon liggend): de overzichtsschermen worden een rij in
    plaats van een kolom, anders staan de stapels en de knop boven en onder
-   het beeld. */
+   het beeld. De stand blíjft daarbij één blok: als losse kinderen van de
+   rij dreven de twee ploegen uit elkaar en was er niets meer te
+   vergelijken. */
 @media (max-height: 520px) {
   #s-turnend.on, #s-roundend.on, #s-winner.on {
     flex-direction: row; flex-wrap: wrap;
     justify-content: center; align-items: center; gap: 3vw;
   }
-  .roadmap .step { width: min(20vw, 96px); }
+  /* Krap genoeg om samen op één rij te passen: brak de rij af, dan zakte de
+     knop naar een tweede regel en viel het scherm in losse eilanden uiteen
+     met een lege band ertussen. */
+  .side-by-side { width: min(38vw, 300px); gap: var(--s-1) var(--s-2); }
+  /* Op een laag scherm rekende de fiche met 3,1% van de hóógte en werd hij
+     twaalf pixels: te klein om nog te tellen. Liggend is er breedte zat. */
+  .pile { --tok: min(20px, 4.4vw); }
+  .roadmap { gap: var(--s-1); }
+  .roadmap .step { width: min(14vw, 78px); gap: var(--s-2); }
   .roadmap .step .box { width: 40px; height: 40px; }
   .roadmap .step .box svg { width: 30px; height: 30px; }
-  .roadmap .step.next .box { width: 56px; height: 56px; }
-  .roadmap .step.next .box svg { width: 42px; height: 42px; }
-  .tally { width: min(26vw, 150px); }
+  .roadmap .step.done .tick { width: 20px; height: 20px; right: -7px; bottom: -7px; }
+  .roadmap .step.next .box { width: 54px; height: 54px; }
+  .roadmap .step.next .box svg { width: 40px; height: 40px; }
+  .tally { width: min(17vw, 132px); }
   .tally .crown { width: 32px; top: -20px; }
+  .tally .mascot-sm { width: min(52px, 13vh); }
+  .tally.winner .mascot-sm { width: min(26vw, 20vh, 110px); }
+  .next-up { padding: var(--s-1) var(--s-3) var(--s-1) var(--s-1); }
+  /* De hoofdknop hing op 21vh, en 21% van 390 px is een knoop van 82 px:
+     kleiner dan de pauzeknop ernaast, terwijl hij de hoofdhandeling is. */
+  .btn-go { width: min(30vw, 34vh, 150px); }
+  #s-handoff { flex-direction: row; flex-wrap: wrap; gap: 3vw; }
+  #s-handoff .mascot-big { width: min(30vw, 34vh, 180px); }
+  .ri-stage { width: min(30vw, 38vh, 190px); }
+  .hold-ring { width: min(26vw, 34vh, 160px); }
+  /* De bovenbalk vreet op een laag scherm hoogte die de kaart nodig heeft. */
+  .teamchip, .roundchip .ico { width: 40px; height: 40px; }
+  .roundchip .ico svg { width: 30px; height: 30px; }
+  .btn-icon { width: 44px; height: 44px; }
+}
+
+/* Groot scherm: de overzichten stonden vol maxima die voor een telefoon
+   bedacht zijn, waardoor alles op een tablet als een postzegel midden in
+   het beeld hing. */
+@media (min-width: 700px) and (min-height: 700px) {
+  .pile { --tok: min(34px, 3.4vh, 6.4vw); }
+  .tally { width: min(38vw, 230px); }
+  .tally .mascot-sm { width: min(104px, 11vh); }
+  .tally .crown { width: 58px; top: -34px; }
+  .tally .num { font-size: 19px; }
+  .tally .sr svg { width: 26px; height: 26px; }
+  .tally .sr b { font-size: 18px; }
+  .side-by-side { max-width: 560px; gap: var(--s-3) var(--s-5); }
+  .roadmap .step { width: min(24vw, 150px); }
+  .roadmap .step .box { width: 68px; height: 68px; }
+  .roadmap .step .box svg { width: 50px; height: 50px; }
+  .roadmap .step.next .box { width: 94px; height: 94px; }
+  .roadmap .step.next .box svg { width: 68px; height: 68px; }
+  .roadmap .step b { font-size: 12px; }
+  .roadmap .step.next b { font-size: 14px; }
+  .roadmap .step.done .tick { width: 32px; height: 32px; }
+  .next-up .mascot-sm { width: 76px; }
+  .next-up .ico { width: 60px; height: 60px; }
+  .next-up .ico svg { width: 44px; height: 44px; }
+  .next-up .arrow { width: 34px; height: 34px; }
+  .teamchip, .roundchip .ico { width: 60px; height: 60px; }
+  .roundchip .ico svg { width: 46px; height: 46px; }
+  .roundchip b { font-size: 12px; }
+  .secs-left { font-size: 34px; }
+  .won i { width: 19px; height: 19px; }
+  .won { max-width: 150px; }
+  .btn-icon { width: 56px; height: 56px; }
+  .btn-icon svg { width: 26px; }
 }
 </style>
 </head>
@@ -810,11 +1160,32 @@ input[type=range]::-moz-range-thumb {
     <path d="M10 74 H90" stroke="#14110F" stroke-width="7" stroke-linecap="round"/>
   </symbol>
 
+  <!-- Harde hoeken, net als al het andere: de afgeronde hoekjes hier waren
+       de enige zachte vorm in de hele set. -->
   <symbol id="i-pauze" viewBox="0 0 100 100">
     <g fill="#14110F">
-      <rect x="26" y="20" width="16" height="60" rx="3"/>
-      <rect x="58" y="20" width="16" height="60" rx="3"/>
+      <rect x="26" y="20" width="16" height="60"/>
+      <rect x="58" y="20" width="16" height="60"/>
     </g>
+  </symbol>
+
+  <!-- terug naar de titel -->
+  <symbol id="i-huis" viewBox="0 0 100 100">
+    <path d="M50 12 L90 46 V88 H60 V62 H40 V88 H10 V46 Z"
+          fill="none" stroke="#14110F" stroke-width="10" stroke-linejoin="round"/>
+  </symbol>
+
+  <!-- "hierna", op het einde-beurt-scherm -->
+  <symbol id="i-naar" viewBox="0 0 100 100">
+    <path d="M14 50 H74" stroke="#14110F" stroke-width="12" stroke-linecap="round"/>
+    <path d="M58 26 L86 50 L58 74 Z" fill="#14110F" stroke="#14110F" stroke-width="8" stroke-linejoin="round"/>
+  </symbol>
+
+  <!-- let op: staat op "Beginnen" zodra dat een lopend spel zou weggooien -->
+  <symbol id="i-let-op" viewBox="0 0 100 100">
+    <path d="M50 10 L94 86 H6 Z" fill="none" stroke="#F4EBDA" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M50 38 V60" stroke="#F4EBDA" stroke-width="11" stroke-linecap="round"/>
+    <circle cx="50" cy="73" r="6" fill="#F4EBDA"/>
   </symbol>
 
   <symbol id="i-stop" viewBox="0 0 100 100">
@@ -862,7 +1233,10 @@ input[type=range]::-moz-range-thumb {
   <symbol id="r-mimen" viewBox="0 0 100 100">
     <path d="M22 12 H78 A16 16 0 0 1 94 28 V56 A16 16 0 0 1 78 72 H52 L30 92 L33 72 H22 A16 16 0 0 1 6 56 V28 A16 16 0 0 1 22 12 Z"
           fill="#F4EBDA" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
-    <path d="M18 62 L82 20" stroke="#E8452B" stroke-width="13" stroke-linecap="round"/>
+    <!-- De streep stond in vermiljoen, en vermiljoen is Vos. Wijnrood is
+         de kleur van "dit mag niet" (de stopknop, de laatste seconden) en
+         betekent hier dus hetzelfde als overal elders. -->
+    <path d="M18 62 L82 20" stroke="#8C2F1E" stroke-width="13" stroke-linecap="round"/>
   </symbol>
 
   <symbol id="i-glass" viewBox="0 0 100 100">
@@ -875,89 +1249,120 @@ input[type=range]::-moz-range-thumb {
 
 <!-- ============================ TITEL ============================ -->
 <section class="screen" id="s-title">
-  <div class="wordmark block">
+  <div class="wordmark surface">
     <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-glass"/></svg>
     <b>Tijd<br>is Om</b>
   </div>
-  <button class="btn-play press" id="btnStart" aria-label="Spelen">
-    <svg viewBox="0 0 100 100"><use href="#i-play"/></svg>
+
+  <!-- Ligt er een half potje klaar, dan zegt dit scherm dat, met de
+       mascotte die aan de beurt is en de opdracht van de ronde. De grote
+       knop betekende anders de ene avond "nieuw spel" en de andere
+       "verder waar we gebleven waren", zonder enig verschil te tonen. -->
+  <!-- Hetzelfde kaartje als op het einde-beurt-scherm: mascotte, pijl,
+       opdracht. "Wie is er aan de beurt" is op beide plekken dezelfde
+       mededeling, dus ook hetzelfde ding om naar te kijken. -->
+  <div class="next-up surface resume-note" id="tiNext" aria-hidden="true">
+    <svg class="mascot-sm" id="tiMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg>
+    <svg class="arrow" viewBox="0 0 100 100"><use href="#i-naar"/></svg>
+    <div class="ico"><svg id="tiRound" viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
+  </div>
+
+  <button class="btn-go" id="btnStart" aria-label="Spelen">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-play"/></svg>
   </button>
-  <button class="gear" id="btnGear" aria-label="Instellingen (blijf duwen)">
-    <i></i><svg viewBox="0 0 100 100"><use href="#i-gear"/></svg>
+
+  <!-- Opnieuw beginnen was alleen te doen via de instellingen, waar
+       "Beginnen" het lopende spel zonder waarschuwing weggooide. -->
+  <button class="btn-ghost" id="btnFresh" hidden>Nieuw spel</button>
+
+  <button class="gear" id="btnGear" aria-label="Instellingen — houd ingedrukt">
+    <i></i><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-gear"/></svg>
   </button>
 </section>
 
 <!-- ======================= INSTELLINGEN ========================= -->
 <section class="screen" id="s-setup">
-  <h1>Tijd is Om</h1>
+  <div class="setup-scroll">
+    <h1>Tijd is Om</h1>
 
-  <div class="rules">
-    <p><b>Twee ploegen, drie rondes over dezelfde kaarten.</b>
-      Eerst omschrijven met woorden, dan met één enkel woord, dan alleen
-      uitbeelden. Dat je de kaarten drie keer ziet is de bedoeling: tegen de
-      derde ronde kent iedereen ze half, en beginnen de jongsten te winnen.</p>
-    <p>Geraden is een punt en meteen de volgende kaart. Passen mag zonder
-      straf. Is de stapel leeg, dan stopt de ronde — ook midden in een beurt —
-      en gaat de resterende tijd mee naar de volgende ronde, voor dezelfde
-      ploeg. Verder hoeft niemand iets te lezen: de kinderen zien alleen
-      beelden.</p>
-  </div>
+    <div class="rules">
+      <p><b>Twee ploegen, drie rondes over dezelfde kaarten.</b>
+        Eerst omschrijven met woorden, dan met één enkel woord, dan alleen
+        uitbeelden. Dat je de kaarten drie keer ziet is de bedoeling: tegen de
+        derde ronde kent iedereen ze half, en beginnen de jongsten te winnen.</p>
+      <p>Geraden is een punt en meteen de volgende kaart. Passen mag zonder
+        straf. Is de stapel leeg, dan stopt de ronde — ook midden in een beurt —
+        en gaat de resterende tijd mee naar de volgende ronde, voor dezelfde
+        ploeg. Verder hoeft niemand iets te lezen: de kinderen zien alleen
+        beelden.</p>
+    </div>
 
-  <div class="field">
-    <h2>Ploegen</h2>
-    <div class="teams-row">
-      <div class="team-card block" style="--team:var(--vermilion)">
-        <svg viewBox="0 0 100 100"><use href="#m-vos"/></svg>
+    <!-- Hier stond een kopje "Ploegen" boven twee vakjes met een mascotte
+         erin. Ze zagen eruit als knoppen -- zelfde papier, zelfde slagschaduw
+         -- maar er zat niets achter; de stijlregels voor de naamvelden
+         stonden er nog, de velden zelf waren er nooit gekomen. Een kop met
+         twee nepknoppen eronder is erger dan geen kop, dus weg ermee. -->
+
+    <fieldset class="field">
+      <legend>Moeilijkheid</legend>
+      <div class="chips" id="tierChips" role="radiogroup" aria-label="Moeilijkheid">
+        <button class="chip" role="radio" aria-checked="false" data-tier="klein">Klein<small>3–5 jaar</small>
+          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+        <button class="chip" role="radio" aria-checked="false" data-tier="midden">Midden<small>6–8 jaar</small>
+          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+        <button class="chip" role="radio" aria-checked="false" data-tier="groot">Groot<small>9+ jaar</small>
+          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
       </div>
-      <div class="team-card block" style="--team:var(--blue)">
-        <svg viewBox="0 0 100 100"><use href="#m-uil"/></svg>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend>Aantal kaarten</legend>
+      <div class="chips" id="sizeChips" role="radiogroup" aria-label="Aantal kaarten">
+        <button class="chip" role="radio" aria-checked="false" data-size="16">16
+          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+        <button class="chip" role="radio" aria-checked="false" data-size="24">24
+          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+        <button class="chip" role="radio" aria-checked="false" data-size="32">32
+          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+      </div>
+    </fieldset>
+
+    <div class="field">
+      <label class="legend-label" for="secs">Tijd per beurt</label>
+      <div class="slider-row">
+        <input type="range" id="secs" min="20" max="60" step="5" value="30">
+        <span class="secs" id="secsOut" aria-live="polite">30s</span>
       </div>
     </div>
-  </div>
 
-  <div class="field">
-    <h2>Moeilijkheid</h2>
-    <div class="chips" id="tierChips">
-      <button class="chip" data-tier="klein">Klein<small>3–5 jaar</small></button>
-      <button class="chip" data-tier="midden">Midden<small>6–8 jaar</small></button>
-      <button class="chip" data-tier="groot">Groot<small>9+ jaar</small></button>
+    <fieldset class="field">
+      <legend>Geluid</legend>
+      <div class="chips" id="soundChips" role="radiogroup" aria-label="Geluid">
+        <button class="chip" role="radio" aria-checked="false" data-sound="1">Aan
+          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+        <button class="chip" role="radio" aria-checked="false" data-sound="0">Uit
+          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+      </div>
+    </fieldset>
+
+    <div class="field">
+      <h2 id="previewHead">Het spel van vanavond</h2>
+      <div class="preview" id="preview" role="group" aria-labelledby="previewHead"></div>
+      <p class="hint">Tik op een kaart om ze te vervangen. Deze kaarten komen alle drie
+        de rondes terug — dat is de bedoeling: tegen ronde drie kent iedereen ze.</p>
     </div>
   </div>
 
-  <div class="field">
-    <h2>Aantal kaarten</h2>
-    <div class="chips" id="sizeChips">
-      <button class="chip" data-size="16">16</button>
-      <button class="chip" data-size="24">24</button>
-      <button class="chip" data-size="32">32</button>
-    </div>
+  <!-- De hoofdknop staat vast onderin: hij stond onder een scherm dat je
+       eerst helemaal moest afrollen. -->
+  <div class="setup-foot">
+    <button class="btn-wide" id="btnGo">
+      <i class="fill" aria-hidden="true"></i>
+      <svg class="warn" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-let-op"/></svg>
+      <span id="btnGoLabel">Beginnen</span>
+    </button>
+    <button class="btn-ghost" id="btnBack">Terug</button>
   </div>
-
-  <div class="field">
-    <h2>Tijd per beurt</h2>
-    <div class="slider-row">
-      <input type="range" id="secs" min="20" max="60" step="5" value="30" aria-label="Seconden per beurt">
-      <span class="secs" id="secsOut">30s</span>
-    </div>
-  </div>
-
-  <div class="field">
-    <h2>Geluid</h2>
-    <div class="chips" id="soundChips">
-      <button class="chip" data-sound="1">Aan</button>
-      <button class="chip" data-sound="0">Uit</button>
-    </div>
-  </div>
-
-  <div class="field">
-    <h2>Het spel van vanavond</h2>
-    <div class="preview" id="preview"></div>
-    <p class="hint">Tik op een kaart om ze te vervangen. Deze kaarten komen alle drie
-      de rondes terug — dat is de bedoeling: tegen ronde drie kent iedereen ze.</p>
-  </div>
-
-  <button class="btn-wide press" id="btnGo">Beginnen</button>
-  <button class="btn-ghost" id="btnBack">Terug</button>
 </section>
 
 <!-- ====================== RONDE-INTRO =========================== -->
@@ -967,40 +1372,68 @@ input[type=range]::-moz-range-thumb {
     <b id="riWord">Uitleggen</b>
     <p id="riHow"></p>
   </div>
-  <div class="dots" id="riDots"><i></i><i></i><i></i></div>
-  <button class="btn-play press" id="btnRoundGo" aria-label="Verder">
-    <svg viewBox="0 0 100 100"><use href="#i-play"/></svg>
+  <!-- Drie naamloze bolletjes vertelden hoeveel rondes er nog waren, niet
+       welke. Dezelfde routekaart als op het einde-ronde-scherm vertelt
+       allebei, en scheelt een component. -->
+  <div class="roadmap" id="riRoadmap"></div>
+  <button class="btn-go" id="btnRoundGo" aria-label="Verder">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-play"/></svg>
+  </button>
+  <button class="btn-icon" id="btnPauzeRi" aria-label="Pauze">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pauze"/></svg>
   </button>
 </section>
 
 <!-- ======================== OVERDRACHT ========================== -->
 <section class="screen" id="s-handoff">
-  <div class="plaque block">
+  <div class="plaque surface">
     <svg class="mascot-big" id="hoMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg>
   </div>
-  <div class="roundcard block" id="hoRoundCard">
+  <div class="roundcard surface" id="hoRoundCard">
     <div class="ico"><svg id="hoRound" viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
     <b id="hoRoundWord">Uitleggen</b>
   </div>
-  <div class="carry" id="hoCarry" hidden>
-    <svg class="frame" viewBox="0 0 80 80" aria-hidden="true">
-      <rect id="carryRect" x="6" y="6" width="68" height="68" fill="none"/>
-    </svg>
-    <b id="carrySecs">15</b>
+
+  <!-- De stand, klein: wie het toestel krijgt wil weten waar het over gaat. -->
+  <div class="mini-score surface" id="hoScore" aria-hidden="true">
+    <div class="side"><svg viewBox="0 0 100 100"><use href="#m-vos"/></svg><b id="hoScoreA">0</b></div>
+    <i class="sep"></i>
+    <div class="side"><svg viewBox="0 0 100 100"><use href="#m-uil"/></svg><b id="hoScoreB">0</b></div>
   </div>
-  <button class="btn-pauze corner" id="btnPauzeHo" aria-label="Pauze">
-    <svg viewBox="0 0 100 100"><use href="#i-pauze"/></svg>
+
+  <button class="btn-icon" id="btnPauzeHo" aria-label="Pauze">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pauze"/></svg>
   </button>
+
   <div class="hold-ring">
-    <button class="btn-play" id="btnHold" aria-label="Houd ingedrukt om te beginnen">
-      <svg viewBox="0 0 100 100"><use href="#i-play"/></svg>
+    <button class="btn-go" id="btnHold" aria-label="Houd ingedrukt om te beginnen">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-play"/></svg>
     </button>
-    <svg class="ring" viewBox="0 0 100 100"><circle id="holdArc" cx="50" cy="50" r="46"/></svg>
+    <!-- De baan staat er altijd, gestippeld: zo zie je dát er iets vast te
+         houden valt vóórdat je het fout doet. Daarboven de voortgang, en
+         waar tijd van de vorige ronde meekomt een dunne boog in de kleur
+         van de klok. -->
+    <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+      <circle class="track" cx="50" cy="50" r="46"/>
+      <circle class="arc" id="holdArc" cx="50" cy="50" r="46"/>
+    </svg>
+    <!-- Het getal erbij voor wie leest, in inkt in plaats van in marigold. -->
+    <div class="carry" id="hoCarry" hidden>
+      <svg class="frame" viewBox="0 0 80 80" aria-hidden="true">
+        <rect id="carryRect" x="6" y="6" width="68" height="68" fill="none"/>
+      </svg>
+      <b id="carrySecs">15</b>
+    </div>
   </div>
 </section>
 
 <!-- =========================== SPEL ============================= -->
 <section class="screen" id="s-play">
+  <!-- De balk bovenaan valt in drie groepen uiteen, in die volgorde:
+       wie-en-wat (staat vast voor de hele beurt), hoe-staat-het (verandert
+       terwijl je speelt), en de pauzeknop. Ze stonden hiervoor door elkaar:
+       de pauzeknop zat tussen de klok en de mascotte in, alsof hij bij de
+       tijd hoorde. -->
   <div class="play-top">
     <div class="who">
       <div class="teamchip"><svg id="plMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg></div>
@@ -1010,23 +1443,21 @@ input[type=range]::-moz-range-thumb {
       </div>
     </div>
     <div class="turnbox">
-      <div class="toprow">
-        <button class="btn-pauze" id="btnPauze" aria-label="Pauze">
-          <svg viewBox="0 0 100 100"><use href="#i-pauze"/></svg>
-        </button>
-        <div class="secs-left" id="clockDigits">30</div>
-      </div>
+      <div class="secs-left" id="clockDigits">30</div>
       <div class="won" id="turnScore" aria-hidden="true"></div>
     </div>
+    <button class="btn-icon" id="btnPauze" aria-label="Pauze">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pauze"/></svg>
+    </button>
   </div>
 
   <div class="cardwrap">
     <div class="cardstack">
-      <div class="cardslot">
+      <div class="cardslot" id="cardslot">
         <i class="under u3" aria-hidden="true"></i>
         <i class="under u2" aria-hidden="true"></i>
         <i class="under u1" aria-hidden="true"></i>
-        <div class="card block" id="card">
+        <div class="card" id="card" data-time="ok">
           <span class="glyph" id="glyph">🐘</span>
           <svg class="timerframe" id="timerFrame" aria-hidden="true">
             <rect id="timerRect" fill="none"/>
@@ -1037,20 +1468,35 @@ input[type=range]::-moz-range-thumb {
   </div>
 
   <div class="controls">
-    <button class="btn-pas press" id="btnPas" aria-label="Overslaan">
-      <svg viewBox="0 0 100 100"><use href="#i-pass"/></svg>
+    <button class="btn-skip" id="btnPas" aria-label="Overslaan">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <use href="#i-pass"/>
+        <path class="bar" d="M12 12 L88 88" stroke="#14110F" stroke-width="11" stroke-linecap="round"/>
+      </svg>
     </button>
-    <button class="btn-goed press" id="btnGoed" aria-label="Geraden">
-      <svg viewBox="0 0 100 100"><use href="#i-check"/></svg>
+    <button class="btn-good" id="btnGoed" aria-label="Geraden">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-check"/></svg>
     </button>
   </div>
+
 </section>
 
 <!-- ======================== EINDE BEURT ========================= -->
 <section class="screen" id="s-turnend">
+  <!-- Wie hierna aan de beurt is. De ploeg wisselde hier stilletjes en het
+       scherm toonde alleen twee stapels: precies wanneer het toestel van
+       hand moet, stond er nergens naar wie toe. -->
+  <div class="next-up surface" id="teNext">
+    <svg class="mascot-sm" id="teNextMascot" viewBox="0 0 100 100"><use href="#m-uil"/></svg>
+    <svg class="arrow" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-naar"/></svg>
+    <div class="ico"><svg id="teNextRound" viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
+  </div>
   <div class="side-by-side" id="tePiles"></div>
-  <button class="btn-play press" id="btnTurnNext" aria-label="Volgende beurt">
-    <svg viewBox="0 0 100 100"><use href="#i-play"/></svg>
+  <button class="btn-go" id="btnTurnNext" aria-label="Volgende beurt">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-play"/></svg>
+  </button>
+  <button class="btn-icon" id="btnPauzeTe" aria-label="Pauze">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pauze"/></svg>
   </button>
 </section>
 
@@ -1058,8 +1504,11 @@ input[type=range]::-moz-range-thumb {
 <section class="screen" id="s-roundend">
   <div class="side-by-side" id="rePiles"></div>
   <div class="roadmap" id="reRoadmap"></div>
-  <button class="btn-play press" id="btnRoundNext" aria-label="Volgende ronde">
-    <svg viewBox="0 0 100 100"><use href="#i-play"/></svg>
+  <button class="btn-go" id="btnRoundNext" aria-label="Volgende ronde">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-play"/></svg>
+  </button>
+  <button class="btn-icon" id="btnPauzeRe" aria-label="Pauze">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pauze"/></svg>
   </button>
 </section>
 
@@ -1070,22 +1519,46 @@ input[type=range]::-moz-range-thumb {
       <g id="rayGroup"></g>
     </svg>
   </div>
-  <svg class="mascot-big" id="wnMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg>
+  <!-- Geen losse juichende mascotte meer bovenaan: die stond als tweede
+       exemplaar van hetzelfde dier boven de gekroonde in de stand. De
+       winnaar groeit nu in de stand zelf. -->
   <div class="side-by-side" id="wnPiles"></div>
-  <button class="btn-play press" id="btnAgain" aria-label="Opnieuw">
-    <svg viewBox="0 0 100 100"><use href="#i-play"/></svg>
+  <button class="btn-go" id="btnAgain" aria-label="Nog een keer">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-play"/></svg>
+  </button>
+  <!-- Rechtsboven, precies waar op elk ander spelscherm de pauzeknop zit:
+       die hoek is "de uitgang van dit scherm", en dat hoort niet te
+       verspringen omdat het spel toevallig afgelopen is. -->
+  <button class="btn-icon" id="btnHome" aria-label="Terug naar de titel">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-huis"/></svg>
   </button>
 </section>
 
 <!-- Pauze: de klok staat stil. Verder spelen is één tik; stoppen moet je
      vasthouden, want dat gooit het lopende spel weg. -->
 <div class="overlay" id="pauze" hidden>
-  <div class="panel block">
-    <button class="btn-play press" id="btnResume" aria-label="Verder spelen">
-      <svg viewBox="0 0 100 100"><use href="#i-play"/></svg>
+  <div class="panel surface">
+    <!-- Het paneel toonde alleen twee pictogrammen: niet dát het stilstond,
+         niet waar de klok bleef staan, niet hoe het ervoor stond. -->
+    <div class="paused-clock" id="pauseClock">
+      <div class="bars" aria-hidden="true"><i></i><i></i></div>
+      <div class="dial">
+        <svg viewBox="0 0 80 80" aria-hidden="true">
+          <rect id="pauseRect" x="6" y="6" width="68" height="68" fill="none" stroke-width="12"/>
+        </svg>
+        <b id="pauseSecs">30</b>
+      </div>
+    </div>
+    <div class="mini-score" aria-hidden="true">
+      <div class="side"><svg viewBox="0 0 100 100"><use href="#m-vos"/></svg><b id="pauseScoreA">0</b></div>
+      <i class="sep"></i>
+      <div class="side"><svg viewBox="0 0 100 100"><use href="#m-uil"/></svg><b id="pauseScoreB">0</b></div>
+    </div>
+    <button class="btn-go" id="btnResume" aria-label="Verder spelen">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-play"/></svg>
     </button>
-    <button class="btn-stop" id="btnStop" aria-label="Spel stoppen — houd ingedrukt">
-      <i></i><svg viewBox="0 0 100 100"><use href="#i-stop"/></svg>
+    <button class="btn-danger" id="btnStop" aria-label="Spel stoppen — houd ingedrukt">
+      <i></i><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-stop"/></svg>
     </button>
   </div>
 </div>
@@ -1210,9 +1683,13 @@ const Snd = (() => {
 /* ==============================================================
    3. TOESTAND
    ============================================================== */
+/* De ploegkleuren, en verder niets. "naam" is er alleen voor schermlezers
+   en aria-labels: op het scherm draagt de vorm van het dier de ploeg --
+   driehoek tegen cirkel -- zodat er ook zonder kleur en zonder lezen
+   verschil te zien is. */
 const TEAMS = [
-  { mascot: "#m-vos", color: "var(--vermilion)", hex: "#E8452B" },
-  { mascot: "#m-uil", color: "var(--blue)",      hex: "#1B6FC4" }
+  { mascot: "#m-vos", naam: "Vos", color: "var(--team-vos)", hex: "#E8452B" },
+  { mascot: "#m-uil", naam: "Uil", color: "var(--team-uil)", hex: "#1B6FC4" }
 ];
 const ROUNDS = 3;
 const KEY_SET = "tijdisom.settings";
@@ -1265,24 +1742,58 @@ function drawDeck(tier, size) {
    4. SCHERMEN
    ============================================================== */
 let current = "title";
+
+/* De hoofdknop van elk scherm. Wie met een toetsenbord of een schakelaar
+   speelt raakte bij elke schermwissel de focus kwijt -- die viel terug op
+   <body>, want het element dat de focus had werd verborgen. */
+const PRIMARY = {
+  title: "#btnStart", setup: "#btnGo", roundintro: "#btnRoundGo",
+  handoff: "#btnHold", play: "#btnGoed", turnend: "#btnTurnNext",
+  roundend: "#btnRoundNext", winner: "#btnAgain"
+};
+
+let started = false;
+
 function show(name) {
   current = name;
   $$(".screen").forEach(s => s.classList.toggle("on", s.id === "s-" + name));
   if (name !== "play") { stopClock(); releaseWake(); }
+
+  // Beide schermen hangen af van of er nog een spel loopt, en dat verandert
+  // onderweg.
+  if (name === "title") paintTitle();
+  if (name === "setup") paintSetup();
+
+  /* De focus viel bij elke schermwissel terug op <body>: het element dat
+     hem had werd verborgen. Wie met een toetsenbord of een schakelaar
+     speelt was daarmee telkens zijn plek kwijt. Niet bij het allereerste
+     beeld -- dan zou de app zichzelf openen met een focusring die niemand
+     gevraagd heeft. */
+  const p = started && PRIMARY[name] && $(PRIMARY[name]);
+  if (p) p.focus({ preventScroll: true });
 }
 
 /* ==============================================================
    5. INSTELLINGEN (volwassene)
    ============================================================== */
+/* aria-checked in plaats van aria-pressed: dit zijn keuzes uit een rijtje,
+   geen drie losse schakelaars die toevallig samen staan. Een schermlezer
+   zei anders drie keer "knop, ingedrukt/niet ingedrukt" waar hij nu
+   "keuzerondje, 2 van 3" zegt. */
 function paintSetup() {
   $$("#soundChips .chip").forEach(c =>
-    c.setAttribute("aria-pressed", String((c.dataset.sound === "1") === !!settings.sound)));
+    c.setAttribute("aria-checked", String((c.dataset.sound === "1") === !!settings.sound)));
   $$("#tierChips .chip").forEach(c =>
-    c.setAttribute("aria-pressed", String(c.dataset.tier === settings.tier)));
+    c.setAttribute("aria-checked", String(c.dataset.tier === settings.tier)));
   $$("#sizeChips .chip").forEach(c =>
-    c.setAttribute("aria-pressed", String(Number(c.dataset.size) === settings.size)));
+    c.setAttribute("aria-checked", String(Number(c.dataset.size) === settings.size)));
   $("#secs").value = settings.secs;
   $("#secsOut").textContent = settings.secs + "s";
+  // "Beginnen" gooit een lopend spel weg. Dan moet je hem vasthouden.
+  $("#btnGo").dataset.confirm = G ? "1" : "0";
+  $("#btnGo").setAttribute("aria-label",
+    G ? "Nieuw spel beginnen — houd ingedrukt, het lopende spel gaat weg" : "Beginnen");
+  $("#btnGoLabel").textContent = G ? "Opnieuw beginnen" : "Beginnen";
   paintPreview();
 }
 
@@ -1335,37 +1846,86 @@ $("#soundChips").addEventListener("click", e => {
   if (settings.sound) { Snd.unlock(); Snd.goed(); }   // even laten horen
 });
 $("#btnBack").addEventListener("click", () => show("title"));
-$("#btnGo").addEventListener("click", () => { Snd.unlock(); newGame(); });
 
-/* Het tandwiel gaat pas open na 1,2 s duwen -- zo dwaalt een
-   vierjarige er tijdens het spel niet per ongeluk in. */
-/* Knop die pas na een lange druk afgaat, met een vulling die meeloopt en een
-   schud als je te vroeg loslaat. Gebruikt door het tandwiel en door stoppen. */
-function holdButton(el, ms, run) {
-  let t = null, down = 0;
-  el.addEventListener("pointerdown", e => {
-    e.preventDefault();
-    down = performance.now();
-    el.classList.add("hold");
-    t = setTimeout(() => { down = 0; el.classList.remove("hold"); run(); }, ms);
-  });
-  ["pointerup", "pointerleave", "pointercancel"].forEach(ev => el.addEventListener(ev, () => {
-    clearTimeout(t);
-    el.classList.remove("hold");
-    if (down && performance.now() - down < ms) nudge(el);
-    down = 0;
-  }));
+/* ==============================================================
+   5b. LANG DRUKKEN — één mechanisme voor alle vier de knoppen.
+
+   Er stonden er twee: het tandwiel en stoppen vulden zich met een
+   CSS-overgang, de startknop tekende zijn ring per frame in JS. Dat
+   gaf twee problemen die allebei echt waren.
+
+   Ten eerste sloeg de toetsenbordtak van de eerste variant het
+   vasthouden helemaal over: één Enter op de stopknop gooide een
+   lopend spel meteen weg, zonder vulling en zonder vraag. De enige
+   beveiliging op de enige onomkeerbare handeling in de app gold dus
+   alleen voor vingers.
+
+   Ten tweede zet "prefers-reduced-motion" alle overgangen uit. De
+   vulling sprong daardoor bij aanraking meteen op vol: de knop meldde
+   "klaar" terwijl er nog ruim een seconde te gaan was, en de schud bij
+   te vroeg loslaten was óók uitgezet. Wie beperkte beweging aan heeft
+   kreeg dus een knop die loog en daarna zweeg.
+
+   Nu tekent één lus de voortgang zelf, per frame, voor muis, vinger én
+   toets. Wat JS zelf schrijft laat die mediaquery met rust.
+   ============================================================== */
+const HOLD_MS = 700;
+
+function holdButton(el, ms, run, paint) {
+  let raf = null, t0 = 0;
+  const draw = p => { if (paint) paint(p); };
+
+  function start() {
+    if (raf !== null) return;               // al bezig (toets die herhaalt)
+    t0 = performance.now();
+    raf = requestAnimationFrame(step);
+  }
+  function step(now) {
+    const p = Math.min(1, (now - t0) / ms);
+    draw(p);
+    if (p >= 1) { cancel(false); run(); }
+    else raf = requestAnimationFrame(step);
+  }
+  function cancel(complain) {
+    if (raf === null) return;
+    cancelAnimationFrame(raf); raf = null; draw(0);
+    if (complain) nudge(el);
+  }
+
+  el.addEventListener("pointerdown", e => { e.preventDefault(); Snd.unlock(); start(); });
+  ["pointerup", "pointerleave", "pointercancel"].forEach(ev =>
+    el.addEventListener(ev, () => cancel(true)));
   el.addEventListener("keydown", e => {
-    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); run(); }
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); Snd.unlock(); start(); }
   });
+  ["keyup", "blur"].forEach(ev => el.addEventListener(ev, () => cancel(true)));
 }
-holdButton($("#btnGear"), 1200, openSetup);
 
+/* Een vulling die van onder naar boven loopt (tandwiel, stoppen) of van
+   links naar rechts (de brede beginknop). */
+const fillY = el => p => { el.style.transform = "scaleY(" + p + ")"; };
+const fillX = el => p => { el.style.transform = "scaleX(" + p + ")"; };
+
+/* Het tandwiel gaat pas open na lang duwen -- zo dwaalt een vierjarige
+   er tijdens het spel niet per ongeluk in. */
+holdButton($("#btnGear"), 1200, openSetup, fillY($("#btnGear i")));
+
+/* Beginnen is een gewone tik zolang er niets te verliezen valt, en een
+   lange druk zodra er een spel loopt dat eraan zou gaan. */
+$("#btnGo").addEventListener("click", () => {
+  if (G) return;                    // dan geldt de lange druk hieronder
+  Snd.unlock(); newGame();
+});
+holdButton($("#btnGo"), 900, () => { if (G) { Snd.unlock(); newGame(); } }, fillX($("#btnGo .fill")));
+
+/* Te vroeg losgelaten: schudden, én de rand even in waarschuwingskleur.
+   Dat tweede is er voor wie beperkte beweging aan heeft: daar valt de
+   schud weg, en dan bleef er niets over. */
 function nudge(el) {
-  el.classList.remove("nudge");
+  el.classList.remove("nudge", "refuse");
   void el.offsetWidth;
-  el.classList.add("nudge");
-  setTimeout(() => el.classList.remove("nudge"), 500);
+  el.classList.add("nudge", "refuse");
+  setTimeout(() => el.classList.remove("nudge", "refuse"), 500);
 }
 
 function openSetup() {
@@ -1402,11 +1962,10 @@ function roundIntro() {
 }
 
 function paintRoundIntro(r) {
-  $("#s-roundintro").style.setProperty("--round", ROUND_COLOR[r - 1]);
   $("#riStage").innerHTML = RI_ART[r - 1];
   $("#riWord").textContent = ROUND_WORD[r - 1];
   $("#riHow").textContent = ROUND_HOW[r - 1];
-  $$("#riDots i").forEach((d, i) => d.classList.toggle("on", i < r));
+  paintRoadmap($("#riRoadmap"), r);
 }
 
 /* Dezelfde tekstballon in het groot, met het aantal woorden erin dat
@@ -1429,7 +1988,7 @@ const RI_ART = [
    </svg>`,
   /* 2 — één woord: nog één stip, en die klopt */
   `<svg viewBox="0 0 200 200">
-     <circle cx="100" cy="100" r="92" fill="#1B6FC4" stroke="#14110F" stroke-width="8"/>
+     <circle cx="100" cy="100" r="92" fill="#F2B705" stroke="#14110F" stroke-width="8"/>
      <g transform="translate(100 104) scale(1.45) translate(-50 -50)">
        <path d="M22 12 H78 A16 16 0 0 1 94 28 V56 A16 16 0 0 1 78 72 H52 L30 92 L33 72 H22 A16 16 0 0 1 6 56 V28 A16 16 0 0 1 22 12 Z"
              fill="#F4EBDA" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
@@ -1441,7 +2000,7 @@ const RI_ART = [
      alleen de doorgestreepte ballon -- twee plaatjes voor één ronde, en dan
      werkt het systeem juist niet meer. */
   `<svg viewBox="0 0 200 200">
-     <circle cx="100" cy="100" r="92" fill="#E8452B" stroke="#14110F" stroke-width="8"/>
+     <circle cx="100" cy="100" r="92" fill="#F2B705" stroke="#14110F" stroke-width="8"/>
      <g transform="translate(100 104) scale(1.45) translate(-50 -50)">
        <path d="M22 12 H78 A16 16 0 0 1 94 28 V56 A16 16 0 0 1 78 72 H52 L30 92 L33 72 H22 A16 16 0 0 1 6 56 V28 A16 16 0 0 1 22 12 Z"
              fill="#F4EBDA" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
@@ -1451,13 +2010,14 @@ const RI_ART = [
    </svg>`
 ];
 
-/* Alleen voor het ronde-scherm. Elders krijgt de ronde géén kleur, want er
-   is er geen vrije: marigold is de klok, blauw is Uil en vermiljoen is Vos.
-   Een blauwe rondechip naast de blauwe uil las als ploegkleur. Op het
-   ronde-scherm staat geen mascotte en geen klok, dus daar mag het wel --
-   het pictogram (drie stippen, één stip, doorgestreept) draagt de ronde
-   overal, kleur is daar alleen feest. */
-const ROUND_COLOR = ["#F2B705", "#1B6FC4", "#E8452B"];
+/* De ronde krijgt nergens meer een eigen kleur, ook niet op dit scherm.
+   Ze had er drie: goud, blauw en vermiljoen -- en die laatste twee zijn
+   Uil en Vos. Ronde 2 kwam dus op in het blauw van de uilen en ronde 3 in
+   het rood van de vossen, met een schijf van een halve schermbreedte. Wie
+   net geleerd heeft dat blauw "de uilen" betekent, leert daar niets goeds.
+   Het pictogram draagt de ronde (drie stippen, één stip, doorgestreept),
+   het woord staat eronder en de routekaart zegt de hoeveelste het is; alle
+   drie de schijven staan nu in goud, de kleur van "dit gebeurt er nu". */
 const ROUND_WORD = ["Uitleggen", "Eén woord", "Uitbeelden"];
 const ROUND_HOW = [
   "Zeg er alles over wat je wil — behalve het woord zelf.",
@@ -1480,9 +2040,17 @@ function handoff() {
   $("#s-handoff").style.setProperty("--team", t.color);
   $("#hoMascot").firstElementChild.setAttribute("href", t.mascot);
   paintRound($("#hoRoundCard"), $("#hoRound"), $("#hoRoundWord"));
-  /* Overgedragen tijd als een kaartje met een half opgebruikte rand: hetzelfde
-     beeld dat straks om de echte kaart loopt, zodat het geen los symbool is
-     dat je apart moet leren. Het getal erbij voor wie leest. */
+
+  // De stand erbij: wie het toestel krijgt wil weten waar het over gaat.
+  $("#hoScoreA").textContent = total(0);
+  $("#hoScoreB").textContent = total(1);
+
+  /* Overgedragen tijd. Dit was een los kaartje dat ergens tussen de
+     opdracht en de startknop zweefde, met het getal in marigold op papier
+     (1,54:1, dus onleesbaar) -- een vierde badge zonder uitleg. Nu hangt
+     het tegen de startknop aan én loopt dezelfde tijd als een boog binnen
+     de ring mee: het gaat over wat er gebeurt als je díe knop indrukt, en
+     dat mag je zien zonder het te moeten leren. */
   const carried = G.pendingMs > 0 && G.pendingMs < G.secs * 1000;
   $("#hoCarry").hidden = !carried;
   if (carried) {
@@ -1493,50 +2061,63 @@ function handoff() {
     rect.style.strokeDashoffset = perim * (1 - p);
     rect.style.stroke = timerColour(G.pendingMs);
     $("#carrySecs").textContent = Math.ceil(G.pendingMs / 1000);
-    $("#carrySecs").style.setProperty("--tcol", timerColour(G.pendingMs));
+    $("#hoCarry").setAttribute("aria-label",
+      Math.ceil(G.pendingMs / 1000) + " seconden mee uit de vorige ronde");
   }
   show("handoff");
   saveGame();
 }
 
-/* Ook starten gaat via vasthouden: het toestel wisselt van hand,
-   en een losse tik mag de klok niet laten lopen. */
+/* Ook starten gaat via vasthouden: het toestel wisselt van hand, en een
+   losse tik mag de klok niet laten lopen. Dit had een eigen lus met een
+   eigen ring; het is nu dezelfde holdButton als het tandwiel, de
+   beginknop en stoppen -- één mechanisme, één duur. */
 (() => {
-  const btn = $("#btnHold"), arc = $("#holdArc");
-  const LEN = 2 * Math.PI * 46;
-  let raf = null, t0 = 0;
+  const arc = $("#holdArc"), LEN = 2 * Math.PI * 46;
   arc.style.strokeDasharray = LEN;
   arc.style.strokeDashoffset = LEN;
-  const HOLD = 700;
-  function frame(now) {
-    const p = Math.min(1, (now - t0) / HOLD);
-    arc.style.strokeDashoffset = LEN * (1 - p);
-    if (p >= 1) { reset(); Snd.unlock(); startTurn(); }
-    else raf = requestAnimationFrame(frame);
-  }
-  function reset() { cancelAnimationFrame(raf); raf = null; arc.style.strokeDashoffset = LEN; }
-  btn.addEventListener("pointerdown", e => {
-    e.preventDefault(); Snd.unlock();
-    t0 = performance.now(); reset(); raf = requestAnimationFrame(frame);
-  });
-  ["pointerup", "pointerleave", "pointercancel"].forEach(ev => btn.addEventListener(ev, () => {
-    const held = raf !== null && performance.now() - t0 < HOLD;
-    reset();
-    if (held) nudge(btn);        // losgelaten voor de ring vol was
-  }));
-  btn.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); Snd.unlock(); startTurn(); } });
+  holdButton($("#btnHold"), HOLD_MS, startTurn,
+             p => { arc.style.strokeDashoffset = LEN * (1 - p); });
 })();
 
 /* ---------- de klok ---------- */
 let clockRaf = null, deadline = 0, lastTickAt = 0, lastSaveAt = 0;
 
-/* De rand om de kaart is de klok. Hij wordt op de echte afmeting van de
-   kaart gezet, zodat hij ook klopt als de kaart niet vierkant is (liggend). */
+/* De rand om de kaart is de klok, en het teken erin is zo groot als de
+   kaart toelaat. Allebei worden ze van de gemeten kaart afgeleid.
+
+   Dat laatste was het niet. De kaart hield op bij 460 px en het teken
+   rekende met de vensterhoogte (46vh); boven ongeveer 600 px breed liep
+   het tweede het eerste voorbij. Op een iPad stak de emoji er 132 px
+   buiten, op een iPad Pro 328 px -- dwars over de klokrand heen, want de
+   kaart sneed niets af. Twee maatstelsels voor één doosje; nu is er één,
+   en groeit de kaart bovendien mee met de ruimte die er is in plaats van
+   met 280 px lucht eromheen stil te blijven staan. */
 let framePerim = 0;
-function sizeTimer() {
+
+function sizeCard() {
+  const wrap = $(".cardwrap"), slot = $("#cardslot");
   const card = $("#card"), svg = $("#timerFrame"), rect = $("#timerRect");
+
+  /* De kaart is het grootste vierkant dat in de vrije ruimte past. Ze hield
+     hiervoor op bij 460 px, waardoor er op een tablet bijna 300 px papier
+     omheen stond te niksen.
+
+     Ook liggend een vierkant, en niet de volle breedte. Het teken wordt
+     daar toch door de hoogte begrensd, dus een brede kaart maakt het beeld
+     geen millimeter groter -- ze zet er alleen twee handen leeg papier
+     naast, met de emoji eenzaam in het midden. Precies de reden waarom de
+     kaart ooit vierkant werd. */
+  const aw = Math.floor(wrap.clientWidth), ah = Math.floor(wrap.clientHeight);
+  if (aw > 0 && ah > 0) {
+    const side = Math.min(aw, ah);
+    slot.style.width = side + "px";
+    slot.style.height = side + "px";
+  }
+
   const w = Math.round(card.clientWidth), h = Math.round(card.clientHeight);
   if (!w || !h) return;
+
   const inset = 6;                        // halve streekdikte
   svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
   rect.setAttribute("x", inset); rect.setAttribute("y", inset);
@@ -1544,26 +2125,55 @@ function sizeTimer() {
   rect.setAttribute("height", Math.max(1, h - inset * 2));
   framePerim = 2 * ((w - inset * 2) + (h - inset * 2));
   rect.style.strokeDasharray = framePerim;
+
+  /* De letter is niet zo groot als de kaart: een emoji tekent breder dan
+     zijn eigen lettergrootte. Over alle 228 kaarten heen gemeten is de
+     breedste inkt 1,248 keer de lettergrootte (de hond) -- 1,28 hieronder
+     is dat met een marge. En er moet binnen de klokrand papier overblijven,
+     vandaar de 32 px: vier voor de contour, twaalf voor de klok, aan beide
+     kanten. Zo raakt geen enkele kaart ooit de rand die de tijd draagt. */
+  const inner = Math.min(w, h) - 2 * (4 + 12);
+  card.style.setProperty("--glyph", Math.max(24, Math.floor(inner / 1.28)) + "px");
 }
-addEventListener("resize", () => { if (current === "play") { sizeTimer(); repaintClock(); } });
+
+/* Eén waarnemer in plaats van een resize-luisteraar: die miste de gevallen
+   waarin de kaart van maat verandert zonder dat het venster dat doet --
+   een schermwissel, een toetsenbord dat opkomt, een gedraaide tablet die
+   pas na de wissel uitgemeten kan worden. */
+function remeasure() { if (current === "play") { sizeCard(); repaintClock(); } }
+if (window.ResizeObserver) new ResizeObserver(remeasure).observe($(".cardwrap"));
+addEventListener("resize", remeasure);
+addEventListener("orientationchange", remeasure);
 
 let lastMs = 0, lastTotal = 1;
 function repaintClock() { paintClock(lastMs, lastTotal); }
 
+/* De klok heeft een eigen ramp gekregen: goud, gebrand, wijn. Ze stond
+   hiervoor op marigold, vermiljoen en wijn -- en vermiljoen is Vos. Rood
+   betekende op het ene scherm "de vossen" en op het volgende "haast je",
+   en dan betekent het geen van beide meer. Deze drie komen alleen op de
+   rand van de kaart voor, en daar komt nooit een ploegkleur. */
+function timerStage(ms) {
+  return ms <= 5000 ? "crit" : ms <= 10000 ? "warn" : "ok";
+}
 function timerColour(ms) {
-  return ms <= 5000 ? "var(--wine)" : ms <= 10000 ? "var(--vermilion)" : "var(--marigold)";
+  return ms <= 5000 ? "var(--time-1)" : ms <= 10000 ? "var(--time-2)" : "var(--time-3)";
 }
 
 function paintClock(ms, totalMs) {
   lastMs = ms; lastTotal = totalMs;
   const p = Math.max(0, Math.min(1, ms / totalMs));
-  const col = timerColour(ms);
-  const rect = $("#timerRect");
-  rect.style.strokeDashoffset = framePerim * (1 - p);
-  rect.style.stroke = col;
+  $("#timerRect").style.strokeDashoffset = framePerim * (1 - p);
+  /* De kleur van de rand staat in CSS, niet hier: één blok waar alle drie
+     de standen naast elkaar staan, in plaats van een ternary in JS. */
+  $("#card").dataset.time = timerStage(ms);
+  /* Het getal stond in de kleur van de klok mee te verkleuren -- in goud
+     op papier haalde het 1,54:1, oftewel onzichtbaar, en dat precies voor
+     de eerste twee derde van elke beurt. Het staat nu altijd in inkt
+     (15,9:1); de haast zit in de rand, in de klop van de kaart en in het
+     tempo van de tik, en dus in drie kanalen die geen kleur zijn. */
   $("#clockDigits").textContent = Math.ceil(ms / 1000);
-  $("#clockDigits").style.setProperty("--tcol", col);
-  $("#card").classList.toggle("hurry", ms > 0 && ms <= 5000);
+  $("#cardslot").classList.toggle("hurry", ms > 0 && ms <= 5000);
 }
 
 function startTurn() {
@@ -1575,7 +2185,7 @@ function startTurn() {
   nextCard(null);
   syncControls();
   show("play");
-  sizeTimer();                 // pas ná show(): daarvoor heeft de kaart geen maat
+  sizeCard();                  // pas ná show(): daarvoor heeft de kaart geen maat
   paintTurnScore();
   requestWake();
   const totalMs = G.secs * 1000;
@@ -1621,20 +2231,43 @@ function nextCard(how) {
 }
 
 /* Twee tikken vlak na elkaar zijn in de praktijk één enthousiaste vinger,
-   geen twee geraden kaarten. De tweede telt niet mee. */
+   geen twee geraden kaarten. De tweede telt niet mee -- maar hij wordt wel
+   beantwoord: de rand van de kaart knippert één keer. Zonder dat verdween
+   de tik in het niets en leek het toestel te haperen op het drukste moment
+   van de beurt. */
 let lastAct = 0;
 function acts() {
   if (current !== "play" || !G || G.card === null) return false;
   const now = performance.now();
-  if (now - lastAct < 280) return false;
+  if (now - lastAct < 280) { flash("seen"); return false; }
   lastAct = now;
   return true;
 }
 
+function flash(cls) {
+  const c = $("#card");
+  c.classList.remove(cls);
+  void c.offsetWidth;
+  c.classList.add(cls);
+  setTimeout(() => c.classList.remove(cls), 400);
+}
+
 /* Ligt er nog maar één kaart, dan levert passen dezelfde kaart weer op.
-   De knop gaat dan uit, zodat zichtbaar is dat er niets te kiezen valt. */
+
+   De knop ging daar vroeger uit. Dat leek netjes, maar een uitgeschakelde
+   knop krijgt geen tik binnen en kan dus ook niet antwoorden: je duwde, er
+   gebeurde niets, je duwde nog eens, er gebeurde weer niets. Op het
+   spannendste moment van de beurt lijkt de app dan bevroren.
+
+   Hij blijft nu leven en zegt "nee": schudden, een korte lage toon, en een
+   streep door het pictogram zodat de toestand ook zonder kleur en zonder
+   beweging te zien is. */
 function syncControls() {
-  $("#btnPas").disabled = !G || G.card === null || G.pile.length === 0;
+  const spent = !G || G.card === null || G.pile.length === 0;
+  const btn = $("#btnPas");
+  btn.dataset.spent = spent ? "1" : "0";
+  btn.setAttribute("aria-disabled", String(spent));
+  btn.setAttribute("aria-label", spent ? "Overslaan — dit is de laatste kaart" : "Overslaan");
   paintStack();
 }
 
@@ -1673,7 +2306,10 @@ $("#btnGoed").addEventListener("click", () => {
 });
 
 $("#btnPas").addEventListener("click", () => {
-  if (!acts() || G.pile.length === 0) return;
+  if (current !== "play" || !G || G.card === null) return;
+  // Laatste kaart: er valt niets over te slaan. Antwoorden doet hij wel.
+  if (G.pile.length === 0) { Snd.pas(); nudge($("#btnPas")); return; }
+  if (!acts()) return;
   Snd.pas();
   G.pile.push(G.card);      // onderop, zonder straf
   nextCard("pas");
@@ -1693,7 +2329,12 @@ function timeUp() {
 
 /* Einde beurt toont beide ploegen, niet alleen wie net speelde: één mascotte
    in beeld las als "jij weer", terwijl het toestel juist doorgegeven moet
-   worden. De zojuist verdiende fiches komen aanrollen. */
+   worden. De zojuist verdiende fiches komen aanrollen.
+
+   En het zegt nu ook naar wíe toe. De ploeg wisselde hier stilletijk -- de
+   kroon staat boven wie vóórstaat, niet boven wie aan zet is -- zodat er
+   precies op het moment dat het toestel van hand moet nergens stond aan
+   wie. */
 function turnEnd() {
   const box = $("#tePiles");
   box.textContent = "";
@@ -1701,6 +2342,16 @@ function turnEnd() {
   for (let i = 0; i < G.gained; i++) Snd.token(i);
   G.team = 1 - G.team;
   G.pendingMs = 0;
+
+  const nxt = TEAMS[G.team];
+  // De kleurlaag van dit kaartje is die van de ploeg die hierna speelt --
+  // anders stond er de standaardkleur (rood) achter een blauwe uil.
+  $("#teNext").style.setProperty("--team", nxt.color);
+  $("#teNextMascot").firstElementChild.setAttribute("href", nxt.mascot);
+  $("#teNextRound").firstElementChild.setAttribute("href", ROUND_ICON[G.round - 1]);
+  $("#teNext").setAttribute("aria-label",
+    "Hierna: " + nxt.naam + " — " + ROUND_WORD[G.round - 1]);
+
   saveGame();
   show("turnend");
 }
@@ -1773,8 +2424,13 @@ function tallyNode(t, newest) {
      pictogram als overal. De stapel zegt "wie staat voor"; dit zegt "waar
      kwam het vandaan" -- anders zie je alleen een totaal en niet dat je de
      ene ronde won en de andere verloor. */
-  const split = document.createElement("div");
-  split.className = "split";
+  /* Kop, stapel en voet zijn nu drie vaste rijen die bij beide ploegen op
+     dezelfde hoogte liggen (zie .side-by-side, subgrid). Ze hingen eerder
+     los onder elkaar, waardoor het rondelijstje van de ene ploeg 235 px
+     lager stond dan dat van de andere -- en dan valt er niets meer te
+     vergelijken, terwijl vergelijken het enige is wat dit scherm doet. */
+  const foot = document.createElement("div");
+  foot.className = "foot";
   for (let r = 1; r <= ROUNDS; r++) {
     if (!playedRound(r)) continue;
     const row = document.createElement("div");
@@ -1783,14 +2439,16 @@ function tallyNode(t, newest) {
     const n = document.createElement("b");
     n.textContent = G.scores[t][r - 1];
     row.appendChild(n);
-    split.appendChild(row);
+    foot.appendChild(row);
   }
 
   const num = document.createElement("div");
   num.className = "num";
   num.textContent = total(t);
+  foot.appendChild(num);
 
-  wrap.append(head, pile, split, num);
+  wrap.setAttribute("aria-label", TEAMS[t].naam + ": " + total(t) + " punten");
+  wrap.append(head, pile, foot);
   return wrap;
 }
 
@@ -1811,6 +2469,9 @@ function paintRoadmap(el, nextRound) {
     const box = document.createElement("div");
     box.className = "box";
     box.appendChild(svgUse(ROUND_ICON[r - 1]));
+    /* Het vinkje hing ín het vakje, bovenop het rondepictogram: op 38%
+       doorzichtigheid werd dat een kluwen van ballon en haak waar geen van
+       beide nog uit te halen was. Nu staat het als merkje in de hoek. */
     if (r < nextRound) box.appendChild(svgUse("#i-vink", "tick"));
 
     const b = document.createElement("b");
@@ -1821,14 +2482,22 @@ function paintRoadmap(el, nextRound) {
   }
 }
 
-/* ---------- winnaar ---------- */
+/* ---------- winnaar ----------
+   Er stonden twee dezelfde dieren op dit scherm: een grote juichende
+   mascotte bovenaan en dezelfde, gekroond en klein, in de stand eronder.
+   Nu groeit de winnaar in de stand zelf. Bij gelijkspel groeien ze allebei
+   even hard -- dat leest als "samen", waar de zandloper-met-confetti
+   eerder als "niemand" las. */
 function winner() {
   const a = total(0), b = total(1);
   const win = a === b ? null : (a > b ? 0 : 1);
-  $("#wnMascot").firstElementChild.setAttribute("href", win === null ? "#i-glass" : TEAMS[win].mascot);
   const box = $("#wnPiles");
   box.textContent = "";
-  [0, 1].forEach(t => box.appendChild(tallyNode(t)));
+  const nodes = [0, 1].map(t => tallyNode(t));
+  nodes.forEach((n, t) => { if (win === null || win === t) n.classList.add("winner"); });
+  nodes.forEach(n => box.appendChild(n));
+  $("#s-winner").dataset.draw = win === null ? "1" : "0";
+
   rays(win === null ? "#F2B705" : TEAMS[win].hex);
   confetti(win === null ? ["#E8452B", "#1B6FC4", "#F2B705"] : [TEAMS[win].hex, "#F2B705"]);
   Snd.fanfare();
@@ -1862,25 +2531,37 @@ function confetti(colors) {
     d.style.background = colors[i % colors.length];
     d.style.animationDelay = (Math.random() * 2.6) + "s";
     d.style.animationDuration = (2.2 + Math.random() * 1.6) + "s";
-    const s = 16 + Math.random() * 18;
-    d.style.width = d.style.height = s + "px";
+    /* Snippers, geen schijfjes. Confetti was rond, zwart omrand en in
+       ploegkleur -- dat is exact een fiche, en er regenden dus punten over
+       de stand heen. Even feestelijk, maar met geen mogelijkheid meer te
+       tellen. */
+    const w = 9 + Math.random() * 7;
+    d.style.width = w + "px";
+    d.style.height = (w * (1.6 + Math.random())) + "px";
     box.appendChild(d);
   }
 }
 
-$("#btnAgain").addEventListener("click", () => {
+function clearConfetti() {
   $("#confetti").hidden = true;
   $("#confetti").textContent = "";
-  redraw();
-  show("title");
+}
+
+/* "Opnieuw" bracht je naar de titel, waar je dan nog een knop moest
+   indrukken -- het woord beloofde een revanche en leverde een menu. Nu
+   begint hij er ook echt een, met dezelfde instellingen en een vers deck.
+   Terug naar de titel is een eigen knop geworden. */
+$("#btnAgain").addEventListener("click", () => {
+  clearConfetti(); Snd.unlock(); redraw(); newGame();
 });
+$("#btnHome").addEventListener("click", () => { clearConfetti(); redraw(); show("title"); });
 
 /* ==============================================================
    PAUZE EN STOPPEN
    De klok staat stil zolang het paneel open is. Verder spelen is één tik;
    stoppen gooit het lopende spel weg en zit daarom achter een lange druk.
    ============================================================== */
-let pauseMs = 0;
+let pauseMs = 0, pauseReturn = null;
 
 function openPause() {
   if (current === "play") {
@@ -1888,11 +2569,35 @@ function openPause() {
     stopClock();
     releaseWake();
   }
+  /* Het paneel toonde alleen twee pictogrammen op een donker vlak: niet
+     dát het stilstond, niet waar de klok bleef staan, niet hoe het ervoor
+     stond. Nu staat de bevroren tijd er groot in inkt, met de rand van de
+     kaart eromheen -- hetzelfde beeld als in het spel -- en de stand
+     eronder. */
+  const totalMs = G ? G.secs * 1000 : 1;
+  const left = current === "play" ? pauseMs : (G ? G.pendingMs : 0);
+  const p = Math.max(0, Math.min(1, left / totalMs));
+  const rect = $("#pauseRect"), perim = 2 * (68 + 68);
+  rect.style.strokeDasharray = perim;
+  rect.style.strokeDashoffset = perim * (1 - p);
+  rect.style.stroke = timerColour(left);
+  $("#pauseSecs").textContent = Math.ceil(left / 1000);
+  // Alleen tijdens een lopende beurt staat er een klok stil. Op de
+  // tussenschermen loopt er niets, en dan is een wijzerplaat op nul
+  // eerder een mededeling dan naslag.
+  $("#pauseClock").hidden = current !== "play";
+  $("#pauseScoreA").textContent = G ? total(0) : 0;
+  $("#pauseScoreB").textContent = G ? total(1) : 0;
+
+  pauseReturn = document.activeElement;
   $("#pauze").hidden = false;
+  $("#btnResume").focus({ preventScroll: true });
 }
 
 function closePause() {
   $("#pauze").hidden = true;
+  if (pauseReturn && pauseReturn.isConnected) pauseReturn.focus({ preventScroll: true });
+  pauseReturn = null;
   if (current === "play" && pauseMs > 0) {
     deadline = performance.now() + pauseMs;
     pauseMs = 0;
@@ -1902,17 +2607,29 @@ function closePause() {
   }
 }
 
-$("#btnPauze").addEventListener("click", () => { Snd.unlock(); openPause(); });
-$("#btnPauzeHo").addEventListener("click", () => { Snd.unlock(); openPause(); });
+/* Pauze staat nu op élk scherm van het spel, altijd rechtsboven, altijd
+   even groot. Hij bestond alleen op het spel- en het overdrachtscherm --
+   in twee verschillende maten en doorzichtigheden -- en op de vier
+   tussenschermen helemaal niet. Wie na de ronde wilde stoppen ("nog één en
+   dan naar bed") moest daarvoor eerst een nieuwe ronde beginnen. */
+["#btnPauze", "#btnPauzeHo", "#btnPauzeRi", "#btnPauzeTe", "#btnPauzeRe"]
+  .forEach(sel => $(sel).addEventListener("click", () => { Snd.unlock(); openPause(); }));
+
 $("#btnResume").addEventListener("click", closePause);
+// Naast het paneel tikken is de veilige uitweg: verder spelen, nooit stoppen.
+$("#pauze").addEventListener("click", e => { if (e.target === $("#pauze")) closePause(); });
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && !$("#pauze").hidden) { e.preventDefault(); closePause(); }
+});
+
 holdButton($("#btnStop"), 1100, () => {
-  pauseMs = 0;
+  pauseMs = 0; pauseReturn = null;
   stopClock(); releaseWake();
   $("#pauze").hidden = true;
   G = null; saveGame();
   redraw();
   show("title");
-});
+}, fillY($("#btnStop i")));
 
 /* ==============================================================
    7. SCHERM WAKKER HOUDEN — stil falen waar het niet bestaat.
@@ -1957,11 +2674,33 @@ $("#btnStart").addEventListener("click", () => {
   else { if (!draft.length) redraw(); newGame(); }
 });
 
+/* De grote knop op de titel betekende de ene avond "nieuw spel" en de
+   andere "verder waar we gebleven waren", zonder enig zichtbaar verschil.
+   Ligt er een half potje klaar, dan zegt het scherm dat nu: de mascotte
+   die aan de beurt is en de opdracht van de ronde staan erbij, en er komt
+   een aparte knop voor wie juist opnieuw wil beginnen. Dat laatste kon
+   alleen via de instellingen, waar "Beginnen" het lopende spel zonder
+   waarschuwing weggooide. */
+function paintTitle() {
+  const on = !!G;
+  $("#s-title").dataset.resume = on ? "1" : "0";
+  $("#btnFresh").hidden = !on;
+  $("#btnStart").setAttribute("aria-label",
+    on ? "Verder spelen — " + TEAMS[G.team].naam + " is aan de beurt" : "Spelen");
+  if (on) {
+    $("#tiNext").style.setProperty("--team", TEAMS[G.team].color);
+    $("#tiMascot").firstElementChild.setAttribute("href", TEAMS[G.team].mascot);
+    $("#tiRound").firstElementChild.setAttribute("href", ROUND_ICON[G.round - 1]);
+  }
+}
+$("#btnFresh").addEventListener("click", () => { Snd.unlock(); openSetup(); });
+
 load();
 Snd.enabled = settings.sound !== false;
 redraw();
 paintSetup();
 show("title");
+started = true;
 
 // Alleen voor de tests: inkijk in de lopende stand (?debug in de URL).
 if (location.search.indexOf("debug") !== -1) {
