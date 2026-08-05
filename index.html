@@ -378,7 +378,12 @@ button.btn-ghost, button.btn-icon, button.gear, button.chip, button.pv {
   transform: rotate(-2deg);
   text-align: center;
 }
-.wordmark b {
+/* h1 en niet b: dit ís de titel van de app, en tot nu toe stond die
+   nergens als koptekst -- alleen de instellingen (voor de volwassene)
+   hadden een eigen h1 met dezelfde tekst. Wie met een schermlezer
+   binnenkomt hoorde dus geen titel op de eerste, belangrijkste pagina. */
+.wordmark h1 {
+  margin: 0;
   display: block; font-size: clamp(40px, 14vw, 88px); font-weight: 900;
   letter-spacing: .01em; line-height: .9; text-transform: uppercase;
   color: var(--paper);
@@ -394,6 +399,21 @@ button.btn-ghost, button.btn-icon, button.gear, button.chip, button.pv {
 /* Met het kaartje erbij staan er vier dingen onder elkaar; dan mag de lucht
    ertussen wat minder. */
 #s-title[data-resume="1"] { gap: 4vh; }
+
+/* "Terug" op de instellingen hoort onder een kolom velden van volle
+   breedte en mag dus terecht de hele breedte pakken. Ditzelfde knopje trok
+   hier, op een titelscherm waar verder alles compact en gecentreerd staat
+   (het merk, het kaartje, de ronde knoppen), een rand-tot-rand balk dwars
+   door dat ritme -- en op een smalle telefoon liep die balk zelfs door tot
+   onder de tandwielknop, waar hij hem overlapte. Hij krimpt hier terug tot
+   zijn eigen tekst, net als elk ander compact element op dit scherm, en
+   een kleine marge erboven zet hem zichtbaar apart van de hoofdknop: dat
+   is de andere handeling, niet de volgende stap. */
+#s-title .btn-ghost {
+  width: auto; min-height: 48px;
+  padding: 10px 30px;
+  margin-top: var(--s-1);
+}
 
 /* Het tandwiel vereiste een lange druk van 1,2 s: "zo dwaalt een vierjarige
    er tijdens het spel niet per ongeluk in." Maar dat kind zou het tandwiel
@@ -1101,6 +1121,26 @@ input[type=range]::-moz-range-thumb {
   .teamchip, .roundchip .ico { width: 40px; height: 40px; }
   .roundchip .ico svg { width: 30px; height: 30px; }
   .btn-icon { width: 44px; height: 44px; }
+
+  /* Het merk mat zichzelf in vw: op een brede maar lage telefoon (844x390)
+     rekent 14vw ruim binnen zijn eigen maximum van 88px, dus kromp het
+     merk daar helemaal niet mee -- de kaart stak met kop en schouders
+     boven de viewport uit en de zandloper viel letterlijk van het scherm
+     af. Hij rekent hier met vh in plaats van vw: de kortste zijde van het
+     scherm is nu wat de maat bepaalt, niet de langste. */
+  #s-title {
+    gap: 1.6vh;
+    padding-top: min(1.6vh, 10px); padding-bottom: min(1.6vh, 10px);
+  }
+  /* Met het overdrachtskaartje erbij staan er vier dingen onder elkaar in
+     dezelfde beperkte hoogte -- die extra regel wint hier niet van het
+     merk zelf, dus hij snoept eerst van de tussenruimte. */
+  #s-title[data-resume="1"] { gap: 0.6vh; }
+  .wordmark {
+    padding: min(1.4vh, 12px) min(3.2vw, 22px) min(1.7vh, 16px);
+  }
+  .wordmark svg { width: min(5.4vh, 36px); margin-bottom: 2px; }
+  .wordmark h1 { font-size: min(8.2vh, 44px); }
 }
 
 /* Groot scherm: de overzichten stonden vol maxima die voor een telefoon
@@ -1287,7 +1327,7 @@ input[type=range]::-moz-range-thumb {
 <section class="screen" id="s-title">
   <div class="wordmark surface">
     <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-glass"/></svg>
-    <b>Tijd<br>is Om</b>
+    <h1>Tijd<br>is Om</h1>
   </div>
 
   <!-- Ligt er een half potje klaar, dan zegt dit scherm dat, met de
