@@ -418,8 +418,25 @@ button.btn-ghost, button.btn-icon, button.gear, button.chip, button.pv {
    daaronder hangt een half potje van gisteravond. Wie in plaats daarvan
    opnieuw wil beginnen heeft daar nu een eigen knop voor, in plaats van
    dat de instellingen het spel stilletjes weggooiden. */
-.resume-note { display: none; }
-#s-title[data-resume="1"] .resume-note { display: flex; }
+.resume-card { display: none; flex-direction: column; align-items: center; gap: var(--s-2); padding: var(--s-3) var(--s-4); }
+#s-title[data-resume="1"] .resume-card { display: flex; }
+/* Het kaartje en de knop erna horen bij elkaar -- de knop zet voort wat
+   het kaartje net heeft aangekondigd -- dus die twee schuiven dichter naar
+   elkaar toe dan de rest van de kolom. */
+#s-title[data-resume="1"] .resume-card { margin-bottom: calc(-1 * var(--s-3)); }
+.resume-card .tag { display: flex; align-items: center; gap: 7px; }
+.resume-card .tag svg { width: 16px; height: 16px; }
+.resume-card .tag b {
+  font-size: 12px; font-weight: 900; text-transform: uppercase;
+  letter-spacing: .14em; color: var(--ink-2);
+}
+.resume-card .who { display: flex; align-items: center; gap: var(--s-3); }
+.resume-card .mascot-sm { width: 52px; display: block; }
+.resume-card .ico {
+  width: 52px; height: 52px; display: grid; place-items: center;
+  border: var(--line-2) solid var(--ink); background: var(--paper-2);
+}
+.resume-card .ico svg { width: 36px; height: 36px; }
 /* Met het kaartje erbij staan er vier dingen onder elkaar; dan mag de lucht
    ertussen wat minder. */
 #s-title[data-resume="1"] { gap: 4vh; }
@@ -1165,6 +1182,12 @@ input[type=range]::-moz-range-thumb {
   }
   .wordmark svg { width: min(5.4vh, 36px); margin-bottom: 2px; }
   .wordmark h1 { font-size: min(8.2vh, 44px); }
+  .resume-card { padding: 3px var(--s-3); gap: 3px; }
+  #s-title[data-resume="1"] .resume-card { margin-bottom: -18px; }
+  .resume-card .tag svg { width: 13px; height: 13px; }
+  .resume-card .tag b { font-size: 11px; }
+  .resume-card .mascot-sm, .resume-card .ico { width: 36px; height: 36px; }
+  .resume-card .ico svg { width: 25px; height: 25px; }
 }
 
 /* Groot scherm: de overzichten stonden vol maxima die voor een telefoon
@@ -1354,17 +1377,27 @@ input[type=range]::-moz-range-thumb {
     <h1>Tijd<br>is Om</h1>
   </div>
 
-  <!-- Ligt er een half potje klaar, dan zegt dit scherm dat, met de
-       mascotte die aan de beurt is en de opdracht van de ronde. De grote
-       knop betekende anders de ene avond "nieuw spel" en de andere
-       "verder waar we gebleven waren", zonder enig verschil te tonen. -->
-  <!-- Hetzelfde kaartje als op het einde-beurt-scherm: mascotte, pijl,
-       opdracht. "Wie is er aan de beurt" is op beide plekken dezelfde
-       mededeling, dus ook hetzelfde ding om naar te kijken. -->
-  <div class="next-up surface resume-note" id="tiNext" aria-hidden="true">
-    <svg class="mascot-sm" id="tiMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg>
-    <svg class="arrow" viewBox="0 0 100 100"><use href="#i-naar"/></svg>
-    <div class="ico"><svg id="tiRound" viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
+  <!-- Ligt er een half potje klaar, dan zegt dit scherm dat. Eerst stond
+       hier hetzelfde mascotte-pijl-opdracht-kaartje als op het
+       einde-beurt-scherm, maar die pijl betekent daar "hierna" -- vlak
+       ná een beurt, met de stand nog vers in het geheugen. Hier is het
+       geheugen juist weg: dit is het scherm waar je een spel van dagen
+       terug weer oppakt, en dan moet de allereerste blik al zeggen "er
+       ligt hier iets", niet een pictogram-grammatica die je toevallig nog
+       kent. Daarom staat er nu een woord bij (net als "Nieuw spel"
+       hieronder: dit scherm is voor de volwassene die opzet, niet voor het
+       kind dat raadt) en hetzelfde pauze-teken als op het echte
+       pauzescherm -- geen nieuw teken om te leren, het teken dat je al
+       kent van precies dit moment. -->
+  <div class="resume-card surface" id="tiNext" aria-hidden="true">
+    <div class="tag">
+      <svg viewBox="0 0 100 100"><use href="#i-pauze"/></svg>
+      <b>Pauze</b>
+    </div>
+    <div class="who">
+      <svg class="mascot-sm" id="tiMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg>
+      <div class="ico"><svg id="tiRound" viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
+    </div>
   </div>
 
   <button class="btn-go" id="btnStart" aria-label="Spelen">
