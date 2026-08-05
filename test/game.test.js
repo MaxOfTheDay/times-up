@@ -66,9 +66,24 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     await page.waitForTimeout(80);
     ok(await screen() === 'handoff', 'een korte tik start de beurt al');
 
+    // Wat de opdracht is moet op het overdrachtscherm kloppen: dat is waar
+    // je kijkt als je het toestel aangereikt krijgt.
+    const woord = ['Uitleggen', 'Eén woord', 'Uitbeelden'][round - 1];
+    const icoon = ['#r-praten', '#r-eenwoord', '#r-mimen'][round - 1];
+    ok(await page.textContent('#hoRoundWord') === woord,
+       `ronde ${round}: verkeerd woord op het overdrachtscherm`);
+    ok(await page.getAttribute('#hoRound use', 'href') === icoon,
+       `ronde ${round}: verkeerd pictogram op het overdrachtscherm`);
+
     await hold(page, '#btnHold', 900);
     await page.waitForTimeout(150);
     ok(await screen() === 'play', `ronde ${round}: niet aan het spelen`);
+
+    // En tijdens het spelen ook, want daar wordt het vergeten.
+    ok(await page.textContent('#plRoundWord') === woord,
+       `ronde ${round}: verkeerd woord in de spelbalk`);
+    ok(await page.getAttribute('#plRound use', 'href') === icoon,
+       `ronde ${round}: verkeerd pictogram in de spelbalk`);
 
     // Elke getoonde kaart wordt onthouden, ook die van de proefjes hieronder:
     // aan het eind moet elke ronde precies hetzelfde deck getoond hebben.

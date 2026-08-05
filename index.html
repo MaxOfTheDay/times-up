@@ -250,26 +250,42 @@ input[type=range]::-moz-range-thumb {
 /* ============================================================
    RONDE-INTRO — geen woorden, geen cijfers. Alleen een gebaar.
    ============================================================ */
-#s-roundintro { justify-content: center; align-items: center; gap: 5vh; }
-.ri-stage { width: min(72vw, 340px); aspect-ratio: 1; display: grid; place-items: center; }
+#s-roundintro { justify-content: center; align-items: center; gap: 3.4vh; }
+.ri-stage { width: min(62vw, 300px); aspect-ratio: 1; display: grid; place-items: center; }
 .ri-stage svg { width: 100%; height: 100%; overflow: visible; }
+
+/* Het woord erbij. De ballon vertelt het aan wie niet leest, het woord
+   maakt het zeker voor wie dat wel doet -- geen van beide moet het alleen
+   dragen. */
+.ri-say { text-align: center; max-width: 24rem; }
+.ri-say b {
+  display: block; font-size: clamp(30px, 10vw, 46px); font-weight: 900;
+  text-transform: uppercase; letter-spacing: .04em; line-height: 1;
+}
+.ri-say p {
+  margin: 8px 0 0; font-size: 14px; font-weight: 700; line-height: 1.4;
+  color: #4a4036;
+}
 
 .dots { display: flex; gap: 16px; }
 .dots i {
   width: 26px; height: 26px; border-radius: 50%;
   border: var(--line) solid var(--ink); background: var(--paper);
 }
-.dots i.on { background: var(--vermilion); }
+.dots i.on { background: var(--round, var(--vermilion)); }
 
 /* Alle geanimeerde SVG-onderdelen draaien om punten uit de viewBox. */
-.ri-mouth, .ri-hand, .ri-body, .ri-armL, .ri-armR, .ri-legL, .ri-legR { transform-box: view-box; }
+.ri-body, .ri-armL, .ri-armR, .ri-legL, .ri-legR { transform-box: view-box; }
 
-/* ronde 1: de mond opent en sluit */
-@keyframes mouth { 0%,100% { transform: scaleY(.22); } 45% { transform: scaleY(1); } }
-.ri-mouth { transform-origin: 100px 104px; animation: mouth calc(1.1s / max(var(--dur), .001)) ease-in-out infinite; }
-/* ronde 2: één vinger springt op */
-@keyframes pop { 0%,100% { transform: translateY(0) rotate(0); } 40% { transform: translateY(-16px) rotate(-4deg); } }
-.ri-hand { animation: pop calc(1.4s / max(var(--dur), .001)) ease-in-out infinite; }
+/* ronde 1: de drie woorden ratelen achter elkaar door */
+@keyframes say { 0%, 60%, 100% { transform: translateY(0); } 25% { transform: translateY(-9px); } }
+.ri-d1, .ri-d2, .ri-d3 { animation: say calc(1.05s / max(var(--dur), .001)) ease-in-out infinite; }
+.ri-d2 { animation-delay: calc(.12s / max(var(--dur), .001)); }
+.ri-d3 { animation-delay: calc(.24s / max(var(--dur), .001)); }
+/* ronde 2: dat ene woord klopt als een hart */
+@keyframes beat { 0%, 100% { transform: scale(1); } 45% { transform: scale(1.22); } }
+.ri-one { transform-origin: 50px 42px; transform-box: view-box;
+          animation: beat calc(1.1s / max(var(--dur), .001)) ease-in-out infinite; }
 /* ronde 3: het hele lijf danst */
 @keyframes swayL { 0%,100% { transform: rotate(16deg); } 50% { transform: rotate(-42deg); } }
 @keyframes swayR { 0%,100% { transform: rotate(-16deg); } 50% { transform: rotate(42deg); } }
@@ -324,18 +340,39 @@ input[type=range]::-moz-range-thumb {
 }
 .teamchip svg { width: 40px; height: 40px; }
 
-/* De opdracht van deze ronde, altijd in beeld. */
+/* De opdracht van deze ronde, altijd in beeld. Beeld én woord samen: het
+   kind leest de ballon, wie wél leest is meteen zeker. Elke ronde heeft
+   bovendien een eigen kleur, zodat de wissel ook van een afstand opvalt. */
 .roundchip {
-  width: 52px; height: 52px; display: grid; place-items: center;
-  border: var(--line) solid var(--ink); background: var(--paper-2);
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
   flex: 0 0 auto;
 }
-.roundchip svg { width: 38px; height: 38px; }
-.roundchip.big {
-  width: 96px; height: 96px; background: var(--paper);
-  box-shadow: 6px 6px 0 var(--ink);
+.roundchip .ico {
+  width: 52px; height: 52px; display: grid; place-items: center;
+  border: var(--line) solid var(--ink); background: var(--round, var(--paper-2));
 }
-.roundchip.big svg { width: 72px; height: 72px; }
+.roundchip .ico svg { width: 38px; height: 38px; }
+.roundchip b {
+  font-size: 10px; font-weight: 900; letter-spacing: .02em;
+  text-transform: uppercase; white-space: nowrap;
+}
+
+/* Overdrachtscherm: dezelfde boodschap, maar in het groot en op papier,
+   want daar staat ze op de ploegkleur. */
+.roundcard {
+  --team: var(--round);
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 20px 12px 14px;
+}
+.roundcard .ico {
+  width: 74px; height: 74px; display: grid; place-items: center;
+  background: var(--round); border: var(--line) solid var(--ink);
+}
+.roundcard .ico svg { width: 56px; height: 56px; }
+.roundcard b {
+  font-size: clamp(19px, 6vw, 26px); font-weight: 900;
+  letter-spacing: .05em; text-transform: uppercase;
+}
 
 .clock { position: relative; width: 112px; height: 112px; flex: 0 0 auto; }
 .clock svg { width: 100%; height: 100%; transform: rotate(-90deg); }
@@ -546,33 +583,28 @@ input[type=range]::-moz-range-thumb {
   <!-- De drie rondes in het klein. Tijdens het spelen staat er nergens meer
        wat de opdracht was: wie het toestel aangereikt krijgt weet anders niet
        of hij mag praten of moet mimen. -->
-  <symbol id="r-mond" viewBox="0 0 100 100">
-    <ellipse cx="40" cy="50" rx="34" ry="30" fill="#F4EBDA" stroke="#14110F" stroke-width="7"/>
-    <ellipse cx="40" cy="53" rx="24" ry="20" fill="#8C2F1E"/>
-    <path d="M18 42 H62" stroke="#F4EBDA" stroke-width="10" stroke-linecap="round"/>
-    <g stroke="#14110F" stroke-width="7" fill="none" stroke-linecap="round">
-      <path d="M82 36 a20 20 0 0 1 0 28"/>
-      <path d="M94 24 a36 36 0 0 1 0 52"/>
+  <!-- Eén tekstballon, drie keer. Het aantal woorden erin loopt terug van
+       veel naar één naar niets: dat is precies de regel van elke ronde, en
+       je hoeft er maar één keer achter te komen. Een mond, een vinger en
+       een lijf waren drie losse plaatjes die je stuk voor stuk moest kennen. -->
+  <symbol id="r-praten" viewBox="0 0 100 100">
+    <path d="M22 12 H78 A16 16 0 0 1 94 28 V56 A16 16 0 0 1 78 72 H52 L30 92 L33 72 H22 A16 16 0 0 1 6 56 V28 A16 16 0 0 1 22 12 Z"
+          fill="#F4EBDA" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
+    <g fill="#14110F">
+      <circle cx="30" cy="42" r="7"/><circle cx="50" cy="42" r="7"/><circle cx="70" cy="42" r="7"/>
     </g>
   </symbol>
 
-  <symbol id="r-vinger" viewBox="0 0 100 100">
-    <g fill="#F4EBDA" stroke="#14110F" stroke-width="6" stroke-linejoin="round">
-      <rect x="26" y="52" width="52" height="42" rx="13"/>
-      <path d="M50 54 a8 8 0 0 1 16 0 z"/>
-      <path d="M64 54 a7 7 0 0 1 14 0 z"/>
-      <rect x="72" y="64" width="16" height="24" rx="8"/>
-      <rect x="31" y="10" width="18" height="50" rx="9"/>
-    </g>
+  <symbol id="r-eenwoord" viewBox="0 0 100 100">
+    <path d="M22 12 H78 A16 16 0 0 1 94 28 V56 A16 16 0 0 1 78 72 H52 L30 92 L33 72 H22 A16 16 0 0 1 6 56 V28 A16 16 0 0 1 22 12 Z"
+          fill="#F4EBDA" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
+    <circle cx="50" cy="42" r="16" fill="#14110F"/>
   </symbol>
 
-  <symbol id="r-lijf" viewBox="0 0 100 100">
-    <g stroke="#14110F" stroke-width="8" stroke-linecap="round" fill="none">
-      <circle cx="50" cy="22" r="12" fill="#F4EBDA"/>
-      <path d="M50 34 V64"/>
-      <path d="M50 42 L24 30"/><path d="M50 42 L76 30"/>
-      <path d="M50 64 L32 90"/><path d="M50 64 L68 90"/>
-    </g>
+  <symbol id="r-mimen" viewBox="0 0 100 100">
+    <path d="M22 12 H78 A16 16 0 0 1 94 28 V56 A16 16 0 0 1 78 72 H52 L30 92 L33 72 H22 A16 16 0 0 1 6 56 V28 A16 16 0 0 1 22 12 Z"
+          fill="#F4EBDA" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M18 62 L82 20" stroke="#E8452B" stroke-width="13" stroke-linecap="round"/>
   </symbol>
 
   <symbol id="i-glass" viewBox="0 0 100 100">
@@ -673,6 +705,10 @@ input[type=range]::-moz-range-thumb {
 <!-- ====================== RONDE-INTRO =========================== -->
 <section class="screen" id="s-roundintro">
   <div class="ri-stage" id="riStage"></div>
+  <div class="ri-say">
+    <b id="riWord">Uitleggen</b>
+    <p id="riHow"></p>
+  </div>
   <div class="dots" id="riDots"><i></i><i></i><i></i></div>
   <button class="btn-play press" id="btnRoundGo" aria-label="Verder">
     <svg viewBox="0 0 100 100"><use href="#i-play"/></svg>
@@ -684,7 +720,10 @@ input[type=range]::-moz-range-thumb {
   <div class="plaque block">
     <svg class="mascot-big" id="hoMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg>
   </div>
-  <div class="roundchip big"><svg id="hoRound" viewBox="0 0 100 100"><use href="#r-mond"/></svg></div>
+  <div class="roundcard block" id="hoRoundCard">
+    <div class="ico"><svg id="hoRound" viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
+    <b id="hoRoundWord">Uitleggen</b>
+  </div>
   <div class="carry" id="hoCarry" hidden>
     <svg viewBox="0 0 100 100"><use href="#i-glass"/></svg>
     <div class="pile" id="hoCarryPile"></div>
@@ -702,7 +741,10 @@ input[type=range]::-moz-range-thumb {
   <div class="play-top">
     <div class="who">
       <div class="teamchip"><svg id="plMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg></div>
-      <div class="roundchip"><svg id="plRound" viewBox="0 0 100 100"><use href="#r-mond"/></svg></div>
+      <div class="roundchip" id="plRoundChip">
+        <div class="ico"><svg id="plRound" viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
+        <b id="plRoundWord">Uitleggen</b>
+      </div>
     </div>
     <div class="clock" id="clock">
       <svg viewBox="0 0 120 120">
@@ -1110,66 +1152,86 @@ function roundIntro() {
 }
 
 function paintRoundIntro(r) {
-  const stage = $("#riStage");
-  stage.innerHTML = RI_ART[r - 1];
+  $("#s-roundintro").style.setProperty("--round", ROUND_COLOR[r - 1]);
+  $("#riStage").innerHTML = RI_ART[r - 1];
+  $("#riWord").textContent = ROUND_WORD[r - 1];
+  $("#riHow").textContent = ROUND_HOW[r - 1];
   $$("#riDots i").forEach((d, i) => d.classList.toggle("on", i < r));
 }
 
-/* De drie rondes, alleen als gebaar: een mond, één vinger,
-   een heel lijf. Nergens een cijfer of een woord. */
+/* Dezelfde tekstballon in het groot, met het aantal woorden erin dat
+   terugloopt naar nul. De ballon uit de balk tijdens het spelen is
+   letterlijk hetzelfde beeld, zodat de herinnering en de aankondiging
+   niet twee dingen zijn die je apart moet leren. */
 const RI_ART = [
-  /* 1 — uitleggen: een pratende mond met geluid aan weerszijden */
+  /* 1 — uitleggen: drie woorden die stuiteren */
   `<svg viewBox="0 0 200 200">
-     <circle cx="100" cy="100" r="74" fill="#F2B705" stroke="#14110F" stroke-width="7"/>
-     <g class="ri-mouth">
-       <ellipse cx="100" cy="104" rx="50" ry="44" fill="#F4EBDA" stroke="#14110F" stroke-width="7"/>
-       <ellipse cx="100" cy="107" rx="37" ry="31" fill="#8C2F1E"/>
-       <path d="M70 93 H130" stroke="#F4EBDA" stroke-width="13" stroke-linecap="round"/>
-       <ellipse cx="100" cy="126" rx="17" ry="10" fill="#E8452B"/>
-     </g>
-     <g stroke="#14110F" stroke-width="8" fill="none" stroke-linecap="round">
-       <path d="M182 82 a26 26 0 0 1 0 36"/>
-       <path d="M196 64 a48 48 0 0 1 0 72"/>
-       <path d="M18 82 a26 26 0 0 0 0 36"/>
-       <path d="M4 64 a48 48 0 0 0 0 72"/>
+     <circle cx="100" cy="100" r="92" fill="#F2B705" stroke="#14110F" stroke-width="8"/>
+     <g transform="translate(100 104) scale(1.45) translate(-50 -50)">
+       <path d="M22 12 H78 A16 16 0 0 1 94 28 V56 A16 16 0 0 1 78 72 H52 L30 92 L33 72 H22 A16 16 0 0 1 6 56 V28 A16 16 0 0 1 22 12 Z"
+             fill="#F4EBDA" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
+       <g fill="#14110F">
+         <circle class="ri-d1" cx="30" cy="42" r="7"/>
+         <circle class="ri-d2" cx="50" cy="42" r="7"/>
+         <circle class="ri-d3" cx="70" cy="42" r="7"/>
+       </g>
      </g>
    </svg>`,
-  /* 2 — één woord: één vinger omhoog. De vinger staat opzij (wijsvinger)
-     en de knokkels zijn zichtbaar; recht in het midden las het gebaar
-     als iets heel anders. */
+  /* 2 — één woord: nog één stip, en die klopt */
   `<svg viewBox="0 0 200 200">
-     <circle cx="100" cy="100" r="88" fill="#1B6FC4" stroke="#14110F" stroke-width="7"/>
-     <g class="ri-hand" fill="#F4EBDA" stroke="#14110F" stroke-width="7" stroke-linejoin="round">
-       <rect x="60" y="100" width="80" height="66" rx="20"/>
-       <path d="M96 104 a12 12 0 0 1 24 0 z"/>
-       <path d="M118 104 a11 11 0 0 1 22 0 z"/>
-       <rect x="130" y="118" width="24" height="36" rx="12"/>
-       <rect x="68" y="34" width="27" height="78" rx="13"/>
+     <circle cx="100" cy="100" r="92" fill="#1B6FC4" stroke="#14110F" stroke-width="8"/>
+     <g transform="translate(100 104) scale(1.45) translate(-50 -50)">
+       <path d="M22 12 H78 A16 16 0 0 1 94 28 V56 A16 16 0 0 1 78 72 H52 L30 92 L33 72 H22 A16 16 0 0 1 6 56 V28 A16 16 0 0 1 22 12 Z"
+             fill="#F4EBDA" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
+       <circle class="ri-one" cx="50" cy="42" r="16" fill="#14110F"/>
      </g>
    </svg>`,
-  /* 3 — uitbeelden: het hele lijf danst */
+  /* 3 — uitbeelden: de ballon gaat door, en het lijf neemt het over */
   `<svg viewBox="0 0 200 200">
-     <circle cx="100" cy="100" r="88" fill="#E8452B" stroke="#14110F" stroke-width="7"/>
+     <circle cx="100" cy="100" r="92" fill="#E8452B" stroke="#14110F" stroke-width="8"/>
+     <!-- Ballon linksboven, lijf rechts, allebei ruim binnen de cirkel: over
+          de rand heen leek de ballon afgesneden, en met de armen eroverheen
+          leek het of de figuur hem vasthield in plaats van te zwijgen. -->
+     <g transform="translate(58 62) scale(.58) translate(-50 -50)">
+       <path d="M22 12 H78 A16 16 0 0 1 94 28 V56 A16 16 0 0 1 78 72 H52 L30 92 L33 72 H22 A16 16 0 0 1 6 56 V28 A16 16 0 0 1 22 12 Z"
+             fill="#F4EBDA" stroke="#14110F" stroke-width="11" stroke-linejoin="round"/>
+       <path d="M18 62 L82 20" stroke="#8C2F1E" stroke-width="19" stroke-linecap="round"/>
+     </g>
      <g class="ri-body" stroke="#14110F" stroke-width="12" stroke-linecap="round" fill="none">
-       <circle cx="100" cy="62" r="20" fill="#F4EBDA"/>
-       <path d="M100 82 V150"/>
-       <path class="ri-armL" d="M100 96 L58 76"/>
-       <path class="ri-armR" d="M100 96 L142 76"/>
-       <path class="ri-legL" d="M100 150 L70 186"/>
-       <path class="ri-legR" d="M100 150 L130 186"/>
+       <circle cx="112" cy="92" r="17" fill="#F4EBDA"/>
+       <path d="M112 109 V146"/>
+       <path class="ri-armL" d="M112 116 L80 92"/>
+       <path class="ri-armR" d="M112 116 L144 92"/>
+       <path class="ri-legL" d="M112 146 L90 178"/>
+       <path class="ri-legR" d="M112 146 L134 178"/>
      </g>
    </svg>`
 ];
 
+const ROUND_COLOR = ["#F2B705", "#1B6FC4", "#E8452B"];
+const ROUND_WORD = ["Uitleggen", "Eén woord", "Uitbeelden"];
+const ROUND_HOW = [
+  "Zeg er alles over wat je wil — behalve het woord zelf.",
+  "Eén enkel woord. Meer mag niet.",
+  "Alleen uitbeelden. Geen geluid."
+];
+
 $("#btnRoundGo").addEventListener("click", () => { Snd.unlock(); handoff(); });
 
-const ROUND_ICON = ["#r-mond", "#r-vinger", "#r-lijf"];
+const ROUND_ICON = ["#r-praten", "#r-eenwoord", "#r-mimen"];
+
+function paintRound(el, iconEl, wordEl) {
+  el.style.setProperty("--round", ROUND_COLOR[G.round - 1]);
+  iconEl.firstElementChild.setAttribute("href", ROUND_ICON[G.round - 1]);
+  wordEl.textContent = ROUND_WORD[G.round - 1];
+  el.setAttribute("aria-label", "Deze ronde: " + ROUND_WORD[G.round - 1]);
+}
 
 function handoff() {
   const t = TEAMS[G.team];
   $("#s-handoff").style.setProperty("--team", t.color);
   $("#hoMascot").firstElementChild.setAttribute("href", t.mascot);
-  $("#hoRound").firstElementChild.setAttribute("href", ROUND_ICON[G.round - 1]);
+  paintRound($("#hoRoundCard"), $("#hoRound"), $("#hoRoundWord"));
   // Overgedragen tijd tonen als fiches, niet als getal.
   const carried = G.pendingMs > 0 && G.pendingMs < G.secs * 1000;
   $("#hoCarry").hidden = !carried;
@@ -1233,7 +1295,7 @@ function startTurn() {
   G.gained = 0;
   const t = TEAMS[G.team];
   $("#plMascot").firstElementChild.setAttribute("href", t.mascot);
-  $("#plRound").firstElementChild.setAttribute("href", ROUND_ICON[G.round - 1]);
+  paintRound($("#plRoundChip"), $("#plRound"), $("#plRoundWord"));
   $("#s-play").style.setProperty("--team", t.color);
   nextCard(false);
   syncControls();
