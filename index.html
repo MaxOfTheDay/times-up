@@ -418,7 +418,30 @@ button.btn-ghost, button.btn-icon, button.gear, button.chip, button.pv {
    daaronder hangt een half potje van gisteravond. Wie in plaats daarvan
    opnieuw wil beginnen heeft daar nu een eigen knop voor, in plaats van
    dat de instellingen het spel stilletjes weggooiden. */
-.resume-card { display: none; flex-direction: column; align-items: center; gap: var(--s-2); padding: var(--s-3) var(--s-4); }
+/* Dit kaartje en de knop "Nieuw spel" eronder waren, ondanks dat het ene
+   informatie is en het andere een echte knop, nagenoeg niet uit elkaar te
+   houden: allebei een rechthoek, dezelfde rand, dezelfde slagschaduw --
+   het enige verschil was een kleurstreepje van een paar pixels dat je
+   moest weten te zoeken. In deze app betekent een slagschaduw overal
+   "dit kun je indrukken, en het vlakt af als je dat doet"; .surface
+   (rand + schaduw) wordt verder in het hele bestand uitsluitend gebruikt
+   voor dingen die je NIET kunt indrukken. Dit kaartje was de enige plek
+   waar dat samenviel met een knop die er precies zo uitziet.
+   Daarom verliest het hier zijn schaduw en de bijbehorende gekleurde
+   misregistratie: plat waar de knop verhoogd is, zodat "heeft dit
+   reliëf" een betrouwbaar antwoord wordt op "kan ik dit aantikken". De
+   ploegkleur die eerst in de schaduw zat staat nu als een streep links,
+   hetzelfde idee als een gekleurde markering langs de rand van een
+   papieren kaart -- zegt nog steeds "dit gaat over de vossen", maar
+   claimt geen knop-gedrag meer. */
+.resume-card {
+  display: none; flex-direction: column; align-items: center; gap: var(--s-2);
+  padding: var(--s-3) var(--s-4);
+}
+/* Compound selector, niet .resume-card alleen: die heeft dezelfde
+   specificiteit als .surface hierboven, en zou dan alleen winnen zolang
+   niemand ooit de volgorde in dit bestand verandert. Dit wint gegarandeerd. */
+.resume-card.surface { box-shadow: none; border-left: var(--line) solid var(--team); }
 #s-title[data-resume="1"] .resume-card { display: flex; }
 /* Het kaartje en de knop erna horen bij elkaar -- de knop zet voort wat
    het kaartje net heeft aangekondigd -- dus die twee schuiven dichter naar
