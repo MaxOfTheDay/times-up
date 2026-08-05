@@ -55,16 +55,21 @@
   --go:       #F2B705;  /* vlak van elke "verder"-knop en de kroon (inkt erop, 10,3:1) */
   --good:     #2E9E5B;  /* vlak van de geraden-knop                (inkt erop,  5,5:1) */
   --good-ink: #17693B;  /* hetzelfde groen, maar donker genoeg om tekst te dragen (5,7:1) */
-  --danger:   #8C2F1E;  /* stoppen, en de laatste seconden         ( 7,0:1) */
+  --danger:   #8C2F1E;  /* stoppen. Alleen op het pauzepaneel, nooit op de kaart. ( 7,0:1) */
 
   /* ---- de klok ----
-     Eén ramp die alleen maar donkerder wordt: goud, gebrand, wijn.
-     Bewust geen vermiljoen: dat is Vos. Deze drie komen uitsluitend
-     voor op de rand van de kaart, en op de kaart komt nooit een
-     ploegkleur -- ze kunnen elkaar dus niet tegenkomen. */
+     Eén ramp die steeds donkerder én kleurlozer wordt: goud, gebrand, dan
+     bijna zwart. De laatste stap wás wijnrood (--danger hergebruikt) -- en
+     wijnrood ligt op 9° tint, vermiljoen op 8°: vrijwel dezelfde kleur, alleen
+     donkerder. Speelt Vos, dan staat de mascotte in vermiljoen naast een
+     kaartrand die in de laatste vijf seconden naar diezelfde tint donkert,
+     en dat las als "iets met de vossen" in plaats van "bijna om". Nu wordt de
+     rand ontkleurd in plaats van roder: een schaars verzadigde, bijna zwarte
+     bruinkleur op 24° tint, ruim vijftien graden van elke ploegkleur
+     vandaan. Wat overblijft van kleur is duisternis, niet een tint. */
   --time-3: #A8790B;         /* ruim tijd    ( 3,3:1) */
   --time-2: #9E4E10;         /* 10 tot 5 s   ( 5,0:1) */
-  --time-1: var(--danger);   /* onder 5 s    ( 7,0:1) */
+  --time-1: #3D2B1F;         /* onder 5 s    (11,4:1) */
 
   --team: var(--team-vos);   /* per beurt gezet; alleen ploegvlakken lezen dit */
 
@@ -211,19 +216,13 @@ button.btn-ghost, button.btn-icon, button.chip, button.pv {
 .nudge { animation: nudge calc(.42s / max(var(--dur), .001)) ease-in-out; }
 .refuse { border-color: var(--danger) !important; }
 
-/* Alles wat je moet vásthouden draagt hetzelfde merkje: een streepje in
-   stippellijn, de rechte versie van de gestippelde ring om de startknop.
-   Dat er iets te houden valt moet je kunnen zien vóór je het fout doet --
-   en het moet er bij alle vier hetzelfde uitzien, anders is het geen teken
-   maar een toevalligheid. De ring, het tandwiel, stoppen en "opnieuw
-   beginnen" zeggen het nu op één manier. */
-.gear::after, .btn-danger::after, .btn-wide[data-confirm="1"]::after {
-  content: ""; position: absolute; left: 50%; bottom: 6px; z-index: 2;
-  transform: translateX(-50%);
-  width: 22px; height: 3px; opacity: .45; pointer-events: none;
-  background: repeating-linear-gradient(to right,
-              currentColor 0 5px, transparent 5px 9px);
-}
+/* Alles wat je moet vasthouden draagt dezelfde stippellijn -- niet als los
+   merkje ernaast, maar als de eigen contour van de knop. Er stond eerst een
+   streepje van 22 px onderin, los van de rand, in de kleur van de knop zelf
+   op 45% dekking: op een knop van 64 px was dat vrijwel onzichtbaar en las
+   het als een vlekje, niet als teken. Een gestippelde rand ís de knop, is
+   dus nooit kleiner dan de knop, en is precies het gebaar dat de ring om de
+   startknop ook al gebruikt: wat gestippeld is, is nog niet af. */
 
 /* ---- de grote ronde "verder"-knop ----
    Titel, ronde-intro, volgende beurt, volgende ronde, opnieuw, verder
@@ -303,10 +302,12 @@ button.btn-ghost, button.btn-icon, button.chip, button.pv {
 .btn-icon svg { width: 22px; }
 
 /* ---- vasthouden om te stoppen ---- */
+/* Ook gestippeld: stoppen is de enige knop op het pauzepaneel die niet op
+   een tik reageert, en is meteen de enige onomkeerbare handeling in de app. */
 .btn-danger {
   position: relative; overflow: hidden;
   width: 68px; height: 68px; display: grid; place-items: center;
-  border: var(--line-2) solid var(--danger); background: var(--paper-2);
+  border: var(--line-2) dashed var(--danger); background: var(--paper-2);
 }
 .btn-danger svg { width: 32px; position: relative; z-index: 1; }
 .btn-danger i {
@@ -324,13 +325,14 @@ button.btn-ghost, button.btn-icon, button.chip, button.pv {
   grid-auto-flow: column;
 }
 /* Beginnen gooit een lopend spel weg. Dat mag niet van één tik, dus in dat
-   geval -- en alleen dan -- moet je hem vasthouden.
+   geval -- en alleen dan -- moet je hem vasthouden, en dat zegt de knop op
+   twee manieren: hij kleurt wijnrood, dezelfde kleur als de stopknop, en
+   zijn rand springt van dicht naar gestippeld -- dezelfde overgang die het
+   tandwiel en de stopknop altijd al hebben.
 
-   En dan is hij ook niet groen. Groen betekent in deze app "ja, goed, doe
+   Hij is dan ook niet groen. Groen betekent in deze app "ja, goed, doe
    maar"; met een waarschuwingsdriehoek op een groen vlak zeggen de kleur en
-   het teken het tegenovergestelde van elkaar. Zodra er iets te verliezen
-   valt kleurt de knop wijnrood -- dezelfde kleur als de stopknop en als de
-   laatste seconden. */
+   het teken het tegenovergestelde van elkaar. */
 .btn-wide { position: relative; overflow: hidden; }
 .btn-wide i.fill {
   position: absolute; inset: 0; background: var(--ink);
@@ -338,7 +340,7 @@ button.btn-ghost, button.btn-icon, button.chip, button.pv {
 }
 .btn-wide > * { position: relative; z-index: 1; }
 .btn-wide .warn { display: none; width: 26px; height: 26px; }
-.btn-wide[data-confirm="1"] { background: var(--danger); }
+.btn-wide[data-confirm="1"] { background: var(--danger); border-style: dashed; }
 .btn-wide[data-confirm="1"] .warn { display: block; }
 
 .btn-ghost {
@@ -378,12 +380,14 @@ button.btn-ghost, button.btn-icon, button.chip, button.pv {
    ertussen wat minder. */
 #s-title[data-resume="1"] { gap: 4vh; }
 
+/* Gestippeld in plaats van dichtgetrokken: het tandwiel is de enige knop op
+   de titel die geen tik verdraagt, en zijn rand zegt dat nu zelf. */
 .gear {
   position: fixed; right: var(--s-4); bottom: max(var(--s-4), env(safe-area-inset-bottom));
   width: 64px; height: 64px;
   display: grid; place-items: center;
   border-radius: 50%;
-  border: var(--line) solid var(--ink);
+  border: var(--line) dashed var(--ink);
   background: var(--paper-2);
   overflow: hidden;
 }
