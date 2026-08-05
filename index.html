@@ -250,15 +250,16 @@ button.btn-ghost, button.btn-icon, button.gear, button.chip, button.pv {
   transform: rotate(-90deg); pointer-events: none;
 }
 .hold-ring .ring circle { fill: none; stroke-width: 8; stroke-linecap: butt; }
-/* De baan was eerst gestippeld: dezelfde taal als de rand van een
-   vasthoud-knop elders. Maar deze knop heeft al een ring om zich heen die
-   geen andere .btn-go draagt -- die vorm alleen zegt al "dit is anders,
-   hou vast", en de stippels erbovenop lazen op het vermiljoen van dit
-   scherm eerder als een kartelrand of een tandwiel dan als een spoor.
-   Eén dichte lijn in papierwit op een kwart doorzichtigheid; de zwarte
-   boog die hem volloopt is er nog altijd goed van te onderscheiden. */
-.hold-ring .ring .track { stroke: var(--paper); opacity: .55; }
-.hold-ring .ring .arc   { stroke: var(--ink); stroke-linecap: round; }
+/* De baan stond in papierwit op een kwart doorzichtigheid, en dat kwam op
+   het vermiljoen van dit scherm neer op een waas: doorschijnend papier op
+   rood mengt tot een vaal roze, precies het "geen pastel, geen zachte
+   randen"-effect dat de rest van de app nooit toelaat. Nu een dichte
+   inktring zonder enige doorzichtigheid -- geen waas, gewoon een tweede,
+   duidelijke lijn -- en het goud dat hem tijdens het vasthouden volloopt
+   is dezelfde kleur als de knop zelf: je ziet de kleur van de knop letterlijk
+   de ring in kruipen. */
+.hold-ring .ring .track { stroke: var(--ink); }
+.hold-ring .ring .arc   { stroke: var(--go); stroke-linecap: round; }
 
 /* ---- geraden ---- */
 .btn-good {
