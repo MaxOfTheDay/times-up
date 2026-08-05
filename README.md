@@ -90,7 +90,8 @@ npm test
 `test/deck.test.js` bewaakt de kaartregels (aantal, dubbels, en of elke emoji
 echt tekent). `test/game.test.js` speelt een volledig potje in een echte
 browser: de drie rondes, passen, de klok die afloopt, de ploegwissel, de
-overgedragen tijd en een herstart midden in een beurt. Die laatste duurt
-ruim een halve minuut, omdat één beurt echt moet uitlopen.
+overgedragen tijd en dat een herlaadbeurt midden in een beurt niets laat
+terugkomen. Die laatste duurt ruim een halve minuut, omdat één beurt echt
+moet uitlopen.
 
 Beide draaien ook op elke pull request, via `.github/workflows/test.yml`.
