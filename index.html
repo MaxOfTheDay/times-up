@@ -298,6 +298,14 @@ button.btn-ghost, button.btn-icon, button.gear, button.chip, button.pv {
 .hold-ring .ring .track { stroke: var(--ink); }
 .hold-ring .ring .arc   { stroke: var(--go); stroke-linecap: round; }
 
+/* De ring staat los van de knop, in zijn eigen SVG. .btn-go:active
+   verschuift een knop over --lift-2 om zijn schaduw te laten "verdwijnen
+   onder" de knop -- maar de ring schuift niet mee, dus die verschuiving
+   duwt de knop uit het midden van zijn eigen ring. Hier verliest hij
+   alleen de schaduw, zonder te verschuiven: concentrisch blijft
+   concentrisch, en de vullende boog blijft het teken dat er iets gebeurt. */
+.hold-ring .btn-go:active { transform: none; }
+
 /* ---- geraden ---- */
 .btn-good {
   width: min(40vw, 20vh, 164px); aspect-ratio: 1;
