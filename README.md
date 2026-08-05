@@ -14,10 +14,12 @@ Daarom staat er op een kaart alleen een emoji, groot genoeg om door de kamer
 te zien. De kaarten zijn zo gekozen dat elk beeld maar één ding kan
 betekenen.
 
-Het spelscherm houdt de blik op die ene kaart. De klok loopt als een rand om
-de kaart heen in plaats van in een wijzerplaat ernaast, dus de tijd zit in
-dezelfde blik als het beeld; de laatste seconden kleurt hij rood en klopt de
-kaart mee. De kaart ligt op een stapel waarvan de randen verdwijnen naarmate
+Het spelscherm houdt de blik op die ene kaart. De kaart is het grootste
+vierkant dat op het scherm past en het teken erin is zo groot als de kaart
+toelaat -- op een tablet vult dat bijna het hele beeld. De klok loopt als een
+rand om de kaart heen in plaats van in een wijzerplaat ernaast, dus de tijd
+zit in dezelfde blik als het beeld; hij verkleurt van goud naar wijnrood en
+de laatste seconden klopt de kaart mee. De kaart ligt op een stapel waarvan de randen verdwijnen naarmate
 je opschiet — leegspelen levert tijd op voor de volgende ronde, dus dat is
 het zien waard, en bij de laatste kaart ligt er niets meer onder.
 Rechtsboven groeit een rij fiches: wat deze beurt al binnen is.
@@ -51,6 +53,11 @@ moeilijkheid, het aantal kaarten, de tijd per beurt en het geluid. Je ziet
 daar ook het deck van vanavond; tik een kaart aan om ze te vervangen. Het is
 het enige scherm met tekst, en meteen de korte uitleg voor wie Time's Up niet
 kent.
+
+De pauzeknop staat op elk scherm van het spel rechtsboven, op dezelfde plek
+en in dezelfde maat; daarachter zit stoppen, achter een lange druk. Passen
+staat altijd linksonder en geraden altijd rechtsonder, ook als je het toestel
+draait.
 
 Tijdens het spelen staat linksboven altijd wie aan de beurt is én wat de
 opdracht van deze ronde is — praten, één woord of uitbeelden — zodat wie het

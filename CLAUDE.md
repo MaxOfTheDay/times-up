@@ -17,6 +17,25 @@ de knoppen, niet op het scorebord. Tekst hoort op het instellingenscherm, dat
 voor de volwassene is. Waar tekst elders toch helpt, staat ze náást een beeld
 dat hetzelfde vertelt — nooit in plaats daarvan.
 
+## Kleur betekent één ding
+
+Rood is Vos en blauw is Uil, en verder niets. Wie een kleur nodig heeft voor
+een toestand pakt er een uit `:root`: `--go` (goud) voor verdergaan,
+`--good` voor geraden, `--danger` voor stoppen, `--time-3/2/1` voor de klok.
+Nooit een ploegkleur lenen — dan betekent rood op het ene scherm "de vossen"
+en op het volgende "haast je", en daarmee niets meer.
+
+Kleur staat ook nooit alleen: elke toestand heeft er een tweede kanaal bij
+(een vorm, een teken, een woord, een beweging).
+
+## Wat je moet vasthouden, zegt dat
+
+Alle vier de lange drukken (starten, instellingen, stoppen, opnieuw beginnen)
+lopen via `holdButton()` en dragen hetzelfde stippelstreepje. Die functie
+tekent de voortgang zelf, per frame: een CSS-overgang zou bij
+`prefers-reduced-motion` meteen op vol springen, en het toetsenbord zou de
+druk overslaan.
+
 Alles staat in `index.html`: geen build, geen externe assets, werkt met de
 wifi uit. Houd dat zo.
 

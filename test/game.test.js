@@ -137,8 +137,11 @@ const ok = (c, m) => { if (!c) fails.push(m); };
      'afgelopen spel blijft in localStorage staan');
 
   // --- de klok loopt af en geeft de beurt door ---
-  await page.click('#btnAgain');
+  // "Opnieuw" begint nu ook echt opnieuw in plaats van naar de titel te
+  // gaan; terug naar de titel is een eigen knop.
+  await page.click('#btnHome');
   await page.waitForTimeout(100);
+  ok(await screen() === 'title', 'de huisknop komt niet uit op de titel');
   await setup({ tier: 'klein', size: 16, secs: 20 });
   await page.click('#btnRoundGo');
   await page.waitForTimeout(100);
