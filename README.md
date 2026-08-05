@@ -12,8 +12,12 @@ instellingen, en die zijn voor de volwassene.
 
 Daarom staat er op een kaart alleen een emoji, groot genoeg om door de kamer
 te zien. De kaarten zijn zo gekozen dat elk beeld maar één ding kan
-betekenen. Wie toch blokkeert, houdt de oorknop vast en hoort het woord
-gefluisterd — een vangnet, niet het hoofdkanaal.
+betekenen. Wie toch blokkeert, tikt op de luisterknop rechtsboven en krijgt
+het woord zacht voorgezegd — een vangnet, niet het hoofdkanaal.
+
+Onder de kaart loopt een balkje terug: dat is wat er nog op de stapel ligt.
+Leegspelen levert tijd op voor de volgende ronde, dus het helpt om te zien
+dat je er bijna bent.
 
 ## Spelen
 

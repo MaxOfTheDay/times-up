@@ -115,8 +115,8 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .nudge { animation: nudge calc(.42s / max(var(--dur), .001)) ease-in-out; }
 
 .btn-play {                /* het grote ▶ : titel, volgende, opnieuw */
-  align-self: center;
-  width: min(52vw, 190px); aspect-ratio: 1;
+  align-self: center; flex: 0 0 auto;
+  width: min(52vw, 24vh, 190px); aspect-ratio: 1;
   border-radius: 50%;
   background: var(--marigold);
   border: var(--line) solid var(--ink);
@@ -299,16 +299,19 @@ input[type=range]::-moz-range-thumb {
 /* ============================================================
    OVERDRACHT — wie is er aan de beurt
    ============================================================ */
-#s-handoff { justify-content: center; align-items: center; gap: 4vh; background: var(--team); }
+/* Alle maten hier zijn ook aan de hoogte gebonden. Op een kleine telefoon
+   (360x640) duwde de opdrachtkaart de startknop anders onder de rand, en
+   dan kun je de beurt niet meer beginnen. */
+#s-handoff { justify-content: center; align-items: center; gap: 2.4vh; background: var(--team); }
 /* De mascotte staat op een papieren plaat: in ploegkleur op ploegkleur
    blijft alleen de zwarte contour over en verdwijnt het dier. */
 .plaque {
   --team: var(--ink);
-  padding: 22px; display: grid; place-items: center;
+  padding: min(2.6vh, 22px); display: grid; place-items: center;
   transform: rotate(-1.5deg);
 }
-#s-handoff .mascot-big { width: min(52vw, 230px); display: block; }
-.hold-ring { position: relative; width: min(52vw, 190px); aspect-ratio: 1; }
+#s-handoff .mascot-big { width: min(46vw, 32vh, 230px); display: block; }
+.hold-ring { position: relative; width: min(44vw, 24vh, 190px); aspect-ratio: 1; flex: 0 0 auto; }
 .hold-ring .btn-play { width: 100%; }
 .hold-ring svg.ring {
   position: absolute; inset: -10px; width: calc(100% + 20px); height: calc(100% + 20px);
@@ -317,10 +320,11 @@ input[type=range]::-moz-range-thumb {
 .hold-ring .ring circle { fill: none; stroke: var(--paper); stroke-width: 8; stroke-linecap: round; }
 .carry {
   display: flex; align-items: center; gap: 12px;
-  background: var(--paper); border: 3px solid var(--ink); padding: 8px 14px;
+  background: var(--paper); border: 3px solid var(--ink);
+  padding: min(1.1vh, 8px) 14px;
 }
 .carry[hidden] { display: none; }     /* display:flex wint anders van [hidden] */
-.carry svg { width: 40px; height: 40px; flex: 0 0 auto; }
+.carry svg { width: min(5vh, 40px); height: min(5vh, 40px); flex: 0 0 auto; }
 .carry .pile i { width: 20px; height: 20px; }
 
 /* ============================================================
@@ -361,16 +365,17 @@ input[type=range]::-moz-range-thumb {
    want daar staat ze op de ploegkleur. */
 .roundcard {
   --team: var(--round);
-  display: flex; align-items: center; gap: 14px;
-  padding: 12px 20px 12px 14px;
+  display: flex; align-items: center; gap: min(1.8vh, 14px);
+  padding: min(1.6vh, 12px) 20px min(1.6vh, 12px) 14px;
 }
 .roundcard .ico {
-  width: 74px; height: 74px; display: grid; place-items: center;
+  width: min(9vh, 74px); height: min(9vh, 74px);
+  display: grid; place-items: center;
   background: var(--round); border: var(--line) solid var(--ink);
 }
-.roundcard .ico svg { width: 56px; height: 56px; }
+.roundcard .ico svg { width: 76%; height: 76%; }
 .roundcard b {
-  font-size: clamp(19px, 6vw, 26px); font-weight: 900;
+  font-size: min(6vw, 2.9vh, 26px); font-weight: 900;
   letter-spacing: .05em; text-transform: uppercase;
 }
 
@@ -391,14 +396,22 @@ input[type=range]::-moz-range-thumb {
   border: var(--line) solid var(--ink); background: var(--paper-2);
   display: grid; place-items: center; border-radius: 50%;
 }
-.btn-ear svg { width: 32px; }
-.btn-ear[aria-pressed="true"] { background: var(--marigold); }
+.btn-ear svg { width: 34px; }
 .btn-ear[hidden] { display: none; }
+/* Terwijl het woord klinkt: de knop licht op en golft, zodat duidelijk is
+   dat er iets te horen is en dat de telefoon naar het oor mag. */
+@keyframes hearing { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.09); } }
+.btn-ear[aria-pressed="true"] {
+  background: var(--marigold);
+  animation: hearing calc(.6s / max(var(--dur), .001)) ease-in-out infinite;
+}
 
 .cardwrap { flex: 1; display: grid; place-items: center; min-height: 0; }
+/* Vierkant, met het teken zo groot dat het de kaart vult. Hoger dan breed
+   liet het beeld midden in een leeg vlak zweven. */
 .card {
   --team: var(--marigold);
-  width: min(88vw, 460px); height: 100%; max-height: min(62vh, 520px);
+  width: min(86vw, 430px); aspect-ratio: 1; max-height: 100%;
   display: grid; place-items: center;
   background: var(--paper);
 }
@@ -408,7 +421,19 @@ input[type=range]::-moz-range-thumb {
 }
 .card.in { animation: stamp calc(.16s / max(var(--dur), .001)) ease-out; }
 /* Eén kaart, één teken, zo groot als de kaart toelaat. */
-.glyph { font-size: min(52vh, 72vw); line-height: 1; }
+.glyph { font-size: min(42vh, 64vw); line-height: 1; }
+
+/* Hoeveel er nog op de stapel ligt. Leegspelen levert tijd op voor de
+   volgende ronde, dus het loont om te zien dat je er bijna bent. */
+.stack {
+  width: min(86vw, 430px); height: 16px; align-self: center;
+  border: 3px solid var(--ink); background: var(--paper-2);
+  padding: 2px; display: flex;
+}
+.stack i {
+  display: block; height: 100%; background: var(--team);
+  transition: width calc(.25s * var(--dur)) ease;
+}
 
 .controls {
   display: flex; align-items: flex-end; justify-content: space-between;
@@ -437,22 +462,47 @@ input[type=range]::-moz-range-thumb {
 
 /* ============================================================
    PUNTEN ALS TELBARE FICHES
+   Vaste rijen van vijf: twee stapels naast elkaar vormen dan hetzelfde
+   raster, en zie je wie voorstaat aan de hoogte in plaats van door te
+   tellen. Vrij afbrekende rijen maakten 11 tegen 5 tot een rekensom.
    ============================================================ */
-.pile { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-width: min(78vw, 330px); }
+/* De ficheGROOTTE hangt ook van de schermhoogte af: met 32 fiches per ploeg
+   is een stapel zeven rijen hoog, en op een kleine telefoon duwde dat de
+   knop eronder van het scherm. */
+.pile {
+  --tok: min(26px, 3.1vh, 6.4vw);
+  display: grid; grid-template-columns: repeat(5, var(--tok));
+  gap: calc(var(--tok) * .24); justify-content: center;
+}
 .pile i {
-  width: 26px; height: 26px; border-radius: 50%;
+  width: var(--tok); height: var(--tok); border-radius: 50%;
   border: 3px solid var(--ink); background: var(--tc, var(--vermilion));
 }
+/* Wat er deze ronde bij kwam, met een gouden rand: het verschil tussen
+   "hoe staan we" en "wat heb ik net verdiend". */
+.pile i.fresh { box-shadow: 0 0 0 3px var(--marigold); }
 @keyframes tokenIn { from { transform: scale(0) rotate(-40deg); } to { transform: scale(1) rotate(0); } }
 .pile i.new { animation: tokenIn calc(.3s / max(var(--dur), .001)) cubic-bezier(.2,1.5,.4,1) backwards; }
 
 /* Beide ploegen krijgen even brede kolommen, anders duwt de ploeg met
    de meeste fiches de andere scheef en oogt de stand vertekend. */
 .tally {
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
-  width: min(36vw, 152px);
+  display: flex; flex-direction: column; align-items: center; gap: min(1.3vh, 10px);
+  width: min(42vw, 172px);
 }
-.tally .mascot-sm { width: 74px; }
+.tally .head { position: relative; }
+.tally .mascot-sm { width: min(74px, 9vh); display: block; }
+/* Een kroon boven wie voorstaat. Zonder die aanwijzing moet een kind twee
+   stapels tellen en vergelijken voor het weet hoe het ervoor staat. */
+.tally .crown {
+  position: absolute; top: -26px; left: 50%; transform: translateX(-50%) rotate(-8deg);
+  width: 42px;
+}
+@keyframes crownIn {
+  from { transform: translateX(-50%) rotate(-8deg) translateY(-14px) scale(.5); opacity: 0; }
+  to   { transform: translateX(-50%) rotate(-8deg) translateY(0) scale(1); opacity: 1; }
+}
+.tally .crown { animation: crownIn calc(.4s / max(var(--dur), .001)) cubic-bezier(.2,1.6,.4,1) backwards; }
 /* Rijen links uitlijnen: twee stapels naast elkaar lezen dan als staafjes,
    en zie je in één oogopslag wie voorstaat. Gecentreerd moet je tellen. */
 .tally .pile { max-width: 100%; justify-content: flex-start; }
@@ -460,13 +510,55 @@ input[type=range]::-moz-range-thumb {
    op .5 doorzichtigheid haalde het de AA-drempel niet. */
 .tally .num { font-weight: 900; font-size: 15px; color: #6b5f4e; font-variant-numeric: tabular-nums; }
 
-#s-turnend, #s-roundend { justify-content: center; align-items: center; gap: 4vh; }
+#s-turnend, #s-roundend { justify-content: center; align-items: center; gap: 3.4vh; }
 .side-by-side { display: flex; gap: 16px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+
+/* De voortgang als de drie rondes zelf, niet als drie naamloze stippen.
+   Gedane rondes krijgen een vinkje, de volgende staat vooraan in kleur --
+   zo weet je meteen wat er hierna komt in plaats van alleen hoeveel er
+   nog te gaan is. */
+.roadmap { display: flex; align-items: flex-end; gap: 6px; }
+/* Vaste kolombreedte: anders duwt het langste woord ("uitbeelden") zijn
+   buur opzij en lopen de onderschriften in elkaar. */
+.roadmap .step {
+  width: min(29vw, 104px);
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  opacity: .38;
+}
+.roadmap .step .box {
+  position: relative;
+  width: 52px; height: 52px; display: grid; place-items: center;
+  border: var(--line) solid var(--ink); background: var(--paper-2);
+}
+.roadmap .step .box svg { width: 38px; height: 38px; }
+.roadmap .step b {
+  font-size: 9px; font-weight: 900; letter-spacing: 0;
+  text-transform: uppercase; text-align: center; line-height: 1.1;
+}
+.roadmap .step.done { opacity: .55; }
+.roadmap .step.done .box::after {
+  content: ""; position: absolute; inset: 0;
+  background: var(--paper); opacity: .6;
+}
+.roadmap .step.done .tick {
+  position: absolute; width: 30px; height: 30px; z-index: 1;
+}
+.roadmap .step.next {
+  opacity: 1;
+}
+.roadmap .step.next .box {
+  width: 74px; height: 74px; background: var(--sc);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.roadmap .step.next .box svg { width: 54px; height: 54px; }
+.roadmap .step.next b { font-size: 11px; }
+@keyframes stepIn { from { transform: translateY(6px) scale(.9); } to { transform: none; } }
+.roadmap .step.next { animation: stepIn calc(.35s / max(var(--dur), .001)) cubic-bezier(.2,1.5,.4,1) backwards; }
 
 /* ============================================================
    WINNAAR
    ============================================================ */
-#s-winner { justify-content: center; align-items: center; gap: 4vh; overflow: hidden; }
+#s-winner { justify-content: center; align-items: center; gap: 2.6vh; overflow: hidden; }
 .rays {
   position: absolute; inset: -30%; z-index: -1;
   display: grid; place-items: center;
@@ -474,7 +566,12 @@ input[type=range]::-moz-range-thumb {
 @keyframes spin { to { transform: rotate(360deg); } }
 .rays svg { width: 160%; height: 160%; animation: spin calc(26s / max(var(--dur), .001)) linear infinite; }
 @keyframes cheer { 0%,100% { transform: scale(1) rotate(-2deg); } 50% { transform: scale(1.07) rotate(2deg); } }
-#s-winner .mascot-big { width: min(64vw, 300px); animation: cheer calc(.9s / max(var(--dur), .001)) ease-in-out infinite; }
+/* Kleiner dan het aanvoelt: met de kronen erbij werd het scherm te hoog en
+   liep de winnaar boven het beeld uit. */
+#s-winner .mascot-big {
+  width: min(44vw, 21vh, 200px); flex: 0 0 auto;
+  animation: cheer calc(.9s / max(var(--dur), .001)) ease-in-out infinite;
+}
 
 @keyframes rain { to { transform: translateY(115vh) rotate(540deg); } }
 .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
@@ -503,7 +600,9 @@ input[type=range]::-moz-range-thumb {
   }
   .play-top { grid-area: top; }
   .cardwrap { grid-area: card; }
-  .card { max-height: none; height: 100%; width: min(100%, 680px); }
+  /* aspect-ratio uit: liggend bepalen breedte én hoogte de kaart, en
+     anders rekt het vierkant zich buiten beeld. */
+  .card { aspect-ratio: auto; max-height: none; height: 100%; width: min(100%, 680px); }
   .glyph { font-size: min(58vh, 46vw); }
   .controls {
     grid-area: controls; flex-direction: column-reverse;
@@ -514,6 +613,24 @@ input[type=range]::-moz-range-thumb {
   .btn-pas { width: min(15vh, 84px); height: min(15vh, 84px); }
   .btn-pas svg { width: 60%; }
   .clock { width: min(18vh, 112px); height: min(18vh, 112px); }
+  .stack { width: min(100%, 680px); justify-self: start; grid-area: card; align-self: end; }
+}
+
+/* Laag scherm (telefoon liggend): de overzichtsschermen worden een rij in
+   plaats van een kolom, anders staan de stapels en de knop boven en onder
+   het beeld. */
+@media (max-height: 520px) {
+  #s-turnend.on, #s-roundend.on, #s-winner.on {
+    flex-direction: row; flex-wrap: wrap;
+    justify-content: center; align-items: center; gap: 3vw;
+  }
+  .roadmap .step { width: min(20vw, 96px); }
+  .roadmap .step .box { width: 40px; height: 40px; }
+  .roadmap .step .box svg { width: 30px; height: 30px; }
+  .roadmap .step.next .box { width: 56px; height: 56px; }
+  .roadmap .step.next .box svg { width: 42px; height: 42px; }
+  .tally { width: min(26vw, 150px); }
+  .tally .crown { width: 32px; top: -20px; }
 }
 </style>
 </head>
@@ -564,10 +681,28 @@ input[type=range]::-moz-range-thumb {
     <path d="M48 22 L90 50 L48 78 Z" fill="#14110F" stroke="#14110F" stroke-width="8" stroke-linejoin="round"/>
   </symbol>
 
-  <symbol id="i-ear" viewBox="0 0 100 100">
-    <path d="M62 88 C62 66 78 62 78 40 A26 26 0 0 0 26 38 C26 44 30 48 36 48
-             C42 48 46 44 46 39 A8 8 0 1 1 58 46 C50 56 46 62 46 88 Z"
-          fill="#14110F"/>
+  <!-- Een luidspreker met golven. De vorige tekening moest een oor voorstellen,
+       maar kwam er als een vraagteken uit -- uitgerekend de knop waarvan
+       niemand wist wat hij deed. -->
+  <symbol id="i-luister" viewBox="0 0 100 100">
+    <path d="M12 38 H32 L52 18 V82 L32 62 H12 Z"
+          fill="#14110F" stroke="#14110F" stroke-width="8" stroke-linejoin="round"/>
+    <g stroke="#14110F" stroke-width="9" fill="none" stroke-linecap="round">
+      <path d="M64 36 a18 18 0 0 1 0 28"/>
+      <path d="M78 22 a36 36 0 0 1 0 56"/>
+    </g>
+  </symbol>
+
+  <!-- kroon voor wie voorstaat -->
+  <symbol id="i-kroon" viewBox="0 0 100 100">
+    <path d="M10 74 L18 26 L34 48 L50 18 L66 48 L82 26 L90 74 Z"
+          fill="#F2B705" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M10 74 H90" stroke="#14110F" stroke-width="7" stroke-linecap="round"/>
+  </symbol>
+
+  <symbol id="i-vink" viewBox="0 0 100 100">
+    <path d="M18 52 L40 74 L84 24" fill="none" stroke="#14110F" stroke-width="16"
+          stroke-linecap="round" stroke-linejoin="round"/>
   </symbol>
 
   <!-- schuifregelaars i.p.v. een tandwiel: dat las als een zonnetje -->
@@ -753,14 +888,15 @@ input[type=range]::-moz-range-thumb {
       </svg>
       <div class="digits" id="clockDigits">30</div>
     </div>
-    <button class="btn-ear" id="btnEar" aria-label="Houd vast om het woord te horen" aria-pressed="false">
-      <svg viewBox="0 0 100 100"><use href="#i-ear"/></svg>
+    <button class="btn-ear" id="btnEar" aria-label="Zeg het woord voor" aria-pressed="false">
+      <svg viewBox="0 0 100 100"><use href="#i-luister"/></svg>
     </button>
   </div>
 
   <div class="cardwrap">
     <div class="card block" id="card"><span class="glyph" id="glyph">🐘</span></div>
   </div>
+  <div class="stack" id="stack" aria-hidden="true"><i></i></div>
 
   <div class="controls">
     <button class="btn-pas press" id="btnPas" aria-label="Overslaan">
@@ -784,7 +920,7 @@ input[type=range]::-moz-range-thumb {
 <!-- ======================== EINDE RONDE ========================= -->
 <section class="screen" id="s-roundend">
   <div class="side-by-side" id="rePiles"></div>
-  <div class="dots" id="reDots"><i></i><i></i><i></i></div>
+  <div class="roadmap" id="reRoadmap"></div>
   <button class="btn-play press" id="btnRoundNext" aria-label="Volgende ronde">
     <svg viewBox="0 0 100 100"><use href="#i-play"/></svg>
   </button>
@@ -947,12 +1083,13 @@ const Voice = (() => {
   return {
     get available() { return !!picked; },
     get settled() { return ready; },
-    say(text) {
-      if (!picked || !window.speechSynthesis) return;
+    say(text, done) {
+      if (!picked || !window.speechSynthesis) { if (done) done(); return; }
       speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
       u.voice = picked; u.lang = picked.lang;
       u.volume = .35; u.rate = .9; u.pitch = 1;
+      if (done) { u.onend = done; u.onerror = done; setTimeout(done, 4000); }
       speechSynthesis.speak(u);
     },
     stop() { if (window.speechSynthesis) speechSynthesis.cancel(); }
@@ -1357,6 +1494,10 @@ function acts() {
    De knop gaat dan uit, zodat zichtbaar is dat er niets te kiezen valt. */
 function syncControls() {
   $("#btnPas").disabled = !G || G.card === null || G.pile.length === 0;
+  const left = G ? G.pile.length + (G.card === null ? 0 : 1) : 0;
+  const total = G ? G.deck.length : 1;
+  $("#stack").firstElementChild.style.width =
+    Math.round((left / Math.max(1, total)) * 100) + "%";
 }
 
 $("#btnGoed").addEventListener("click", () => {
@@ -1385,15 +1526,15 @@ $("#btnPas").addEventListener("click", () => {
   const ear = $("#btnEar");
   const sync = () => { ear.hidden = !Voice.available; };
   document.addEventListener("voice", sync); sync();
-  const on = e => {
-    e.preventDefault();
+  /* Eén tik en het woord wordt uitgesproken. Vasthouden hoefde nooit: de
+     knop sprak bij het indrukken en brak bij het loslaten meteen weer af,
+     dus een gewone tik leverde een half woord op. Wat je wél vasthoudt is
+     de telefoon, tegen je oor -- daar is de golfjes-animatie voor. */
+  ear.addEventListener("click", () => {
     if (current !== "play" || G === null || G.card === null) return;
     ear.setAttribute("aria-pressed", "true");
-    Voice.say(G.deck[G.card][1]);
-  };
-  const off = () => { ear.setAttribute("aria-pressed", "false"); Voice.stop(); };
-  ear.addEventListener("pointerdown", on);
-  ["pointerup", "pointerleave", "pointercancel"].forEach(ev => ear.addEventListener(ev, off));
+    Voice.say(G.deck[G.card][1], () => ear.setAttribute("aria-pressed", "false"));
+  });
 })();
 
 /* ---------- einde beurt / ronde ---------- */
@@ -1433,10 +1574,12 @@ function endRound() {
 
   if (G.round >= ROUNDS) { saveGame(); winner(); return; }
 
+  // Wat elke ploeg deze ronde verdiende, met een gouden rand om de verse
+  // fiches: anders zie je alleen een totaal en niet wie de ronde won.
   const box = $("#rePiles");
   box.textContent = "";
-  [0, 1].forEach(t => box.appendChild(tallyNode(t)));
-  $$("#reDots i").forEach((d, i) => d.classList.toggle("on", i < G.round));
+  [0, 1].forEach(t => box.appendChild(tallyNode(t, G.scores[t][G.round - 1])));
+  paintRoadmap($("#reRoadmap"), G.round + 1);
 
   G.round++;
   G.pile = shuffle(G.deck.map((_, i) => i));
@@ -1452,30 +1595,65 @@ function fillPile(el, n, hex, newest) {
     const d = document.createElement("i");
     d.style.setProperty("--tc", hex);
     if (newest && i >= n - newest) {
-      d.classList.add("new");
+      d.classList.add("new", "fresh");
       d.style.animationDelay = ((i - (n - newest)) * 0.075) + "s";
     }
     el.appendChild(d);
   }
 }
 
+function svgUse(href, cls) {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 100 100");
+  if (cls) svg.setAttribute("class", cls);
+  const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+  use.setAttribute("href", href);
+  svg.appendChild(use);
+  return svg;
+}
+
 function tallyNode(t, newest) {
   const wrap = document.createElement("div");
   wrap.className = "tally";
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("viewBox", "0 0 100 100");
-  svg.setAttribute("class", "mascot-sm");
-  const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
-  use.setAttribute("href", TEAMS[t].mascot);
-  svg.appendChild(use);
+
+  const head = document.createElement("div");
+  head.className = "head";
+  head.appendChild(svgUse(TEAMS[t].mascot, "mascot-sm"));
+  if (total(t) > total(1 - t)) head.appendChild(svgUse("#i-kroon", "crown"));
+
   const pile = document.createElement("div");
   pile.className = "pile";
   fillPile(pile, total(t), TEAMS[t].hex, newest || 0);
+
   const num = document.createElement("div");
   num.className = "num";
   num.textContent = total(t);
-  wrap.append(svg, pile, num);
+
+  wrap.append(head, pile, num);
   return wrap;
+}
+
+/* De drie rondes als route: wat geweest is krijgt een vinkje, wat nu komt
+   staat groot en in kleur. Drie naamloze stippen vertelden alleen hoevéél
+   er nog te gaan was, niet wát. */
+function paintRoadmap(el, nextRound) {
+  el.textContent = "";
+  for (let r = 1; r <= ROUNDS; r++) {
+    const step = document.createElement("div");
+    step.className = "step" + (r < nextRound ? " done" : r === nextRound ? " next" : "");
+    step.style.setProperty("--sc", ROUND_COLOR[r - 1]);
+
+    const box = document.createElement("div");
+    box.className = "box";
+    box.appendChild(svgUse(ROUND_ICON[r - 1]));
+    if (r < nextRound) box.appendChild(svgUse("#i-vink", "tick"));
+
+    const b = document.createElement("b");
+    b.textContent = ROUND_WORD[r - 1];
+
+    step.append(box, b);
+    el.appendChild(step);
+  }
 }
 
 /* ---------- winnaar ---------- */
