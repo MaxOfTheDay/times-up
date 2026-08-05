@@ -32,8 +32,15 @@ meteen — ook midden in een beurt — en gaat de resterende tijd mee naar de
 eerste beurt van de volgende ronde, voor dezelfde ploeg.
 
 De instellingen (houd het knopje rechtsonder ingedrukt) regelen de
-moeilijkheid, het aantal kaarten en de tijd per beurt. Je ziet daar ook het
-deck van vanavond; tik een kaart aan om ze te vervangen.
+moeilijkheid, het aantal kaarten, de tijd per beurt en het geluid. Je ziet
+daar ook het deck van vanavond; tik een kaart aan om ze te vervangen. Het is
+het enige scherm met tekst, en meteen de korte uitleg voor wie Time's Up niet
+kent.
+
+Tijdens het spelen staat linksboven altijd wie aan de beurt is én wat de
+opdracht van deze ronde is — praten, één woord of uitbeelden — zodat wie het
+toestel aangereikt krijgt niet hoeft te vragen. Wordt de app weggeklikt of
+het scherm vergrendeld, dan bevriest de klok tot je terug bent.
 
 ## Kaarten aanpassen
 

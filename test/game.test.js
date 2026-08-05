@@ -70,19 +70,38 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     await page.waitForTimeout(150);
     ok(await screen() === 'play', `ronde ${round}: niet aan het spelen`);
 
+    // Elke getoonde kaart wordt onthouden, ook die van de proefjes hieronder:
+    // aan het eind moet elke ronde precies hetzelfde deck getoond hebben.
+    const seen = new Set();
+    const noteCard = async () => {
+      const c = await game(() => window.__tijd.G.card);
+      if (c !== null) seen.add(c);
+    };
+
     // Passen zet de kaart achteraan bij, hij mag niet verdwijnen.
+    await noteCard();
     const before = await game(() => window.__tijd.G.pile.length);
     await page.click('#btnPas');
+    await page.waitForTimeout(320);
     const after = await game(() => window.__tijd.G.pile.length);
     ok(before === after, `pas verandert stapelgrootte (${before} -> ${after})`);
 
-    const seen = new Set();
+    // Twee tikken vlak na elkaar zijn één vinger, geen twee kaarten.
+    await noteCard();
+    const scoreBefore = await game(() => window.__tijd.G.scores[window.__tijd.G.team][window.__tijd.G.round - 1]);
+    await page.click('#btnGoed');
+    await page.click('#btnGoed');
+    await page.waitForTimeout(320);
+    const scoreAfter = await game(() => window.__tijd.G.scores[window.__tijd.G.team][window.__tijd.G.round - 1]);
+    ok(scoreAfter - scoreBefore === 1,
+       `dubbele tik telde ${scoreAfter - scoreBefore} punten in plaats van 1`);
+
+    // Ruim boven de dubbeltik-drempel van 280 ms: sneller dan dat is geen mens.
     for (let i = 0; i < 40; i++) {
       if (await screen() !== 'play') break;
-      const c = await game(() => window.__tijd.G.card);
-      if (c !== null) seen.add(c);
+      await noteCard();
       await page.click('#btnGoed');
-      await page.waitForTimeout(20);
+      await page.waitForTimeout(320);
     }
     seenPerRound.push([...seen].sort((a, b) => a - b).join(','));
 

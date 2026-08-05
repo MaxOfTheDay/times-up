@@ -104,6 +104,16 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .press { transition: transform calc(.09s * var(--dur)) ease, box-shadow calc(.09s * var(--dur)) ease; }
 .press:active { transform: translate(var(--drop), var(--drop)); box-shadow: 0 0 0 var(--ink); }
 
+/* Knoppen die je moet vasthouden negeren een tik. Zonder terugkoppeling
+   lijkt het toestel dan stuk, dus schudt de knop even: "blijf duwen". */
+@keyframes nudge {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  20% { transform: translateX(-9px) rotate(-3deg); }
+  50% { transform: translateX(9px) rotate(3deg); }
+  80% { transform: translateX(-5px) rotate(-2deg); }
+}
+.nudge { animation: nudge calc(.42s / max(var(--dur), .001)) ease-in-out; }
+
 .btn-play {                /* het grote ▶ : titel, volgende, opnieuw */
   align-self: center;
   width: min(52vw, 190px); aspect-ratio: 1;
@@ -166,6 +176,12 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   letter-spacing: .12em; margin: 0 0 10px; color: #6b5f4e;
 }
 .field { margin-top: 4px; }
+.rules {
+  border-left: 6px solid var(--vermilion); padding: 2px 0 2px 14px;
+  font-size: 13.5px; line-height: 1.5; color: #4a4036;
+}
+.rules p { margin: 0 0 8px; }
+.rules b { color: var(--ink); }
 
 .teams-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .team-card {
@@ -187,7 +203,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   font-weight: 900; text-transform: uppercase; letter-spacing: .05em; font-size: 14px;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
-.chip small { display: block; font-size: 11px; letter-spacing: .04em; opacity: .65; font-weight: 700; }
+.chip small { display: block; font-size: 11px; letter-spacing: .04em; color: #6b5f4e; font-weight: 700; }
 .chip[aria-pressed="true"] { background: var(--marigold); transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--ink); }
 
 .slider-row { display: flex; align-items: center; gap: 14px; }
@@ -298,14 +314,28 @@ input[type=range]::-moz-range-thumb {
 /* Drie kolommen i.p.v. space-between: verbergt het toestel de oorknop
    (geen Nederlandse stem), dan blijft de klok toch in het midden. */
 .play-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
-.play-top .teamchip { justify-self: start; }
-.play-top .btn-ear  { justify-self: end; }
+.play-top .who { justify-self: start; display: flex; align-items: center; gap: 8px; }
+.play-top .btn-ear { justify-self: end; }
 
 .teamchip {
-  width: 60px; height: 60px; display: grid; place-items: center;
+  width: 56px; height: 56px; display: grid; place-items: center;
   border: var(--line) solid var(--ink); background: var(--team);
+  flex: 0 0 auto;
 }
-.teamchip svg { width: 42px; height: 42px; }
+.teamchip svg { width: 40px; height: 40px; }
+
+/* De opdracht van deze ronde, altijd in beeld. */
+.roundchip {
+  width: 52px; height: 52px; display: grid; place-items: center;
+  border: var(--line) solid var(--ink); background: var(--paper-2);
+  flex: 0 0 auto;
+}
+.roundchip svg { width: 38px; height: 38px; }
+.roundchip.big {
+  width: 96px; height: 96px; background: var(--paper);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.roundchip.big svg { width: 72px; height: 72px; }
 
 .clock { position: relative; width: 112px; height: 112px; flex: 0 0 auto; }
 .clock svg { width: 100%; height: 100%; transform: rotate(-90deg); }
@@ -363,6 +393,11 @@ input[type=range]::-moz-range-thumb {
 .btn-goed svg { width: 52%; }
 .gap { flex: 1; min-width: 24px; }   /* dode zone tussen de twee knoppen */
 
+.btn-pas:disabled {
+  opacity: .3; cursor: default;
+  transform: translate(var(--drop), var(--drop)); box-shadow: 0 0 0 var(--ink);
+}
+
 /* ============================================================
    PUNTEN ALS TELBARE FICHES
    ============================================================ */
@@ -381,8 +416,12 @@ input[type=range]::-moz-range-thumb {
   width: min(36vw, 152px);
 }
 .tally .mascot-sm { width: 74px; }
-.tally .pile { max-width: 100%; }
-.tally .num { font-weight: 900; font-size: 15px; opacity: .5; font-variant-numeric: tabular-nums; }
+/* Rijen links uitlijnen: twee stapels naast elkaar lezen dan als staafjes,
+   en zie je in één oogopslag wie voorstaat. Gecentreerd moet je tellen. */
+.tally .pile { max-width: 100%; justify-content: flex-start; }
+/* Het getal is bijzaak voor de volwassenen, maar moet wel leesbaar zijn:
+   op .5 doorzichtigheid haalde het de AA-drempel niet. */
+.tally .num { font-weight: 900; font-size: 15px; color: #6b5f4e; font-variant-numeric: tabular-nums; }
 
 #s-turnend, #s-roundend { justify-content: center; align-items: center; gap: 4vh; }
 .side-by-side { display: flex; gap: 16px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
@@ -411,24 +450,33 @@ input[type=range]::-moz-range-thumb {
 /* ============================================================
    LIGGEND (tablet): kaart links, bediening rechts
    ============================================================ */
-@media (orientation: landscape) and (min-width: 700px) {
+/* Een telefoon in liggende stand is breed én laag. De balk bovenaan loopt
+   daarom over de volle breedte en alleen de kaart en de bediening delen de
+   hoogte -- met de balk in de rechterkolom paste die kolom niet meer in
+   ~390 px en liep de knop van het scherm. */
+@media (orientation: landscape) and (min-width: 640px) {
   /* .on erbij: een id-selector met display zou anders de display:none
      van .screen overrulen en het spelscherm altijd zichtbaar maken. */
   #s-play.on {
     display: grid;
-    grid-template-columns: 1fr 300px;
-    grid-template-areas: "card top" "card controls";
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "top top" "card controls";
     grid-template-rows: auto 1fr;
-    gap: 16px;
+    gap: 10px 16px;
   }
-  .play-top { grid-area: top; grid-template-columns: 1fr; justify-items: center; gap: 16px; }
-  .play-top .teamchip, .play-top .btn-ear { justify-self: center; }
+  .play-top { grid-area: top; }
   .cardwrap { grid-area: card; }
   .card { max-height: none; height: 100%; width: min(100%, 680px); }
-  .glyph { font-size: min(62vh, 46vw); }
-  .controls { grid-area: controls; flex-direction: column-reverse; align-items: center; justify-content: flex-end; }
+  .glyph { font-size: min(58vh, 46vw); }
+  .controls {
+    grid-area: controls; flex-direction: column-reverse;
+    align-items: center; justify-content: center; gap: 16px;
+  }
   .gap { display: none; }
-  .btn-goed { width: min(30vh, 170px); }
+  .btn-goed { width: min(26vh, 148px); }
+  .btn-pas { width: min(15vh, 84px); height: min(15vh, 84px); }
+  .btn-pas svg { width: 60%; }
+  .clock { width: min(18vh, 112px); height: min(18vh, 112px); }
 }
 </style>
 </head>
@@ -495,6 +543,38 @@ input[type=range]::-moz-range-thumb {
     </g>
   </symbol>
 
+  <!-- De drie rondes in het klein. Tijdens het spelen staat er nergens meer
+       wat de opdracht was: wie het toestel aangereikt krijgt weet anders niet
+       of hij mag praten of moet mimen. -->
+  <symbol id="r-mond" viewBox="0 0 100 100">
+    <ellipse cx="40" cy="50" rx="34" ry="30" fill="#F4EBDA" stroke="#14110F" stroke-width="7"/>
+    <ellipse cx="40" cy="53" rx="24" ry="20" fill="#8C2F1E"/>
+    <path d="M18 42 H62" stroke="#F4EBDA" stroke-width="10" stroke-linecap="round"/>
+    <g stroke="#14110F" stroke-width="7" fill="none" stroke-linecap="round">
+      <path d="M82 36 a20 20 0 0 1 0 28"/>
+      <path d="M94 24 a36 36 0 0 1 0 52"/>
+    </g>
+  </symbol>
+
+  <symbol id="r-vinger" viewBox="0 0 100 100">
+    <g fill="#F4EBDA" stroke="#14110F" stroke-width="6" stroke-linejoin="round">
+      <rect x="26" y="52" width="52" height="42" rx="13"/>
+      <path d="M50 54 a8 8 0 0 1 16 0 z"/>
+      <path d="M64 54 a7 7 0 0 1 14 0 z"/>
+      <rect x="72" y="64" width="16" height="24" rx="8"/>
+      <rect x="31" y="10" width="18" height="50" rx="9"/>
+    </g>
+  </symbol>
+
+  <symbol id="r-lijf" viewBox="0 0 100 100">
+    <g stroke="#14110F" stroke-width="8" stroke-linecap="round" fill="none">
+      <circle cx="50" cy="22" r="12" fill="#F4EBDA"/>
+      <path d="M50 34 V64"/>
+      <path d="M50 42 L24 30"/><path d="M50 42 L76 30"/>
+      <path d="M50 64 L32 90"/><path d="M50 64 L68 90"/>
+    </g>
+  </symbol>
+
   <symbol id="i-glass" viewBox="0 0 100 100">
     <path d="M22 10 H78 M22 90 H78" stroke="#14110F" stroke-width="10" stroke-linecap="round"/>
     <path d="M26 12 L50 50 L26 88 H74 L50 50 L74 12 Z"
@@ -521,16 +601,26 @@ input[type=range]::-moz-range-thumb {
 <section class="screen" id="s-setup">
   <h1>Tijd is Om</h1>
 
+  <div class="rules">
+    <p><b>Twee ploegen, drie rondes over dezelfde kaarten.</b>
+      Eerst omschrijven met woorden, dan met één enkel woord, dan alleen
+      uitbeelden. Dat je de kaarten drie keer ziet is de bedoeling: tegen de
+      derde ronde kent iedereen ze half, en beginnen de jongsten te winnen.</p>
+    <p>Geraden is een punt en meteen de volgende kaart. Passen mag zonder
+      straf. Is de stapel leeg, dan stopt de ronde — ook midden in een beurt —
+      en gaat de resterende tijd mee naar de volgende ronde, voor dezelfde
+      ploeg. Verder hoeft niemand iets te lezen: de kinderen zien alleen
+      beelden.</p>
+  </div>
+
   <div class="field">
     <h2>Ploegen</h2>
     <div class="teams-row">
       <div class="team-card block" style="--team:var(--vermilion)">
         <svg viewBox="0 0 100 100"><use href="#m-vos"/></svg>
-        <input id="nameA" maxlength="10" value="Vos" aria-label="Naam ploeg 1">
       </div>
       <div class="team-card block" style="--team:var(--blue)">
         <svg viewBox="0 0 100 100"><use href="#m-uil"/></svg>
-        <input id="nameB" maxlength="10" value="Uil" aria-label="Naam ploeg 2">
       </div>
     </div>
   </div>
@@ -562,6 +652,14 @@ input[type=range]::-moz-range-thumb {
   </div>
 
   <div class="field">
+    <h2>Geluid</h2>
+    <div class="chips" id="soundChips">
+      <button class="chip" data-sound="1">Aan</button>
+      <button class="chip" data-sound="0">Uit</button>
+    </div>
+  </div>
+
+  <div class="field">
     <h2>Het spel van vanavond</h2>
     <div class="preview" id="preview"></div>
     <p class="hint">Tik op een kaart om ze te vervangen. Deze kaarten komen alle drie
@@ -586,6 +684,7 @@ input[type=range]::-moz-range-thumb {
   <div class="plaque block">
     <svg class="mascot-big" id="hoMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg>
   </div>
+  <div class="roundchip big"><svg id="hoRound" viewBox="0 0 100 100"><use href="#r-mond"/></svg></div>
   <div class="carry" id="hoCarry" hidden>
     <svg viewBox="0 0 100 100"><use href="#i-glass"/></svg>
     <div class="pile" id="hoCarryPile"></div>
@@ -601,7 +700,10 @@ input[type=range]::-moz-range-thumb {
 <!-- =========================== SPEL ============================= -->
 <section class="screen" id="s-play">
   <div class="play-top">
-    <div class="teamchip"><svg id="plMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg></div>
+    <div class="who">
+      <div class="teamchip"><svg id="plMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg></div>
+      <div class="roundchip"><svg id="plRound" viewBox="0 0 100 100"><use href="#r-mond"/></svg></div>
+    </div>
     <div class="clock" id="clock">
       <svg viewBox="0 0 120 120">
         <circle class="track" cx="60" cy="60" r="50"/>
@@ -631,8 +733,7 @@ input[type=range]::-moz-range-thumb {
 
 <!-- ======================== EINDE BEURT ========================= -->
 <section class="screen" id="s-turnend">
-  <svg class="mascot-big" id="teMascot" viewBox="0 0 100 100" style="width:min(42vw,190px)"><use href="#m-vos"/></svg>
-  <div class="pile" id="tePile"></div>
+  <div class="side-by-side" id="tePiles"></div>
   <button class="btn-play press" id="btnTurnNext" aria-label="Volgende beurt">
     <svg viewBox="0 0 100 100"><use href="#i-play"/></svg>
   </button>
@@ -745,12 +846,14 @@ const DECKS = {
    ============================================================== */
 const Snd = (() => {
   let ctx = null;
+  let on = true;                 // te wisselen in de instellingen
   function ac() {
     if (!ctx) { const C = window.AudioContext || window.webkitAudioContext; if (C) ctx = new C(); }
     if (ctx && ctx.state === "suspended") ctx.resume();
     return ctx;
   }
   function tone(freq, dur, type, vol, at, glide) {
+    if (!on) return;
     const c = ac(); if (!c) return;
     const t0 = c.currentTime + (at || 0);
     const o = c.createOscillator(), g = c.createGain();
@@ -765,6 +868,8 @@ const Snd = (() => {
   }
   return {
     unlock: ac,
+    set enabled(v) { on = !!v; },
+    get enabled() { return on; },
     goed()  { tone(660, .09, "square", .2, 0); tone(990, .13, "square", .2, .08); },
     pas()   { tone(200, .13, "sine", .22, 0, 120); },
     tick(f) { tone(f || 1400, .022, "square", .08, 0); },
@@ -824,10 +929,10 @@ const KEY_SET = "tijdisom.settings";
 const KEY_GAME = "tijdisom.game";
 
 let settings = {
-  names: ["Vos", "Uil"],
   tier: "klein",
   size: 24,
-  secs: 30
+  secs: 30,
+  sound: true
 };
 let G = null;          // lopend spel, of null
 let draft = [];        // getrokken kaarten op het instellingenscherm
@@ -880,8 +985,8 @@ function show(name) {
    6. INSTELLINGEN (volwassene)
    ============================================================== */
 function paintSetup() {
-  $("#nameA").value = settings.names[0];
-  $("#nameB").value = settings.names[1];
+  $$("#soundChips .chip").forEach(c =>
+    c.setAttribute("aria-pressed", String((c.dataset.sound === "1") === !!settings.sound)));
   $$("#tierChips .chip").forEach(c =>
     c.setAttribute("aria-pressed", String(c.dataset.tier === settings.tier)));
   $$("#sizeChips .chip").forEach(c =>
@@ -932,11 +1037,12 @@ $("#secs").addEventListener("input", e => {
   $("#secsOut").textContent = settings.secs + "s";
   saveSettings();
 });
-["nameA", "nameB"].forEach((id, i) => {
-  $("#" + id).addEventListener("input", e => {
-    settings.names[i] = e.target.value.trim() || (i ? "Uil" : "Vos");
-    saveSettings();
-  });
+$("#soundChips").addEventListener("click", e => {
+  const c = e.target.closest(".chip"); if (!c) return;
+  settings.sound = c.dataset.sound === "1";
+  Snd.enabled = settings.sound;
+  saveSettings(); paintSetup();
+  if (settings.sound) { Snd.unlock(); Snd.goed(); }   // even laten horen
 });
 $("#btnBack").addEventListener("click", () => show("title"));
 $("#btnGo").addEventListener("click", () => { Snd.unlock(); newGame(); });
@@ -945,17 +1051,30 @@ $("#btnGo").addEventListener("click", () => { Snd.unlock(); newGame(); });
    vierjarige er tijdens het spel niet per ongeluk in. */
 (() => {
   const gear = $("#btnGear");
-  let t = null;
+  let t = null, down = 0;
   const start = e => {
     e.preventDefault();
+    down = performance.now();
     gear.classList.add("hold");
-    t = setTimeout(() => { gear.classList.remove("hold"); openSetup(); }, 1200);
+    t = setTimeout(() => { down = 0; gear.classList.remove("hold"); openSetup(); }, 1200);
   };
-  const cancel = () => { clearTimeout(t); gear.classList.remove("hold"); };
+  const cancel = () => {
+    clearTimeout(t);
+    gear.classList.remove("hold");
+    if (down && performance.now() - down < 1200) nudge(gear);
+    down = 0;
+  };
   gear.addEventListener("pointerdown", start);
   ["pointerup", "pointerleave", "pointercancel"].forEach(ev => gear.addEventListener(ev, cancel));
   gear.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openSetup(); } });
 })();
+
+function nudge(el) {
+  el.classList.remove("nudge");
+  void el.offsetWidth;
+  el.classList.add("nudge");
+  setTimeout(() => el.classList.remove("nudge"), 500);
+}
 
 function openSetup() {
   if (!draft.length) redraw();
@@ -977,8 +1096,7 @@ function newGame() {
     scores: [[0, 0, 0], [0, 0, 0]],   // [ploeg][ronde]
     gained: 0,
     pendingMs: settings.secs * 1000,  // wat de volgende beurt meekrijgt
-    secs: settings.secs,
-    names: settings.names.slice()
+    secs: settings.secs
   };
   saveGame();
   roundIntro();
@@ -1045,10 +1163,13 @@ const RI_ART = [
 
 $("#btnRoundGo").addEventListener("click", () => { Snd.unlock(); handoff(); });
 
+const ROUND_ICON = ["#r-mond", "#r-vinger", "#r-lijf"];
+
 function handoff() {
   const t = TEAMS[G.team];
   $("#s-handoff").style.setProperty("--team", t.color);
   $("#hoMascot").firstElementChild.setAttribute("href", t.mascot);
+  $("#hoRound").firstElementChild.setAttribute("href", ROUND_ICON[G.round - 1]);
   // Overgedragen tijd tonen als fiches, niet als getal.
   const carried = G.pendingMs > 0 && G.pendingMs < G.secs * 1000;
   $("#hoCarry").hidden = !carried;
@@ -1085,7 +1206,11 @@ function handoff() {
     e.preventDefault(); Snd.unlock();
     t0 = performance.now(); reset(); raf = requestAnimationFrame(frame);
   });
-  ["pointerup", "pointerleave", "pointercancel"].forEach(ev => btn.addEventListener(ev, reset));
+  ["pointerup", "pointerleave", "pointercancel"].forEach(ev => btn.addEventListener(ev, () => {
+    const held = raf !== null && performance.now() - t0 < HOLD;
+    reset();
+    if (held) nudge(btn);        // losgelaten voor de ring vol was
+  }));
   btn.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); Snd.unlock(); startTurn(); } });
 })();
 
@@ -1108,8 +1233,10 @@ function startTurn() {
   G.gained = 0;
   const t = TEAMS[G.team];
   $("#plMascot").firstElementChild.setAttribute("href", t.mascot);
+  $("#plRound").firstElementChild.setAttribute("href", ROUND_ICON[G.round - 1]);
   $("#s-play").style.setProperty("--team", t.color);
   nextCard(false);
+  syncControls();
   show("play");
   requestWake();
   const totalMs = G.secs * 1000;
@@ -1153,21 +1280,40 @@ function nextCard(animate) {
   }
 }
 
+/* Twee tikken vlak na elkaar zijn in de praktijk één enthousiaste vinger,
+   geen twee geraden kaarten. De tweede telt niet mee. */
+let lastAct = 0;
+function acts() {
+  if (current !== "play" || !G || G.card === null) return false;
+  const now = performance.now();
+  if (now - lastAct < 280) return false;
+  lastAct = now;
+  return true;
+}
+
+/* Ligt er nog maar één kaart, dan levert passen dezelfde kaart weer op.
+   De knop gaat dan uit, zodat zichtbaar is dat er niets te kiezen valt. */
+function syncControls() {
+  $("#btnPas").disabled = !G || G.card === null || G.pile.length === 0;
+}
+
 $("#btnGoed").addEventListener("click", () => {
-  if (current !== "play" || G.card === null) return;
+  if (!acts()) return;
   Snd.goed();
   G.scores[G.team][G.round - 1]++;
   G.gained++;
   if (!G.pile.length) { endRound(); return; }
   nextCard(true);
+  syncControls();
   saveGame();
 });
 
 $("#btnPas").addEventListener("click", () => {
-  if (current !== "play" || G.card === null) return;
+  if (!acts() || G.pile.length === 0) return;
   Snd.pas();
   G.pile.push(G.card);      // onderop, zonder straf
   nextCard(true);
+  syncControls();
   saveGame();
 });
 
@@ -1198,10 +1344,13 @@ function timeUp() {
   turnEnd();
 }
 
+/* Einde beurt toont beide ploegen, niet alleen wie net speelde: één mascotte
+   in beeld las als "jij weer", terwijl het toestel juist doorgegeven moet
+   worden. De zojuist verdiende fiches komen aanrollen. */
 function turnEnd() {
-  const t = TEAMS[G.team];
-  $("#teMascot").firstElementChild.setAttribute("href", t.mascot);
-  fillPile($("#tePile"), total(G.team), t.hex, G.gained);
+  const box = $("#tePiles");
+  box.textContent = "";
+  [0, 1].forEach(t => box.appendChild(tallyNode(t, t === G.team ? G.gained : 0)));
   for (let i = 0; i < G.gained; i++) Snd.token(i);
   G.team = 1 - G.team;
   G.pendingMs = 0;
@@ -1248,7 +1397,7 @@ function fillPile(el, n, hex, newest) {
   }
 }
 
-function tallyNode(t) {
+function tallyNode(t, newest) {
   const wrap = document.createElement("div");
   wrap.className = "tally";
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -1259,7 +1408,7 @@ function tallyNode(t) {
   svg.appendChild(use);
   const pile = document.createElement("div");
   pile.className = "pile";
-  fillPile(pile, total(t), TEAMS[t].hex, 0);
+  fillPile(pile, total(t), TEAMS[t].hex, newest || 0);
   const num = document.createElement("div");
   num.className = "num";
   num.textContent = total(t);
@@ -1333,8 +1482,24 @@ async function requestWake() {
 function releaseWake() {
   try { if (wake) { wake.release(); wake = null; } } catch (e) { wake = null; }
 }
+/* Weggeklikt of scherm vergrendeld: de klok bevriest. Anders loopt de beurt
+   in stilte af terwijl niemand kijkt, en is de tijd bij terugkomst op. */
+let frozenMs = 0;
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible" && current === "play") requestWake();
+  if (current !== "play") return;
+  if (document.visibilityState === "hidden") {
+    frozenMs = remaining();
+    stopClock();
+    Voice.stop();
+  } else {
+    requestWake();
+    if (frozenMs > 0) {
+      deadline = performance.now() + frozenMs;
+      lastTickAt = 0;
+      frozenMs = 0;
+      runClock(G.secs * 1000);
+    }
+  }
 });
 
 /* ==============================================================
@@ -1350,6 +1515,7 @@ $("#btnStart").addEventListener("click", () => {
 });
 
 load();
+Snd.enabled = settings.sound !== false;
 redraw();
 paintSetup();
 show("title");
