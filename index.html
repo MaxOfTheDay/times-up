@@ -242,9 +242,7 @@ button.btn-ghost, button.btn-icon, button.gear, button.chip, button.pv {
    Het toestel wisselt van hand; een losse tik mag de klok niet laten
    lopen. Dat werkte, maar was onzichtbaar: de ring stond in papierwit
    met de streep volledig weggeschoven, dus je zag pas dát je moest
-   vasthouden nadat je het al fout had gedaan. Nu staat de baan er altijd,
-   in inkt op een kwart doorzichtigheid, met streepjes -- dezelfde taal
-   als een stippellijn: "hier moet nog iets gebeuren". */
+   vasthouden nadat je het al fout had gedaan. Nu staat de baan er altijd. */
 .hold-ring { position: relative; width: min(44vw, 24vh, 190px); aspect-ratio: 1; flex: 0 0 auto; }
 .hold-ring .btn-go { width: 100%; }
 .hold-ring svg.ring {
@@ -252,12 +250,14 @@ button.btn-ghost, button.btn-icon, button.gear, button.chip, button.pv {
   transform: rotate(-90deg); pointer-events: none;
 }
 .hold-ring .ring circle { fill: none; stroke-width: 8; stroke-linecap: butt; }
-/* De baan in papierwit en de voortgang in inkt. Andersom -- allebei inkt --
-   liep de baan op het vermiljoen van het overdrachtscherm dicht tot een
-   vuile bordeauxrode stippellijn die als vlek las in plaats van als spoor.
-   Licht op een verzadigd vlak zegt "hier moet nog iets komen", en de zwarte
-   boog die hem volloopt is er dan goed van te onderscheiden. */
-.hold-ring .ring .track { stroke: var(--paper); opacity: .6; stroke-dasharray: 10 12; }
+/* De baan was eerst gestippeld: dezelfde taal als de rand van een
+   vasthoud-knop elders. Maar deze knop heeft al een ring om zich heen die
+   geen andere .btn-go draagt -- die vorm alleen zegt al "dit is anders,
+   hou vast", en de stippels erbovenop lazen op het vermiljoen van dit
+   scherm eerder als een kartelrand of een tandwiel dan als een spoor.
+   Eén dichte lijn in papierwit op een kwart doorzichtigheid; de zwarte
+   boog die hem volloopt is er nog altijd goed van te onderscheiden. */
+.hold-ring .ring .track { stroke: var(--paper); opacity: .55; }
 .hold-ring .ring .arc   { stroke: var(--ink); stroke-linecap: round; }
 
 /* ---- geraden ---- */
