@@ -347,12 +347,16 @@ input[type=range]::-moz-range-thumb {
 .play-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .play-top .who { display: flex; align-items: flex-start; gap: 8px; }
 
+/* De mascotte staat vrij, zonder kader en zonder vlak: wie aan de beurt is
+   heeft het overdrachtscherm net paginagroot verteld, dus hier is het
+   naslag. Met een omkaderd gekleurd blokje leek het even belangrijk als de
+   opdracht ernaast -- twee gelijke badges naast elkaar, en dan lees je
+   allebei niet. De vorm van het dier draagt de ploeg al. */
 .teamchip {
-  width: 56px; height: 56px; display: grid; place-items: center;
-  border: var(--line) solid var(--ink); background: var(--team);
+  width: 46px; height: 46px; display: grid; place-items: center;
   flex: 0 0 auto;
 }
-.teamchip svg { width: 40px; height: 40px; }
+.teamchip svg { width: 100%; height: 100%; }
 
 /* De opdracht van deze ronde, altijd in beeld. Beeld én woord samen: het
    kind leest de ballon, wie wél leest is meteen zeker. Elke ronde heeft
@@ -362,10 +366,11 @@ input[type=range]::-moz-range-thumb {
   flex: 0 0 auto;
 }
 .roundchip .ico {
-  width: 52px; height: 52px; display: grid; place-items: center;
+  width: 58px; height: 58px; display: grid; place-items: center;
   border: var(--line) solid var(--ink); background: var(--round, var(--paper-2));
+  box-shadow: 4px 4px 0 var(--ink);
 }
-.roundchip .ico svg { width: 38px; height: 38px; }
+.roundchip .ico svg { width: 42px; height: 42px; }
 .roundchip b {
   font-size: 10px; font-weight: 900; letter-spacing: .02em;
   text-transform: uppercase; white-space: nowrap;
@@ -403,6 +408,10 @@ input[type=range]::-moz-range-thumb {
 /* De kaart groeit mee met de ruimte die er is en blijft vierkant. Met een
    vaste breedte bleef op een lange telefoon een gat van ruim 120 px tussen
    de kaart en de knop staan -- veel lucht die niets deed. */
+/* Geen ploegkleur op de kaart. De rand ís de klok en verkleurt van geel naar
+   rood; met de vermiljoenen misregistratie van ploeg Vos erbij liep er rood
+   over rood en werd de rand onleesbaar. De kaart is het neutrale toneel,
+   de ploeg staat in de balk erboven. */
 .card {
   position: relative;
   flex: 1 1 auto; min-height: 0;
@@ -410,6 +419,7 @@ input[type=range]::-moz-range-thumb {
   max-width: min(94vw, 460px); max-height: min(94vw, 460px);
   display: grid; place-items: center;
   background: var(--paper);
+  box-shadow: 7px 7px 0 var(--ink);
 }
 
 /* De klok loopt om de kaart heen in plaats van in een wijzerplaat ernaast.
@@ -426,19 +436,39 @@ input[type=range]::-moz-range-thumb {
 }
 /* Alleen de beweging, geen box-shadow meer: die draagt nu de stapel eronder
    en mag niet door de animatie overschreven worden. */
-@keyframes stamp {
-  0%   { transform: translate(-6px,-6px) rotate(-1.5deg); }
-  100% { transform: translate(0,0) rotate(0); }
+/* Geraden en gepast zagen er precies hetzelfde uit, terwijl ze het
+   tegenovergestelde betekenen. Nu wordt een geraden kaart van de stapel
+   gedeeld -- schuin van boven erop -- en zakt een gepaste kaart eerst weg
+   onder de stapel voor de volgende bovenkomt. Zonder te kijken weet je
+   welke knop het deed. */
+@keyframes deal {
+  0%   { transform: translate(-10px, -14px) rotate(-3deg); }
+  100% { transform: translate(0, 0) rotate(0); }
 }
-.card.in { animation: stamp calc(.16s / max(var(--dur), .001)) ease-out; }
+@keyframes tuck {
+  0%   { transform: translateY(0) scale(1); }
+  45%  { transform: translateY(16px) scale(.965); }
+  100% { transform: translateY(0) scale(1); }
+}
+.card.in   { animation: deal calc(.17s / max(var(--dur), .001)) ease-out; }
+.card.tuck { animation: tuck calc(.28s / max(var(--dur), .001)) ease-in-out; }
 /* Eén kaart, één teken, zo groot als de kaart toelaat. */
 .glyph { font-size: min(46vh, 68vw); line-height: 1; }
 
-/* Hoeveel er nog op de stapel ligt zit in de kaart zelf: er liggen randen
-   ónder, en die verdwijnen naarmate je opschiet. Hier stond een balkje,
-   maar naast een klok die óók leegloopt lees je twee meters als één
-   onbegrijpelijk ding. Een stapel is een voorwerp, geen meter.
-   De lagen worden als box-shadow gezet vanuit paintStack(). */
+/* De stapel: echte kaarten ónder de bovenste, elk een graadje gedraaid.
+   Als box-shadow, keurig uitgelijnd, werd het een streepjespatroon in plaats
+   van een stapel -- pas de scheve hoeken maken er iets van dat op tafel
+   ligt. Ze verdwijnen één voor één naarmate je opschiet. */
+.cardslot { position: relative; display: grid; place-items: center; min-height: 0; }
+.cardslot .under {
+  position: absolute; inset: 0; z-index: -1;
+  background: var(--paper); border: var(--line) solid var(--ink);
+  transition: opacity calc(.2s * var(--dur)) ease;
+}
+.cardslot .u1 { transform: rotate(1.6deg) translate(3px, 4px); }
+.cardslot .u2 { transform: rotate(-2.2deg) translate(-2px, 7px); }
+.cardslot .u3 { transform: rotate(3deg) translate(5px, 10px); }
+.cardslot .under[hidden] { display: none; }
 
 /* "Goed" staat in het midden: dat is waar een duim uitkomt, links- of
    rechtshandig. "Pas" zit in de hoek, ver genoeg weg om niet per ongeluk
@@ -893,11 +923,16 @@ input[type=range]::-moz-range-thumb {
 
   <div class="cardwrap">
     <div class="cardstack">
-      <div class="card block" id="card">
-        <span class="glyph" id="glyph">🐘</span>
-        <svg class="timerframe" id="timerFrame" aria-hidden="true">
-          <rect id="timerRect" fill="none"/>
-        </svg>
+      <div class="cardslot">
+        <i class="under u3" aria-hidden="true"></i>
+        <i class="under u2" aria-hidden="true"></i>
+        <i class="under u1" aria-hidden="true"></i>
+        <div class="card block" id="card">
+          <span class="glyph" id="glyph">🐘</span>
+          <svg class="timerframe" id="timerFrame" aria-hidden="true">
+            <rect id="timerRect" fill="none"/>
+          </svg>
+        </div>
       </div>
     </div>
   </div>
@@ -1425,7 +1460,7 @@ function startTurn() {
   $("#plMascot").firstElementChild.setAttribute("href", t.mascot);
   paintRound($("#plRoundChip"), $("#plRound"), $("#plRoundWord"));
   $("#s-play").style.setProperty("--team", t.color);
-  nextCard(false);
+  nextCard(null);
   syncControls();
   show("play");
   sizeTimer();                 // pas ná show(): daarvoor heeft de kaart geen maat
@@ -1461,14 +1496,15 @@ function stopClock() { cancelAnimationFrame(clockRaf); clockRaf = null; }
 function remaining() { return Math.max(0, deadline - performance.now()); }
 
 /* ---------- kaarten ---------- */
-function nextCard(animate) {
+function nextCard(how) {
   if (!G.pile.length) { G.card = null; return; }
   G.card = G.pile.shift();
-  const el = $("#glyph");
-  el.textContent = G.deck[G.card][0];
-  if (animate !== false) {
+  $("#glyph").textContent = G.deck[G.card][0];
+  if (how) {
     const c = $("#card");
-    c.classList.remove("in"); void c.offsetWidth; c.classList.add("in");
+    c.classList.remove("in", "tuck");
+    void c.offsetWidth;                       // herstart de animatie
+    c.classList.add(how === "pas" ? "tuck" : "in");
   }
 }
 
@@ -1495,20 +1531,12 @@ function syncControls() {
    naar rechts zou de stapel op smalle telefoons buiten beeld lopen. Bij de
    laatste kaart blijft er niets over -- die ligt plat op tafel, en dat is
    precies de boodschap. */
-const STACK_STEP = 7, STACK_MAX = 4;
 function paintStack() {
-  const el = $("#card");
-  const misreg = "calc(var(--shift) * -1) calc(var(--shift) * -1) 0 0 var(--team)";
-  if (!G) { el.style.boxShadow = ""; return; }
-  const left = G.pile.length + (G.card === null ? 0 : 1);
-  const layers = Math.min(STACK_MAX,
-    Math.max(0, Math.round(((left - 1) / Math.max(1, G.deck.length)) * STACK_MAX)));
-  const parts = [misreg];
-  for (let i = 1; i <= layers; i++) {
-    const d = i * STACK_STEP;
-    parts.push(`0 ${d}px 0 0 var(--paper)`, `0 ${d}px 0 2px var(--ink)`);
-  }
-  el.style.boxShadow = parts.join(", ");
+  const left = G ? G.pile.length + (G.card === null ? 0 : 1) : 0;
+  const total = G ? Math.max(1, G.deck.length) : 1;
+  // 3 kaarten eronder bij een volle stapel, geen enkele bij de laatste.
+  const layers = Math.min(3, Math.max(0, Math.round(((left - 1) / total) * 3)));
+  [1, 2, 3].forEach(i => { $(".cardslot .u" + i).hidden = i > layers; });
 }
 
 /* Wat je deze beurt al binnen hebt, als fiches. Zonder dat werk je blind:
@@ -1527,7 +1555,7 @@ $("#btnGoed").addEventListener("click", () => {
   G.gained++;
   paintTurnScore();
   if (!G.pile.length) { endRound(); return; }
-  nextCard(true);
+  nextCard("goed");
   syncControls();
   saveGame();
 });
@@ -1536,7 +1564,7 @@ $("#btnPas").addEventListener("click", () => {
   if (!acts() || G.pile.length === 0) return;
   Snd.pas();
   G.pile.push(G.card);      // onderop, zonder straf
-  nextCard(true);
+  nextCard("pas");
   syncControls();
   saveGame();
 });
