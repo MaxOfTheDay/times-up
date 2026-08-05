@@ -12,8 +12,14 @@ instellingen, en die zijn voor de volwassene.
 
 Daarom staat er op een kaart alleen een emoji, groot genoeg om door de kamer
 te zien. De kaarten zijn zo gekozen dat elk beeld maar één ding kan
-betekenen. Wie toch blokkeert, houdt de oorknop vast en hoort het woord
-gefluisterd — een vangnet, niet het hoofdkanaal.
+betekenen.
+
+Het spelscherm houdt de blik op die ene kaart. De klok loopt als een rand om
+de kaart heen in plaats van in een wijzerplaat ernaast, dus de tijd zit in
+dezelfde blik als het beeld; de laatste seconden kleurt hij rood en klopt de
+kaart mee. Eronder loopt een balkje terug met wat er nog op de stapel ligt —
+leegspelen levert tijd op voor de volgende ronde, dus dat is het zien waard.
+Rechtsboven groeit een rij fiches: wat deze beurt al binnen is.
 
 ## Spelen
 
