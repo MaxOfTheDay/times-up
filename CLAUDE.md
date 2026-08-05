@@ -50,6 +50,22 @@ geen potje overleeft een herlaadbeurt. Die knop is nu ook een gewone tik.
 Alles staat in `index.html`: geen build, geen externe assets, werkt met de
 wifi uit. Houd dat zo.
 
+## App-pictogram en installeerbaarheid
+
+Het manifest staat niet als los bestand naast `index.html` -- dat zou de
+regel "alles staat in `index.html`" breken -- maar wordt bij het laden in
+het geheugen opgebouwd en als blob-URL aan `<link rel="manifest">` gehangen.
+Een blob-URL heeft geen pad om relatief tegenaan te resolven, dus
+`start_url` en `scope` staan er expliciet in als de volledige map-URL
+(`location.href` met de bestandsnaam eraf), niet als `"."` of `"/"`.
+
+De pictogrammen (`favicon`, `apple-touch-icon`, en de drie manifest-iconen)
+zijn dezelfde zeefdruk-plaat als `.wordmark`: inkt-vlak, gouden zandloper,
+crème contour. Ze zijn met Pillow gegenereerd uit dezelfde coördinaten als
+het `#i-glass`-symbool en als vaste PNG's ingebakken -- geen build-stap,
+gewoon eenmalig gegenereerd. Wijzigt de zandloper in `#i-glass`, genereer
+de pictogrammen dan opnieuw met dezelfde vorm.
+
 ## Kaarten
 
 `DECKS` bovenaan `index.html`, één regel per kaart. Twee regels bij het
