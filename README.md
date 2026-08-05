@@ -17,9 +17,14 @@ betekenen.
 Het spelscherm houdt de blik op die ene kaart. De klok loopt als een rand om
 de kaart heen in plaats van in een wijzerplaat ernaast, dus de tijd zit in
 dezelfde blik als het beeld; de laatste seconden kleurt hij rood en klopt de
-kaart mee. Eronder loopt een balkje terug met wat er nog op de stapel ligt —
-leegspelen levert tijd op voor de volgende ronde, dus dat is het zien waard.
+kaart mee. De kaart ligt op een stapel waarvan de randen verdwijnen naarmate
+je opschiet — leegspelen levert tijd op voor de volgende ronde, dus dat is
+het zien waard, en bij de laatste kaart ligt er niets meer onder.
 Rechtsboven groeit een rij fiches: wat deze beurt al binnen is.
+
+Alleen de klok is een meter. Alles wat langzaam leegloopt leest als tijd, dus
+de stapel is een voorwerp en de punten zijn fiches — geen tweede en derde
+balkje ernaast.
 
 ## Spelen
 
