@@ -318,6 +318,27 @@ input[type=range]::-moz-range-thumb {
   transform: rotate(-90deg); pointer-events: none;
 }
 .hold-ring .ring circle { fill: none; stroke: var(--paper); stroke-width: 8; stroke-linecap: round; }
+
+/* De opdracht op het overdrachtscherm: pictogram en woord naast elkaar, op
+   papier. Ook hier geen rondekleur -- de mascotte staat er pal boven en
+   blauw naast de blauwe uil las als ploegkleur. */
+.roundcard {
+  display: flex; align-items: center; gap: min(1.8vh, 14px);
+  padding: min(1.6vh, 12px) 20px min(1.6vh, 12px) 14px;
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.roundcard .ico {
+  width: min(9vh, 74px); height: min(9vh, 74px);
+  display: grid; place-items: center;
+  background: var(--paper-2); border: 3px solid var(--ink);
+  flex: 0 0 auto;
+}
+.roundcard .ico svg { width: 76%; height: 76%; }
+.roundcard b {
+  font-size: min(6vw, 2.9vh, 26px); font-weight: 900;
+  letter-spacing: .05em; text-transform: uppercase;
+}
+
 /* Overgedragen tijd: een kaartje waarvan de rand al deels weg is -- precies
    het beeld dat straks om de echte kaart staat. Hier stond eerst een
    zandloper met gele bolletjes, maar bolletjes zijn in dit spel punten;
@@ -345,7 +366,10 @@ input[type=range]::-moz-range-thumb {
    welke opdracht) en wat er tijdens de beurt verandert (tijd, gescoord).
    Links naslag, rechts de teller. */
 .play-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.play-top .who { display: flex; align-items: flex-start; gap: 8px; }
+/* De mascotte hangt op het midden van het opdrachtvakje in plaats van op de
+   bovenrand; zo staan de twee als een groepje bij elkaar. */
+.play-top .who { display: flex; align-items: flex-start; gap: 10px; }
+.play-top .teamchip { margin-top: 4px; }
 
 /* De mascotte staat vrij, zonder kader en zonder vlak: wie aan de beurt is
    heeft het overdrachtscherm net paginagroot verteld, dus hier is het
@@ -365,12 +389,14 @@ input[type=range]::-moz-range-thumb {
   display: flex; flex-direction: column; align-items: center; gap: 3px;
   flex: 0 0 auto;
 }
+/* Geen kleur op de ronde -- zie de opmerking bij ROUND_COLOR. Zonder vlak
+   en zonder slagschaduw is de chip ook meteen een stuk lichter; het is
+   naslag, geen mededeling. */
 .roundchip .ico {
-  width: 58px; height: 58px; display: grid; place-items: center;
-  border: var(--line) solid var(--ink); background: var(--round, var(--paper-2));
-  box-shadow: 4px 4px 0 var(--ink);
+  width: 54px; height: 54px; display: grid; place-items: center;
+  border: 3px solid var(--ink); background: var(--paper-2);
 }
-.roundchip .ico svg { width: 42px; height: 42px; }
+.roundchip .ico svg { width: 40px; height: 40px; }
 .roundchip b {
   font-size: 10px; font-weight: 900; letter-spacing: .02em;
   text-transform: uppercase; white-space: nowrap;
@@ -470,18 +496,24 @@ input[type=range]::-moz-range-thumb {
 .cardslot .u3 { transform: rotate(3deg) translate(5px, 10px); }
 .cardslot .under[hidden] { display: none; }
 
-/* "Goed" staat in het midden: dat is waar een duim uitkomt, links- of
-   rechtshandig. "Pas" zit in de hoek, ver genoeg weg om niet per ongeluk
-   te raken. Eerst stonden ze links en rechts, waarbij de hoofdknop alleen
-   voor rechtshandigen goed lag. */
+/* "Goed" heeft even in het midden gestaan, voor duimen van beide handen,
+   maar dan schoof hij tot negen pixels van "pas" -- en juist die twee
+   moeten ver uit elkaar. Hij staat weer rechts, waar een rechterduim
+   vanzelf uitkomt; met 156 px breedte haalt een linkerduim de linkerhelft
+   ook makkelijk. "Pas" ligt diagonaal in de andere hoek, met de hele
+   onderrand ertussen. */
 .controls {
   position: relative;
-  display: flex; align-items: flex-end; justify-content: center;
-  padding: 0 4px; min-height: min(40vw, 20vh, 164px);
+  display: flex; align-items: flex-end; justify-content: flex-end;
+  padding: 0 6px; min-height: min(40vw, 20vh, 164px);
 }
-.btn-pas {                 /* klein, vierkant, in de hoek, papierkleur */
-  position: absolute; left: 4px; bottom: 4px;
-  width: 84px; height: 84px;
+/* Links onderin, maar niet tegen de rand: die strook is op Android de
+   terugveeg-zone, en een knop die daar half in ligt krijg je soms niet en
+   veegt je soms de app uit. Iets kleiner dan eerst, zodat er meer dode
+   ruimte tussen "pas" en "goed" blijft nu die laatste in het midden staat. */
+.btn-pas {
+  position: absolute; left: 18px; bottom: 4px;
+  width: 76px; height: 76px;
   background: var(--paper-2);
   border: var(--line) solid var(--ink); box-shadow: var(--drop) var(--drop) 0 var(--ink);
   display: grid; place-items: center;
@@ -586,8 +618,10 @@ input[type=range]::-moz-range-thumb {
 .roadmap .step.next {
   opacity: 1;
 }
+/* De volgende ronde valt op door formaat en scherpte, niet door kleur: op
+   dit scherm staan de mascottes ernaast. */
 .roadmap .step.next .box {
-  width: 74px; height: 74px; background: var(--sc);
+  width: 74px; height: 74px; background: var(--paper);
   box-shadow: 5px 5px 0 var(--ink);
 }
 .roadmap .step.next .box svg { width: 54px; height: 54px; }
@@ -1344,6 +1378,12 @@ const RI_ART = [
    </svg>`
 ];
 
+/* Alleen voor het ronde-scherm. Elders krijgt de ronde géén kleur, want er
+   is er geen vrije: marigold is de klok, blauw is Uil en vermiljoen is Vos.
+   Een blauwe rondechip naast de blauwe uil las als ploegkleur. Op het
+   ronde-scherm staat geen mascotte en geen klok, dus daar mag het wel --
+   het pictogram (drie stippen, één stip, doorgestreept) draagt de ronde
+   overal, kleur is daar alleen feest. */
 const ROUND_COLOR = ["#F2B705", "#1B6FC4", "#E8452B"];
 const ROUND_WORD = ["Uitleggen", "Eén woord", "Uitbeelden"];
 const ROUND_HOW = [
@@ -1357,7 +1397,6 @@ $("#btnRoundGo").addEventListener("click", () => { Snd.unlock(); handoff(); });
 const ROUND_ICON = ["#r-praten", "#r-eenwoord", "#r-mimen"];
 
 function paintRound(el, iconEl, wordEl) {
-  el.style.setProperty("--round", ROUND_COLOR[G.round - 1]);
   iconEl.firstElementChild.setAttribute("href", ROUND_ICON[G.round - 1]);
   wordEl.textContent = ROUND_WORD[G.round - 1];
   el.setAttribute("aria-label", "Deze ronde: " + ROUND_WORD[G.round - 1]);
@@ -1673,7 +1712,6 @@ function paintRoadmap(el, nextRound) {
   for (let r = 1; r <= ROUNDS; r++) {
     const step = document.createElement("div");
     step.className = "step" + (r < nextRound ? " done" : r === nextRound ? " next" : "");
-    step.style.setProperty("--sc", ROUND_COLOR[r - 1]);
 
     const box = document.createElement("div");
     box.className = "box";
