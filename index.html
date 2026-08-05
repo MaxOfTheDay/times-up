@@ -116,7 +116,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 
 .btn-play {                /* het grote ▶ : titel, volgende, opnieuw */
   align-self: center; flex: 0 0 auto;
-  width: min(52vw, 24vh, 190px); aspect-ratio: 1;
+  width: min(52vw, 21vh, 190px); aspect-ratio: 1;
   border-radius: 50%;
   background: var(--marigold);
   border: var(--line) solid var(--ink);
@@ -274,9 +274,6 @@ input[type=range]::-moz-range-thumb {
 }
 .dots i.on { background: var(--round, var(--vermilion)); }
 
-/* Alle geanimeerde SVG-onderdelen draaien om punten uit de viewBox. */
-.ri-body, .ri-armL, .ri-armR, .ri-legL, .ri-legR { transform-box: view-box; }
-
 /* ronde 1: de drie woorden ratelen achter elkaar door */
 @keyframes say { 0%, 60%, 100% { transform: translateY(0); } 25% { transform: translateY(-9px); } }
 .ri-d1, .ri-d2, .ri-d3 { animation: say calc(1.05s / max(var(--dur), .001)) ease-in-out infinite; }
@@ -286,15 +283,10 @@ input[type=range]::-moz-range-thumb {
 @keyframes beat { 0%, 100% { transform: scale(1); } 45% { transform: scale(1.22); } }
 .ri-one { transform-origin: 50px 42px; transform-box: view-box;
           animation: beat calc(1.1s / max(var(--dur), .001)) ease-in-out infinite; }
-/* ronde 3: het hele lijf danst */
-@keyframes swayL { 0%,100% { transform: rotate(16deg); } 50% { transform: rotate(-42deg); } }
-@keyframes swayR { 0%,100% { transform: rotate(-16deg); } 50% { transform: rotate(42deg); } }
-@keyframes hop   { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-.ri-body  { animation: hop calc(.62s / max(var(--dur), .001)) ease-in-out infinite; }
-.ri-armL  { transform-origin: 100px 96px; animation: swayL calc(.62s / max(var(--dur), .001)) ease-in-out infinite; }
-.ri-armR  { transform-origin: 100px 96px; animation: swayR calc(.62s / max(var(--dur), .001)) ease-in-out infinite; }
-.ri-legL  { transform-origin: 100px 150px; animation: swayR calc(.62s / max(var(--dur), .001)) ease-in-out infinite; }
-.ri-legR  { transform-origin: 100px 150px; animation: swayL calc(.62s / max(var(--dur), .001)) ease-in-out infinite; }
+/* ronde 3: de streep wordt er telkens opnieuw doorheen gezet */
+@keyframes strike { 0%, 100% { opacity: 1; transform: scale(1); } 40% { opacity: .55; transform: scale(.9); } }
+.ri-cross { transform-origin: 50px 41px; transform-box: view-box;
+            animation: strike calc(1.2s / max(var(--dur), .001)) ease-in-out infinite; }
 
 /* ============================================================
    OVERDRACHT — wie is er aan de beurt
@@ -318,6 +310,27 @@ input[type=range]::-moz-range-thumb {
   transform: rotate(-90deg); pointer-events: none;
 }
 .hold-ring .ring circle { fill: none; stroke: var(--paper); stroke-width: 8; stroke-linecap: round; }
+
+/* De opdracht op het overdrachtscherm: pictogram en woord naast elkaar, op
+   papier. Ook hier geen rondekleur -- de mascotte staat er pal boven en
+   blauw naast de blauwe uil las als ploegkleur. */
+.roundcard {
+  display: flex; align-items: center; gap: min(1.8vh, 14px);
+  padding: min(1.6vh, 12px) 20px min(1.6vh, 12px) 14px;
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.roundcard .ico {
+  width: min(9vh, 74px); height: min(9vh, 74px);
+  display: grid; place-items: center;
+  background: var(--paper-2); border: 3px solid var(--ink);
+  flex: 0 0 auto;
+}
+.roundcard .ico svg { width: 76%; height: 76%; }
+.roundcard b {
+  font-size: min(6vw, 2.9vh, 26px); font-weight: 900;
+  letter-spacing: .05em; text-transform: uppercase;
+}
+
 /* Overgedragen tijd: een kaartje waarvan de rand al deels weg is -- precies
    het beeld dat straks om de echte kaart staat. Hier stond eerst een
    zandloper met gele bolletjes, maar bolletjes zijn in dit spel punten;
@@ -345,14 +358,21 @@ input[type=range]::-moz-range-thumb {
    welke opdracht) en wat er tijdens de beurt verandert (tijd, gescoord).
    Links naslag, rechts de teller. */
 .play-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.play-top .who { display: flex; align-items: flex-start; gap: 8px; }
+/* De mascotte hangt op het midden van het opdrachtvakje in plaats van op de
+   bovenrand; zo staan de twee als een groepje bij elkaar. */
+.play-top .who { display: flex; align-items: flex-start; gap: 10px; }
+.play-top .teamchip { margin-top: 4px; }
 
+/* De mascotte staat vrij, zonder kader en zonder vlak: wie aan de beurt is
+   heeft het overdrachtscherm net paginagroot verteld, dus hier is het
+   naslag. Met een omkaderd gekleurd blokje leek het even belangrijk als de
+   opdracht ernaast -- twee gelijke badges naast elkaar, en dan lees je
+   allebei niet. De vorm van het dier draagt de ploeg al. */
 .teamchip {
-  width: 56px; height: 56px; display: grid; place-items: center;
-  border: var(--line) solid var(--ink); background: var(--team);
+  width: 46px; height: 46px; display: grid; place-items: center;
   flex: 0 0 auto;
 }
-.teamchip svg { width: 40px; height: 40px; }
+.teamchip svg { width: 100%; height: 100%; }
 
 /* De opdracht van deze ronde, altijd in beeld. Beeld én woord samen: het
    kind leest de ballon, wie wél leest is meteen zeker. Elke ronde heeft
@@ -361,11 +381,14 @@ input[type=range]::-moz-range-thumb {
   display: flex; flex-direction: column; align-items: center; gap: 3px;
   flex: 0 0 auto;
 }
+/* Geen kleur op de ronde -- zie de opmerking bij ROUND_COLOR. Zonder vlak
+   en zonder slagschaduw is de chip ook meteen een stuk lichter; het is
+   naslag, geen mededeling. */
 .roundchip .ico {
-  width: 52px; height: 52px; display: grid; place-items: center;
-  border: var(--line) solid var(--ink); background: var(--round, var(--paper-2));
+  width: 54px; height: 54px; display: grid; place-items: center;
+  border: 3px solid var(--ink); background: var(--paper-2);
 }
-.roundchip .ico svg { width: 38px; height: 38px; }
+.roundchip .ico svg { width: 40px; height: 40px; }
 .roundchip b {
   font-size: 10px; font-weight: 900; letter-spacing: .02em;
   text-transform: uppercase; white-space: nowrap;
@@ -375,6 +398,45 @@ input[type=range]::-moz-range-thumb {
    het al) en daaronder wat deze beurt al binnen is. Dat laatste stond er
    niet, terwijl het precies is wat de speler wil weten terwijl hij bezig is. */
 .turnbox { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.turnbox .toprow { display: flex; align-items: center; gap: 12px; }
+
+/* Pauze: klein en grijzig, want je hebt hem zelden nodig. Eén tik is genoeg
+   -- pauzeren kost niets en is met één tik terug te draaien; stoppen zit
+   erachter, achter een lange druk. */
+.btn-pauze {
+  width: 38px; height: 38px; flex: 0 0 auto;
+  display: grid; place-items: center;
+  border: 3px solid var(--ink); background: var(--paper-2);
+  opacity: .62;
+}
+.btn-pauze svg { width: 20px; }
+.btn-pauze.corner {
+  position: absolute; top: max(14px, env(safe-area-inset-top)); right: 14px;
+  background: var(--paper); opacity: .85;
+}
+
+.overlay {
+  position: fixed; inset: 0; z-index: 8;
+  display: grid; place-items: center;
+  background: rgba(20, 17, 15, .62);
+}
+.overlay[hidden] { display: none; }
+.overlay .panel {
+  --team: var(--marigold);
+  display: flex; flex-direction: column; align-items: center; gap: 22px;
+  padding: 26px 30px;
+}
+.btn-stop {
+  position: relative; overflow: hidden;
+  width: 68px; height: 68px; display: grid; place-items: center;
+  border: 3px solid var(--ink); background: var(--paper-2);
+}
+.btn-stop svg { width: 32px; position: relative; z-index: 1; }
+.btn-stop i {
+  position: absolute; inset: 0; background: var(--red-danger, var(--vermilion));
+  transform: scaleY(0); transform-origin: bottom;
+}
+.btn-stop.hold i { transition: transform 1.1s linear; transform: scaleY(1); }
 .secs-left {
   font-weight: 900; font-size: 26px; font-variant-numeric: tabular-nums;
   line-height: 1; color: var(--tcol, var(--ink));
@@ -403,6 +465,10 @@ input[type=range]::-moz-range-thumb {
 /* De kaart groeit mee met de ruimte die er is en blijft vierkant. Met een
    vaste breedte bleef op een lange telefoon een gat van ruim 120 px tussen
    de kaart en de knop staan -- veel lucht die niets deed. */
+/* Geen ploegkleur op de kaart. De rand ís de klok en verkleurt van geel naar
+   rood; met de vermiljoenen misregistratie van ploeg Vos erbij liep er rood
+   over rood en werd de rand onleesbaar. De kaart is het neutrale toneel,
+   de ploeg staat in de balk erboven. */
 .card {
   position: relative;
   flex: 1 1 auto; min-height: 0;
@@ -410,6 +476,7 @@ input[type=range]::-moz-range-thumb {
   max-width: min(94vw, 460px); max-height: min(94vw, 460px);
   display: grid; place-items: center;
   background: var(--paper);
+  box-shadow: 7px 7px 0 var(--ink);
 }
 
 /* De klok loopt om de kaart heen in plaats van in een wijzerplaat ernaast.
@@ -426,32 +493,58 @@ input[type=range]::-moz-range-thumb {
 }
 /* Alleen de beweging, geen box-shadow meer: die draagt nu de stapel eronder
    en mag niet door de animatie overschreven worden. */
-@keyframes stamp {
-  0%   { transform: translate(-6px,-6px) rotate(-1.5deg); }
-  100% { transform: translate(0,0) rotate(0); }
+/* Geraden en gepast zagen er precies hetzelfde uit, terwijl ze het
+   tegenovergestelde betekenen. Nu wordt een geraden kaart van de stapel
+   gedeeld -- schuin van boven erop -- en zakt een gepaste kaart eerst weg
+   onder de stapel voor de volgende bovenkomt. Zonder te kijken weet je
+   welke knop het deed. */
+@keyframes deal {
+  0%   { transform: translate(-10px, -14px) rotate(-3deg); }
+  100% { transform: translate(0, 0) rotate(0); }
 }
-.card.in { animation: stamp calc(.16s / max(var(--dur), .001)) ease-out; }
+@keyframes tuck {
+  0%   { transform: translateY(0) scale(1); }
+  45%  { transform: translateY(16px) scale(.965); }
+  100% { transform: translateY(0) scale(1); }
+}
+.card.in   { animation: deal calc(.17s / max(var(--dur), .001)) ease-out; }
+.card.tuck { animation: tuck calc(.28s / max(var(--dur), .001)) ease-in-out; }
 /* Eén kaart, één teken, zo groot als de kaart toelaat. */
 .glyph { font-size: min(46vh, 68vw); line-height: 1; }
 
-/* Hoeveel er nog op de stapel ligt zit in de kaart zelf: er liggen randen
-   ónder, en die verdwijnen naarmate je opschiet. Hier stond een balkje,
-   maar naast een klok die óók leegloopt lees je twee meters als één
-   onbegrijpelijk ding. Een stapel is een voorwerp, geen meter.
-   De lagen worden als box-shadow gezet vanuit paintStack(). */
+/* De stapel: echte kaarten ónder de bovenste, elk een graadje gedraaid.
+   Als box-shadow, keurig uitgelijnd, werd het een streepjespatroon in plaats
+   van een stapel -- pas de scheve hoeken maken er iets van dat op tafel
+   ligt. Ze verdwijnen één voor één naarmate je opschiet. */
+.cardslot { position: relative; display: grid; place-items: center; min-height: 0; }
+.cardslot .under {
+  position: absolute; inset: 0; z-index: -1;
+  background: var(--paper); border: var(--line) solid var(--ink);
+  transition: opacity calc(.2s * var(--dur)) ease;
+}
+.cardslot .u1 { transform: rotate(1.6deg) translate(3px, 4px); }
+.cardslot .u2 { transform: rotate(-2.2deg) translate(-2px, 7px); }
+.cardslot .u3 { transform: rotate(3deg) translate(5px, 10px); }
+.cardslot .under[hidden] { display: none; }
 
-/* "Goed" staat in het midden: dat is waar een duim uitkomt, links- of
-   rechtshandig. "Pas" zit in de hoek, ver genoeg weg om niet per ongeluk
-   te raken. Eerst stonden ze links en rechts, waarbij de hoofdknop alleen
-   voor rechtshandigen goed lag. */
+/* "Goed" heeft even in het midden gestaan, voor duimen van beide handen,
+   maar dan schoof hij tot negen pixels van "pas" -- en juist die twee
+   moeten ver uit elkaar. Hij staat weer rechts, waar een rechterduim
+   vanzelf uitkomt; met 156 px breedte haalt een linkerduim de linkerhelft
+   ook makkelijk. "Pas" ligt diagonaal in de andere hoek, met de hele
+   onderrand ertussen. */
 .controls {
   position: relative;
-  display: flex; align-items: flex-end; justify-content: center;
-  padding: 0 4px; min-height: min(40vw, 20vh, 164px);
+  display: flex; align-items: flex-end; justify-content: flex-end;
+  padding: 0 6px; min-height: min(40vw, 20vh, 164px);
 }
-.btn-pas {                 /* klein, vierkant, in de hoek, papierkleur */
-  position: absolute; left: 4px; bottom: 4px;
-  width: 84px; height: 84px;
+/* Links onderin, maar niet tegen de rand: die strook is op Android de
+   terugveeg-zone, en een knop die daar half in ligt krijg je soms niet en
+   veegt je soms de app uit. Iets kleiner dan eerst, zodat er meer dode
+   ruimte tussen "pas" en "goed" blijft nu die laatste in het midden staat. */
+.btn-pas {
+  position: absolute; left: 18px; bottom: 4px;
+  width: 76px; height: 76px;
   background: var(--paper-2);
   border: var(--line) solid var(--ink); box-shadow: var(--drop) var(--drop) 0 var(--ink);
   display: grid; place-items: center;
@@ -516,6 +609,19 @@ input[type=range]::-moz-range-thumb {
 /* Rijen links uitlijnen: twee stapels naast elkaar lezen dan als staafjes,
    en zie je in één oogopslag wie voorstaat. Gecentreerd moet je tellen. */
 .tally .pile { max-width: 100%; justify-content: flex-start; }
+/* De uitsplitsing per ronde: pictogram + aantal, klein en rustig. */
+.tally .split { display: flex; flex-direction: column; gap: 2px; align-items: center; }
+.tally .sr {
+  display: flex; align-items: center; gap: 6px;
+  opacity: .55;
+}
+.tally .sr.now { opacity: 1; }
+.tally .sr svg { width: min(20px, 2.6vh); height: min(20px, 2.6vh); }
+.tally .sr b {
+  font-weight: 900; font-size: min(14px, 1.9vh); font-variant-numeric: tabular-nums;
+  min-width: 1.4ch; text-align: left;
+}
+
 /* Het getal is bijzaak voor de volwassenen, maar moet wel leesbaar zijn:
    op .5 doorzichtigheid haalde het de AA-drempel niet. */
 .tally .num { font-weight: 900; font-size: 15px; color: #6b5f4e; font-variant-numeric: tabular-nums; }
@@ -556,8 +662,10 @@ input[type=range]::-moz-range-thumb {
 .roadmap .step.next {
   opacity: 1;
 }
+/* De volgende ronde valt op door formaat en scherpte, niet door kleur: op
+   dit scherm staan de mascottes ernaast. */
 .roadmap .step.next .box {
-  width: 74px; height: 74px; background: var(--sc);
+  width: 74px; height: 74px; background: var(--paper);
   box-shadow: 5px 5px 0 var(--ink);
 }
 .roadmap .step.next .box svg { width: 54px; height: 54px; }
@@ -568,7 +676,7 @@ input[type=range]::-moz-range-thumb {
 /* ============================================================
    WINNAAR
    ============================================================ */
-#s-winner { justify-content: center; align-items: center; gap: 2.6vh; overflow: hidden; }
+#s-winner { justify-content: center; align-items: center; gap: 2vh; overflow: hidden; }
 .rays {
   position: absolute; inset: -30%; z-index: -1;
   display: grid; place-items: center;
@@ -579,7 +687,7 @@ input[type=range]::-moz-range-thumb {
 /* Kleiner dan het aanvoelt: met de kronen erbij werd het scherm te hoog en
    liep de winnaar boven het beeld uit. */
 #s-winner .mascot-big {
-  width: min(44vw, 21vh, 200px); flex: 0 0 auto;
+  width: min(44vw, 17vh, 200px); flex: 0 0 auto;
   animation: cheer calc(.9s / max(var(--dur), .001)) ease-in-out infinite;
 }
 
@@ -700,6 +808,19 @@ input[type=range]::-moz-range-thumb {
     <path d="M10 74 L18 26 L34 48 L50 18 L66 48 L82 26 L90 74 Z"
           fill="#F2B705" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
     <path d="M10 74 H90" stroke="#14110F" stroke-width="7" stroke-linecap="round"/>
+  </symbol>
+
+  <symbol id="i-pauze" viewBox="0 0 100 100">
+    <g fill="#14110F">
+      <rect x="26" y="20" width="16" height="60" rx="3"/>
+      <rect x="58" y="20" width="16" height="60" rx="3"/>
+    </g>
+  </symbol>
+
+  <symbol id="i-stop" viewBox="0 0 100 100">
+    <g stroke="#14110F" stroke-width="14" stroke-linecap="round">
+      <path d="M26 26 L74 74"/><path d="M74 26 L26 74"/>
+    </g>
   </symbol>
 
   <symbol id="i-vink" viewBox="0 0 100 100">
@@ -867,6 +988,9 @@ input[type=range]::-moz-range-thumb {
     </svg>
     <b id="carrySecs">15</b>
   </div>
+  <button class="btn-pauze corner" id="btnPauzeHo" aria-label="Pauze">
+    <svg viewBox="0 0 100 100"><use href="#i-pauze"/></svg>
+  </button>
   <div class="hold-ring">
     <button class="btn-play" id="btnHold" aria-label="Houd ingedrukt om te beginnen">
       <svg viewBox="0 0 100 100"><use href="#i-play"/></svg>
@@ -886,18 +1010,28 @@ input[type=range]::-moz-range-thumb {
       </div>
     </div>
     <div class="turnbox">
-      <div class="secs-left" id="clockDigits">30</div>
+      <div class="toprow">
+        <button class="btn-pauze" id="btnPauze" aria-label="Pauze">
+          <svg viewBox="0 0 100 100"><use href="#i-pauze"/></svg>
+        </button>
+        <div class="secs-left" id="clockDigits">30</div>
+      </div>
       <div class="won" id="turnScore" aria-hidden="true"></div>
     </div>
   </div>
 
   <div class="cardwrap">
     <div class="cardstack">
-      <div class="card block" id="card">
-        <span class="glyph" id="glyph">🐘</span>
-        <svg class="timerframe" id="timerFrame" aria-hidden="true">
-          <rect id="timerRect" fill="none"/>
-        </svg>
+      <div class="cardslot">
+        <i class="under u3" aria-hidden="true"></i>
+        <i class="under u2" aria-hidden="true"></i>
+        <i class="under u1" aria-hidden="true"></i>
+        <div class="card block" id="card">
+          <span class="glyph" id="glyph">🐘</span>
+          <svg class="timerframe" id="timerFrame" aria-hidden="true">
+            <rect id="timerRect" fill="none"/>
+          </svg>
+        </div>
       </div>
     </div>
   </div>
@@ -942,6 +1076,19 @@ input[type=range]::-moz-range-thumb {
     <svg viewBox="0 0 100 100"><use href="#i-play"/></svg>
   </button>
 </section>
+
+<!-- Pauze: de klok staat stil. Verder spelen is één tik; stoppen moet je
+     vasthouden, want dat gooit het lopende spel weg. -->
+<div class="overlay" id="pauze" hidden>
+  <div class="panel block">
+    <button class="btn-play press" id="btnResume" aria-label="Verder spelen">
+      <svg viewBox="0 0 100 100"><use href="#i-play"/></svg>
+    </button>
+    <button class="btn-stop" id="btnStop" aria-label="Spel stoppen — houd ingedrukt">
+      <i></i><svg viewBox="0 0 100 100"><use href="#i-stop"/></svg>
+    </button>
+  </div>
+</div>
 
 <div class="confetti" id="confetti" hidden></div>
 
@@ -1192,25 +1339,27 @@ $("#btnGo").addEventListener("click", () => { Snd.unlock(); newGame(); });
 
 /* Het tandwiel gaat pas open na 1,2 s duwen -- zo dwaalt een
    vierjarige er tijdens het spel niet per ongeluk in. */
-(() => {
-  const gear = $("#btnGear");
+/* Knop die pas na een lange druk afgaat, met een vulling die meeloopt en een
+   schud als je te vroeg loslaat. Gebruikt door het tandwiel en door stoppen. */
+function holdButton(el, ms, run) {
   let t = null, down = 0;
-  const start = e => {
+  el.addEventListener("pointerdown", e => {
     e.preventDefault();
     down = performance.now();
-    gear.classList.add("hold");
-    t = setTimeout(() => { down = 0; gear.classList.remove("hold"); openSetup(); }, 1200);
-  };
-  const cancel = () => {
+    el.classList.add("hold");
+    t = setTimeout(() => { down = 0; el.classList.remove("hold"); run(); }, ms);
+  });
+  ["pointerup", "pointerleave", "pointercancel"].forEach(ev => el.addEventListener(ev, () => {
     clearTimeout(t);
-    gear.classList.remove("hold");
-    if (down && performance.now() - down < 1200) nudge(gear);
+    el.classList.remove("hold");
+    if (down && performance.now() - down < ms) nudge(el);
     down = 0;
-  };
-  gear.addEventListener("pointerdown", start);
-  ["pointerup", "pointerleave", "pointercancel"].forEach(ev => gear.addEventListener(ev, cancel));
-  gear.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openSetup(); } });
-})();
+  }));
+  el.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); run(); }
+  });
+}
+holdButton($("#btnGear"), 1200, openSetup);
 
 function nudge(el) {
   el.classList.remove("nudge");
@@ -1287,28 +1436,27 @@ const RI_ART = [
        <circle class="ri-one" cx="50" cy="42" r="16" fill="#14110F"/>
      </g>
    </svg>`,
-  /* 3 — uitbeelden: de ballon gaat door, en het lijf neemt het over */
+  /* 3 — uitbeelden: dezelfde ballon, doorgestreept. Hier danste eerst een
+     poppetje naast een kleine ballon, maar op de chip en de routekaart staat
+     alleen de doorgestreepte ballon -- twee plaatjes voor één ronde, en dan
+     werkt het systeem juist niet meer. */
   `<svg viewBox="0 0 200 200">
      <circle cx="100" cy="100" r="92" fill="#E8452B" stroke="#14110F" stroke-width="8"/>
-     <!-- Ballon linksboven, lijf rechts, allebei ruim binnen de cirkel: over
-          de rand heen leek de ballon afgesneden, en met de armen eroverheen
-          leek het of de figuur hem vasthield in plaats van te zwijgen. -->
-     <g transform="translate(58 62) scale(.58) translate(-50 -50)">
+     <g transform="translate(100 104) scale(1.45) translate(-50 -50)">
        <path d="M22 12 H78 A16 16 0 0 1 94 28 V56 A16 16 0 0 1 78 72 H52 L30 92 L33 72 H22 A16 16 0 0 1 6 56 V28 A16 16 0 0 1 22 12 Z"
-             fill="#F4EBDA" stroke="#14110F" stroke-width="11" stroke-linejoin="round"/>
-       <path d="M18 62 L82 20" stroke="#8C2F1E" stroke-width="19" stroke-linecap="round"/>
-     </g>
-     <g class="ri-body" stroke="#14110F" stroke-width="12" stroke-linecap="round" fill="none">
-       <circle cx="112" cy="92" r="17" fill="#F4EBDA"/>
-       <path d="M112 109 V146"/>
-       <path class="ri-armL" d="M112 116 L80 92"/>
-       <path class="ri-armR" d="M112 116 L144 92"/>
-       <path class="ri-legL" d="M112 146 L90 178"/>
-       <path class="ri-legR" d="M112 146 L134 178"/>
+             fill="#F4EBDA" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
+       <path class="ri-cross" d="M18 62 L82 20"
+             stroke="#8C2F1E" stroke-width="13" stroke-linecap="round"/>
      </g>
    </svg>`
 ];
 
+/* Alleen voor het ronde-scherm. Elders krijgt de ronde géén kleur, want er
+   is er geen vrije: marigold is de klok, blauw is Uil en vermiljoen is Vos.
+   Een blauwe rondechip naast de blauwe uil las als ploegkleur. Op het
+   ronde-scherm staat geen mascotte en geen klok, dus daar mag het wel --
+   het pictogram (drie stippen, één stip, doorgestreept) draagt de ronde
+   overal, kleur is daar alleen feest. */
 const ROUND_COLOR = ["#F2B705", "#1B6FC4", "#E8452B"];
 const ROUND_WORD = ["Uitleggen", "Eén woord", "Uitbeelden"];
 const ROUND_HOW = [
@@ -1322,7 +1470,6 @@ $("#btnRoundGo").addEventListener("click", () => { Snd.unlock(); handoff(); });
 const ROUND_ICON = ["#r-praten", "#r-eenwoord", "#r-mimen"];
 
 function paintRound(el, iconEl, wordEl) {
-  el.style.setProperty("--round", ROUND_COLOR[G.round - 1]);
   iconEl.firstElementChild.setAttribute("href", ROUND_ICON[G.round - 1]);
   wordEl.textContent = ROUND_WORD[G.round - 1];
   el.setAttribute("aria-label", "Deze ronde: " + ROUND_WORD[G.round - 1]);
@@ -1425,7 +1572,7 @@ function startTurn() {
   $("#plMascot").firstElementChild.setAttribute("href", t.mascot);
   paintRound($("#plRoundChip"), $("#plRound"), $("#plRoundWord"));
   $("#s-play").style.setProperty("--team", t.color);
-  nextCard(false);
+  nextCard(null);
   syncControls();
   show("play");
   sizeTimer();                 // pas ná show(): daarvoor heeft de kaart geen maat
@@ -1461,14 +1608,15 @@ function stopClock() { cancelAnimationFrame(clockRaf); clockRaf = null; }
 function remaining() { return Math.max(0, deadline - performance.now()); }
 
 /* ---------- kaarten ---------- */
-function nextCard(animate) {
+function nextCard(how) {
   if (!G.pile.length) { G.card = null; return; }
   G.card = G.pile.shift();
-  const el = $("#glyph");
-  el.textContent = G.deck[G.card][0];
-  if (animate !== false) {
+  $("#glyph").textContent = G.deck[G.card][0];
+  if (how) {
     const c = $("#card");
-    c.classList.remove("in"); void c.offsetWidth; c.classList.add("in");
+    c.classList.remove("in", "tuck");
+    void c.offsetWidth;                       // herstart de animatie
+    c.classList.add(how === "pas" ? "tuck" : "in");
   }
 }
 
@@ -1495,20 +1643,12 @@ function syncControls() {
    naar rechts zou de stapel op smalle telefoons buiten beeld lopen. Bij de
    laatste kaart blijft er niets over -- die ligt plat op tafel, en dat is
    precies de boodschap. */
-const STACK_STEP = 7, STACK_MAX = 4;
 function paintStack() {
-  const el = $("#card");
-  const misreg = "calc(var(--shift) * -1) calc(var(--shift) * -1) 0 0 var(--team)";
-  if (!G) { el.style.boxShadow = ""; return; }
-  const left = G.pile.length + (G.card === null ? 0 : 1);
-  const layers = Math.min(STACK_MAX,
-    Math.max(0, Math.round(((left - 1) / Math.max(1, G.deck.length)) * STACK_MAX)));
-  const parts = [misreg];
-  for (let i = 1; i <= layers; i++) {
-    const d = i * STACK_STEP;
-    parts.push(`0 ${d}px 0 0 var(--paper)`, `0 ${d}px 0 2px var(--ink)`);
-  }
-  el.style.boxShadow = parts.join(", ");
+  const left = G ? G.pile.length + (G.card === null ? 0 : 1) : 0;
+  const total = G ? Math.max(1, G.deck.length) : 1;
+  // 3 kaarten eronder bij een volle stapel, geen enkele bij de laatste.
+  const layers = Math.min(3, Math.max(0, Math.round(((left - 1) / total) * 3)));
+  [1, 2, 3].forEach(i => { $(".cardslot .u" + i).hidden = i > layers; });
 }
 
 /* Wat je deze beurt al binnen hebt, als fiches. Zonder dat werk je blind:
@@ -1527,7 +1667,7 @@ $("#btnGoed").addEventListener("click", () => {
   G.gained++;
   paintTurnScore();
   if (!G.pile.length) { endRound(); return; }
-  nextCard(true);
+  nextCard("goed");
   syncControls();
   saveGame();
 });
@@ -1536,7 +1676,7 @@ $("#btnPas").addEventListener("click", () => {
   if (!acts() || G.pile.length === 0) return;
   Snd.pas();
   G.pile.push(G.card);      // onderop, zonder straf
-  nextCard(true);
+  nextCard("pas");
   syncControls();
   saveGame();
 });
@@ -1629,12 +1769,34 @@ function tallyNode(t, newest) {
   pile.className = "pile";
   fillPile(pile, total(t), TEAMS[t].hex, newest || 0);
 
+  /* Onder de stapel per ronde wat die ploeg daar haalde, met hetzelfde
+     pictogram als overal. De stapel zegt "wie staat voor"; dit zegt "waar
+     kwam het vandaan" -- anders zie je alleen een totaal en niet dat je de
+     ene ronde won en de andere verloor. */
+  const split = document.createElement("div");
+  split.className = "split";
+  for (let r = 1; r <= ROUNDS; r++) {
+    if (!playedRound(r)) continue;
+    const row = document.createElement("div");
+    row.className = "sr" + (r === G.round ? " now" : "");
+    row.appendChild(svgUse(ROUND_ICON[r - 1]));
+    const n = document.createElement("b");
+    n.textContent = G.scores[t][r - 1];
+    row.appendChild(n);
+    split.appendChild(row);
+  }
+
   const num = document.createElement("div");
   num.className = "num";
   num.textContent = total(t);
 
-  wrap.append(head, pile, num);
+  wrap.append(head, pile, split, num);
   return wrap;
+}
+
+// Een ronde telt mee zodra er in gespeeld is (of iemand er punten haalde).
+function playedRound(r) {
+  return r < G.round || G.scores[0][r - 1] > 0 || G.scores[1][r - 1] > 0;
 }
 
 /* De drie rondes als route: wat geweest is krijgt een vinkje, wat nu komt
@@ -1645,7 +1807,6 @@ function paintRoadmap(el, nextRound) {
   for (let r = 1; r <= ROUNDS; r++) {
     const step = document.createElement("div");
     step.className = "step" + (r < nextRound ? " done" : r === nextRound ? " next" : "");
-    step.style.setProperty("--sc", ROUND_COLOR[r - 1]);
 
     const box = document.createElement("div");
     box.className = "box";
@@ -1710,6 +1871,45 @@ function confetti(colors) {
 $("#btnAgain").addEventListener("click", () => {
   $("#confetti").hidden = true;
   $("#confetti").textContent = "";
+  redraw();
+  show("title");
+});
+
+/* ==============================================================
+   PAUZE EN STOPPEN
+   De klok staat stil zolang het paneel open is. Verder spelen is één tik;
+   stoppen gooit het lopende spel weg en zit daarom achter een lange druk.
+   ============================================================== */
+let pauseMs = 0;
+
+function openPause() {
+  if (current === "play") {
+    pauseMs = remaining();
+    stopClock();
+    releaseWake();
+  }
+  $("#pauze").hidden = false;
+}
+
+function closePause() {
+  $("#pauze").hidden = true;
+  if (current === "play" && pauseMs > 0) {
+    deadline = performance.now() + pauseMs;
+    pauseMs = 0;
+    lastTickAt = 0;
+    requestWake();
+    runClock(G.secs * 1000);
+  }
+}
+
+$("#btnPauze").addEventListener("click", () => { Snd.unlock(); openPause(); });
+$("#btnPauzeHo").addEventListener("click", () => { Snd.unlock(); openPause(); });
+$("#btnResume").addEventListener("click", closePause);
+holdButton($("#btnStop"), 1100, () => {
+  pauseMs = 0;
+  stopClock(); releaseWake();
+  $("#pauze").hidden = true;
+  G = null; saveGame();
   redraw();
   show("title");
 });

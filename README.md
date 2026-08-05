@@ -26,6 +26,10 @@ Alleen de klok is een meter. Alles wat langzaam leegloopt leest als tijd, dus
 de stapel is een voorwerp en de punten zijn fiches — geen tweede en derde
 balkje ernaast.
 
+Geraden en gepast voelen ook anders: een geraden kaart wordt van de stapel
+gedeeld, een gepaste zakt eerst weg onder de stapel. Zonder te kijken weet je
+welke knop het deed.
+
 ## Spelen
 
 Twee ploegen, drie rondes over hetzelfde deck:
