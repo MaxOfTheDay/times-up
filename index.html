@@ -116,7 +116,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 
 .btn-play {                /* het grote ▶ : titel, volgende, opnieuw */
   align-self: center; flex: 0 0 auto;
-  width: min(52vw, 24vh, 190px); aspect-ratio: 1;
+  width: min(52vw, 21vh, 190px); aspect-ratio: 1;
   border-radius: 50%;
   background: var(--marigold);
   border: var(--line) solid var(--ink);
@@ -274,9 +274,6 @@ input[type=range]::-moz-range-thumb {
 }
 .dots i.on { background: var(--round, var(--vermilion)); }
 
-/* Alle geanimeerde SVG-onderdelen draaien om punten uit de viewBox. */
-.ri-body, .ri-armL, .ri-armR, .ri-legL, .ri-legR { transform-box: view-box; }
-
 /* ronde 1: de drie woorden ratelen achter elkaar door */
 @keyframes say { 0%, 60%, 100% { transform: translateY(0); } 25% { transform: translateY(-9px); } }
 .ri-d1, .ri-d2, .ri-d3 { animation: say calc(1.05s / max(var(--dur), .001)) ease-in-out infinite; }
@@ -286,15 +283,10 @@ input[type=range]::-moz-range-thumb {
 @keyframes beat { 0%, 100% { transform: scale(1); } 45% { transform: scale(1.22); } }
 .ri-one { transform-origin: 50px 42px; transform-box: view-box;
           animation: beat calc(1.1s / max(var(--dur), .001)) ease-in-out infinite; }
-/* ronde 3: het hele lijf danst */
-@keyframes swayL { 0%,100% { transform: rotate(16deg); } 50% { transform: rotate(-42deg); } }
-@keyframes swayR { 0%,100% { transform: rotate(-16deg); } 50% { transform: rotate(42deg); } }
-@keyframes hop   { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-.ri-body  { animation: hop calc(.62s / max(var(--dur), .001)) ease-in-out infinite; }
-.ri-armL  { transform-origin: 100px 96px; animation: swayL calc(.62s / max(var(--dur), .001)) ease-in-out infinite; }
-.ri-armR  { transform-origin: 100px 96px; animation: swayR calc(.62s / max(var(--dur), .001)) ease-in-out infinite; }
-.ri-legL  { transform-origin: 100px 150px; animation: swayR calc(.62s / max(var(--dur), .001)) ease-in-out infinite; }
-.ri-legR  { transform-origin: 100px 150px; animation: swayL calc(.62s / max(var(--dur), .001)) ease-in-out infinite; }
+/* ronde 3: de streep wordt er telkens opnieuw doorheen gezet */
+@keyframes strike { 0%, 100% { opacity: 1; transform: scale(1); } 40% { opacity: .55; transform: scale(.9); } }
+.ri-cross { transform-origin: 50px 41px; transform-box: view-box;
+            animation: strike calc(1.2s / max(var(--dur), .001)) ease-in-out infinite; }
 
 /* ============================================================
    OVERDRACHT — wie is er aan de beurt
@@ -406,6 +398,45 @@ input[type=range]::-moz-range-thumb {
    het al) en daaronder wat deze beurt al binnen is. Dat laatste stond er
    niet, terwijl het precies is wat de speler wil weten terwijl hij bezig is. */
 .turnbox { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.turnbox .toprow { display: flex; align-items: center; gap: 12px; }
+
+/* Pauze: klein en grijzig, want je hebt hem zelden nodig. Eén tik is genoeg
+   -- pauzeren kost niets en is met één tik terug te draaien; stoppen zit
+   erachter, achter een lange druk. */
+.btn-pauze {
+  width: 38px; height: 38px; flex: 0 0 auto;
+  display: grid; place-items: center;
+  border: 3px solid var(--ink); background: var(--paper-2);
+  opacity: .62;
+}
+.btn-pauze svg { width: 20px; }
+.btn-pauze.corner {
+  position: absolute; top: max(14px, env(safe-area-inset-top)); right: 14px;
+  background: var(--paper); opacity: .85;
+}
+
+.overlay {
+  position: fixed; inset: 0; z-index: 8;
+  display: grid; place-items: center;
+  background: rgba(20, 17, 15, .62);
+}
+.overlay[hidden] { display: none; }
+.overlay .panel {
+  --team: var(--marigold);
+  display: flex; flex-direction: column; align-items: center; gap: 22px;
+  padding: 26px 30px;
+}
+.btn-stop {
+  position: relative; overflow: hidden;
+  width: 68px; height: 68px; display: grid; place-items: center;
+  border: 3px solid var(--ink); background: var(--paper-2);
+}
+.btn-stop svg { width: 32px; position: relative; z-index: 1; }
+.btn-stop i {
+  position: absolute; inset: 0; background: var(--red-danger, var(--vermilion));
+  transform: scaleY(0); transform-origin: bottom;
+}
+.btn-stop.hold i { transition: transform 1.1s linear; transform: scaleY(1); }
 .secs-left {
   font-weight: 900; font-size: 26px; font-variant-numeric: tabular-nums;
   line-height: 1; color: var(--tcol, var(--ink));
@@ -578,6 +609,19 @@ input[type=range]::-moz-range-thumb {
 /* Rijen links uitlijnen: twee stapels naast elkaar lezen dan als staafjes,
    en zie je in één oogopslag wie voorstaat. Gecentreerd moet je tellen. */
 .tally .pile { max-width: 100%; justify-content: flex-start; }
+/* De uitsplitsing per ronde: pictogram + aantal, klein en rustig. */
+.tally .split { display: flex; flex-direction: column; gap: 2px; align-items: center; }
+.tally .sr {
+  display: flex; align-items: center; gap: 6px;
+  opacity: .55;
+}
+.tally .sr.now { opacity: 1; }
+.tally .sr svg { width: min(20px, 2.6vh); height: min(20px, 2.6vh); }
+.tally .sr b {
+  font-weight: 900; font-size: min(14px, 1.9vh); font-variant-numeric: tabular-nums;
+  min-width: 1.4ch; text-align: left;
+}
+
 /* Het getal is bijzaak voor de volwassenen, maar moet wel leesbaar zijn:
    op .5 doorzichtigheid haalde het de AA-drempel niet. */
 .tally .num { font-weight: 900; font-size: 15px; color: #6b5f4e; font-variant-numeric: tabular-nums; }
@@ -632,7 +676,7 @@ input[type=range]::-moz-range-thumb {
 /* ============================================================
    WINNAAR
    ============================================================ */
-#s-winner { justify-content: center; align-items: center; gap: 2.6vh; overflow: hidden; }
+#s-winner { justify-content: center; align-items: center; gap: 2vh; overflow: hidden; }
 .rays {
   position: absolute; inset: -30%; z-index: -1;
   display: grid; place-items: center;
@@ -643,7 +687,7 @@ input[type=range]::-moz-range-thumb {
 /* Kleiner dan het aanvoelt: met de kronen erbij werd het scherm te hoog en
    liep de winnaar boven het beeld uit. */
 #s-winner .mascot-big {
-  width: min(44vw, 21vh, 200px); flex: 0 0 auto;
+  width: min(44vw, 17vh, 200px); flex: 0 0 auto;
   animation: cheer calc(.9s / max(var(--dur), .001)) ease-in-out infinite;
 }
 
@@ -764,6 +808,19 @@ input[type=range]::-moz-range-thumb {
     <path d="M10 74 L18 26 L34 48 L50 18 L66 48 L82 26 L90 74 Z"
           fill="#F2B705" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
     <path d="M10 74 H90" stroke="#14110F" stroke-width="7" stroke-linecap="round"/>
+  </symbol>
+
+  <symbol id="i-pauze" viewBox="0 0 100 100">
+    <g fill="#14110F">
+      <rect x="26" y="20" width="16" height="60" rx="3"/>
+      <rect x="58" y="20" width="16" height="60" rx="3"/>
+    </g>
+  </symbol>
+
+  <symbol id="i-stop" viewBox="0 0 100 100">
+    <g stroke="#14110F" stroke-width="14" stroke-linecap="round">
+      <path d="M26 26 L74 74"/><path d="M74 26 L26 74"/>
+    </g>
   </symbol>
 
   <symbol id="i-vink" viewBox="0 0 100 100">
@@ -931,6 +988,9 @@ input[type=range]::-moz-range-thumb {
     </svg>
     <b id="carrySecs">15</b>
   </div>
+  <button class="btn-pauze corner" id="btnPauzeHo" aria-label="Pauze">
+    <svg viewBox="0 0 100 100"><use href="#i-pauze"/></svg>
+  </button>
   <div class="hold-ring">
     <button class="btn-play" id="btnHold" aria-label="Houd ingedrukt om te beginnen">
       <svg viewBox="0 0 100 100"><use href="#i-play"/></svg>
@@ -950,7 +1010,12 @@ input[type=range]::-moz-range-thumb {
       </div>
     </div>
     <div class="turnbox">
-      <div class="secs-left" id="clockDigits">30</div>
+      <div class="toprow">
+        <button class="btn-pauze" id="btnPauze" aria-label="Pauze">
+          <svg viewBox="0 0 100 100"><use href="#i-pauze"/></svg>
+        </button>
+        <div class="secs-left" id="clockDigits">30</div>
+      </div>
       <div class="won" id="turnScore" aria-hidden="true"></div>
     </div>
   </div>
@@ -1011,6 +1076,19 @@ input[type=range]::-moz-range-thumb {
     <svg viewBox="0 0 100 100"><use href="#i-play"/></svg>
   </button>
 </section>
+
+<!-- Pauze: de klok staat stil. Verder spelen is één tik; stoppen moet je
+     vasthouden, want dat gooit het lopende spel weg. -->
+<div class="overlay" id="pauze" hidden>
+  <div class="panel block">
+    <button class="btn-play press" id="btnResume" aria-label="Verder spelen">
+      <svg viewBox="0 0 100 100"><use href="#i-play"/></svg>
+    </button>
+    <button class="btn-stop" id="btnStop" aria-label="Spel stoppen — houd ingedrukt">
+      <i></i><svg viewBox="0 0 100 100"><use href="#i-stop"/></svg>
+    </button>
+  </div>
+</div>
 
 <div class="confetti" id="confetti" hidden></div>
 
@@ -1261,25 +1339,27 @@ $("#btnGo").addEventListener("click", () => { Snd.unlock(); newGame(); });
 
 /* Het tandwiel gaat pas open na 1,2 s duwen -- zo dwaalt een
    vierjarige er tijdens het spel niet per ongeluk in. */
-(() => {
-  const gear = $("#btnGear");
+/* Knop die pas na een lange druk afgaat, met een vulling die meeloopt en een
+   schud als je te vroeg loslaat. Gebruikt door het tandwiel en door stoppen. */
+function holdButton(el, ms, run) {
   let t = null, down = 0;
-  const start = e => {
+  el.addEventListener("pointerdown", e => {
     e.preventDefault();
     down = performance.now();
-    gear.classList.add("hold");
-    t = setTimeout(() => { down = 0; gear.classList.remove("hold"); openSetup(); }, 1200);
-  };
-  const cancel = () => {
+    el.classList.add("hold");
+    t = setTimeout(() => { down = 0; el.classList.remove("hold"); run(); }, ms);
+  });
+  ["pointerup", "pointerleave", "pointercancel"].forEach(ev => el.addEventListener(ev, () => {
     clearTimeout(t);
-    gear.classList.remove("hold");
-    if (down && performance.now() - down < 1200) nudge(gear);
+    el.classList.remove("hold");
+    if (down && performance.now() - down < ms) nudge(el);
     down = 0;
-  };
-  gear.addEventListener("pointerdown", start);
-  ["pointerup", "pointerleave", "pointercancel"].forEach(ev => gear.addEventListener(ev, cancel));
-  gear.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openSetup(); } });
-})();
+  }));
+  el.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); run(); }
+  });
+}
+holdButton($("#btnGear"), 1200, openSetup);
 
 function nudge(el) {
   el.classList.remove("nudge");
@@ -1356,24 +1436,17 @@ const RI_ART = [
        <circle class="ri-one" cx="50" cy="42" r="16" fill="#14110F"/>
      </g>
    </svg>`,
-  /* 3 — uitbeelden: de ballon gaat door, en het lijf neemt het over */
+  /* 3 — uitbeelden: dezelfde ballon, doorgestreept. Hier danste eerst een
+     poppetje naast een kleine ballon, maar op de chip en de routekaart staat
+     alleen de doorgestreepte ballon -- twee plaatjes voor één ronde, en dan
+     werkt het systeem juist niet meer. */
   `<svg viewBox="0 0 200 200">
      <circle cx="100" cy="100" r="92" fill="#E8452B" stroke="#14110F" stroke-width="8"/>
-     <!-- Ballon linksboven, lijf rechts, allebei ruim binnen de cirkel: over
-          de rand heen leek de ballon afgesneden, en met de armen eroverheen
-          leek het of de figuur hem vasthield in plaats van te zwijgen. -->
-     <g transform="translate(58 62) scale(.58) translate(-50 -50)">
+     <g transform="translate(100 104) scale(1.45) translate(-50 -50)">
        <path d="M22 12 H78 A16 16 0 0 1 94 28 V56 A16 16 0 0 1 78 72 H52 L30 92 L33 72 H22 A16 16 0 0 1 6 56 V28 A16 16 0 0 1 22 12 Z"
-             fill="#F4EBDA" stroke="#14110F" stroke-width="11" stroke-linejoin="round"/>
-       <path d="M18 62 L82 20" stroke="#8C2F1E" stroke-width="19" stroke-linecap="round"/>
-     </g>
-     <g class="ri-body" stroke="#14110F" stroke-width="12" stroke-linecap="round" fill="none">
-       <circle cx="112" cy="92" r="17" fill="#F4EBDA"/>
-       <path d="M112 109 V146"/>
-       <path class="ri-armL" d="M112 116 L80 92"/>
-       <path class="ri-armR" d="M112 116 L144 92"/>
-       <path class="ri-legL" d="M112 146 L90 178"/>
-       <path class="ri-legR" d="M112 146 L134 178"/>
+             fill="#F4EBDA" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
+       <path class="ri-cross" d="M18 62 L82 20"
+             stroke="#8C2F1E" stroke-width="13" stroke-linecap="round"/>
      </g>
    </svg>`
 ];
@@ -1696,12 +1769,34 @@ function tallyNode(t, newest) {
   pile.className = "pile";
   fillPile(pile, total(t), TEAMS[t].hex, newest || 0);
 
+  /* Onder de stapel per ronde wat die ploeg daar haalde, met hetzelfde
+     pictogram als overal. De stapel zegt "wie staat voor"; dit zegt "waar
+     kwam het vandaan" -- anders zie je alleen een totaal en niet dat je de
+     ene ronde won en de andere verloor. */
+  const split = document.createElement("div");
+  split.className = "split";
+  for (let r = 1; r <= ROUNDS; r++) {
+    if (!playedRound(r)) continue;
+    const row = document.createElement("div");
+    row.className = "sr" + (r === G.round ? " now" : "");
+    row.appendChild(svgUse(ROUND_ICON[r - 1]));
+    const n = document.createElement("b");
+    n.textContent = G.scores[t][r - 1];
+    row.appendChild(n);
+    split.appendChild(row);
+  }
+
   const num = document.createElement("div");
   num.className = "num";
   num.textContent = total(t);
 
-  wrap.append(head, pile, num);
+  wrap.append(head, pile, split, num);
   return wrap;
+}
+
+// Een ronde telt mee zodra er in gespeeld is (of iemand er punten haalde).
+function playedRound(r) {
+  return r < G.round || G.scores[0][r - 1] > 0 || G.scores[1][r - 1] > 0;
 }
 
 /* De drie rondes als route: wat geweest is krijgt een vinkje, wat nu komt
@@ -1776,6 +1871,45 @@ function confetti(colors) {
 $("#btnAgain").addEventListener("click", () => {
   $("#confetti").hidden = true;
   $("#confetti").textContent = "";
+  redraw();
+  show("title");
+});
+
+/* ==============================================================
+   PAUZE EN STOPPEN
+   De klok staat stil zolang het paneel open is. Verder spelen is één tik;
+   stoppen gooit het lopende spel weg en zit daarom achter een lange druk.
+   ============================================================== */
+let pauseMs = 0;
+
+function openPause() {
+  if (current === "play") {
+    pauseMs = remaining();
+    stopClock();
+    releaseWake();
+  }
+  $("#pauze").hidden = false;
+}
+
+function closePause() {
+  $("#pauze").hidden = true;
+  if (current === "play" && pauseMs > 0) {
+    deadline = performance.now() + pauseMs;
+    pauseMs = 0;
+    lastTickAt = 0;
+    requestWake();
+    runClock(G.secs * 1000);
+  }
+}
+
+$("#btnPauze").addEventListener("click", () => { Snd.unlock(); openPause(); });
+$("#btnPauzeHo").addEventListener("click", () => { Snd.unlock(); openPause(); });
+$("#btnResume").addEventListener("click", closePause);
+holdButton($("#btnStop"), 1100, () => {
+  pauseMs = 0;
+  stopClock(); releaseWake();
+  $("#pauze").hidden = true;
+  G = null; saveGame();
   redraw();
   show("title");
 });
