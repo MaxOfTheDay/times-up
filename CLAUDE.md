@@ -50,6 +50,27 @@ geen potje overleeft een herlaadbeurt. Die knop is nu ook een gewone tik.
 Alles staat in `index.html`: geen build, geen externe assets, werkt met de
 wifi uit. Houd dat zo.
 
+## Eén overdrachtscherm, twee standen
+
+Vroeger waren er vier schermen tussen "de klok is om" en "de volgende beurt
+begint": een terugblik, een overdracht, een rondeafsluiting, een
+ronde-intro. Geen van de tikken ertussen bewaakte iets -- ze wachtten alleen
+tot je verder tikte -- terwijl "wie is er nu aan de beurt" op twee van die
+schermen apart onthuld werd. `#s-handoff` is nu het enige scherm: `handoff("turn")`
+laat de mascotte en de ploegkleur het scherm vullen (er wisselt een speler,
+dus dat is het nieuws), `handoff("round")` laat in plaats daarvan de nieuwe
+regel groot zien met de routekaart erbij (dezelfde speler zet door, dus geen
+onthulling nodig). `.mode-round` op `#s-handoff` schakelt tussen de twee
+blokken; `#btnHold` en zijn ring blijven in allebei de standen hetzelfde.
+
+De stand op dit scherm (`#hoTally`) toont daarom geen stapel fiches meer,
+zoals de winnaar dat wel doet: dat scherm is verder leeg, maar dit scherm
+deelt de ruimte al met de opdracht en, in de "round"-stand, ook nog de
+regel-illustratie en de routekaart. Een stapel van dertig-plus fiches duwde
+tegen ronde 3 de startknop van het scherm af -- onzichtbaar in de test tot
+je 'm met een screenshot ziet staan. Een totaal met een goud "+N" ernaast
+zegt hetzelfde, in een breedte die niet meegroeit met de avond.
+
 ## App-pictogram en installeerbaarheid
 
 Het manifest staat niet als los bestand naast `index.html` -- dat zou de

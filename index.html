@@ -262,8 +262,8 @@ button.btn-ghost, button.btn-icon, button.gear, button.chip, button.pv {
    startknop ook al gebruikt: wat gestippeld is, is nog niet af. */
 
 /* ---- de grote ronde "verder"-knop ----
-   Titel, ronde-intro, volgende beurt, volgende ronde, opnieuw, verder
-   na pauze: allemaal één tik. */
+   Titel, overdracht (vasthouden), opnieuw, verder na pauze: allemaal
+   dezelfde knop. */
 .btn-go {
   align-self: center; flex: 0 0 auto;
   width: min(52vw, 21vh, 190px); aspect-ratio: 1;
@@ -551,9 +551,9 @@ input[type=range]::-moz-range-thumb {
 .hint { font-size: 12px; color: var(--ink-2); margin: var(--s-2) 0 0; line-height: 1.45; }
 
 /* ============================================================
-   6. RONDE-INTRO — geen woorden op de knoppen, alleen een gebaar.
+   6. RONDE-REGEL — geen eigen scherm meer: dit blok verschijnt nu op het
+   overdrachtscherm zelf, zie ".mode-round" bij sectie 7.
    ============================================================ */
-#s-roundintro { justify-content: center; align-items: center; gap: 3vh; }
 .ri-stage { width: min(52vw, 26vh, 260px); aspect-ratio: 1; display: grid; place-items: center; }
 .ri-stage svg { width: 100%; height: 100%; overflow: visible; }
 
@@ -600,6 +600,29 @@ input[type=range]::-moz-range-thumb {
 }
 #s-handoff .mascot-big { width: min(46vw, 30vh, 230px); display: block; }
 
+/* Twee soorten overdracht delen dit ene scherm: van speler wisselen (een
+   nieuwe mascotte, de ploegkleur vult het scherm) en van ronde wisselen
+   (dezelfde speler, alleen de opdracht is nieuw -- dus geen onthulling om
+   voor te staan). .mode-round schakelt tussen de twee blokken in plaats
+   van dat daar een los scherm voor bestaat dat toch weer op hetzelfde
+   "hou vast om te beginnen" uitkomt. */
+/* Zes blokken in plaats van vier (stand, wie, regel-beeld, regel-tekst,
+   routekaart, startknop): op een smal toestel is er dan minder lucht per
+   blok nodig dan de kolom voor een gewone beurtwissel gebruikt. */
+#s-handoff.mode-round { background: var(--paper); gap: 1.6vh; }
+#s-handoff.mode-round .plaque,
+#s-handoff.mode-round .roundcard { display: none; }
+#s-handoff:not(.mode-round) .whos-up,
+#s-handoff:not(.mode-round) .ri-stage,
+#s-handoff:not(.mode-round) .ri-say,
+#s-handoff:not(.mode-round) .roadmap { display: none; }
+
+/* Wie er verdergaat, rustig: geen ploegkleur die het scherm vult, want er
+   is niets om voor te staan -- dezelfde speler zet door. Alleen het icoon:
+   de naam zit als aria-label op de wrapper, zie het overdrachtscherm. */
+.whos-up { display: flex; align-items: center; justify-content: center; }
+.whos-up svg { width: 40px; height: 40px; display: block; }
+
 /* De opdracht op het overdrachtscherm: pictogram en woord naast elkaar, op
    papier. Ook hier geen rondekleur -- de mascotte staat er pal boven. */
 .roundcard {
@@ -621,7 +644,11 @@ input[type=range]::-moz-range-thumb {
 
 /* De stand op het moment van overdragen: wie het toestel krijgt wil
    weten waar het over gaat. Klein, want het is naslag. */
-.mini-score { display: flex; align-items: center; gap: var(--s-3); }
+/* --team vast op inkt: dit kaartje toont soms allebei de ploegen tegelijk,
+   dus geen van beide mag zijn kleur op de schaduw claimen -- en in de
+   "round"-stand hangt --team sowieso nog op de vorige beurt, want er is
+   geen wissel om 'm opnieuw te zetten. */
+.mini-score { --team: var(--ink); display: flex; align-items: center; gap: var(--s-3); }
 .mini-score .side { display: flex; align-items: center; gap: var(--s-1); }
 .mini-score .side svg { width: 28px; height: 28px; }
 .mini-score b {
@@ -629,6 +656,18 @@ input[type=range]::-moz-range-thumb {
   color: var(--ink);
 }
 .mini-score .sep { width: 3px; height: 20px; background: var(--ink); opacity: .3; }
+/* Wat er net bij kwam, als klein goud label naast het totaal -- niet als
+   stapel fiches: die groeit de hele avond door, en op het overdrachtscherm
+   staat ook nog de opdracht (en soms de routekaart) om ruimte mee te delen. */
+.mini-score .fresh {
+  font-style: normal; font-weight: 900; font-size: 13px; color: var(--ink);
+  background: var(--go); border: 2px solid var(--ink); padding: 1px 6px;
+}
+@keyframes freshIn { from { transform: scale(0); } to { transform: scale(1); } }
+.mini-score .fresh:not([hidden]) {
+  display: inline-block;
+  animation: freshIn calc(.4s / max(var(--dur), .001)) var(--e-pop) backwards;
+}
 
 /* Overgedragen tijd: een kaartje waarvan de rand al deels weg is -- precies
    het beeld dat straks om de echte kaart staat. Het hangt nu tegen de
@@ -977,30 +1016,14 @@ input[type=range]::-moz-range-thumb {
   border-top: 2px solid var(--rule);
 }
 
-#s-turnend, #s-roundend { justify-content: center; align-items: center; gap: 3vh; }
-
-/* Wie er nu aan de beurt is. Het einde-beurt-scherm wisselde de ploeg
-   stilletjes en toonde daarna twee stapels en een driehoekje: precies op
-   het moment dat het toestel van hand moet wisselen stond er nergens naar
-   wie toe. */
-.next-up {
-  display: flex; align-items: center; gap: var(--s-3);
-  padding: var(--s-2) var(--s-4) var(--s-2) var(--s-2);
-}
-.next-up .mascot-sm { width: min(56px, 7vh); display: block; }
-.next-up .arrow { width: 26px; height: 26px; flex: 0 0 auto; }
-.next-up .ico {
-  width: 44px; height: 44px; display: grid; place-items: center;
-  border: var(--line-2) solid var(--ink); background: var(--paper-2); flex: 0 0 auto;
-}
-.next-up .ico svg { width: 32px; height: 32px; }
-
 /* De voortgang als de drie rondes zelf, niet als drie naamloze stippen.
    Gedane rondes krijgen een vinkje, de volgende staat vooraan in kleur --
    zo weet je meteen wat er hierna komt in plaats van alleen hoeveel er
-   nog te gaan is. Dit stond alleen op het einde-ronde-scherm, terwijl de
+   nog te gaan is. Dit stond ooit op het einde-ronde-scherm, terwijl de
    ronde-intro het met drie naamloze bolletjes deed: twee componenten voor
-   één begrip. Nu staat deze op allebei. */
+   één begrip. Nu is er nog maar één plek waar dat kan spelen: de
+   "round"-stand van het overdrachtscherm, en de routekaart tekent er
+   precies één keer. */
 .roadmap { display: flex; align-items: flex-end; gap: var(--s-2); }
 /* Vaste kolombreedte: anders duwt het langste woord ("uitbeelden") zijn
    buur opzij en lopen de onderschriften in elkaar. */
@@ -1114,7 +1137,7 @@ input[type=range]::-moz-range-thumb {
    rij dreven de twee ploegen uit elkaar en was er niets meer te
    vergelijken. */
 @media (max-height: 520px) {
-  #s-turnend.on, #s-roundend.on, #s-winner.on {
+  #s-winner.on {
     flex-direction: row; flex-wrap: wrap;
     justify-content: center; align-items: center; gap: 3vw;
   }
@@ -1136,7 +1159,6 @@ input[type=range]::-moz-range-thumb {
   .tally .crown { width: 32px; top: -20px; }
   .tally .mascot-sm { width: min(52px, 13vh); }
   .tally.winner .mascot-sm { width: min(26vw, 20vh, 110px); }
-  .next-up { padding: var(--s-1) var(--s-3) var(--s-1) var(--s-1); }
   /* De hoofdknop hing op 21vh, en 21% van 390 px is een knoop van 82 px:
      kleiner dan de pauzeknop ernaast, terwijl hij de hoofdhandeling is. */
   .btn-go { width: min(30vw, 34vh, 150px); }
@@ -1186,10 +1208,7 @@ input[type=range]::-moz-range-thumb {
   .roadmap .step b { font-size: 12px; }
   .roadmap .step.next b { font-size: 14px; }
   .roadmap .step.done .tick { width: 32px; height: 32px; }
-  .next-up .mascot-sm { width: 76px; }
-  .next-up .ico { width: 60px; height: 60px; }
-  .next-up .ico svg { width: 44px; height: 44px; }
-  .next-up .arrow { width: 34px; height: 34px; }
+  .whos-up svg { width: 52px; height: 52px; }
   .teamchip, .roundchip .ico { width: 60px; height: 60px; }
   .roundchip .ico svg { width: 46px; height: 46px; }
   .roundchip b { font-size: 12px; }
@@ -1269,12 +1288,6 @@ input[type=range]::-moz-range-thumb {
   <symbol id="i-huis" viewBox="0 0 100 100">
     <path d="M50 12 L90 46 V88 H60 V62 H40 V88 H10 V46 Z"
           fill="none" stroke="#14110F" stroke-width="10" stroke-linejoin="round"/>
-  </symbol>
-
-  <!-- "hierna", op het einde-beurt-scherm -->
-  <symbol id="i-naar" viewBox="0 0 100 100">
-    <path d="M14 50 H74" stroke="#14110F" stroke-width="12" stroke-linecap="round"/>
-    <path d="M58 26 L86 50 L58 74 Z" fill="#14110F" stroke="#14110F" stroke-width="8" stroke-linejoin="round"/>
   </symbol>
 
   <symbol id="i-stop" viewBox="0 0 100 100">
@@ -1436,41 +1449,55 @@ input[type=range]::-moz-range-thumb {
   </div>
 </section>
 
-<!-- ====================== RONDE-INTRO =========================== -->
-<section class="screen" id="s-roundintro">
-  <div class="ri-stage" id="riStage"></div>
-  <div class="ri-say">
-    <b id="riWord">Uitleggen</b>
-    <p id="riHow"></p>
-  </div>
-  <!-- Drie naamloze bolletjes vertelden hoeveel rondes er nog waren, niet
-       welke. Dezelfde routekaart als op het einde-ronde-scherm vertelt
-       allebei, en scheelt een component. -->
-  <div class="roadmap" id="riRoadmap"></div>
-  <button class="btn-go" id="btnRoundGo" aria-label="Verder">
-    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-play"/></svg>
-  </button>
-  <button class="btn-icon" id="btnPauzeRi" aria-label="Pauze">
-    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pauze"/></svg>
-  </button>
-</section>
-
 <!-- ======================== OVERDRACHT ========================== -->
+<!-- Eén scherm voor allebei de wissels die het toestel van hand laten
+     gaan. Wisselt de spéler (een beurt liep af), dan is de mascotte het
+     nieuws: de ploegkleur vult het scherm. Wisselt de rónde (de stapel is
+     leeg), dan blijft dezelfde speler zitten -- geen onthulling dus, alleen
+     de nieuwe opdracht groot in beeld en de routekaart erbij. ".mode-round"
+     schakelt tussen de twee blokken; welke knop je moet vasthouden
+     verandert nooit. -->
 <section class="screen" id="s-handoff">
-  <div class="plaque surface">
-    <svg class="mascot-big" id="hoMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg>
+  <!-- De stand die net veranderde. Dit scherm deelt de ruimte met de
+       opdracht en (bij een ronde-wissel) de regel en de routekaart, dus
+       hier geen volle stapel fiches per punt -- die groeit de hele avond
+       door en duwde tegen ronde 3 de startknop van het scherm af. Een
+       getal met een gouden "erbij" ernaast zegt hetzelfde in vaste
+       breedte. -->
+  <div class="mini-score surface" id="hoTally" aria-hidden="true" hidden>
+    <div class="side">
+      <svg viewBox="0 0 100 100"><use href="#m-vos"/></svg>
+      <b id="hoScoreA">0</b>
+      <i class="fresh" id="hoFreshA" hidden></i>
+    </div>
+    <i class="sep"></i>
+    <div class="side">
+      <svg viewBox="0 0 100 100"><use href="#m-uil"/></svg>
+      <b id="hoScoreB">0</b>
+      <i class="fresh" id="hoFreshB" hidden></i>
+    </div>
+  </div>
+
+  <div class="plaque surface" id="hoPlaque">
+    <svg class="mascot-big" id="hoMascot" viewBox="0 0 100 100" aria-hidden="true"><use href="#m-vos"/></svg>
   </div>
   <div class="roundcard surface" id="hoRoundCard">
     <div class="ico"><svg id="hoRound" viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
     <b id="hoRoundWord">Uitleggen</b>
   </div>
 
-  <!-- De stand, klein: wie het toestel krijgt wil weten waar het over gaat. -->
-  <div class="mini-score surface" id="hoScore" aria-hidden="true">
-    <div class="side"><svg viewBox="0 0 100 100"><use href="#m-vos"/></svg><b id="hoScoreA">0</b></div>
-    <i class="sep"></i>
-    <div class="side"><svg viewBox="0 0 100 100"><use href="#m-uil"/></svg><b id="hoScoreB">0</b></div>
+  <!-- Alleen het icoon: een zichtbaar tekstlabel ernaast liep op een smal
+       scherm onder de pauzeknop door. De naam gaat als aria-label mee voor
+       wie een schermlezer gebruikt; wie kijkt herkent de mascotte toch al. -->
+  <div class="whos-up" id="hoWhosUp">
+    <svg id="hoWhosUpMascot" viewBox="0 0 100 100" aria-hidden="true"><use href="#m-vos"/></svg>
   </div>
+  <div class="ri-stage" id="hoRuleStage"></div>
+  <div class="ri-say">
+    <b id="hoRuleWord">Eén woord</b>
+    <p id="hoRuleHow"></p>
+  </div>
+  <div class="roadmap" id="hoRoadmap"></div>
 
   <button class="btn-icon" id="btnPauzeHo" aria-label="Pauze">
     <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pauze"/></svg>
@@ -1547,37 +1574,6 @@ input[type=range]::-moz-range-thumb {
     </button>
   </div>
 
-</section>
-
-<!-- ======================== EINDE BEURT ========================= -->
-<section class="screen" id="s-turnend">
-  <!-- Wie hierna aan de beurt is. De ploeg wisselde hier stilletjes en het
-       scherm toonde alleen twee stapels: precies wanneer het toestel van
-       hand moet, stond er nergens naar wie toe. -->
-  <div class="next-up surface" id="teNext">
-    <svg class="mascot-sm" id="teNextMascot" viewBox="0 0 100 100"><use href="#m-uil"/></svg>
-    <svg class="arrow" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-naar"/></svg>
-    <div class="ico"><svg id="teNextRound" viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
-  </div>
-  <div class="side-by-side" id="tePiles"></div>
-  <button class="btn-go" id="btnTurnNext" aria-label="Volgende beurt">
-    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-play"/></svg>
-  </button>
-  <button class="btn-icon" id="btnPauzeTe" aria-label="Pauze">
-    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pauze"/></svg>
-  </button>
-</section>
-
-<!-- ======================== EINDE RONDE ========================= -->
-<section class="screen" id="s-roundend">
-  <div class="side-by-side" id="rePiles"></div>
-  <div class="roadmap" id="reRoadmap"></div>
-  <button class="btn-go" id="btnRoundNext" aria-label="Volgende ronde">
-    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-play"/></svg>
-  </button>
-  <button class="btn-icon" id="btnPauzeRe" aria-label="Pauze">
-    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pauze"/></svg>
-  </button>
 </section>
 
 <!-- ========================== WINNAAR =========================== -->
@@ -1814,9 +1810,8 @@ let current = "title";
    speelt raakte bij elke schermwissel de focus kwijt -- die viel terug op
    <body>, want het element dat de focus had werd verborgen. */
 const PRIMARY = {
-  title: "#btnStart", setup: "#btnGo", roundintro: "#btnRoundGo",
-  handoff: "#btnHold", play: "#btnGoed", turnend: "#btnTurnNext",
-  roundend: "#btnRoundNext", winner: "#btnAgain"
+  title: "#btnStart", setup: "#btnGo",
+  handoff: "#btnHold", play: "#btnGoed", winner: "#btnAgain"
 };
 
 let started = false;
@@ -2003,22 +1998,13 @@ function newGame() {
     pendingMs: settings.secs * 1000,  // wat de volgende beurt meekrijgt
     secs: settings.secs
   };
-  roundIntro();
+  // Er is nog niets om terug te blikken op: de stand blijft verborgen tot
+  // turnEnd() of endRound() 'm voor het eerst vult.
+  $("#hoTally").hidden = true;
+  handoff("round");
 }
 
 function total(t) { return G.scores[t].reduce((a, b) => a + b, 0); }
-
-function roundIntro() {
-  paintRoundIntro(G.round);
-  show("roundintro");
-}
-
-function paintRoundIntro(r) {
-  $("#riStage").innerHTML = RI_ART[r - 1];
-  $("#riWord").textContent = ROUND_WORD[r - 1];
-  $("#riHow").textContent = ROUND_HOW[r - 1];
-  paintRoadmap($("#riRoadmap"), r);
-}
 
 /* Dezelfde tekstballon in het groot, met het aantal woorden erin dat
    terugloopt naar nul. De ballon uit de balk tijdens het spelen is
@@ -2077,8 +2063,6 @@ const ROUND_HOW = [
   "Alleen uitbeelden. Geen geluid."
 ];
 
-$("#btnRoundGo").addEventListener("click", () => { Snd.unlock(); handoff(); });
-
 const ROUND_ICON = ["#r-praten", "#r-eenwoord", "#r-mimen"];
 
 function paintRound(el, iconEl, wordEl) {
@@ -2087,15 +2071,30 @@ function paintRound(el, iconEl, wordEl) {
   el.setAttribute("aria-label", "Deze ronde: " + ROUND_WORD[G.round - 1]);
 }
 
-function handoff() {
+/* Twee soorten overdracht, één scherm. Wisselt de speler ("turn"), dan is
+   de mascotte het nieuws: de ploegkleur vult het scherm. Wisselt alleen de
+   ronde ("round"), dan blijft dezelfde speler zitten -- geen onthulling
+   dus, alleen de nieuwe opdracht groot in beeld, met de routekaart erbij.
+   De stand (#hoTally) vult de aanroeper zelf, via paintHoTally(): "vers"
+   betekent bij een beurt iets anders dan bij een ronde. */
+function handoff(mode) {
+  $("#s-handoff").classList.toggle("mode-round", mode === "round");
   const t = TEAMS[G.team];
-  $("#s-handoff").style.setProperty("--team", t.color);
-  $("#hoMascot").firstElementChild.setAttribute("href", t.mascot);
-  paintRound($("#hoRoundCard"), $("#hoRound"), $("#hoRoundWord"));
 
-  // De stand erbij: wie het toestel krijgt wil weten waar het over gaat.
-  $("#hoScoreA").textContent = total(0);
-  $("#hoScoreB").textContent = total(1);
+  if (mode === "round") {
+    $("#hoWhosUpMascot").firstElementChild.setAttribute("href", t.mascot);
+    $("#hoWhosUp").setAttribute("aria-label", t.naam + " is aan de beurt");
+    $("#hoRuleStage").innerHTML = RI_ART[G.round - 1];
+    $("#hoRuleWord").textContent = ROUND_WORD[G.round - 1];
+    $("#hoRuleHow").textContent = ROUND_HOW[G.round - 1];
+    paintRoadmap($("#hoRoadmap"), G.round);
+  } else {
+    $("#s-handoff").style.setProperty("--team", t.color);
+    $("#hoMascot").firstElementChild.setAttribute("href", t.mascot);
+    paintRound($("#hoRoundCard"), $("#hoRound"), $("#hoRoundWord"));
+    $("#hoPlaque").setAttribute("aria-label",
+      "Hierna: " + t.naam + " — " + ROUND_WORD[G.round - 1]);
+  }
 
   /* Overgedragen tijd. Dit was een los kaartje dat ergens tussen de
      opdracht en de startknop zweefde, met het getal in marigold op papier
@@ -2382,36 +2381,41 @@ function timeUp() {
   turnEnd();
 }
 
+/* De stand op het overdrachtscherm, met wat er net bij kwam als goud label.
+   Geen stapel fiches hier: dat werkt op een scherm dat verder leeg is
+   (winnaar), maar dit scherm deelt de ruimte al met de opdracht en soms de
+   routekaart, en een stapel van 30+ fiches duwde tegen ronde 3 de startknop
+   van het scherm af. */
+function paintHoTally(freshA, freshB) {
+  $("#hoTally").hidden = false;
+  $("#hoScoreA").textContent = total(0);
+  $("#hoScoreB").textContent = total(1);
+  $("#hoFreshA").hidden = !freshA;
+  $("#hoFreshA").textContent = freshA ? "+" + freshA : "";
+  $("#hoFreshB").hidden = !freshB;
+  $("#hoFreshB").textContent = freshB ? "+" + freshB : "";
+}
+
 /* Einde beurt toont beide ploegen, niet alleen wie net speelde: één mascotte
    in beeld las als "jij weer", terwijl het toestel juist doorgegeven moet
-   worden. De zojuist verdiende fiches komen aanrollen.
-
-   En het zegt nu ook naar wíe toe. De ploeg wisselde hier stilletijk -- de
-   kroon staat boven wie vóórstaat, niet boven wie aan zet is -- zodat er
-   precies op het moment dat het toestel van hand moet nergens stond aan
-   wie. */
+   worden. Het overdrachtscherm opent meteen -- geen tik ertussen die alleen
+   maar naar het volgende scherm ging en verder niets bewaakte. */
 function turnEnd() {
-  const box = $("#tePiles");
-  box.textContent = "";
-  [0, 1].forEach(t => box.appendChild(tallyNode(t, t === G.team ? G.gained : 0)));
+  const freshA = G.team === 0 ? G.gained : 0;
+  const freshB = G.team === 1 ? G.gained : 0;
   for (let i = 0; i < G.gained; i++) Snd.token(i);
   G.team = 1 - G.team;
   G.pendingMs = 0;
 
-  const nxt = TEAMS[G.team];
-  // De kleurlaag van dit kaartje is die van de ploeg die hierna speelt --
-  // anders stond er de standaardkleur (rood) achter een blauwe uil.
-  $("#teNext").style.setProperty("--team", nxt.color);
-  $("#teNextMascot").firstElementChild.setAttribute("href", nxt.mascot);
-  $("#teNextRound").firstElementChild.setAttribute("href", ROUND_ICON[G.round - 1]);
-  $("#teNext").setAttribute("aria-label",
-    "Hierna: " + nxt.naam + " — " + ROUND_WORD[G.round - 1]);
-
-  show("turnend");
+  paintHoTally(freshA, freshB);
+  handoff("turn");
 }
 
-$("#btnTurnNext").addEventListener("click", () => { Snd.unlock(); handoff(); });
-
+/* Dezelfde overweging bij einde ronde: de stand van de afgelopen ronde en de
+   nieuwe opdracht kwamen eerst via twee tussenschermen (ronde-afsluiting,
+   ronde-intro) die geen van beide iets bewaakten. Nu vult dit meteen het
+   overdrachtscherm, in de "round"-stand: geen ploegwissel, dus geen
+   mascotte-onthulling, wel de nieuwe regel groot in beeld. */
 function endRound() {
   stopClock(); releaseWake();
   // Klassieke regel: de resterende tijd gaat mee naar de eerste
@@ -2423,19 +2427,12 @@ function endRound() {
 
   if (G.round >= ROUNDS) { winner(); return; }
 
-  // Wat elke ploeg deze ronde verdiende, met een gouden rand om de verse
-  // fiches: anders zie je alleen een totaal en niet wie de ronde won.
-  const box = $("#rePiles");
-  box.textContent = "";
-  [0, 1].forEach(t => box.appendChild(tallyNode(t, G.scores[t][G.round - 1])));
-  paintRoadmap($("#reRoadmap"), G.round + 1);
+  paintHoTally(G.scores[0][G.round - 1], G.scores[1][G.round - 1]);
 
   G.round++;
   G.pile = shuffle(G.deck.map((_, i) => i));
-  show("roundend");
+  handoff("round");
 }
-
-$("#btnRoundNext").addEventListener("click", () => { Snd.unlock(); roundIntro(); });
 
 function fillPile(el, n, hex, newest) {
   el.textContent = "";
@@ -2665,7 +2662,7 @@ function closePause() {
    in twee verschillende maten en doorzichtigheden -- en op de vier
    tussenschermen helemaal niet. Wie na de ronde wilde stoppen ("nog één en
    dan naar bed") moest daarvoor eerst een nieuwe ronde beginnen. */
-["#btnPauze", "#btnPauzeHo", "#btnPauzeRi", "#btnPauzeTe", "#btnPauzeRe"]
+["#btnPauze", "#btnPauzeHo"]
   .forEach(sel => $(sel).addEventListener("click", () => { Snd.unlock(); openPause(); }));
 
 $("#btnResume").addEventListener("click", closePause);
