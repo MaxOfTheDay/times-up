@@ -50,26 +50,52 @@ geen potje overleeft een herlaadbeurt. Die knop is nu ook een gewone tik.
 Alles staat in `index.html`: geen build, geen externe assets, werkt met de
 wifi uit. Houd dat zo.
 
-## Eén overdrachtscherm, twee standen
+## Eén overdrachtscherm, drie vakken
 
 Vroeger waren er vier schermen tussen "de klok is om" en "de volgende beurt
 begint": een terugblik, een overdracht, een rondeafsluiting, een
 ronde-intro. Geen van de tikken ertussen bewaakte iets -- ze wachtten alleen
 tot je verder tikte -- terwijl "wie is er nu aan de beurt" op twee van die
-schermen apart onthuld werd. `#s-handoff` is nu het enige scherm: `handoff("turn")`
-laat de mascotte en de ploegkleur het scherm vullen (er wisselt een speler,
-dus dat is het nieuws), `handoff("round")` laat in plaats daarvan de nieuwe
-regel groot zien met de routekaart erbij (dezelfde speler zet door, dus geen
-onthulling nodig). `.mode-round` op `#s-handoff` schakelt tussen de twee
-blokken; `#btnHold` en zijn ring blijven in allebei de standen hetzelfde.
+schermen apart onthuld werd. `#s-handoff` is nu het enige scherm, en het
+vult altijd dezelfde drie vakken in dezelfde volgorde:
 
-De stand op dit scherm (`#hoTally`) toont daarom geen stapel fiches meer,
-zoals de winnaar dat wel doet: dat scherm is verder leeg, maar dit scherm
-deelt de ruimte al met de opdracht en, in de "round"-stand, ook nog de
-regel-illustratie en de routekaart. Een stapel van dertig-plus fiches duwde
-tegen ronde 3 de startknop van het scherm af -- onzichtbaar in de test tot
-je 'm met een screenshot ziet staan. Een totaal met een goud "+N" ernaast
-zegt hetzelfde, in een breedte die niet meegroeit met de avond.
+1. **stand** -- hoe staan we, wie is er aan zet, wat kwam er net bij;
+2. **opdracht** -- wat moet je doen;
+3. **start** -- vasthouden, de enige handeling.
+
+Het enige verschil tussen de twee wissels is de dichtheid van vak 2.
+`handoff("turn")` laat de kaart compact (de opdracht is niet veranderd),
+`handoff("round")` klapt hem uit met de ronde-tekening en de regel erin.
+Dat uitklappen ís het teken dat er iets nieuws te leren valt -- daar is geen
+apart scherm of tweede component voor nodig. `.mode-round` schakelt ertussen.
+
+Wat er níet meer staat, en waarom:
+
+- **Geen routekaart.** Die noemde de ronde nog een keer met hetzelfde
+  pictogram en hetzelfde woord dat er al in kapitalen boven stond.
+- **Geen grote mascotte op een plaat.** Het scherm heeft al de ploegkleur en
+  de stand toont die mascotte al; ze stond er dus drie keer, terwijl de
+  opdracht -- het enige waar de speler íets mee moet -- het kleinste kaartje
+  op het scherm was. Wie aan zet is, blijkt nu uit de opgetilde tegel in de
+  stand: vorm en reliëf, dus kleur staat nog steeds niet alleen.
+- **Geen aparte regel-schijf.** Die is de tekening ín de uitgeklapte kaart
+  geworden.
+
+Alle tekst staat op papier, nooit rechtstreeks op de ploegkleur: `--ink-2`
+haalt op ploegblauw maar 1,5:1 en op ploegrood 2,0:1, en de uitleg bij de
+regel is juist de enige tekst in het spel die een speler moet kunnen lezen.
+
+De stand (`#hoTally`) toont geen stapel fiches, zoals de winnaar dat wel
+doet: dat scherm is verder leeg, maar hier deelt de stand de ruimte met de
+opdracht. Een stapel van dertig-plus fiches duwde tegen ronde 3 de startknop
+van het scherm af -- onzichtbaar in de test tot je 'm met een screenshot ziet
+staan. Een totaal met een goud "+N" ernaast zegt hetzelfde in vaste breedte,
+met een kroon boven wie voorstaat (hetzelfde teken als op het winnaarsscherm,
+want twee getallen vergelijken kan een vierjarige nog niet).
+
+De knop rechtsboven draagt hier een huisje en geen pauzeteken: er loopt geen
+klok, dus er valt niets te pauzeren. De enige reden om er te tikken is
+weggaan -- en dat is wat het huisje op het winnaarsscherm ook betekent.
 
 ## App-pictogram en installeerbaarheid
 
