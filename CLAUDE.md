@@ -2,10 +2,32 @@
 
 ## Werkwijze
 
-Werk af op een feature branch, open een pull request en merge die zelf zodra
-de tests groen zijn. Niet eerst om toestemming vragen — dat is de standaard
-voor deze repo. Alleen wachten als er expliciet om een plan of een controle
-vooraf gevraagd wordt.
+Werk af op een feature branch, open een pull request en merge die zelf. Niet
+eerst om toestemming vragen — dat is de standaard voor deze repo. Alleen
+wachten als er expliciet om een plan of een controle vooraf gevraagd wordt.
+
+Merge zodra `npm test` hier lokaal groen is. Blijf niet naar de CI-run staan
+kijken: die draait dezelfde twee suites nog een keer. Hier stond eerst dat je
+erop moest wachten, en op 6 augustus kostte dat ruim een half uur — een run
+bleef vijftien minuten in de wachtrij staan en werd toen door GitHub
+afgebroken — voor één regel gewijzigde CSS waar geen enkele test iets over
+beweert.
+
+CI blijft draaien, maar als vangnet en als bewijs bij de PR, niet als hek. Hij
+vangt de dag dat je vergeet lokaal te draaien, en verschillen tussen deze
+machine en een verse `npm ci`.
+
+**Wachten doe je wél** als de wijziging aan de speellogica zit, aan `DECKS`, of
+aan de testharnas zelf. Daar zegt een verse omgeving met een volledig
+doorgespeeld potje iets wat je hier niet ziet.
+
+En weet waar de fouten echt zitten. Geen enkele misser in deze repo is ooit
+door een test gevonden: de mascottes op 0 bij 0 pixels in het pauzepaneel, de
+derde rechthoek om het merk, de kroon die liggend door de bovenrand schoot
+(`min()` kiest bij negatieve waarden de méést negatieve), de stapel fiches die
+de startknop van het scherm af duwde. Allemaal gevonden door te renderen en te
+meten. Dát is de controle die telt — niet `npm test`, en al helemaal niet het
+groene vinkje op GitHub.
 
 De site draait op GitHub Pages vanaf `main`, dus wat niet gemerged is, staat
 niet in de woonkamer.
