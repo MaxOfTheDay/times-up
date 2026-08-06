@@ -985,8 +985,22 @@ input[type=range]::-moz-range-thumb {
 .overlay:not([hidden]) .panel {
   animation: panelIn calc(.22s / max(var(--dur), .001)) var(--e-pop) backwards;
 }
+/* Een gewoon stuk papier, net als de kaart en de opdracht: crème, inkt-rand,
+   inktschaduw. Hier stond een gouden kleurplaat op (`--mis`), en die had ooit
+   gezelschap -- het merk droeg dezelfde. Sinds het merk zijn plaat als
+   slagschaduw draagt, was dit paneel het énige element in de app dat `--mis`
+   nog zette, en een misregistratie die één keer voorkomt is geen kenmerk van
+   de pers meer maar een gouden randje zonder reden.
+
+   Ze kostte bovendien een derde betekenis aan goud op dit scherm: de plaat
+   (--go), de wijzerplaat (--time-3) en de verder-knop (--go). Twee daarvan
+   zijn letterlijk --go, en --go betekent "verdergaan" -- wat de omlijsting
+   van een paneel niet doet. Zonder plaat houdt goud hier twee betekenissen
+   over, en die zijn allebei verdiend.
+
+   Het paneel verliest er niets bij: het is al het enige dat op een donker
+   waas ligt, het staat gecentreerd, en het schaalt op bij het openen. */
 .overlay .panel {
-  --mis: var(--go);
   display: flex; flex-direction: column; align-items: center; gap: var(--s-4);
   padding: var(--s-5) var(--s-6);
   max-width: 100%; min-width: min(280px, 82vw);
