@@ -22,10 +22,13 @@ zit in dezelfde blik als het beeld; hij verkleurt van goud naar wijnrood en
 de laatste seconden klopt de kaart mee. De kaart ligt op een stapel waarvan de randen verdwijnen naarmate
 je opschiet — leegspelen levert tijd op voor de volgende ronde, dus dat is
 het zien waard, en bij de laatste kaart ligt er niets meer onder.
-Rechtsboven groeit een rij fiches: wat deze beurt al binnen is.
+Linksboven, naast de mascotte, staat een groen "+N": wat deze beurt al binnen
+is. Datzelfde label komt straks op de stand terecht, in dezelfde kleur en op
+dezelfde plek naast diezelfde mascotte, dus je ziet wat je verzamelde
+overgaan in wat erbij komt.
 
 Alleen de klok is een meter. Alles wat langzaam leegloopt leest als tijd, dus
-de stapel is een voorwerp en de punten zijn fiches — geen tweede en derde
+de stapel is een voorwerp en de punten zijn een label — geen tweede en derde
 balkje ernaast.
 
 Geraden en gepast voelen ook anders: een geraden kaart wordt van de stapel
@@ -54,17 +57,20 @@ de kaart gaat onderaan terug. Loopt de stapel leeg, dan stopt de ronde
 meteen — ook midden in een beurt — en gaat de resterende tijd mee naar de
 eerste beurt van de volgende ronde, voor dezelfde ploeg.
 
-De instellingen (het knopje rechtsonder) regelen de
+De instellingen (het knopje rechtsboven) regelen de
 moeilijkheid, het aantal kaarten, de tijd per beurt en het geluid. Je ziet
 daar ook het deck van vanavond; tik een kaart aan om ze te vervangen. Het is
 het enige scherm met tekst, en meteen de korte uitleg voor wie Time's Up niet
 kent.
 
-Rechtsboven staat op elk scherm van het spel een knopje op dezelfde plek en
-in dezelfde maat: tijdens het spelen een pauzeteken, tussen de beurten een
-huisje (daar loopt geen klok, dus valt er niets te pauzeren). Achter allebei
-zit hetzelfde paneel, met stoppen achter een lange druk. Passen staat altijd
-linksonder en geraden altijd rechtsonder, ook als je het toestel draait.
+Rechtsboven staat op elk scherm een knopje op dezelfde plek en in dezelfde
+maat: op de titel een tandwiel, tijdens het spelen een pauzeteken, tussen de
+beurten een huisje (daar loopt geen klok, dus valt er niets te pauzeren).
+Achter de laatste twee zit hetzelfde paneel: de bevroren klok, de stand met
+de kroon bij wie voorstaat en de opgetilde tegel bij wie aan zet is, en
+daaronder de twee keuzes naast elkaar — verdergaan is een tik, stoppen een
+lange druk. Passen staat altijd linksonder en geraden altijd rechtsonder,
+ook als je het toestel draait.
 
 Tijdens het spelen staat linksboven altijd wie aan de beurt is én wat de
 opdracht van deze ronde is — praten, één woord of uitbeelden — zodat wie het
