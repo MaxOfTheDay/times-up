@@ -92,11 +92,24 @@ plaat. Ze werd dus geen schaduw maar een tweede zwarte rechthoek die het
 silhouet verlengde, en met de gouden kleurplaat linksboven erbij lagen er
 drie rechthoeken over elkaar — zichtbaar op de twee hoeken waar niemand
 kijkt, rechtsboven en linksonder, als een trap waar de ene rechthoek onder
-de andere uitsteekt. Een inkt-vlak krijgt dus alleen de kleurplaat:
+de andere uitsteekt. Een inkt-vlak krijgt dus maar één verschoven laag.
+
+Wélke, dat is de tweede helft van de les. Die laag stond linksboven, op de
+plek van de misregistratie — en daarmee was het merk het enige vlak in de
+app dat de andere kant op verschoof, terwijl elke andere kaart vijf pixels
+naar rechtsonder van de pagina af ligt. Naast de opdrachtkaart van het
+volgende scherm viel dat op: die lag óp het papier, het merk lag erin. De
+gouden plaat is daarom de schaduw geworden — zelfde afstand en richting als
+overal, alleen in goud in plaats van inkt:
 
 ```css
-box-shadow: calc(var(--shift) * -1) calc(var(--shift) * -1) 0 0 var(--go);
+box-shadow: var(--lift-1) var(--lift-1) 0 0 var(--go);
 ```
+
+Op een inkt-vlak kun je de misregistratie óf de lift hebben, niet allebei:
+de laag die de lift geeft is juist de inktlaag die hier een tweede plaat
+wordt. Een crème contour ertussen om plaat en schaduw te scheiden lost het
+niet op — dan liggen er vier rechthoeken (goud, crème, zwart, zwart).
 
 Een rand op de kleur van wat eronder ligt is óók een derde rand. Datzelfde
 merk zette zijn contour op `--paper` om de inkt-rand van `.surface` te

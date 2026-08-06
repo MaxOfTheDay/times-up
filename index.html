@@ -547,24 +547,31 @@ button.btn-ghost, button.btn-icon, button.btn-danger, button.chip, button.pv {
 /* Twee lagen, niet drie -- en op een inkt-vlak betekent dat: géén
    inktschaduw. Die van .surface valt naar rechtsonder in dezelfde kleur als
    de plaat zelf, dus ze werd geen schaduw maar een tweede zwarte rechthoek
-   die het silhouet verlengde. Met de gouden kleurplaat linksboven erbij
-   stonden er drie rechthoeken over elkaar, en zag je op de twee andere
-   hoeken -- rechtsboven en linksonder -- de trap waar de ene rechthoek
-   onder de andere uitstak. Precies dezelfde fout als `--mis: var(--ink)`:
-   een laag in de kleur van de plaat is geen laag meer, maar een tweede
-   plaat.
-   Er blijft nu één verschoven kleurplaat over, en dat is de misregistratie
-   die dit merk wil laten zien.
+   die het silhouet verlengde, met een trap op de hoeken rechtsboven en
+   linksonder. Precies dezelfde fout als `--mis: var(--ink)`: een laag in de
+   kleur van de plaat is geen laag meer, maar een tweede plaat.
 
-   Ook geen eigen contour. Die stond op --paper om de inkt-rand van .surface
-   onzichtbaar te maken, maar --paper is ook de kleur van de pagina eronder:
-   die rand werd dus geen rand maar een gat van vier pixels tussen de plaat
-   en haar eigen lagen. */
+   Er blijft dus één verschoven laag over, en de vraag is wélke. Die stond
+   linksboven, op de plek van de misregistratie -- maar daarmee was dit het
+   enige vlak in de app dat de andere kant op verschoof: elke andere kaart
+   ligt vijf pixels naar rechtsonder van de pagina af. Naast de
+   opdrachtkaart van het volgende scherm viel dat meteen op; die lag op het
+   papier, dit merk lag erin.
+   De gouden plaat is daarom de schaduw geworden: zelfde afstand, zelfde
+   richting als overal, alleen in goud in plaats van inkt. Dat is de ruil --
+   op een inkt-vlak kun je de misregistratie óf de lift hebben, niet allebei,
+   want de laag die de lift geeft is juist de inktlaag die hier een tweede
+   plaat wordt.
+
+   Een crème contour ertussen om plaat en schaduw te scheiden lost het niet
+   op: dan liggen er vier rechthoeken (goud, crème, zwart, zwart). Ook geen
+   eigen contour dus. Die stond eerder op --paper om de inkt-rand van
+   .surface onzichtbaar te maken, maar --paper is ook de pagina eronder: die
+   rand werd geen rand maar een gat van vier pixels. */
 .wordmark {
-  --mis: var(--go);
   background: var(--ink);
   border: 0;
-  box-shadow: calc(var(--shift) * -1) calc(var(--shift) * -1) 0 0 var(--go);
+  box-shadow: var(--lift-1) var(--lift-1) 0 0 var(--go);
   padding: 22px 30px 26px;
   transform: rotate(-2deg);
   text-align: center;
