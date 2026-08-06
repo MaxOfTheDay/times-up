@@ -30,9 +30,17 @@ Twee dingen om te weten als het gebeurt:
   en de time-out annuleert die deployment ("Canceled deployment with ID …").
   Elke volgende poging op dezelfde commit maakt dus opnieuw een deployment met
   een ID dat al geannuleerd is, en faalt binnen vijf seconden op "Deployment
-  cancelled." — ook een volledige her-run met een vers gebouwd artefact. De
-  enige uitweg is een nieuwe commit op `main`: nieuwe SHA, nieuw
-  deployment-ID.
+  cancelled." — ook een volledige her-run met een vers gebouwd artefact. Wil
+  je die commit alsnog live hebben, dan moet er een nieuwe op `main`: nieuwe
+  SHA, nieuw deployment-ID.
+- **Maar een nieuwe commit koopt alleen een nieuwe póging.** Hierboven stond
+  eerst dat dat "de enige uitweg" was, en dat is te stellig gebleken: de
+  commit die deze regels toevoegde kreeg keurig een vers deployment-ID en
+  liep vervolgens net zo hard in dezelfde time-out. Ligt de wachtrij van
+  Pages plat, dan helpt geen enkele commit — dan zet je er alleen werk
+  achteraan. Vier keer achter elkaar mis in anderhalf uur is dus geen
+  aanwijzing dat je iets fout doet; dat is wachten tot GitHub bijtrekt, en
+  daarna één keer duwen.
 
 Kijk na een merge dus niet alleen of `Tests` groen is, maar ook of
 `pages build and deployment` op díe commit geslaagd is.
