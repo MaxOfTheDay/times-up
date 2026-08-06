@@ -285,31 +285,48 @@ button.btn-ghost, button.btn-icon, button.gear, button.chip, button.pv {
    lopen. Dat werkte, maar was onzichtbaar: de ring stond in papierwit
    met de streep volledig weggeschoven, dus je zag pas dát je moest
    vasthouden nadat je het al fout had gedaan. Nu staat de baan er altijd. */
-.hold-ring { position: relative; width: min(44vw, 24vh, 190px); aspect-ratio: 1; flex: 0 0 auto; }
-.hold-ring .btn-go { width: 100%; }
-.hold-ring svg.ring {
+/* De startknop op het overdrachtscherm was hier een eigen variant: dezelfde
+   .btn-go, maar met een gestippelde baan eromheen die tijdens het vasthouden
+   vollliep. Twee keer dezelfde knop die er anders uitzag, terwijl allebei
+   "spelen" betekenen. Nu is het letterlijk dezelfde knop als op de titel;
+   deze wrapper bestaat alleen nog om het kaartje met overgedragen tijd aan
+   te hangen. */
+.go-wrap { position: relative; display: grid; place-items: center; flex: 0 0 auto; }
+
+/* ---- aftellen voor de klok gaat lopen ----
+   Ligt op het spelscherm, in de ploegkleur van het overdrachtscherm dat er
+   net stond: zo loopt de kleur door en voelt het als hetzelfde moment in
+   plaats van een nieuw scherm. In het midden dezelfde gouden schijf als de
+   knop die je net indrukte, met het getal erin en een inktboog eromheen die
+   leegloopt.
+
+   Geen baan onder die boog: op een gekleurd vlak zou een tweede ring alleen
+   maar ruis zijn, en de boog die korter wordt zegt het al. Het getal staat
+   er niet alleen -- boog, cijfer en tik doen alle drie hetzelfde. */
+.countdown {
+  position: absolute; inset: 0; z-index: 6;
+  display: grid; place-items: center;
+  background: var(--team);
+  border: 0; padding: 0;
+}
+.cd-disc { position: relative; width: min(46vw, 24vh, 190px); aspect-ratio: 1; display: block; }
+.cd-disc b {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  border-radius: 50%; background: var(--go);
+  border: var(--line) solid var(--ink);
+  /* Geen slagschaduw: die betekent in deze app "je kunt me indrukken", en
+     dit is geen knop maar een teller. Ze liep bovendien door de leeglopende
+     boog heen, waardoor die er aan één kant dikker uitzag. */
+  font-weight: 900; font-size: min(20vw, 11vh, 84px); color: var(--ink);
+  font-variant-numeric: tabular-nums; line-height: 1;
+}
+.cd-disc .ring {
   position: absolute; inset: -10px; width: calc(100% + 20px); height: calc(100% + 20px);
   transform: rotate(-90deg); pointer-events: none;
 }
-.hold-ring .ring circle { fill: none; stroke-width: 8; stroke-linecap: butt; }
-/* De baan stond in papierwit op een kwart doorzichtigheid, en dat kwam op
-   het vermiljoen van dit scherm neer op een waas: doorschijnend papier op
-   rood mengt tot een vaal roze, precies het "geen pastel, geen zachte
-   randen"-effect dat de rest van de app nooit toelaat. Nu een dichte
-   inktring zonder enige doorzichtigheid -- geen waas, gewoon een tweede,
-   duidelijke lijn -- en het goud dat hem tijdens het vasthouden volloopt
-   is dezelfde kleur als de knop zelf: je ziet de kleur van de knop letterlijk
-   de ring in kruipen. */
-.hold-ring .ring .track { stroke: var(--ink); }
-.hold-ring .ring .arc   { stroke: var(--go); stroke-linecap: round; }
-
-/* De ring staat los van de knop, in zijn eigen SVG. .btn-go:active
-   verschuift een knop over --lift-2 om zijn schaduw te laten "verdwijnen
-   onder" de knop -- maar de ring schuift niet mee, dus die verschuiving
-   duwt de knop uit het midden van zijn eigen ring. Hier verliest hij
-   alleen de schaduw, zonder te verschuiven: concentrisch blijft
-   concentrisch, en de vullende boog blijft het teken dat er iets gebeurt. */
-.hold-ring .btn-go:active { transform: none; }
+.cd-disc .ring .arc {
+  fill: none; stroke: var(--ink); stroke-width: 8; stroke-linecap: round;
+}
 
 /* ---- geraden ---- */
 .btn-good {
@@ -1162,7 +1179,6 @@ input[type=range]::-moz-range-thumb {
      kleiner dan de pauzeknop ernaast, terwijl hij de hoofdhandeling is. */
   .btn-go { width: min(30vw, 34vh, 150px); }
   #s-handoff { flex-direction: row; flex-wrap: wrap; gap: 3vw; }
-  .hold-ring { width: min(26vw, 34vh, 160px); }
   /* De bovenbalk vreet op een laag scherm hoogte die de kaart nodig heeft. */
   .teamchip, .roundchip .ico { width: 40px; height: 40px; }
   .roundchip .ico svg { width: 30px; height: 30px; }
@@ -1500,18 +1516,15 @@ input[type=range]::-moz-range-thumb {
     <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-huis"/></svg>
   </button>
 
-  <div class="hold-ring">
-    <button class="btn-go" id="btnHold" aria-label="Houd ingedrukt om te beginnen">
+  <!-- 3. START. Dezelfde knop als op het titelscherm: één tik. Wat een losse
+       aanraking tijdens het doorgeven tegenhield was de lange druk; dat doet
+       nu het aftellen op het spelscherm, en dat geeft meteen een tel om je
+       klaar te zetten. De wrapper blijft, want het kaartje met overgedragen
+       tijd hangt eraan. -->
+  <div class="go-wrap">
+    <button class="btn-go" id="btnStartTurn" aria-label="Beginnen">
       <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-play"/></svg>
     </button>
-    <!-- De baan staat er altijd, gestippeld: zo zie je dát er iets vast te
-         houden valt vóórdat je het fout doet. Daarboven de voortgang, en
-         waar tijd van de vorige ronde meekomt een dunne boog in de kleur
-         van de klok. -->
-    <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
-      <circle class="track" cx="50" cy="50" r="46"/>
-      <circle class="arc" id="holdArc" cx="50" cy="50" r="46"/>
-    </svg>
     <!-- Het getal erbij voor wie leest, in inkt in plaats van in marigold. -->
     <div class="carry" id="hoCarry" hidden>
       <svg class="frame" viewBox="0 0 80 80" aria-hidden="true">
@@ -1570,6 +1583,23 @@ input[type=range]::-moz-range-thumb {
       <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-check"/></svg>
     </button>
   </div>
+
+  <!-- Aftellen voor de klok gaat lopen. De startknop is een gewone tik
+       geworden, en dit is wat een losse aanraking tijdens het doorgeven
+       opvangt: een misser kost drie tellen, geen beurt. Tegelijk is het de
+       tel waarin je je klaarzet -- vroeger begon de klok meteen, dus moest
+       je al naar de kaart zitten kijken.
+
+       De kaart blijft tot nul toe leeg: zo kan niemand 'm vooraf zien.
+       Tikken breekt af en zet je terug op het overdrachtscherm. -->
+  <button class="countdown" id="countdown" hidden aria-label="Aftellen — tik om terug te gaan">
+    <span class="cd-disc">
+      <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+        <circle class="arc" id="cdArc" cx="50" cy="50" r="46"/>
+      </svg>
+      <b id="cdNum">3</b>
+    </span>
+  </button>
 
 </section>
 
@@ -1807,7 +1837,7 @@ let current = "title";
    <body>, want het element dat de focus had werd verborgen. */
 const PRIMARY = {
   title: "#btnStart", setup: "#btnGo",
-  handoff: "#btnHold", play: "#btnGoed", winner: "#btnAgain"
+  handoff: "#btnStartTurn", play: "#btnGoed", winner: "#btnAgain"
 };
 
 let started = false;
@@ -1919,8 +1949,6 @@ $("#btnBack").addEventListener("click", () => show("title"));
    Nu tekent één lus de voortgang zelf, per frame, voor muis, vinger én
    toets. Wat JS zelf schrijft laat die mediaquery met rust.
    ============================================================== */
-const HOLD_MS = 700;
-
 function holdButton(el, ms, run, paint) {
   let raf = null, t0 = 0;
   const draw = p => { if (paint) paint(p); };
@@ -2072,8 +2100,11 @@ function paintRound(el, iconEl, wordEl) {
    freshA/freshB is wat er net bij kwam: een hele beurt bij een beurtwissel,
    een hele ronde bij een rondewissel, en niets bij de allereerste
    overdracht. */
+let handoffMode = "round";      // waar een afgebroken aftelling naar terugkeert
+
 function handoff(mode, freshA, freshB) {
   const round = mode === "round";
+  handoffMode = round ? "round" : "turn";
   const t = TEAMS[G.team], r = G.round - 1;
   $("#s-handoff").classList.toggle("mode-round", round);
   $("#hoRoundCard").classList.toggle("big", round);
@@ -2121,16 +2152,13 @@ function handoff(mode, freshA, freshB) {
 }
 
 /* Ook starten gaat via vasthouden: het toestel wisselt van hand, en een
-   losse tik mag de klok niet laten lopen. Dit had een eigen lus met een
-   eigen ring; het is nu dezelfde holdButton als het tandwiel, de
-   beginknop en stoppen -- één mechanisme, één duur. */
-(() => {
-  const arc = $("#holdArc"), LEN = 2 * Math.PI * 46;
-  arc.style.strokeDasharray = LEN;
-  arc.style.strokeDashoffset = LEN;
-  holdButton($("#btnHold"), HOLD_MS, startTurn,
-             p => { arc.style.strokeDashoffset = LEN * (1 - p); });
-})();
+   losse tik mag de klok niet laten lopen. Dat deed een lange druk, maar
+   starten is niet onomkeerbaar -- pauze zet de klok zo weer stil -- en de
+   druk viel juist zwaar bij de speler die deze knop élke beurt indrukt: een
+   kind van vier. Wat de lange druk echt afdekte was een strijkende vinger
+   tijdens het doorgeven, en dat vangt het aftellen nu op: een misser kost
+   drie tellen in plaats van een beurt. */
+$("#btnStartTurn").addEventListener("click", () => { Snd.unlock(); startTurn(); });
 
 /* ---------- de klok ---------- */
 let clockRaf = null, deadline = 0, lastTickAt = 0;
@@ -2231,18 +2259,70 @@ function paintClock(ms, totalMs) {
   $("#cardslot").classList.toggle("hurry", ms > 0 && ms <= 5000);
 }
 
+/* Het spelscherm komt meteen in beeld, maar de klok wacht op het aftellen
+   en de kaart blijft tot dan leeg -- anders kun je 'm alvast lezen. */
+const COUNT_FROM = 3;
+let countRaf = null;
+
 function startTurn() {
   G.gained = 0;
   const t = TEAMS[G.team];
   $("#plMascot").firstElementChild.setAttribute("href", t.mascot);
   paintRound($("#plRoundChip"), $("#plRound"), $("#plRoundWord"));
   $("#s-play").style.setProperty("--team", t.color);
-  nextCard(null);
-  syncControls();
+  G.card = null;
+  $("#glyph").textContent = "";   // leeg tot nul: niemand leest de kaart vooraf
   show("play");
   sizeCard();                  // pas ná show(): daarvoor heeft de kaart geen maat
   paintTurnScore();
   requestWake();
+  countdown(beginTurn);
+}
+
+/* Per frame getekend, net als holdButton: een CSS-overgang zou bij
+   prefers-reduced-motion meteen op vol springen en dan telt er niets meer
+   af. Tikken breekt af -- zonder dat zou een losse aanraking tijdens het
+   doorgeven alsnog een beurt starten, alleen drie tellen later. */
+function countdown(done) {
+  const el = $("#countdown"), num = $("#cdNum"), arc = $("#cdArc");
+  const LEN = 2 * Math.PI * 46, MS = COUNT_FROM * 1000;
+  arc.style.strokeDasharray = LEN;
+  el.hidden = false;
+  num.textContent = COUNT_FROM;
+  el.focus({ preventScroll: true });
+
+  let last = COUNT_FROM;
+  const t0 = performance.now();
+  const step = now => {
+    const left = Math.max(0, MS - (now - t0));
+    arc.style.strokeDashoffset = LEN * (1 - left / MS);
+    const shown = Math.ceil(left / 1000);
+    if (shown !== last && shown > 0) { last = shown; num.textContent = shown; Snd.tick(1300); }
+    if (left <= 0) { stopCountdown(); done(); return; }
+    countRaf = requestAnimationFrame(step);
+  };
+  Snd.tick(1300);
+  countRaf = requestAnimationFrame(step);
+}
+
+function stopCountdown() {
+  cancelAnimationFrame(countRaf); countRaf = null;
+  $("#countdown").hidden = true;
+}
+
+// Afgebroken: geen beurt begonnen, dus terug naar waar het toestel vandaan
+// kwam. G is niet aangeraakt behalve G.gained, en dat is voor een nieuwe
+// beurt toch nul.
+$("#countdown").addEventListener("click", () => {
+  if (countRaf === null) return;
+  stopCountdown();
+  releaseWake();
+  handoff(handoffMode);
+});
+
+function beginTurn() {
+  nextCard(null);
+  syncControls();
   const totalMs = G.secs * 1000;
   const ms = G.pendingMs > 0 ? G.pendingMs : totalMs;
   deadline = performance.now() + ms;

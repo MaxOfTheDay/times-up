@@ -52,12 +52,26 @@ gebruikt.
 
 ## Wat je moet vasthouden, zegt dat
 
-Een lange druk is alleen voor wat echt niet ongedaan te maken is: starten
-(de klok mag niet lopen terwijl het toestel nog van hand wisselt) en
-stoppen (een lopend potje weg). Allebei lopen via `holdButton()` en dragen
-dezelfde gestippelde rand. Die functie tekent de voortgang zelf, per frame:
-een CSS-overgang zou bij `prefers-reduced-motion` meteen op vol springen,
-en het toetsenbord zou de druk overslaan.
+Een lange druk is alleen voor wat echt niet ongedaan te maken is, en dat is
+nog precies één ding: **stoppen**. Die knop loopt via `holdButton()` en draagt
+als enige de gestippelde rand — gestippeld betekent nu dus letterlijk "dit is
+de onomkeerbare". `holdButton()` tekent de voortgang zelf, per frame: een
+CSS-overgang zou bij `prefers-reduced-motion` meteen op vol springen, en het
+toetsenbord zou de druk overslaan.
+
+Starten hoorde daar ooit ook bij, maar dat was het niet waard. De klok
+starten is niet onomkeerbaar — pauze zet 'm zo weer stil — en de rekening
+kwam bij de speler die deze knop élke beurt indrukt: een kind van vier, voor
+wie 700 ms volhouden het lastigste gebaar in de app is. Wat de lange druk
+écht afdekte was een strijkende vinger tijdens het doorgeven, en dat vangt
+het **aftellen** nu op: tikken, drie tellen, dan pas de kaart en de klok. Een
+misser kost drie tellen in plaats van een beurt, en er is meteen een tel om
+je klaar te zetten. Tikken tijdens het aftellen breekt af — zonder die
+uitweg zou een losse aanraking alsnog een beurt starten, alleen later.
+
+Daarmee is de speelknop op de titel en die op het overdrachtscherm ook
+dezelfde knop geworden: zelfde maat, zelfde vlak, zelfde rand. Ze betekenen
+allebei "spelen", dus horen ze er niet verschillend uit te zien.
 
 Het tandwiel kreeg deze behandeling ooit ook, maar instellingen openen is
 niets onomkeerbaars en het tandwiel bestaat alleen op het titelscherm --
@@ -83,7 +97,7 @@ vult altijd dezelfde drie vakken in dezelfde volgorde:
 
 1. **stand** -- hoe staan we, wie is er aan zet, wat kwam er net bij;
 2. **opdracht** -- wat moet je doen;
-3. **start** -- vasthouden, de enige handeling.
+3. **start** -- één tik, de enige handeling; het aftellen komt erna.
 
 Het enige verschil tussen de twee wissels is de dichtheid van vak 2.
 `handoff("turn")` laat de kaart compact (de opdracht is niet veranderd),
