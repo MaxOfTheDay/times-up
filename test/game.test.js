@@ -55,30 +55,28 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(await screen() === 'title', 'terug vanuit de instellingen komt niet op de titel uit');
 
   await setup({ tier: 'klein', size: 16, secs: 60 });
-  ok(await screen() === 'roundintro', 'na start niet op roundintro');
+  ok(await screen() === 'handoff', 'na start niet op het overdrachtscherm');
   ok(await game(() => window.__tijd.G.deck.length) === 16, 'deck is geen 16 kaarten');
+  ok(await page.getAttribute('#hoTally', 'hidden') !== null,
+     'de stand staat er al voor er iets gespeeld is');
 
   const seenPerRound = [];
   for (let round = 1; round <= 3; round++) {
     ok(await game(() => window.__tijd.G.round) === round, `ronde ${round} verwacht`);
-    await page.click('#btnRoundGo');
-    await page.waitForTimeout(100);
-    ok(await screen() === 'handoff', 'niet op handoff');
+    ok(await screen() === 'handoff', `ronde ${round}: niet op het overdrachtscherm`);
+
+    // Wat de opdracht is moet op het overdrachtscherm kloppen: dat is waar
+    // je kijkt als je het toestel aangereikt krijgt.
+    const woord = ['Uitleggen', 'Eén woord', 'Uitbeelden'][round - 1];
+    const icoon = ['#r-praten', '#r-eenwoord', '#r-mimen'][round - 1];
+    ok(await page.textContent('#hoRuleWord') === woord,
+       `ronde ${round}: verkeerd woord op het overdrachtscherm`);
 
     // Ook hier: een losse tik mag de klok niet laten lopen terwijl het
     // toestel nog van hand wisselt.
     await page.click('#btnHold');
     await page.waitForTimeout(80);
     ok(await screen() === 'handoff', 'een korte tik start de beurt al');
-
-    // Wat de opdracht is moet op het overdrachtscherm kloppen: dat is waar
-    // je kijkt als je het toestel aangereikt krijgt.
-    const woord = ['Uitleggen', 'Eén woord', 'Uitbeelden'][round - 1];
-    const icoon = ['#r-praten', '#r-eenwoord', '#r-mimen'][round - 1];
-    ok(await page.textContent('#hoRoundWord') === woord,
-       `ronde ${round}: verkeerd woord op het overdrachtscherm`);
-    ok(await page.getAttribute('#hoRound use', 'href') === icoon,
-       `ronde ${round}: verkeerd pictogram op het overdrachtscherm`);
 
     await hold(page, '#btnHold', 900);
     await page.waitForTimeout(150);
@@ -126,11 +124,11 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     seenPerRound.push([...seen].sort((a, b) => a - b).join(','));
 
     const st = await screen();
-    ok(st === (round < 3 ? 'roundend' : 'winner'), `ronde ${round} eindigde op ${st}`);
+    ok(st === (round < 3 ? 'handoff' : 'winner'), `ronde ${round} eindigde op ${st}`);
     if (round < 3) {
       ok(await game(() => window.__tijd.G.pendingMs) > 0, 'resterende tijd wordt niet doorgegeven');
-      await page.click('#btnRoundNext');
-      await page.waitForTimeout(100);
+      ok(await page.getAttribute('#hoTally', 'hidden') === null,
+         `ronde ${round}: de stand van de afgelopen ronde verschijnt niet`);
     }
   }
 
@@ -146,20 +144,19 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   await page.waitForTimeout(100);
   ok(await screen() === 'title', 'de huisknop komt niet uit op de titel');
   await setup({ tier: 'klein', size: 16, secs: 20 });
-  await page.click('#btnRoundGo');
-  await page.waitForTimeout(100);
+  ok(await screen() === 'handoff', 'na start niet op het overdrachtscherm');
   await hold(page, '#btnHold', 900);
   await page.waitForTimeout(150);
   const teamBefore = await game(() => window.__tijd.G.team);
   await page.waitForTimeout(21000);
-  ok(await screen() === 'turnend', 'na tijd om niet op turnend');
+  ok(await screen() === 'handoff', 'na tijd om niet op het overdrachtscherm');
   ok(await game(() => window.__tijd.G.team) !== teamBefore, 'ploeg wisselt niet na tijd om');
+  ok(await page.getAttribute('#hoTally', 'hidden') === null,
+     'de zojuist gescoorde punten verschijnen niet na tijd om');
 
   // --- herladen midden in een beurt laat niets terugkomen ---
   // Er bestaat geen "verder spelen" meer: de titelknop begint altijd vers,
   // dus een potje overleeft geen herlaadbeurt.
-  await page.click('#btnTurnNext');
-  await page.waitForTimeout(80);
   await hold(page, '#btnHold', 900);
   await page.waitForTimeout(1500);
   await page.reload();
@@ -168,7 +165,9 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(!await game(() => !!window.__tijd.G), 'lopend spel overleeft een herlaadbeurt');
   await page.click('#btnStart');
   await page.waitForTimeout(100);
-  ok(await screen() === 'roundintro', 'de titelknop na een herlaadbeurt begint geen vers spel');
+  ok(await screen() === 'handoff', 'de titelknop na een herlaadbeurt begint geen vers spel');
+  ok(await page.getAttribute('#hoTally', 'hidden') !== null,
+     'een vers spel toont meteen een stand');
 
   ok(!errs.length, 'consolefouten: ' + errs.join(' | '));
 
