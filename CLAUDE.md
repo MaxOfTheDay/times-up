@@ -104,10 +104,25 @@ zwaar. Er hoort een `max()` met een ondergrens omheen.
 
 Een lange druk is alleen voor wat echt niet ongedaan te maken is, en dat is
 nog precies één ding: **stoppen**. Die knop loopt via `holdButton()` en draagt
-als enige de gestippelde rand — gestippeld betekent nu dus letterlijk "dit is
-de onomkeerbare". `holdButton()` tekent de voortgang zelf, per frame: een
+als enige de stippellijn — gestippeld betekent nu dus letterlijk "dit is de
+onomkeerbare". `holdButton()` tekent de voortgang zelf, per frame: een
 CSS-overgang zou bij `prefers-reduced-motion` meteen op vol springen, en het
 toetsenbord zou de druk overslaan.
+
+Die stippellijn is een regel ín de knop en niet haar contour, en dat is één
+keer heen en weer gegaan. Eerst een streepje van 22 px onderin, in de kleur
+van de knop zelf op 45% dekking: onzichtbaar, en het las als een vlekje.
+Het antwoord daarop was de hele omtrek stippelen — waarmee stoppen het enige
+vlak in de app werd zonder inkt-contour én zonder reliëf, en dus niet op het
+paneel lag maar eruit geknipt leek. Rood-gestippeld betekent buiten deze app
+bovendien "uitgeschakeld" of "sleep hier iets heen", niet "pas op".
+
+De knop draagt nu dezelfde huid als pauze, huisje en terug (papier,
+inkt-rand, `--lift-1`), en houdt drie eigen tekens: de gestippelde regel in
+rust, het rood dat van onder naar boven volloopt tijdens het houden, en het
+teken dat halverwege omkeert naar papier zodra die vloed het inhaalt. Dat
+omslagpunt is het enige ijkpunt onderweg. Wat de eerste poging mankeerde was
+contrast en maat — volle dekking, volle breedte, `--danger` — niet de plek.
 
 Starten hoorde daar ooit ook bij, maar dat was het niet waard. De klok
 starten is niet onomkeerbaar — pauze zet 'm zo weer stil — en de rekening

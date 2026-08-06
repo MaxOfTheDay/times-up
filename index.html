@@ -283,7 +283,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    chips, "terug", het tandwiel, de pauzeknop en de kaartjes in de
    voorvertoning dood aanvoelden. */
 button.btn-go, button.btn-good, button.btn-skip, button.btn-wide,
-button.btn-ghost, button.btn-icon, button.chip, button.pv {
+button.btn-ghost, button.btn-icon, button.btn-danger, button.chip, button.pv {
   transition: transform calc(var(--t-press) * var(--dur)) ease,
               box-shadow calc(var(--t-press) * var(--dur)) ease;
 }
@@ -291,7 +291,10 @@ button.btn-ghost, button.btn-icon, button.chip, button.pv {
   transform: translate(var(--lift-2), var(--lift-2));
   box-shadow: 0 0 0 var(--ink);
 }
-.btn-ghost:active, .btn-icon:active, .chip:active, .pv:active {
+/* Stoppen zakt mee in: het is nu een knop met reliëf zoals alle andere, en
+   dat het ingedrukt blijft zolang je hem vasthoudt is precies de
+   terugkoppeling die deze knop nodig heeft. */
+.btn-ghost:active, .btn-icon:active, .btn-danger:active, .chip:active, .pv:active {
   transform: translate(var(--lift-1), var(--lift-1));
   box-shadow: 0 0 0 var(--ink);
 }
@@ -309,13 +312,17 @@ button.btn-ghost, button.btn-icon, button.chip, button.pv {
 .nudge { animation: nudge calc(.42s / max(var(--dur), .001)) ease-in-out; }
 .refuse { border-color: var(--danger) !important; }
 
-/* Alles wat je moet vasthouden draagt dezelfde stippellijn -- niet als los
-   merkje ernaast, maar als de eigen contour van de knop. Er stond eerst een
-   streepje van 22 px onderin, los van de rand, in de kleur van de knop zelf
-   op 45% dekking: op een knop van 64 px was dat vrijwel onzichtbaar en las
-   het als een vlekje, niet als teken. Een gestippelde rand ís de knop, is
-   dus nooit kleiner dan de knop, en is precies het gebaar dat de ring om de
-   startknop ook al gebruikt: wat gestippeld is, is nog niet af. */
+/* Wat je vast moet houden, draagt een stippellijn: wat gestippeld is, is nog
+   niet af. Dat geldt nog voor precies één knop -- stoppen.
+
+   Die lijn is de contour van de knop geweest, en dat was een overcorrectie.
+   Het begon als een streepje van 22 px onderin, in de kleur van de knop zelf
+   op 45% dekking: onzichtbaar, en het las als een vlekje in plaats van als
+   teken. Het antwoord daarop was de hele omtrek stippelen, maar daarmee werd
+   de knop het enige vlak in de app dat niet door inkt begrensd werd -- zie
+   .btn-danger. De lijn is weer een regel ín de knop, nu wél op volle dekking,
+   op volle breedte en in --danger. Wat de eerste poging mankeerde was
+   contrast en maat, niet de plek. */
 
 /* ---- de grote ronde "verder"-knop ----
    Titel, overdracht (vasthouden), opnieuw, verder na pauze: allemaal
@@ -441,33 +448,60 @@ button.btn-ghost, button.btn-icon, button.chip, button.pv {
 }
 .btn-icon svg { width: 22px; }
 
-/* ---- vasthouden om te stoppen ---- */
-/* Ook gestippeld: stoppen is de enige knop op het pauzepaneel die niet op
-   een tik reageert, en is meteen de enige onomkeerbare handeling in de app.
+/* ---- vasthouden om te stoppen ----
+   Deze knop was het enige vlak in de app zonder inkt-contour én zonder
+   slagschaduw: geen rand, geen reliëf, alleen een rood gestippeld kader.
+   Daarmee lag ze niet óp het paneel maar leek ze eruit geknipt, en ze was
+   meteen het enige element dat door iets anders dan inkt begrensd werd --
+   terwijl rood-gestippeld in de rest van de wereld "uitgeschakeld" of "sleep
+   hier iets heen" betekent, niet "pas op".
 
-   De stippellijn zelf komt niet van border-style: dashed. CSS verdeelt de
-   streepjes zelf over de omtrek en doet dat per element anders: op deze
-   knop (68 px) vielen ze grof en gelijkmatig, op de brede knop hieronder
-   (bijna de hele schermbreedte) perste diezelfde eigenschap er een rij
-   piepkleine, ongelijke steekjes van -- twee knopen die hetzelfde teken
-   moeten dragen, maar er zichtbaar anders uitzagen. Een SVG-rechthoek met
-   een eigen stroke-dasharray tekent precies de streepjeslengte die is
-   opgegeven, ongeacht hoe groot de knop is; vector-effect="non-scaling-
-   stroke" houdt die lengte ook overeind als de knop breder wordt gerekt. */
+   Ze draagt nu dezelfde huid als pauze, huisje en terug: papier, inkt-rand,
+   vijf pixels reliëf. Wat haar apart zet is niet langer de omlijsting maar
+   wat erin gebeurt.
+
+   Drie toestanden, drie tekens:
+   - in rust de gestippelde regel: dit is de knop die je vast moet houden.
+     Gestippeld blijft het enige teken daarvoor in de app;
+   - tijdens het houden loopt het rood van onder naar boven vol. Dat is de
+     voortgang, per frame getekend door holdButton();
+   - halverwege haalt die vloed het teken in, en keert het om naar papier.
+     Dat omslagpunt is meteen het enige ijkpunt dat je onderweg krijgt:
+     voorbij de helft.
+
+   Let op bij de gestippelde regel: dit is eerder geprobeerd en toen mislukt.
+   Er stond een streepje van 22 px onderin -- een derde van de knopbreedte,
+   in de kleur van de knop zelf, op 45% dekking. Dat las als een vlekje en
+   niet als teken. Deze regel is de volle breedte, in --danger, op volle
+   dekking en drie pixels dik; het verschil zit in contrast en maat, niet in
+   het idee.
+
+   De streepjes komen uit een repeating-linear-gradient en niet uit
+   border-style: dashed. Dat laatste verdeelt de streepjes zelf over de
+   omtrek en doet dat per element anders -- op een knop van 68 px grof en
+   gelijkmatig, op een brede knop een rij piepkleine, ongelijke steekjes.
+   Een gradient tekent exact de opgegeven lengte, ongeacht de maat: negen
+   pixels streep, zeven pixels lucht, net als de oude stroke-dasharray. */
 .btn-danger {
   position: relative; overflow: hidden;
   width: 68px; height: 68px; display: grid; place-items: center;
-  border: none; background: var(--paper-2);
+  border: var(--line-2) solid var(--ink); background: var(--paper-2);
+  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
+  color: var(--ink);
 }
-.btn-danger .dash-frame {
-  position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
+.btn-danger .mark { width: 32px; position: relative; z-index: 1; }
+.btn-danger .hold-rule {
+  position: absolute; left: 8px; right: 8px; bottom: 7px; height: 3px; z-index: 1;
+  background: repeating-linear-gradient(to right,
+    var(--danger) 0 9px, transparent 9px 16px);
 }
-.btn-danger .dash-frame rect { fill: none; stroke: var(--danger); stroke-width: 3; stroke-dasharray: 9 7; }
-.btn-danger svg:not(.dash-frame) { width: 32px; position: relative; z-index: 1; }
 .btn-danger i {
   position: absolute; inset: 0; background: var(--danger);
   transform: scaleY(0); transform-origin: bottom;
 }
+/* Het teken staat in currentColor, dus het keert om zodra het rood eronder
+   staat. Inkt op --danger haalt te weinig; papier op --danger haalt 7,3:1. */
+.btn-danger.flooded { color: var(--paper); }
 
 /* ---- brede knoppen op het instellingenscherm ---- */
 .btn-wide {
@@ -1445,7 +1479,9 @@ input[type=range]::-moz-range-thumb {
   </symbol>
 
   <symbol id="i-stop" viewBox="0 0 100 100">
-    <g stroke="#14110F" stroke-width="14" stroke-linecap="round">
+    <!-- currentColor, zodat het teken kan omkeren naar papier zodra het
+         rood van de vasthoud-vloed eronder staat. -->
+    <g stroke="currentColor" stroke-width="14" stroke-linecap="round">
       <path d="M26 26 L74 74"/><path d="M74 26 L26 74"/>
     </g>
   </symbol>
@@ -1818,10 +1854,9 @@ input[type=range]::-moz-range-thumb {
          bij de bovenste in plaats van als de andere keuze. -->
     <div class="doors">
       <button class="btn-danger" id="btnStop" aria-label="Spel stoppen — houd ingedrukt">
-        <svg class="dash-frame" viewBox="0 0 68 68" aria-hidden="true">
-          <rect x="2.5" y="2.5" width="63" height="63" vector-effect="non-scaling-stroke"/>
-        </svg>
-        <i></i><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-stop"/></svg>
+        <i></i>
+        <span class="hold-rule" aria-hidden="true"></span>
+        <svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-stop"/></svg>
       </button>
       <button class="btn-go" id="btnResume" aria-label="Verder spelen">
         <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-play"/></svg>
@@ -2153,8 +2188,14 @@ function holdButton(el, ms, run, paint) {
   ["keyup", "blur"].forEach(ev => el.addEventListener(ev, () => cancel(true)));
 }
 
-/* Een vulling die van onder naar boven loopt: stoppen. */
-const fillY = el => p => { el.style.transform = "scaleY(" + p + ")"; };
+/* Een vulling die van onder naar boven loopt: stoppen. Halverwege haalt ze
+   het teken in -- het staat gecentreerd, dus op p = .5 ligt het rood er tot
+   aan het hart van het kruis -- en dan keert het teken om naar papier. Dat
+   omslag is het enige ijkpunt onderweg: voorbij de helft. */
+const fillY = (el, btn) => p => {
+  el.style.transform = "scaleY(" + p + ")";
+  if (btn) btn.classList.toggle("flooded", p > .5);
+};
 
 /* Eén tik, zoals elke andere knop op de titel. Zie de toelichting boven
    .btn-icon in de stijlen: dit vereiste eerst een lange druk, maar het
@@ -2977,7 +3018,7 @@ holdButton($("#btnStop"), 1100, () => {
   G = null;
   redraw();
   show("title");
-}, fillY($("#btnStop i")));
+}, fillY($("#btnStop i"), $("#btnStop")));
 
 /* ==============================================================
    7. SCHERM WAKKER HOUDEN — stil falen waar het niet bestaat.
