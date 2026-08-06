@@ -50,6 +50,41 @@ tweede zwarte rand, en lijkt de kaart er drie te hebben. Dat is precies wat
 er eerder gebeurde toen `--team: var(--ink)` als "geen kleur hier" werd
 gebruikt.
 
+Een rand op de kleur van wat eronder ligt is óók een derde rand. Het merk
+zette zijn contour op `--paper` om de inkt-rand van `.surface` te
+neutraliseren op een inkt-vlak — maar `--paper` is de pagina, dus dat werd
+geen rand maar een spleet van vier pixels tussen de plaat en haar eigen
+lagen: goud, spleet, zwart aan de ene kant en zwart, spleet, zwart aan de
+andere. Wie een contour niet wil, zet `border: 0` en niet een kleur die
+toevallig wegvalt.
+
+## Vorm zegt wat het is, diepte hoe zwaar
+
+Drie kanalen, en ze doen elk één ding:
+
+- **Vorm.** Een cirkel op tapmaat is de handeling waar dit scherm voor
+  bestaat: spelen, geraden, nog een keer, verder. Eén per scherm, nooit
+  meer. Al het andere is een rechthoek — de mindere keuze (passen), de
+  uitgang (pauze, huisje, tandwiel), de onomkeerbare (stoppen) en elke
+  knop met tekst op het instellingenscherm. Een cirkel *onder* tapmaat is
+  iets anders: een teken dat je telt, zoals de fiches op het scorebord.
+  Het tandwiel brak dit als enige — een ronde knop van 64 px voor iets
+  waar het titelscherm niet voor bestaat — en is nu gewoon een `.btn-icon`.
+- **Diepte.** `--lift-2` (8 px) is de hoofdhandeling, `--lift-1` (5 px) al
+  het andere. Dit stond ooit als "5 staat stil, 8 kun je indrukken"
+  genoteerd en dat is nooit waar geweest: de pauzeknop, "terug", de chips
+  en de voorvertoningskaartjes liggen allemaal op 5 px en zijn allemaal
+  indrukbaar, op dezelfde hoogte als de kaart en de opdracht, die het niet
+  zijn. Reken dus niet uit de schaduw af of iets een knop is.
+- **Beweging.** Dát is waar indrukbaarheid staat: elke knop zakt bij
+  `:active` precies zijn eigen schaduw in, een stilstaand vlak beweegt
+  nooit.
+
+Zet een primaire knop nooit met alleen `min()` op maat. De knop in het
+pauzepaneel kromp liggend mee met de schermhoogte tot 68 px — even groot als
+de stopknop ernaast — en dan wegen de hoofdhandeling en de onomkeerbare even
+zwaar. Er hoort een `max()` met een ondergrens omheen.
+
 ## Wat je moet vasthouden, zegt dat
 
 Een lange druk is alleen voor wat echt niet ongedaan te maken is, en dat is
@@ -134,6 +169,30 @@ de speler íets mee moet.
 De knop rechtsboven draagt hier een huisje en geen pauzeteken: er loopt geen
 klok, dus er valt niets te pauzeren. De enige reden om er te tikken is
 weggaan -- en dat is wat het huisje op het winnaarsscherm ook betekent.
+
+## Eén label voor "wat er bij komt", op beide schermen
+
+Wat je tijdens een beurt verzamelt en wat er daarna op de stand bij komt, is
+dezelfde grootheid, en dus hetzelfde ding: een groen `+N` met een
+inkt-contour (`.gain`), rechts van de mascotte. Het waren twee dingen -- een
+rij ploegkleurige fiches onder de mascotte tijdens het spelen, een groen
+label ernaast op het overdrachtscherm -- en dan is er niets dat verraadt dat
+het om hetzelfde gaat. Zelfde kleur, zelfde vorm, zelfde plek, zelfde
+leesrichting.
+
+Groen en niet de ploegkleur: dit zijn geraden kaarten, en geraden is
+`--good`. De ploeg staat al in de mascotte ernaast.
+
+## Eén stand, twee schermen
+
+`#hoTally` en de stand in het pauzepaneel zijn hetzelfde onderdeel met
+dezelfde twee tekens: de kroon boven wie voorstaat, de opgetilde tegel
+(`.side.up`) onder wie aan zet is. Ze waren losse kopieën, en die groeiden
+uit elkaar: de kopie in het paneel miste de `.head`-omhulling en viel
+daardoor buiten `.mini-score .head > svg`, zodat beide mascottes op 0 bij 0
+pixels stonden en er twee kale getallen overbleven zonder eigenaar --
+precies het soort tekst-zonder-beeld dat de harde eis verbiedt. Wie de ene
+aanpast, past de andere mee aan, of voegt ze samen.
 
 ## App-pictogram en installeerbaarheid
 
