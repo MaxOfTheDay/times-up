@@ -57,8 +57,12 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   await setup({ tier: 'klein', size: 16, secs: 60 });
   ok(await screen() === 'handoff', 'na start niet op het overdrachtscherm');
   ok(await game(() => window.__tijd.G.deck.length) === 16, 'deck is geen 16 kaarten');
-  ok(await page.getAttribute('#hoTally', 'hidden') !== null,
-     'de stand staat er al voor er iets gespeeld is');
+  ok(await page.getAttribute('#hoTally', 'hidden') === null,
+     'de stand ontbreekt bij de eerste overdracht');
+  ok(await page.textContent('#hoScoreA') === '0' && await page.textContent('#hoScoreB') === '0',
+     'een vers spel begint niet op 0 - 0');
+  ok(await page.getAttribute('#hoFreshA', 'hidden') !== null,
+     'er staat al iets "erbij" voor er gespeeld is');
 
   const seenPerRound = [];
   for (let round = 1; round <= 3; round++) {
@@ -127,8 +131,9 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     ok(st === (round < 3 ? 'handoff' : 'winner'), `ronde ${round} eindigde op ${st}`);
     if (round < 3) {
       ok(await game(() => window.__tijd.G.pendingMs) > 0, 'resterende tijd wordt niet doorgegeven');
-      ok(await page.getAttribute('#hoTally', 'hidden') === null,
-         `ronde ${round}: de stand van de afgelopen ronde verschijnt niet`);
+      ok(await page.getAttribute('#hoFreshA', 'hidden') === null ||
+         await page.getAttribute('#hoFreshB', 'hidden') === null,
+         `ronde ${round}: wat er deze ronde bij kwam wordt niet getoond`);
     }
   }
 
@@ -151,8 +156,12 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   await page.waitForTimeout(21000);
   ok(await screen() === 'handoff', 'na tijd om niet op het overdrachtscherm');
   ok(await game(() => window.__tijd.G.team) !== teamBefore, 'ploeg wisselt niet na tijd om');
-  ok(await page.getAttribute('#hoTally', 'hidden') === null,
-     'de zojuist gescoorde punten verschijnen niet na tijd om');
+  ok(await game(() => {
+       const t = window.__tijd.G.team;
+       const up = document.querySelector('#hoSide' + (t === 0 ? 'A' : 'B'));
+       const other = document.querySelector('#hoSide' + (t === 0 ? 'B' : 'A'));
+       return up.classList.contains('up') && !other.classList.contains('up');
+     }), 'de ploeg die aan zet is wordt niet opgetild in de stand');
 
   // --- herladen midden in een beurt laat niets terugkomen ---
   // Er bestaat geen "verder spelen" meer: de titelknop begint altijd vers,
@@ -166,8 +175,8 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   await page.click('#btnStart');
   await page.waitForTimeout(100);
   ok(await screen() === 'handoff', 'de titelknop na een herlaadbeurt begint geen vers spel');
-  ok(await page.getAttribute('#hoTally', 'hidden') !== null,
-     'een vers spel toont meteen een stand');
+  ok(await page.textContent('#hoScoreA') === '0' && await page.textContent('#hoScoreB') === '0',
+     'een vers spel na een herlaadbeurt begint niet op 0 - 0');
 
   ok(!errs.length, 'consolefouten: ' + errs.join(' | '));
 
