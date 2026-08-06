@@ -25,6 +25,14 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   const screen = () => page.evaluate(() => window.__tijd.screen);
   const game = fn => page.evaluate(fn);
 
+  // Tikken en het aftellen uitzitten: pas daarna loopt de klok.
+  async function startTurn() {
+    await page.click('#btnStartTurn');
+    await page.waitForFunction(
+      () => document.querySelector('#countdown').hidden, null, { timeout: 10000 });
+    await page.waitForTimeout(150);
+  }
+
   // Opzetten via het echte instellingenscherm, niet door de toestand te porren:
   // zo testen we meteen dat de instellingen ook echt in het spel belanden.
   async function setup({ tier, size, secs }) {
@@ -76,15 +84,26 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     ok(await page.textContent('#hoRoundWord') === woord,
        `ronde ${round}: verkeerd woord op het overdrachtscherm`);
 
-    // Ook hier: een losse tik mag de klok niet laten lopen terwijl het
-    // toestel nog van hand wisselt.
-    await page.click('#btnHold');
-    await page.waitForTimeout(80);
-    ok(await screen() === 'handoff', 'een korte tik start de beurt al');
+    // De startknop is een gewone tik geworden; het aftellen erna houdt een
+    // losse aanraking tegen. Afbreken zet je terug op het overdrachtscherm
+    // zonder dat er een beurt begonnen is.
+    await page.click('#btnStartTurn');
+    await page.waitForTimeout(120);
+    ok(await screen() === 'play', `ronde ${round}: aftellen begint niet`);
+    ok(await page.getAttribute('#countdown', 'hidden') === null,
+       `ronde ${round}: er wordt niet afgeteld`);
+    ok(await page.textContent('#glyph') === '',
+       `ronde ${round}: de kaart is al zichtbaar tijdens het aftellen`);
+    await page.click('#countdown');
+    await page.waitForTimeout(120);
+    ok(await screen() === 'handoff', `ronde ${round}: aftellen afbreken werkt niet`);
 
-    await hold(page, '#btnHold', 900);
-    await page.waitForTimeout(150);
+    await startTurn();
     ok(await screen() === 'play', `ronde ${round}: niet aan het spelen`);
+    ok(await page.getAttribute('#countdown', 'hidden') !== null,
+       `ronde ${round}: het aftellen blijft staan`);
+    ok(await page.textContent('#glyph') !== '',
+       `ronde ${round}: geen kaart na het aftellen`);
 
     // En tijdens het spelen ook, want daar wordt het vergeten.
     ok(await page.textContent('#plRoundWord') === woord,
@@ -150,8 +169,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(await screen() === 'title', 'de huisknop komt niet uit op de titel');
   await setup({ tier: 'klein', size: 16, secs: 20 });
   ok(await screen() === 'handoff', 'na start niet op het overdrachtscherm');
-  await hold(page, '#btnHold', 900);
-  await page.waitForTimeout(150);
+  await startTurn();
   const teamBefore = await game(() => window.__tijd.G.team);
   await page.waitForTimeout(21000);
   ok(await screen() === 'handoff', 'na tijd om niet op het overdrachtscherm');
@@ -166,8 +184,8 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   // --- herladen midden in een beurt laat niets terugkomen ---
   // Er bestaat geen "verder spelen" meer: de titelknop begint altijd vers,
   // dus een potje overleeft geen herlaadbeurt.
-  await hold(page, '#btnHold', 900);
-  await page.waitForTimeout(1500);
+  await startTurn();
+  await page.waitForTimeout(1200);
   await page.reload();
   await page.waitForTimeout(300);
   ok(await screen() === 'title', 'na een herlaadbeurt komt het spel niet op de titel uit');

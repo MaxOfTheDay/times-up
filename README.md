@@ -43,6 +43,12 @@ Twee ploegen, drie rondes over hetzelfde deck:
 Dat je dezelfde kaarten drie keer ziet is de bedoeling: tegen ronde drie kent
 iedereen ze half uit het hoofd, en beginnen de jongsten te winnen.
 
+Tussen twee beurten krijg je het toestel aangereikt op één scherm: de stand,
+de opdracht en één knop. Een tik telt af van drie — genoeg om je klaar te
+zetten, en genoeg om een strijkende vinger tijdens het doorgeven op te
+vangen. Tik tijdens het aftellen om terug te gaan. De kaart blijft tot nul
+toe verborgen.
+
 Geraden kaart is een punt en meteen de volgende. Passen mag, zonder straf:
 de kaart gaat onderaan terug. Loopt de stapel leeg, dan stopt de ronde
 meteen — ook midden in een beurt — en gaat de resterende tijd mee naar de
@@ -54,10 +60,11 @@ daar ook het deck van vanavond; tik een kaart aan om ze te vervangen. Het is
 het enige scherm met tekst, en meteen de korte uitleg voor wie Time's Up niet
 kent.
 
-De pauzeknop staat op elk scherm van het spel rechtsboven, op dezelfde plek
-en in dezelfde maat; daarachter zit stoppen, achter een lange druk. Passen
-staat altijd linksonder en geraden altijd rechtsonder, ook als je het toestel
-draait.
+Rechtsboven staat op elk scherm van het spel een knopje op dezelfde plek en
+in dezelfde maat: tijdens het spelen een pauzeteken, tussen de beurten een
+huisje (daar loopt geen klok, dus valt er niets te pauzeren). Achter allebei
+zit hetzelfde paneel, met stoppen achter een lange druk. Passen staat altijd
+linksonder en geraden altijd rechtsonder, ook als je het toestel draait.
 
 Tijdens het spelen staat linksboven altijd wie aan de beurt is én wat de
 opdracht van deze ronde is — praten, één woord of uitbeelden — zodat wie het
