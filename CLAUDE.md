@@ -50,13 +50,28 @@ tweede zwarte rand, en lijkt de kaart er drie te hebben. Dat is precies wat
 er eerder gebeurde toen `--team: var(--ink)` als "geen kleur hier" werd
 gebruikt.
 
-Een rand op de kleur van wat eronder ligt is óók een derde rand. Het merk
-zette zijn contour op `--paper` om de inkt-rand van `.surface` te
-neutraliseren op een inkt-vlak — maar `--paper` is de pagina, dus dat werd
-geen rand maar een spleet van vier pixels tussen de plaat en haar eigen
-lagen: goud, spleet, zwart aan de ene kant en zwart, spleet, zwart aan de
-andere. Wie een contour niet wil, zet `border: 0` en niet een kleur die
-toevallig wegvalt.
+Dezelfde fout andersom: **een laag in de kleur van de plaat zelf is geen
+laag meer, maar een tweede plaat.** Op het merk (een inkt-vlak) viel de
+inktschaduw van `.surface` naar rechtsonder in precies de kleur van de
+plaat. Ze werd dus geen schaduw maar een tweede zwarte rechthoek die het
+silhouet verlengde, en met de gouden kleurplaat linksboven erbij lagen er
+drie rechthoeken over elkaar — zichtbaar op de twee hoeken waar niemand
+kijkt, rechtsboven en linksonder, als een trap waar de ene rechthoek onder
+de andere uitsteekt. Een inkt-vlak krijgt dus alleen de kleurplaat:
+
+```css
+box-shadow: calc(var(--shift) * -1) calc(var(--shift) * -1) 0 0 var(--go);
+```
+
+Een rand op de kleur van wat eronder ligt is óók een derde rand. Datzelfde
+merk zette zijn contour op `--paper` om de inkt-rand van `.surface` te
+neutraliseren — maar `--paper` is de pagina, dus dat werd geen rand maar een
+spleet van vier pixels tussen de plaat en haar eigen lagen. Wie een contour
+niet wil, zet `border: 0` en niet een kleur die toevallig wegvalt.
+
+Kortom: tel bij elk vlak hoeveel rechthoeken er in het silhouet zitten, niet
+hoeveel je er bedoeld hebt. Een screenshot met de hoeken uitvergroot laat het
+in één blik zien; in de tests is het onzichtbaar.
 
 ## Vorm zegt wat het is, diepte hoe zwaar
 

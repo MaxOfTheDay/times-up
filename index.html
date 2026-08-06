@@ -454,18 +454,27 @@ button.btn-ghost, button.btn-icon, button.chip, button.pv {
    Dat is dichter bij de zeefdruk-affiche die de rest van de app al is dan
    een gekleurd blok ooit was, en scheidt het merk (zwart, stil) meteen van
    de knop eronder (goud, de enige echte kleur op dit scherm). */
-/* Geen eigen contour. Die stond op --paper om de inkt-rand van .surface
-   onzichtbaar te maken op een inkt-vlak, maar --paper is ook de kleur van
-   de pagina eronder: die rand werd dus geen rand maar een gat van vier
-   pixels tussen de plaat en haar eigen lagen. Linksboven las dat als goud,
-   spleet, zwart; rechtsonder als zwart, spleet, zwart -- drie randen waar
-   het er twee moeten zijn (zie de regel over papier). Zonder contour blijft
-   precies over wat .surface belooft: de gouden kleurplaat die linksboven
-   uitsteekt en de inktschaduw die rechtsonder aanzet. */
+/* Twee lagen, niet drie -- en op een inkt-vlak betekent dat: géén
+   inktschaduw. Die van .surface valt naar rechtsonder in dezelfde kleur als
+   de plaat zelf, dus ze werd geen schaduw maar een tweede zwarte rechthoek
+   die het silhouet verlengde. Met de gouden kleurplaat linksboven erbij
+   stonden er drie rechthoeken over elkaar, en zag je op de twee andere
+   hoeken -- rechtsboven en linksonder -- de trap waar de ene rechthoek
+   onder de andere uitstak. Precies dezelfde fout als `--mis: var(--ink)`:
+   een laag in de kleur van de plaat is geen laag meer, maar een tweede
+   plaat.
+   Er blijft nu één verschoven kleurplaat over, en dat is de misregistratie
+   die dit merk wil laten zien.
+
+   Ook geen eigen contour. Die stond op --paper om de inkt-rand van .surface
+   onzichtbaar te maken, maar --paper is ook de kleur van de pagina eronder:
+   die rand werd dus geen rand maar een gat van vier pixels tussen de plaat
+   en haar eigen lagen. */
 .wordmark {
   --mis: var(--go);
   background: var(--ink);
   border: 0;
+  box-shadow: calc(var(--shift) * -1) calc(var(--shift) * -1) 0 0 var(--go);
   padding: 22px 30px 26px;
   transform: rotate(-2deg);
   text-align: center;
