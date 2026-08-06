@@ -100,12 +100,20 @@ Kleur staat ook nooit alleen: elke toestand heeft er een tweede kanaal bij
 linksboven (`--mis`, de misregistratie van de pers) en de inktschaduw naar
 rechtsonder. Samen met de eigen contour geeft dat twee zichtbare randen.
 
-`--mis` staat standaard op doorzichtig. Wie geen kleurplaat wil, laat 'm
-staan; alleen het merk en het pauzepaneel zetten 'm (op goud). Zet 'm nooit
-op `--ink`: dan is de bovenste laag geen verschoven kleur meer maar een
-tweede zwarte rand, en lijkt de kaart er drie te hebben. Dat is precies wat
-er eerder gebeurde toen `--team: var(--ink)` als "geen kleur hier" werd
-gebruikt.
+`--mis` staat standaard op doorzichtig, en dat is inmiddels overal zo: geen
+enkel vlak zet 'm nog. Het merk en het pauzepaneel deden dat samen, tot het
+merk zijn plaat als slagschaduw ging dragen (zie hieronder) -- en toen was
+het paneel de laatste. Een misregistratie die op één plek voorkomt is geen
+kenmerk van de pers meer maar een gouden randje zonder reden, en op dat
+scherm was het meteen een derde betekenis voor goud naast de wijzerplaat en
+de verder-knop. Weg dus.
+
+Wie 'm ooit weer aanzet: zet 'm nooit op `--ink`. Dan is de bovenste laag
+geen verschoven kleur meer maar een tweede zwarte rand, en lijkt de kaart er
+drie te hebben. Dat is precies wat er eerder gebeurde toen
+`--team: var(--ink)` als "geen kleur hier" werd gebruikt. En zet 'm niet op
+één los vlak: een kleurplaat die nergens anders terugkomt, verklaart zichzelf
+niet.
 
 Dezelfde fout andersom: **een laag in de kleur van de plaat zelf is geen
 laag meer, maar een tweede plaat.** Op het merk (een inkt-vlak) viel de
