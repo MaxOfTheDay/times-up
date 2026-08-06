@@ -161,6 +161,11 @@
 @media (prefers-reduced-motion: reduce) {
   :root { --dur: 0; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
+  /* Het aftellen lost normaal op terwijl de kaart eronder al gedeeld wordt,
+     en die uitloop is een animatie met forwards-vulling. Zonder animatie
+     blijft die vulling weg, en dan zou de laag nog twee tienden lang
+     ondoorzichtig over de kaart liggen. Hier dus meteen weg. */
+  .countdown.out { display: none !important; }
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -208,7 +213,44 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   padding: max(var(--s-4), env(safe-area-inset-top)) var(--s-4)
            max(var(--s-4), env(safe-area-inset-bottom));
 }
-.screen.on { display: flex; }
+/* Elke schermwissel was een harde knip: display van none naar flex, en het
+   volgende scherm stond er in één frame. Alles binnen een scherm bewoog al
+   (de kaart wordt gedeeld, het label wipt, de klok klopt), maar tussen de
+   schermen gebeurde niets -- en dat is precies waar de app het meest van
+   hand tot hand gaat.
+
+   Alleen bij binnenkomst, nooit bij vertrek: een uitloop houdt het volgende
+   scherm tegen, en dat wachten voel je in een spel dat je doorgeeft. Zes
+   pixels en 0,22 s -- genoeg om als aankomen te lezen, te kort om ergens op
+   te moeten wachten. De knop is meteen raak: er staat geen pointer-events
+   uit en de animatie verplaatst niets wat je aanraakt. */
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.screen.on {
+  display: flex;
+  animation: screenIn calc(.22s / max(var(--dur), .001)) ease-out;
+}
+
+/* Het overdrachtscherm heeft een leesvolgorde -- stand, opdracht, start --
+   en die stond er tot nu toe in één klap. Nu komen de drie vakken in die
+   volgorde binnen, zeventig milliseconden na elkaar. De beweging zegt
+   hetzelfde als de indeling, en de startknop is als laatste in beeld:
+   precies het moment waarop er iets te tikken valt.
+   backwards, anders staan de latere vakken al in beeld te wachten tot hun
+   vertraging voorbij is. */
+@keyframes slotIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+#s-handoff.on > #hoTally,
+#s-handoff.on > #hoRoundCard,
+#s-handoff.on > .go-wrap {
+  animation: slotIn calc(.26s / max(var(--dur), .001)) ease-out backwards;
+}
+#s-handoff.on > #hoRoundCard { animation-delay: calc(.07s / max(var(--dur), .001)); }
+#s-handoff.on > .go-wrap     { animation-delay: calc(.14s / max(var(--dur), .001)); }
 
 /* ============================================================
    2. OPPERVLAK — één regel voor elk stuk papier.
@@ -337,6 +379,20 @@ button.btn-ghost, button.btn-icon, button.chip, button.pv {
 }
 .cd-disc .ring .arc {
   fill: none; stroke: var(--ink); stroke-width: 8; stroke-linecap: round;
+}
+/* Op nul verdween het aftellen in één frame en stond de kaart er. Nu geeft
+   de schijf het beeld door: ze zet nog even uit en lost op terwijl de kaart
+   eronder al gedeeld wordt. Twee tienden, en de kaart wacht er niet op --
+   done() draait meteen, deze laag ligt er alleen nog overheen.
+   pointer-events uit, want de knop is dan al geen uitweg meer: een tik
+   tijdens het oplossen hoort bij de kaart eronder. */
+@keyframes cdOut {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(1.06); }
+}
+.countdown.out {
+  pointer-events: none;
+  animation: cdOut calc(.2s / max(var(--dur), .001)) ease-in forwards;
 }
 
 /* ---- geraden ---- */
@@ -875,6 +931,19 @@ input[type=range]::-moz-range-thumb {
   background: rgba(20, 17, 15, .82);
   padding: var(--s-4);
 }
+/* Het paneel stond er in één frame, en een venster dat zomaar verschijnt
+   voelt goedkoop. Het waas komt op in 0,15 s, het paneel schaalt in 0,22 s
+   van 96% met dezelfde veer als de rest van de app (--e-pop), dus het zet
+   zich net even aan.
+   Alleen bij openen. Wegklikken hoort meteen te gebeuren: wie op verder
+   tikt, wil spelen, en een uitloop van twee tienden is daar precies twee
+   tienden te veel. */
+@keyframes scrimIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes panelIn { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+.overlay:not([hidden]) { animation: scrimIn calc(.15s / max(var(--dur), .001)) ease-out; }
+.overlay:not([hidden]) .panel {
+  animation: panelIn calc(.22s / max(var(--dur), .001)) var(--e-pop) backwards;
+}
 .overlay .panel {
   --mis: var(--go);
   display: flex; flex-direction: column; align-items: center; gap: var(--s-4);
@@ -925,6 +994,18 @@ input[type=range]::-moz-range-thumb {
   line-height: 1; color: var(--tcol, var(--ink-2));
   min-width: 2ch; text-align: right;
 }
+/* De laatste vijf tellen klopt de kaart al mee (.hurry) en versnelt de tik,
+   maar het cijfer zelf stond doodstil -- terwijl dat het enige is wat de
+   werkelijke stand noemt. Eén klop per seconde, op de tel die je hoort.
+   Klein houden: dit staat in een balk met vaste hoogte, en een cijfer dat
+   te ver uitzet duwt de rest opzij. Daarom ook transform en geen font-size:
+   een transform hertekent geen layout. */
+@keyframes digitPulse {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.14); }
+  100% { transform: scale(1); }
+}
+.secs-left.pulse { animation: digitPulse calc(.24s / max(var(--dur), .001)) var(--e-pop); }
 
 /* ---- wat er deze beurt bij komt ----
    Eén label, twee schermen. Dit waren fiches in de ploegkleur: een rijtje
@@ -2320,6 +2401,9 @@ addEventListener("resize", remeasure);
 addEventListener("orientationchange", remeasure);
 
 let lastMs = 0, lastTotal = 1;
+/* Welk cijfer er nu staat, zodat de klop van paintClock() precies één keer
+   per hele seconde afgaat en niet zestig keer. */
+let lastDigit = null;
 function repaintClock() { paintClock(lastMs, lastTotal); }
 
 /* De klok heeft een eigen ramp gekregen: goud, gebrand, wijn. Ze stond
@@ -2347,9 +2431,19 @@ function paintClock(ms, totalMs) {
      van elke beurt. Met de eigen klokreeks haalt elke stand het wel.
      De haast zit sowieso niet in dit cijfer maar in de rand, de klop van de
      kaart en het tempo van de tik: drie kanalen die geen kleur zijn. */
-  $("#clockDigits").textContent = Math.ceil(ms / 1000);
-  $("#clockDigits").style.setProperty("--tcol",
+  const secs = Math.ceil(ms / 1000), dig = $("#clockDigits");
+  dig.textContent = secs;
+  dig.style.setProperty("--tcol",
     ms <= 10000 ? timerColour(ms) : "var(--ink-2)");
+  /* Eén klop per hele seconde, en alleen in de laatste vijf: daarbuiten
+     zou een cijfer dat elke seconde beweegt de hele beurt lang trekken aan
+     een blik die op de kaart hoort. De reflow ertussen is nodig, anders
+     begint dezelfde animatie niet opnieuw (zie ook paintTurnScore). */
+  if (secs !== lastDigit) {
+    lastDigit = secs;
+    dig.classList.remove("pulse");
+    if (ms > 0 && ms <= 5000) { void dig.offsetWidth; dig.classList.add("pulse"); }
+  }
   $("#cardslot").classList.toggle("hurry", ms > 0 && ms <= 5000);
 }
 
@@ -2392,16 +2486,32 @@ function countdown(done) {
     arc.style.strokeDashoffset = LEN * (1 - left / MS);
     const shown = Math.ceil(left / 1000);
     if (shown !== last && shown > 0) { last = shown; num.textContent = shown; Snd.tick(1300); }
-    if (left <= 0) { stopCountdown(); done(); return; }
+    if (left <= 0) { handOffCountdown(); done(); return; }
     countRaf = requestAnimationFrame(step);
   };
   Snd.tick(1300);
   countRaf = requestAnimationFrame(step);
 }
 
+/* Afbreken: meteen weg. Wie tijdens het aftellen tikt, wil terug, en daar
+   hoort niets tussen te zitten. */
 function stopCountdown() {
   cancelAnimationFrame(countRaf); countRaf = null;
-  $("#countdown").hidden = true;
+  const el = $("#countdown");
+  el.classList.remove("out");
+  el.hidden = true;
+}
+
+/* Uitgeteld: de schijf geeft het beeld door in plaats van te verdwijnen.
+   done() draait meteen -- de kaart wordt eronder al gedeeld -- en deze laag
+   lost er in twee tienden overheen op. countRaf staat dan al op null, dus
+   een tik tijdens het oplossen breekt niets meer af; .out zet bovendien
+   pointer-events uit, zodat die tik bij de kaart terechtkomt. */
+function handOffCountdown() {
+  cancelAnimationFrame(countRaf); countRaf = null;
+  const el = $("#countdown");
+  el.classList.add("out");
+  setTimeout(() => { el.classList.remove("out"); el.hidden = true; }, 200);
 }
 
 // Afgebroken: geen beurt begonnen, dus terug naar waar het toestel vandaan
