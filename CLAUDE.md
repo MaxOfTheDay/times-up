@@ -10,6 +10,33 @@ vooraf gevraagd wordt.
 De site draait op GitHub Pages vanaf `main`, dus wat niet gemerged is, staat
 niet in de woonkamer.
 
+## Gemerged is nog niet live
+
+Die deploy is een eigen workflow (`pages build and deployment`), los van
+`Tests`, en hij kan falen terwijl alles groen is. Het patroon: de
+`build`-taak bouwt het artefact prima, en `deploy` blijft daarna tien minuten
+op `Current status: deployment_queued` staan tot `Timeout reached, aborting!`.
+Dat is een wachtrij aan de kant van GitHub — er is dan niets mis met deze
+repo. Op 6 augustus gebeurde dat drie keer achter elkaar, waardoor drie
+gemergede PR's alle drie niet in de woonkamer stonden terwijl alles er groen
+uitzag.
+
+Twee dingen om te weten als het gebeurt:
+
+- **Eén geslaagde deploy haalt alles op.** Pages zet de hele `main` neer, geen
+  diff. Mislukte deploys hoeven dus niet stuk voor stuk opnieuw; de
+  eerstvolgende die slaagt, brengt alles mee.
+- **Opnieuw draaien lost het níet op.** Het deployment-ID *is* de commit-SHA,
+  en de time-out annuleert die deployment ("Canceled deployment with ID …").
+  Elke volgende poging op dezelfde commit maakt dus opnieuw een deployment met
+  een ID dat al geannuleerd is, en faalt binnen vijf seconden op "Deployment
+  cancelled." — ook een volledige her-run met een vers gebouwd artefact. De
+  enige uitweg is een nieuwe commit op `main`: nieuwe SHA, nieuw
+  deployment-ID.
+
+Kijk na een merge dus niet alleen of `Tests` groen is, maar ook of
+`pages build and deployment` op díe commit geslaagd is.
+
 ## De harde eis
 
 Geen enkele speler hoeft ooit een woord te lezen: niet op de kaarten, niet op
