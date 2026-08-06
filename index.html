@@ -210,12 +210,17 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    rotatie, een animatie) zou de kleurlaag dan bovenop de kaart
    leggen in plaats van erachter.
    ============================================================ */
+/* --mis is de kleurplaat, niet --team: wie geen misregistratie wil zette
+   hier "--team: var(--ink)", en dan is de bovenste laag geen verschoven
+   kleur meer maar een tweede zwarte rand. Samen met de eigen contour en de
+   inktschaduw leek zo'n kaart drie randen te hebben. Standaard nu
+   doorzichtig -- wie de kleurlaag wél wil, zet --mis expliciet. */
 .surface {
   position: relative;
   background: var(--paper);
   border: var(--line) solid var(--ink);
   box-shadow:
-    calc(var(--shift) * -1) calc(var(--shift) * -1) 0 0 var(--team),
+    calc(var(--shift) * -1) calc(var(--shift) * -1) 0 0 var(--mis, transparent),
     var(--lift-1) var(--lift-1) 0 0 var(--ink);
 }
 
@@ -417,7 +422,7 @@ button.btn-ghost, button.btn-icon, button.gear, button.chip, button.pv {
    een gekleurd blok ooit was, en scheidt het merk (zwart, stil) meteen van
    de knop eronder (goud, de enige echte kleur op dit scherm). */
 .wordmark {
-  --team: var(--go);
+  --mis: var(--go);
   background: var(--ink);
   border-color: var(--paper);   /* .surface geeft een inkt-rand: onzichtbaar op inkt */
   padding: 22px 30px 26px;
@@ -593,11 +598,16 @@ input[type=range]::-moz-range-thumb {
    vier vakken, dus delen ze ook dezelfde lucht ertussen. */
 
 /* De opdracht op het overdrachtscherm: pictogram en woord naast elkaar, op
-   papier. Ook hier geen rondekleur -- de mascotte staat er pal boven. */
+   papier. Geen kleurplaat (zie --mis bij .surface): de ronde heeft nergens
+   een eigen kleur. */
 .roundcard {
-  --team: var(--ink);
   display: flex; align-items: center; gap: min(1.8vh, 14px);
   padding: min(1.6vh, 12px) 20px min(1.6vh, 12px) 14px;
+  /* Liggend kromp deze kaart tot 157 px naast een stand van 304: de
+     hoofdzaak was het kleinste ding op het scherm. Staand ligt de natuurlijke
+     breedte hier al boven, dus dit doet daar niets. */
+  min-width: min(42vw, 300px);
+  justify-content: center;
 }
 .roundcard .ico {
   width: min(9vh, 74px); height: min(9vh, 74px);
@@ -638,28 +648,21 @@ input[type=range]::-moz-range-thumb {
   color: var(--ink-2);
 }
 
-/* De stand op het moment van overdragen: wie het toestel krijgt wil
-   weten waar het over gaat. Klein, want het is naslag. */
-/* --team vast op inkt: dit kaartje toont soms allebei de ploegen tegelijk,
-   dus geen van beide mag zijn kleur op de schaduw claimen -- en in de
-   "round"-stand hangt --team sowieso nog op de vorige beurt, want er is
-   geen wissel om 'm opnieuw te zetten. */
-/* De ruimte binnen een ploeg is klein en die tussen de ploegen groot: zo
-   hoort het gouden "erbij"-label zichtbaar bij het getal ernaast en niet
-   bij de ploeg aan de overkant. Stonden ze even ver uit elkaar, dan las
-   "4 +4 | 12 +12" als vier losse getallen op een rij. */
-/* Binnenmarge, want de opgetilde tegel hieronder heeft een eigen rand en
-   schaduw: zonder die ruimte plakt ze tegen de rand van de kaart en lijkt
-   ze afgesneden. Bovenaan iets meer, zodat de kroon binnen de kaart blijft. */
-/* De ruimte tussen de ploegen en de binnenmarge schalen mee met de breedte:
-   op een 320px-scherm staan er in het slechtste geval twee mascottes, twee
-   getallen én twee "+N"-labels naast elkaar, en dat liep er anders zes pixels
-   overheen. Blijft ruim boven de --s-2 binnen een ploeg, dus de groepering
-   klopt nog steeds. */
+/* De stand op het moment van overdragen. Naslag, geen hoofdzaak: ze hoort
+   kleiner te blijven dan de opdrachtkaart eronder, want dat is het enige
+   waar de speler iets mee moet. Ze was breder -- 302 tegen 264 px staand,
+   304 tegen 157 liggend -- en trok daarmee de aandacht die de opdracht
+   nodig heeft. Vandaar de kleinere maten hieronder.
+
+   De ruimte binnen een ploeg is klein en die ertussen groot, zodat het
+   "+N"-label zichtbaar bij het getal ernaast hoort en niet bij de ploeg aan
+   de overkant; anders leest "6 +6 10 +10" als vier losse getallen. Allebei
+   schalen ze mee met de breedte, want op 320 px passen twee mascottes, twee
+   getallen én twee labels anders niet naast elkaar. */
 .mini-score {
-  --team: var(--ink); display: flex; align-items: center;
-  gap: min(6vw, var(--s-5));
-  padding: var(--s-4) min(4vw, var(--s-4)) var(--s-3);
+  display: flex; align-items: center;
+  gap: min(5vw, var(--s-4));
+  padding: min(2.6vw, var(--s-3)) min(3vw, var(--s-3));
 }
 .mini-score .side {
   display: flex; align-items: center; gap: var(--s-2);
@@ -671,15 +674,12 @@ input[type=range]::-moz-range-thumb {
    ook voor wie rood en blauw niet uit elkaar houdt. De rand staat er in
    alle gevallen (doorzichtig als je niet aan zet bent), anders verspringt
    de rij een paar pixels zodra de beurt wisselt. */
-.mini-score .side.up {
-  background: var(--paper-2); border-color: var(--ink);
-  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
-}
+.mini-score .side.up { background: var(--paper-2); border-color: var(--ink); }
 /* :not(.crown), want de kroon hangt in hetzelfde vakje en heeft haar eigen
    maat -- zonder die uitzondering wint deze regel en wordt de kroon net zo
    groot als de mascotte eronder. */
 .mini-score .head > svg:not(.crown) {
-  width: min(9vw, 32px); height: min(9vw, 32px); display: block;
+  width: min(7.4vw, 27px); height: min(7.4vw, 27px); display: block;
 }
 /* Vaste cijferbreedte, en tabulaire cijfers: anders springt de hele rij
    opzij zodra iemand van 9 naar 10 gaat, en staan de twee ploegen niet
@@ -688,7 +688,7 @@ input[type=range]::-moz-range-thumb {
    plaats van vast te staan: op 320px passen twee mascottes, twee getallen en
    twee "+N"-labels anders niet naast elkaar. */
 .mini-score b {
-  font-weight: 900; font-size: min(6.5vw, 24px); font-variant-numeric: tabular-nums;
+  font-weight: 900; font-size: min(5.3vw, 20px); font-variant-numeric: tabular-nums;
   color: var(--ink); min-width: 2ch; text-align: right;
 }
 /* Wie voorstaat krijgt de kroon -- hetzelfde teken als op het winnaarsscherm,
@@ -697,18 +697,26 @@ input[type=range]::-moz-range-thumb {
    dan staat er ook niemand voor. */
 .mini-score .head { position: relative; display: flex; flex: 0 0 auto; }
 .mini-score .crown {
-  position: absolute; left: 50%; top: -13px;
+  /* max() en niet min(): bij negatieve waarden kiest min() de méést
+     negatieve, en dan schoot de kroon liggend 23 px omhoog -- door de
+     bovenrand van de kaart heen. Zo blijft ze binnen de binnenmarge. */
+  position: absolute; left: 50%; top: max(-2.4vw, -9px);
   transform: translateX(-50%) rotate(-8deg);
-  width: 24px; height: 24px;
+  width: min(5.5vw, 20px); height: min(5.5vw, 20px);
 }
-.mini-score .sep { width: 3px; height: 24px; background: var(--ink); opacity: .3; }
-/* Wat er net bij kwam, als goud label naast het totaal -- niet als stapel
+/* Wat er net bij kwam, als label naast het totaal -- niet als stapel
    fiches: die groeit de hele avond door, en dit scherm deelt de ruimte al
    met de mascotte en de opdracht. Het plusteken staat erin, want een kaal
    getal naast een ander getal zegt niet welke van de twee erbij kwam. */
+/* Groen, niet goud. Op dit scherm was goud de kroon (staat voor), de
+   ronde-schijf (dit is de ronde nu), de rand om de overgedragen tijd én de
+   startknop -- vier betekenissen, en dan betekent het er geen meer. Deze
+   punten zijn geraden kaarten, en geraden is in deze app groen: hetzelfde
+   vlak met hetzelfde inkt-teken erop als de goed-knop tijdens het spelen.
+   Inkt op --good haalt 5,9:1. */
 .mini-score .fresh {
-  font-style: normal; font-weight: 900; font-size: min(4.4vw, 15px); color: var(--ink);
-  background: var(--go); border: var(--line-2) solid var(--ink); padding: 0 min(1.9vw, 6px);
+  font-style: normal; font-weight: 900; font-size: min(3.9vw, 14px); color: var(--ink);
+  background: var(--good); border: var(--line-2) solid var(--ink); padding: 0 min(1.7vw, 5px);
   font-variant-numeric: tabular-nums;
 }
 @keyframes freshIn { from { transform: scale(0); } to { transform: scale(1); } }
@@ -806,7 +814,7 @@ input[type=range]::-moz-range-thumb {
   padding: var(--s-4);
 }
 .overlay .panel {
-  --team: var(--go);
+  --mis: var(--go);
   display: flex; flex-direction: column; align-items: center; gap: var(--s-4);
   padding: var(--s-5) var(--s-6);
   max-width: 100%; min-width: min(280px, 82vw);
@@ -1462,7 +1470,6 @@ input[type=range]::-moz-range-thumb {
       <b id="hoScoreA">0</b>
       <i class="fresh" id="hoFreshA" hidden></i>
     </div>
-    <i class="sep" aria-hidden="true"></i>
     <div class="side" id="hoSideB">
       <span class="head">
         <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-uil"/></svg>
@@ -1605,7 +1612,6 @@ input[type=range]::-moz-range-thumb {
     </div>
     <div class="mini-score" aria-hidden="true">
       <div class="side"><svg viewBox="0 0 100 100"><use href="#m-vos"/></svg><b id="pauseScoreA">0</b></div>
-      <i class="sep"></i>
       <div class="side"><svg viewBox="0 0 100 100"><use href="#m-uil"/></svg><b id="pauseScoreB">0</b></div>
     </div>
     <button class="btn-go" id="btnResume" aria-label="Verder spelen">

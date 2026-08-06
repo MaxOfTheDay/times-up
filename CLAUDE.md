@@ -25,8 +25,30 @@ een toestand pakt er een uit `:root`: `--go` (goud) voor verdergaan,
 Nooit een ploegkleur lenen — dan betekent rood op het ene scherm "de vossen"
 en op het volgende "haast je", en daarmee niets meer.
 
+Dat geldt net zo goed voor goud, en daar is het één keer misgegaan: op het
+overdrachtscherm stond goud tegelijk voor de kroon (staat voor), het
+"+N"-label (net verdiend), de ronde-schijf (dit is de ronde nu), de rand om
+de overgedragen tijd én de startknop. Vijf betekenissen op één scherm.
+Het label is daarom groen geworden — die punten zijn geraden kaarten, en
+geraden is `--good`, hetzelfde vlak met hetzelfde inkt-teken als de
+goed-knop. Tel bij een nieuw element altijd even hoe vaak een kleur al op
+datzelfde scherm staat.
+
 Kleur staat ook nooit alleen: elke toestand heeft er een tweede kanaal bij
 (een vorm, een teken, een woord, een beweging).
+
+## Papier heeft twee randen, geen drie
+
+`.surface` legt twee lagen onder een vlak: de kleurplaat een paar pixels naar
+linksboven (`--mis`, de misregistratie van de pers) en de inktschaduw naar
+rechtsonder. Samen met de eigen contour geeft dat twee zichtbare randen.
+
+`--mis` staat standaard op doorzichtig. Wie geen kleurplaat wil, laat 'm
+staan; alleen het merk en het pauzepaneel zetten 'm (op goud). Zet 'm nooit
+op `--ink`: dan is de bovenste laag geen verschoven kleur meer maar een
+tweede zwarte rand, en lijkt de kaart er drie te hebben. Dat is precies wat
+er eerder gebeurde toen `--team: var(--ink)` als "geen kleur hier" werd
+gebruikt.
 
 ## Wat je moet vasthouden, zegt dat
 
@@ -89,9 +111,11 @@ De stand (`#hoTally`) toont geen stapel fiches, zoals de winnaar dat wel
 doet: dat scherm is verder leeg, maar hier deelt de stand de ruimte met de
 opdracht. Een stapel van dertig-plus fiches duwde tegen ronde 3 de startknop
 van het scherm af -- onzichtbaar in de test tot je 'm met een screenshot ziet
-staan. Een totaal met een goud "+N" ernaast zegt hetzelfde in vaste breedte,
+staan. Een totaal met een groen "+N" ernaast zegt hetzelfde in vaste breedte,
 met een kroon boven wie voorstaat (hetzelfde teken als op het winnaarsscherm,
-want twee getallen vergelijken kan een vierjarige nog niet).
+want twee getallen vergelijken kan een vierjarige nog niet). Die stand blijft
+kleiner dan de opdrachtkaart: ze is naslag, en de opdracht is het enige waar
+de speler íets mee moet.
 
 De knop rechtsboven draagt hier een huisje en geen pauzeteken: er loopt geen
 klok, dus er valt niets te pauzeren. De enige reden om er te tikken is
