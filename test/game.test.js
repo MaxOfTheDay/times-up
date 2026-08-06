@@ -69,7 +69,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     // je kijkt als je het toestel aangereikt krijgt.
     const woord = ['Uitleggen', 'Eén woord', 'Uitbeelden'][round - 1];
     const icoon = ['#r-praten', '#r-eenwoord', '#r-mimen'][round - 1];
-    ok(await page.textContent('#hoRuleWord') === woord,
+    ok(await page.textContent('#hoRoundWord') === woord,
        `ronde ${round}: verkeerd woord op het overdrachtscherm`);
 
     // Ook hier: een losse tik mag de klok niet laten lopen terwijl het
