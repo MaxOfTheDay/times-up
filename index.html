@@ -2246,6 +2246,26 @@ const Snd = (() => {
     },
     pas()   { tone(200, .13, "sine", .22, 0, 120); },
     tick(f) { tone(f || 1400, .022, "square", .08, 0); },
+    /* Het aftellen is de klok niet. Allebei stonden ze op tick(1300) --
+       letterlijk dezelfde blip -- dus hoorde je vier gelijke piepjes waarvan
+       de vierde toevallig het startsein was. Het kind dat staat uit te
+       beelden kijkt niet naar het scherm; geluid is daar het enige kanaal,
+       en één geluid hoort dan één ding te betekenen.
+
+       Drie zachte dalende noten. Dalen, omdat stijgen al bezet is door
+       goed(), token() én fanfare() -- een stijgend drieklankje vóór de beurt
+       zou klinken als de eerste drie noten van de overwinning. Dat het
+       daalt, zegt bovendien "zet je klaar" in plaats van "er komt iets
+       binnen". En de toonhoogte vertelt waar je in het aftellen zit: drie
+       gelijke piepjes deden dat niet.
+
+       Triangle en niet square: square blijft van de klok. */
+    count(i){ tone([990, 880, 784][Math.min(Math.max(i || 0, 0), 2)], .10, "triangle", .13, 0); },
+    /* Het startsein. Langer en helderder dan welke tick ook, met een veeg
+       omhoog -- het enige moment in een beurt waarop er iets begint in
+       plaats van verstrijkt. Eén noot, dus geen verwarring met goed(), dat
+       er twee heeft. */
+    go()    { tone(1175, .18, "square", .2, 0, 1560); },
     timeUp(){ tone(420, .55, "sawtooth", .22, 0, 90); tone(210, .6, "square", .12, .05, 60); },
     token(i){ tone(520 + Math.min(i, 12) * 45, .07, "triangle", .16, i * .075); },
     fanfare(){ [523,659,784,1047].forEach((f,i)=>tone(f,.26,"square",.2,i*.13)); tone(1568,.5,"square",.16,.55); }
@@ -2890,17 +2910,26 @@ function countdown(done) {
   num.textContent = COUNT_FROM;
   el.focus({ preventScroll: true });
 
+  /* De eerste tel klinkt vóór t0 gezet wordt, en niet andersom. Bij een koud
+     audio-apparaat kost die eerste noot een kwart seconde om op gang te
+     komen; stond t0 ervóór, dan viel de tweede tel al na 750 ms en begon het
+     aftellen met een hink. Met drie gelijke piepjes hoorde je dat niet, met
+     drie verschillende wel. */
   let last = COUNT_FROM;
+  Snd.count(0);
   const t0 = performance.now();
   const step = now => {
-    const left = Math.max(0, MS - (now - t0));
+    /* Ook aan de bovenkant afknellen. De tijdstempel van de eerste
+       rAF-frame kan vóór t0 liggen -- die frame was al onderweg toen de
+       eerste tel nog klonk -- en dan is er méér over dan de hele
+       aftelling: shown wordt 4, en die tel bestaat niet. */
+    const left = Math.min(MS, Math.max(0, MS - (now - t0)));
     arc.style.strokeDashoffset = LEN * (1 - left / MS);
     const shown = Math.ceil(left / 1000);
-    if (shown !== last && shown > 0) { last = shown; num.textContent = shown; Snd.tick(1300); }
+    if (shown !== last && shown > 0) { last = shown; num.textContent = shown; Snd.count(COUNT_FROM - shown); }
     if (left <= 0) { handOffCountdown(); done(); return; }
     countRaf = requestAnimationFrame(step);
   };
-  Snd.tick(1300);
   countRaf = requestAnimationFrame(step);
 }
 
@@ -2917,9 +2946,13 @@ function stopCountdown() {
    done() draait meteen -- de kaart wordt eronder al gedeeld -- en deze laag
    lost er in twee tienden overheen op. countRaf staat dan al op null, dus
    een tik tijdens het oplossen breekt niets meer af; .out zet bovendien
-   pointer-events uit, zodat die tik bij de kaart terechtkomt. */
+   pointer-events uit, zodat die tik bij de kaart terechtkomt.
+
+   Hier valt ook het startsein: dit is het moment waarop de klok gaat lopen,
+   en het was tot nu toe het enige moment van de beurt zónder eigen geluid. */
 function handOffCountdown() {
   cancelAnimationFrame(countRaf); countRaf = null;
+  Snd.go();
   const el = $("#countdown");
   el.classList.add("out");
   setTimeout(() => { el.classList.remove("out"); el.hidden = true; }, 200);
@@ -2941,7 +2974,14 @@ function beginTurn() {
   const totalMs = G.secs * 1000;
   const ms = G.pendingMs > 0 ? G.pendingMs : totalMs;
   deadline = performance.now() + ms;
-  lastTickAt = 0;
+  /* Niet op 0: dan is de eerste tik meteen raak en valt hij boven op het
+     startsein, en die tik markeert dan geen verstreken seconde maar niets.
+     De klok begint dus met een hele tel stilte, precies zoals elke tel
+     daarna.
+     Bij hervatten na pauze staat dit wél op 0, en dat is daar juist goed:
+     daar klinkt geen startsein, dus is die eerste tik het enige teken dat
+     de klok weer loopt. */
+  lastTickAt = performance.now();
   paintClock(ms, totalMs);
   runClock(totalMs);
 }
