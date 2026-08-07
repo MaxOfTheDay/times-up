@@ -32,6 +32,15 @@ groene vinkje op GitHub.
 De site draait op GitHub Pages vanaf `main`, dus wat niet gemerged is, staat
 niet in de woonkamer.
 
+**Maak de branch aan vóór je iets wijzigt, en kijk naar de diff van de PR
+voordat je merget.** Anders commit je op de lokale `main` terwijl de branch
+op iets ouds blijft staan, en dan merget de PR keurig een lege commit: PR #37
+heeft de goede titel, groene CI en nul gewijzigde regels. Dat is niet ergens
+op stukgelopen — het is gewoon nooit meegegaan, en een `git reset --hard
+origin/main` daarna gooide het echte werk weg. De hoekenfix moest er
+daardoor twee keer komen. Twee controles vangen dit: `git log --oneline -1`
+op de branch vóór het pushen, en de regel "N files changed" op de PR.
+
 ## Gemerged is nog niet live
 
 Die deploy is een eigen workflow (`pages build and deployment`), los van
@@ -177,6 +186,43 @@ Zet een primaire knop nooit met alleen `min()` op maat. De knop in het
 pauzepaneel kromp liggend mee met de schermhoogte tot 68 px — even groot als
 de stopknop ernaast — en dan wegen de hoofdhandeling en de onomkeerbare even
 zwaar. Er hoort een `max()` met een ondergrens omheen.
+
+## De hoek van het scherm is geen rechte hoek
+
+Een telefoon met gebogen hoeken snijdt weg wat er te dicht in de bocht staat,
+en `env(safe-area-inset-*)` waarschuwt daar niet voor: dat zegt alleen wat het
+tóéstel opeist (statusbalk, gebarenbalk, notch), niets over de ronding. Twee
+regels, allebei hier misgegaan:
+
+- **Optellen, niet kiezen.** `calc(env(...) + eigen marge)`, nooit
+  `max(env(...), marge)`. Met `max()` verdwijnt je eigen marge zodra het
+  toestel iets opeist — en andersom net zo goed: in app-modus (`standalone`)
+  meldt een Pixel 10 onderaan gewoon **nul**, dus `max(12px, env(...))` gaf
+  exact 12 px en de knop stond twaalf pixels van de fysieke onderrand. Van
+  het toestel valt daar dus niets te verwachten; die marge moet volledig uit
+  onszelf komen.
+- **Eén maat voor beide assen.** In een hoek telt de afstand tot allebei de
+  randen mee, dus smaller aan de zijkant kopen door onderaan ruimer te gaan
+  werkt niet. Vandaar `--corner` (32 px): **elk blijvend geplaatst
+  rechthoekig vlak houdt `--corner` van beide schermranden.** Wat
+  voorbijscrolt hoeft dat niet — dat komt met één veeg weer vrij.
+
+Cirkels zijn vrijgesteld: die wijken in de hoek vanzelf terug. Het meest
+blootgestelde vlak van de app is daarom `.btn-skip`, het vierkant linksonder.
+
+Hoever 32 px reikt is gemeten en niet geschat: met de slagschaduw van 5 px
+erbij ligt zo'n hoek feitelijk op (27, 27), en die blijft binnen een straal
+tot 93 px. Uit de opname van het toestel volgt dat er minstens 48 px ronding
+op staat (een hoek op (16, 12) werd afgesneden, en dat kan pas vanaf 48);
+telefoons zitten rond de 50 à 60. Er zit dus ruim een factor twee tussen.
+
+Controleren doe je door de boog te tékenen: leg een overlay met vier
+`radial-gradient`-hoeken in een schreeuwkleur over elk scherm en kijk of ze
+iets raken. Meten met alleen `getBoundingClientRect()` liegt twee keer — een
+percentage-`border-radius` komt als `"50%"` terug (dus `parseFloat` haalt 50,
+niet de halve breedte, en een cirkel telt ten onrechte als rechthoek), en een
+vlak dat door een scrollend voorouder-vak wordt weggeknipt staat er nog
+gewoon in met volle maten.
 
 ## Wat je moet vasthouden, zegt dat
 
