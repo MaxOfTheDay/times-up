@@ -312,7 +312,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    chips, "terug", het tandwiel, de pauzeknop en de kaartjes in de
    voorvertoning dood aanvoelden. */
 button.btn-go, button.btn-good, button.btn-skip, button.btn-wide,
-button.btn-ghost, button.btn-icon, button.btn-danger, button.chip, button.pv {
+button.btn-icon, button.btn-danger, button.chip, button.pv {
   transition: transform calc(var(--t-press) * var(--dur)) ease,
               box-shadow calc(var(--t-press) * var(--dur)) ease;
 }
@@ -323,7 +323,7 @@ button.btn-ghost, button.btn-icon, button.btn-danger, button.chip, button.pv {
 /* Stoppen zakt mee in: het is nu een knop met reliëf zoals alle andere, en
    dat het ingedrukt blijft zolang je hem vasthoudt is precies de
    terugkoppeling die deze knop nodig heeft. */
-.btn-ghost:active, .btn-icon:active, .btn-danger:active, .chip:active, .pv:active {
+.btn-icon:active, .btn-danger:active, .chip:active, .pv:active {
   transform: translate(var(--lift-1), var(--lift-1));
   box-shadow: 0 0 0 var(--ink);
 }
@@ -537,7 +537,29 @@ button.btn-ghost, button.btn-icon, button.btn-danger, button.chip, button.pv {
    staat. Inkt op --danger haalt te weinig; papier op --danger haalt 7,3:1. */
 .btn-danger.flooded { color: var(--paper); }
 
-/* ---- brede knoppen op het instellingenscherm ---- */
+/* ---- de brede knop op het instellingenscherm ----
+   Enkelvoud, en dat is nieuw. Er stond een tweede onder: "Terug", ook van
+   rand tot rand, ook met inkt-contour en reliëf. Twee dingen gingen daar
+   mis, en allebei zijn ze te meten in plaats van te vinden.
+
+   Het gat ertussen was --s-2 (8 px) en de slagschaduw van deze knop is
+   --lift-2 (ook 8 px). Die schaduw landde dus precies op de bovenrand van
+   de knop eronder: ze deelden een rand en lazen als één aan elkaar gelast
+   blok. Druk je deze knop in, dan zakt hij zijn eigen acht pixels in en
+   raakt hij de ander écht aan.
+
+   En allebei stonden ze op width:100% met een verschillende --lift, dus
+   hun silhouetten waren 3 px verschillend breed: aan de rechterkant een
+   trapje dat je ziet zonder het te kunnen benoemen. Daar volgt een regel
+   uit: **stapel nooit twee knoppen van rand tot rand met een
+   verschillende --lift.** Ze kunnen dan niet uitlijnen, wat je met het gat
+   ook doet.
+
+   Wat er echt aan de hand was: "Terug" is een uitgang, en uitgangen zitten
+   in deze app rechtsboven (pauze, huisje) -- niet onderaan tegen de
+   hoofdhandeling aan geplakt, waar ze als gelijkwaardige keuze leest. Hij
+   is nu het huisje in die hoek, en deze voet is van 175 naar 110 px
+   gekrompen (liggend van 45% van het scherm naar 28%). */
 .btn-wide {
   min-height: 68px; width: 100%;
   background: var(--good-ink); color: var(--paper);
@@ -550,13 +572,6 @@ button.btn-ghost, button.btn-icon, button.btn-danger, button.chip, button.pv {
    kreeg dan een wijnrode, vast te houden bevestiging. Er bestaat geen
    lopend spel meer om weg te gooien -- zie load() -- dus deze knop is nu
    altijd de gewone, groene "ja, goed, doe maar". */
-
-.btn-ghost {
-  min-height: 52px; width: 100%; background: var(--paper);
-  border: var(--line-2) solid var(--ink); box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
-  font-weight: 900; text-transform: uppercase;
-  letter-spacing: .08em; font-size: 13px;
-}
 
 /* ============================================================
    4. TITEL
@@ -662,12 +677,14 @@ button.btn-ghost, button.btn-icon, button.btn-danger, button.chip, button.pv {
    Nu staat hij vast onderin. */
 .setup-foot {
   flex: 0 0 auto;
-  display: flex; flex-direction: column; gap: var(--s-2);
-  /* Deze twee knoppen lopen van rand tot rand en blijven staan, dus hun
-     onderhoeken liggen het diepst in de bocht. Beide assen op --corner --
-     smaller aan de zijkant helpt niet: in een hoek telt de afstand tot
-     allebei de randen mee. Ze staan daardoor iets verder naar binnen dan de
-     chips erboven; die scrollen, deze twee niet. */
+  /* Eén knop, dus geen richting en geen gat meer nodig -- zie .btn-wide
+     voor wat de tweede hier deed en waarom hij weg is. */
+  display: flex;
+  /* Deze knop loopt van rand tot rand en blijft staan, dus zijn onderhoeken
+     liggen het diepst in de bocht. Beide assen op --corner -- smaller aan de
+     zijkant helpt niet: in een hoek telt de afstand tot allebei de randen
+     mee. Hij staat daardoor iets verder naar binnen dan de chips erboven;
+     die scrollen, deze niet. */
   padding: var(--s-3) var(--corner) calc(env(safe-area-inset-bottom, 0px) + var(--corner));
   background: var(--paper);
   border-top: var(--line-2) solid var(--rule);
@@ -1839,11 +1856,19 @@ input[type=range]::-moz-range-thumb {
   </div>
 
   <!-- De hoofdknop staat vast onderin: hij stond onder een scherm dat je
-       eerst helemaal moest afrollen. -->
+       eerst helemaal moest afrollen. Hij staat er nu alleen; "terug" is het
+       huisje rechtsboven geworden. Zie .setup-foot. -->
   <div class="setup-foot">
     <button class="btn-wide" id="btnGo">Beginnen</button>
-    <button class="btn-ghost" id="btnBack">Terug</button>
   </div>
+
+  <!-- Rechtsboven, waar op elk ander scherm ook de uitgang zit -- en waar
+       je via het tandwiel binnenkwam. Hetzelfde huisje als op het
+       winnaarsscherm, want het betekent hetzelfde: weg van dit scherm,
+       zonder dat er iets gebeurt. -->
+  <button class="btn-icon" id="btnBack" aria-label="Terug naar de titel">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-huis"/></svg>
+  </button>
 </section>
 
 <!-- ======================== OVERDRACHT ========================== -->

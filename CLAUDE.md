@@ -248,6 +248,32 @@ pauzepaneel kromp liggend mee met de schermhoogte tot 68 px — even groot als
 de stopknop ernaast — en dan wegen de hoofdhandeling en de onomkeerbare even
 zwaar. Er hoort een `max()` met een ondergrens omheen.
 
+En: **stapel nooit twee knoppen van rand tot rand met een verschillende
+`--lift`.** Op het instellingenscherm stonden "Beginnen" (8 px) en "Terug"
+(5 px) allebei op `width: 100%` boven elkaar, en dan lopen hun silhouetten
+3 px uit de pas — een trapje aan de rechterkant dat je ziet zonder het te
+kunnen benoemen. Uitlijnen kan niet: de schaduw hoort bij het gewicht, en het
+gewicht hoort te verschillen. Kwam bovenop een tweede rekenfout: het gat
+ertussen was `--s-2` (8 px) en de schaduw van de bovenste ook, dus die
+schaduw landde precies op de rand van de onderste. Ze deelden een rand en
+lazen als één blok, en bij `:active` zakte de bovenste er echt tegenaan.
+
+De echte fout zat er nog onder. **Een uitgang hoort rechtsboven**, niet
+onderaan tegen de hoofdhandeling geplakt — daar leest hij als gelijkwaardige
+keuze ("beginnen of terug?") terwijl het titelscherm waar hij heen gaat
+strikt minder kan dan het scherm dat je verlaat. "Terug" is daarom het
+huisje in die hoek geworden, dezelfde knop als op overdracht en winnaar, en
+dezelfde hoek waar je via het tandwiel binnenkwam. De voet zakte van 175
+naar 115 px; liggend van 45% van het scherm naar 29%.
+
+Prijs die daarbij hoort en die je moet zien: een zwevende hoekknop op een
+scherm dat scrollt, krijgt de inhoud ónder zich door. De chips schuiven met
+hun eigen kader en schaduw langs het kader en de schaduw van het huisje. Zijn
+eigen vlak is dekkend, dus hij blijft leesbaar, maar het is even druk in die
+hoek. Wie dat wil verhelpen maakt de titelregel plakkend met een dekkende
+`--paper`-band — en betaalt daar liggend zo'n 15% schermhoogte voor, precies
+waar net ruimte gewonnen is.
+
 ## De hoek van het scherm is geen rechte hoek
 
 Een telefoon met gebogen hoeken snijdt weg wat er te dicht in de bocht staat,
