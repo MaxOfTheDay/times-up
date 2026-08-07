@@ -39,9 +39,9 @@ welke knop het deed.
 
 Twee ploegen, drie rondes over hetzelfde deck:
 
-1. **Uitleggen** — omschrijven met woorden, behalve het woord zelf.
-2. **Eén woord** — één woord, meer niet.
-3. **Uitbeelden** — alleen mimen, geen geluid.
+1. **Omschrijven** — gebruik zoveel woorden als je wilt, behalve het woord zelf.
+2. **Eén woord** — geef één woord als hint.
+3. **Uitbeelden** — niet praten, alleen uitbeelden.
 
 Dat je dezelfde kaarten drie keer ziet is de bedoeling: tegen ronde drie kent
 iedereen ze half uit het hoofd, en beginnen de jongsten te winnen.
