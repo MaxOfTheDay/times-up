@@ -1661,13 +1661,19 @@ input[type=range]::-moz-range-thumb {
            klein/midden/groot -- alleen wat je léést verandert, zodat een
            bestaande keuze in localStorage gewoon blijft werken. -->
       <div class="chips" id="tierChips" role="radiogroup" aria-label="Moeilijkheid van de kaarten">
-        <button class="chip" role="radio" aria-checked="false" data-tier="klein">Makkelijk<small>3–5 jaar</small>
+        <button class="chip" role="radio" aria-checked="false" data-tier="klein">Makkelijk<small>3+ jaar</small>
           <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-        <button class="chip" role="radio" aria-checked="false" data-tier="midden">Medium<small>6–8 jaar</small>
+        <button class="chip" role="radio" aria-checked="false" data-tier="midden">Medium<small>6+ jaar</small>
           <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
         <button class="chip" role="radio" aria-checked="false" data-tier="groot">Moeilijk<small>9+ jaar</small>
           <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
       </div>
+      <!-- Wie dit weet, kiest bij een tafel met een vijfjarige én een
+           achtjarige gerust een stap hoger: de makkelijke kaarten blijven
+           er toch in zitten. Dat is precies waar de schuivende pool voor
+           gemaakt is, dus het hoort hier te staan en niet in de
+           regeluitleg -- die staat dichtgeklapt. -->
+      <p class="hint">Elke stand bevat ook de makkelijkere kaarten.</p>
     </fieldset>
 
     <fieldset class="field">
