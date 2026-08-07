@@ -63,6 +63,13 @@ daar ook het deck van vanavond; tik een kaart aan om ze te vervangen. Het is
 het enige scherm met tekst, en meteen de korte uitleg voor wie Time's Up niet
 kent.
 
+De moeilijkheid werkt als een bovengrens, niet als een band: elke stand
+speelt met zijn eigen kaarten én die van de stand eronder. Aan een tafel met
+een zesjarige en een negenjarige houdt de jongste zo kaarten die hij kan
+winnen, terwijl de oudste er af en toe een krijgt om over na te denken. Dat
+kan omdat de helft van de moeilijkheid uit de ronde komt en niet uit de
+kaart: "hond" zwijgend uitbeelden is op elke leeftijd werk.
+
 Rechtsboven staat op elk scherm een knopje op dezelfde plek en in dezelfde
 maat: op de titel een tandwiel, tijdens het spelen een pauzeteken, tussen de
 beurten een huisje (daar loopt geen klok, dus valt er niets te pauzeren).

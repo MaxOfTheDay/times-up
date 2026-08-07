@@ -320,12 +320,41 @@ de pictogrammen dan opnieuw met dezelfde vorm.
 
 ## Kaarten
 
-`DECKS` bovenaan `index.html`, één regel per kaart. Twee regels bij het
-toevoegen, allebei bewaakt door `test/deck.test.js`:
+`DECKS` bovenaan `index.html`, één regel per kaart. Drie tiers, en ze spelen
+niet los van elkaar: `poolFor()` geeft een tier zijn eigen kaarten **plus die
+van de tier eronder**. Klein speelt met 90 kaarten, midden met 183, groot met
+185.
 
-- één betekenis los van context (geen ⭐, niets cultureel gebonden);
-- alleen emoji tot en met Unicode 9.0 (2016), anders ontbreekt de glyph op
-  oudere tablets en is de kaart onspeelbaar.
+Waarom schuivend en niet gestapeld: de moeilijkheid van een avond komt maar
+half uit de kaart. De andere helft komt uit de ronde, en die is voor iedereen
+gelijk -- omschrijven, één woord, zwijgend uitbeelden. Een makkelijke kaart is
+in ronde 3 nog steeds werk; een moeilijke kaart is voor de jongste aan tafel in
+élke ronde muurvast. De tier zegt daarom "tot en met zo moeilijk" in plaats van
+"alleen deze band", zodat een tafel met verschillende leeftijden één stand kan
+kiezen die voor allebei speelbaar is. Niet álles eronder meenemen, want dan is
+bij groot twee derde van de stapel uit de lagere banden en speelt een tafel van
+negenjarigen vooral peuterkaarten.
+
+Drie regels bij het toevoegen:
+
+- **één betekenis los van context** (geen ⭐, niets cultureel gebonden). Geen
+  test ziet dit; dit is mensenwerk;
+- **geen dubbele emoji of woorden in de póól**, niet alleen binnen de tier.
+  Aangrenzende tiers delen een stapel, dus een kaart die in twee tiers staat
+  komt twee keer in één potje. Zo bleven `hamer` (klein + midden) en `slapen`
+  (midden + groot) lang onzichtbaar: per tier klopte het. `test/deck.test.js`
+  toetst nu de samengestelde pool;
+- **geen ZWJ-reeksen en geen huidskleur-modifiers.** Die vallen op een oud
+  toestel uiteen in losse tekens. Er zitten er nu nul in; de 26 kaarten met
+  een variatieselector (☂️ ✈️ ❤️) zijn de veilige soort.
+
+Over de Unicode-versie: hier stond dat alleen emoji tot en met 9.0 (2016)
+mochten, en dat de test dat bewaakte. Dat tweede klopte niet -- de controle
+meet of een glyph tekent op de máchine die de test draait, en die heeft een
+verse letterfamilie. Een splinternieuwe emoji komt daar dus doorheen en staat
+op een oude tablet alsnog als ▯. De grens is dus een keuze, geen hek. Er staan
+nu bewust nieuwere kaarten in (🧸 🪁 🦥 🪑 🧩 🪐 …); kijk bij twijfel één keer
+op het oudste toestel dat in huis meespeelt.
 
 ## Tests
 
