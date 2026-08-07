@@ -65,8 +65,9 @@ kent. Die uitleg staat open tot je één keer een spel gestart hebt en klapt
 daarna dicht tot één regel — terug te vinden, maar niet meer het eerste wat je
 elke avond ziet.
 
-De moeilijkheid werkt als een bovengrens, niet als een band: elke stand
-speelt met zijn eigen kaarten én die van de stand eronder. Aan een tafel met
+De moeilijkheid van de kaarten (makkelijk, medium, moeilijk) werkt als een
+bovengrens, niet als een band: elke stand speelt met zijn eigen kaarten én die
+van de stand eronder. Aan een tafel met
 een zesjarige en een negenjarige houdt de jongste zo kaarten die hij kan
 winnen, terwijl de oudste er af en toe een krijgt om over na te denken. Dat
 kan omdat de helft van de moeilijkheid uit de ronde komt en niet uit de
