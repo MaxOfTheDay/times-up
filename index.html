@@ -1510,7 +1510,7 @@ input[type=range]::-moz-range-thumb {
 }
 
 /* ============================================================
-   11. LIGGEND (tablet): kaart links, bediening rechts
+   11. LIGGEND (tablet): kaart in het midden, bediening rechts
    ============================================================ */
 /* Een telefoon in liggende stand is breed én laag. De balk bovenaan loopt
    daarom over de volle breedte en alleen de kaart en de bediening delen de
@@ -1518,27 +1518,64 @@ input[type=range]::-moz-range-thumb {
    ~390 px en liep de knop van het scherm. */
 @media (orientation: landscape) and (min-width: 640px) {
   /* .on erbij: een id-selector met display zou anders de display:none
-     van .screen overrulen en het spelscherm altijd zichtbaar maken. */
+     van .screen overrulen en het spelscherm altijd zichtbaar maken.
+
+     Drie kolommen en niet twee: de knop rechts krijgt een even brede lege
+     kolom links naast zich. Zonder die tegenhanger kreeg de kaart alle
+     overgebleven breedte als kolom en stond ze in het midden dáárvan -- en
+     dat is niet het midden van het scherm. Op 844x390 lag ze 93 px links
+     van het hart: 93 px lucht tussen "pas" en de kaart, 258 px tussen de
+     kaart en "goed". Staand valt dat niet op omdat de kaart daar juist op
+     de breedte vastloopt en de speling in de hoogte zit, waar ze wél
+     precies in het midden komt.
+
+     De lege kolom is bovendien niet leeg in beeld: "pas" hangt er
+     doorheen. Links "pas", rechts "goed", en de kaart in het hart.
+
+     De ondergrens van 72 px is de regel dat een hoofdhandeling nooit op
+     alleen een min() staat: op een heel lage liggende stand kromp "goed"
+     anders onder de 64 px van "pas" door, en dan weegt de mindere keuze
+     zwaarder dan de handeling waar dit scherm voor bestaat. */
   #s-play.on {
+    --ctrl: max(72px, min(26vh, 148px));
     display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-areas: "top top" "card controls";
+    grid-template-columns: var(--ctrl) 1fr var(--ctrl);
+    grid-template-areas: "top top top" ".  card controls";
     grid-template-rows: auto 1fr;
     gap: var(--s-2) var(--s-4);
   }
   .play-top { grid-area: top; }
-  .cardwrap { grid-area: card; }
+  /* De kaart wordt liggend door de hoogte begrensd (zie sizeCard), en die
+     hoogte was tot op de pixel opgemaakt: de kaart eindigde op 16 px van de
+     onderrand, maar de stapel eronder niet. De onderste kaart is 3 graden
+     gedraaid en 10 px omlaag geschoven, dus die stak er nog zo'n 17 px
+     onderuit -- en liep daarmee op elk liggend telefoonformaat het scherm
+     af (391 px op een venster van 390). Staand viel het nooit op: daar
+     houdt de kaart hoogte over en valt de stapel in die speling.
+     Deze marge is de ruimte voor die onderste kaart: 10 px verschuiving plus
+     wat de draaiing eronder uit tilt, zodat de stapel binnen de marge van
+     .screen blijft in plaats van erdoorheen. */
+  .cardwrap { grid-area: card; margin-bottom: 20px; }
   /* Liggend krijgt "goed" een eigen kolom rechts; "pas" blijft linksonder
      aan het scherm hangen (zie .btn-skip hierboven), zodat de twee duimen
-     hun vaste hoek houden. */
+     hun vaste hoek houden. De kolom is precies zo breed als de knop erin:
+     stond hij op 170 px, dan was 69 px daarvan dood en klopte de spiegeling
+     met de kolom links niet meer. */
   .controls {
     grid-area: controls;
     display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end;
-    min-height: 0; width: min(30vw, 170px); padding: 0;
+    min-height: 0; width: var(--ctrl); padding: 0;
   }
-  .btn-good { width: min(26vh, 148px); }
+  .btn-good { width: 100%; }
   .btn-skip { width: max(64px, min(15vh, 84px)); height: max(64px, min(15vh, 84px)); }
   .btn-skip svg { width: 60%; }
+  /* Liggend is de hoogte schaars en de breedte ruim -- precies andersom als
+     staand -- dus legt de ronde-tegel zijn woord náást het pictogram in
+     plaats van eronder. Dat scheelt tien pixels balk, en die tien pixels
+     gaan rechtstreeks naar de kaart. Alleen op het spelscherm: op de
+     overdracht staat de tegel niet in een balk maar in de opdrachtkaart,
+     waar hoogte juist geen probleem is. */
+  #s-play .roundchip { flex-direction: row; align-items: center; gap: var(--s-2); }
 }
 
 /* Laag scherm (telefoon liggend): de overzichtsschermen worden een rij in
