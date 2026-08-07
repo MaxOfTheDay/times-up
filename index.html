@@ -169,7 +169,6 @@
   --t-press: .09s;
   --t-card:  .18s;
   --t-fly:   .22s;   /* het "+1" van de kaart naar de teller (zie flyGain) */
-  --t-cheer: .32s;
   --e-pop: cubic-bezier(.2, 1.5, .4, 1);
   --dur: 1;        /* animatieschaal, 0 bij prefers-reduced-motion */
 
@@ -178,8 +177,8 @@
 }
 
 /* Animaties helemaal uit, niet alleen traag: de duur delen door --dur
-   zou ze bevriezen op hun BEGINbeeld -- de fiches staan daar op
-   scale(0) en zouden dus onzichtbaar blijven.
+   zou ze bevriezen op hun BEGINbeeld -- de kroon op het winnaarsscherm
+   staat daar op opacity 0 en zou dus nooit verschijnen.
 
    Let op wat hier NIET onder valt. De vulling van een knop die je moet
    vasthouden en de ring om de startknop zijn geen versiering maar een
@@ -1395,33 +1394,27 @@ input[type=range]::-moz-range-thumb {
 }
 
 /* ============================================================
-   9. PUNTEN ALS TELBARE FICHES
-   Vaste rijen van vijf: twee stapels naast elkaar vormen dan hetzelfde
-   raster, en zie je wie voorstaat aan de hoogte in plaats van door te
-   tellen. Vrij afbrekende rijen maakten 11 tegen 5 tot een rekensom.
-   ============================================================ */
-.pile {
-  --tok: min(26px, 3.1vh, 6.4vw);
-  display: grid; grid-template-columns: repeat(5, var(--tok));
-  gap: calc(var(--tok) * .24); justify-content: flex-start;
-}
-.pile i {
-  width: var(--tok); height: var(--tok); border-radius: 50%;
-  border: var(--line-2) solid var(--ink); background: var(--tc, var(--team-vos));
-}
-/* Wat er deze ronde bij kwam, met een gouden rand: het verschil tussen
-   "hoe staan we" en "wat heb ik net verdiend". */
-.pile i.fresh { box-shadow: 0 0 0 3px var(--go); }
-@keyframes tokenIn { from { transform: scale(0) rotate(-40deg); } to { transform: scale(1) rotate(0); } }
-.pile i.new { animation: tokenIn calc(var(--t-cheer) / max(var(--dur), .001)) var(--e-pop) backwards; }
+   9. DE EINDSTAND: TOTAAL BOVEN, UITSPLITSING ERONDER
+   Hier lag één fiche per punt, in rijen van vijf. Dat las goed op 8 tegen
+   3 en liep daarna uit de hand: die stapel groeit met ongeveer 0,8% van de
+   schermhoogte per punt, dus bij 42 punten stond er een raster van negen
+   rijen dat een derde van het scherm vulde en van het hele scherm
+   "bolletjes" maakte. En hetzelfde getal stond er dan vier keer: de stapel,
+   de drie rondes, het totaal, en de kroon zei allang wie won.
 
-/* Beide ploegen krijgen dezelfde drie rijen: kop, stapel, uitsplitsing.
+   Er is niets voor in de plaats gekomen -- geen kolom, geen balk. Wie won
+   staat in de kroon en in de mascotte die groeit; hoevéél is naslag, en
+   naslag is een getal. Dat getal staat nu bovenaan, groot, met de drie
+   rondes eronder in de volgorde waarin ze gespeeld zijn: eerst de uitslag,
+   dan waar ze vandaan komt.
+   ============================================================ */
+
+/* Beide ploegen krijgen dezelfde drie rijen: kop, totaal, uitsplitsing.
    Met los uitgelijnde kolommen stond het rondelijstje van de ene ploeg
    235 px lager dan dat van de andere, en dan valt er niets meer te
-   vergelijken -- terwijl vergelijken het enige is wat dit scherm doet. */
-/* Drie rijen die zich naar hun inhoud voegen. Met een rekbare middenrij
-   stond de uitsplitsing een halve hand onder de stapel te zweven; nu sluit
-   ze aan, en liggen beide ploegen nog steeds op dezelfde lijnen. */
+   vergelijken -- terwijl vergelijken het enige is wat dit scherm doet.
+   De rijen voegen zich naar hun inhoud: met een rekbare middenrij hing de
+   uitsplitsing een halve hand onder het totaal te zweven. */
 .side-by-side {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1444,8 +1437,8 @@ input[type=range]::-moz-range-thumb {
 }
 .tally .head { position: relative; align-self: end; }
 .tally .mascot-sm { width: min(74px, 9vh); display: block; }
-/* Een kroon boven wie voorstaat. Zonder die aanwijzing moet een kind twee
-   stapels tellen en vergelijken voor het weet hoe het ervoor staat. */
+/* Een kroon boven wie voorstaat, en op dit scherm het enige dat dat zegt
+   zonder cijfers -- twee getallen vergelijken kan een vierjarige nog niet. */
 .tally .crown {
   position: absolute; top: -26px; left: 50%; transform: translateX(-50%) rotate(-8deg);
   width: 42px;
@@ -1455,9 +1448,14 @@ input[type=range]::-moz-range-thumb {
   to   { transform: translateX(-50%) rotate(-8deg) translateY(0) scale(1); opacity: 1; }
 }
 .tally .crown { animation: crownIn calc(.4s / max(var(--dur), .001)) var(--e-pop) backwards; }
-.tally .pile { max-width: 100%; align-self: end; }
-/* De uitsplitsing per ronde: pictogram + aantal, klein en rustig. */
-.tally .foot { display: flex; flex-direction: column; gap: 2px; align-items: center; }
+/* De uitsplitsing per ronde: pictogram + aantal, klein en rustig. Staat
+   onder het totaal, dus met een streep erboven die zegt "hier komt de
+   herkomst" in plaats van "hier komt de som". */
+.tally .foot {
+  display: flex; flex-direction: column; gap: 2px; align-items: center;
+  align-self: start; padding-top: 5px; border-top: 2px solid var(--rule);
+  min-width: 4.5ch;
+}
 .tally .sr {
   display: flex; align-items: center; gap: 6px;
   opacity: .55;
@@ -1468,14 +1466,14 @@ input[type=range]::-moz-range-thumb {
   font-weight: 900; font-size: min(14px, 1.9vh); font-variant-numeric: tabular-nums;
   min-width: 1.4ch; text-align: left;
 }
-/* Het totaal staat er als tekst bij voor wie leest en voor een schermlezer;
-   de stapel is het echte antwoord. Met een streepje erboven leest het als
-   de som van de rondes erboven, in plaats van als een derde herhaling van
-   hetzelfde getal. */
+/* De uitslag zelf, en het enige getal op dit scherm dat groot mag zijn.
+   Allebei de ploegen even groot: wie won zegt de kroon en de mascotte die
+   ernaast groeit, en twee cijfers van verschillend formaat zouden juist
+   moeilijker te vergelijken maken. */
 .tally .num {
-  font-weight: 900; font-size: 15px; color: var(--ink-2); font-variant-numeric: tabular-nums;
-  margin-top: 2px; padding-top: 3px; min-width: 3.5ch; text-align: center;
-  border-top: 2px solid var(--rule);
+  font-weight: 900; font-size: min(15vw, 8vh, 66px); line-height: .85;
+  color: var(--ink); font-variant-numeric: tabular-nums;
+  min-width: 2ch; text-align: center;
 }
 
 /* ============================================================
@@ -1544,7 +1542,7 @@ input[type=range]::-moz-range-thumb {
 }
 
 /* Laag scherm (telefoon liggend): de overzichtsschermen worden een rij in
-   plaats van een kolom, anders staan de stapels en de knop boven en onder
+   plaats van een kolom, anders staan de standen en de knop boven en onder
    het beeld. De stand blíjft daarbij één blok: als losse kinderen van de
    rij dreven de twee ploegen uit elkaar en was er niets meer te
    vergelijken. */
@@ -1557,9 +1555,6 @@ input[type=range]::-moz-range-thumb {
      knop naar een tweede regel en viel het scherm in losse eilanden uiteen
      met een lege band ertussen. */
   .side-by-side { width: min(38vw, 300px); gap: var(--s-1) var(--s-2); }
-  /* Op een laag scherm rekende de fiche met 3,1% van de hóógte en werd hij
-     twaalf pixels: te klein om nog te tellen. Liggend is er breedte zat. */
-  .pile { --tok: min(20px, 4.4vw); }
   .tally { width: min(17vw, 132px); }
   .tally .crown { width: 32px; top: -20px; }
   .tally .mascot-sm { width: min(52px, 13vh); }
@@ -1594,11 +1589,10 @@ input[type=range]::-moz-range-thumb {
    bedacht zijn, waardoor alles op een tablet als een postzegel midden in
    het beeld hing. */
 @media (min-width: 700px) and (min-height: 700px) {
-  .pile { --tok: min(34px, 3.4vh, 6.4vw); }
   .tally { width: min(38vw, 230px); }
   .tally .mascot-sm { width: min(104px, 11vh); }
   .tally .crown { width: 58px; top: -34px; }
-  .tally .num { font-size: 19px; }
+  .tally .num { font-size: min(11vw, 7vh, 88px); }
   .tally .sr svg { width: 26px; height: 26px; }
   .tally .sr b { font-size: 18px; }
   .side-by-side { max-width: 560px; gap: var(--s-3) var(--s-5); }
@@ -3040,9 +3034,8 @@ function paintStack() {
   [1, 2, 3].forEach(i => { $(".cardslot .u" + i).hidden = i > layers; });
 }
 
-/* Wat je deze beurt al binnen hebt, als fiches. Zonder dat werk je blind:
-   de stand komt pas na afloop, terwijl juist tijdens de beurt de spanning
-   zit. */
+/* Wat je deze beurt al binnen hebt. Zonder dat werk je blind: de stand komt
+   pas na afloop, terwijl juist tijdens de beurt de spanning zit. */
 function paintTurnScore() {
   const box = $("#turnScore");
   const n = G ? G.gained : 0;
@@ -3216,11 +3209,11 @@ function timeUp() {
   turnEnd();
 }
 
-/* De stand op het overdrachtscherm, met wat er net bij kwam als goud label.
-   Geen stapel fiches hier: dat werkt op een scherm dat verder leeg is
-   (winnaar), maar dit scherm deelt de ruimte al met de opdracht en soms de
-   routekaart, en een stapel van 30+ fiches duwde tegen ronde 3 de startknop
-   van het scherm af. */
+/* De stand op het overdrachtscherm, met wat er net bij kwam als groen label.
+   Geen fiche per punt hier: zo'n stapel groeit de hele avond door en duwde
+   tegen ronde 3 de startknop van het scherm af. Het winnaarsscherm hield ze
+   nog even -- daar was ruimte -- maar ook daar liepen ze uit de hand.
+   Nergens in de app ligt dus nog één bolletje per punt. */
 function paintHoTally(freshA, freshB) {
   [[0, freshA, "#hoScoreA", "#hoFreshA", "#hoSideA", "#hoCrownA"],
    [1, freshB, "#hoScoreB", "#hoFreshB", "#hoSideB", "#hoCrownB"]]
@@ -3284,18 +3277,6 @@ function endRound() {
   handoff("round", freshA, freshB);
 }
 
-function fillPile(el, n, hex, newest) {
-  el.textContent = "";
-  for (let i = 0; i < n; i++) {
-    const d = document.createElement("i");
-    d.style.setProperty("--tc", hex);
-    if (newest && i >= n - newest) {
-      d.classList.add("new", "fresh");
-      d.style.animationDelay = ((i - (n - newest)) * 0.075) + "s";
-    }
-    el.appendChild(d);
-  }
-}
 
 function svgUse(href, cls) {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -3307,7 +3288,7 @@ function svgUse(href, cls) {
   return svg;
 }
 
-function tallyNode(t, newest) {
+function tallyNode(t) {
   const wrap = document.createElement("div");
   wrap.className = "tally";
 
@@ -3316,16 +3297,17 @@ function tallyNode(t, newest) {
   head.appendChild(svgUse(TEAMS[t].mascot, "mascot-sm"));
   if (total(t) > total(1 - t)) head.appendChild(svgUse("#i-kroon", "crown"));
 
-  const pile = document.createElement("div");
-  pile.className = "pile";
-  fillPile(pile, total(t), TEAMS[t].hex, newest || 0);
+  /* De uitslag eerst, groot. */
+  const num = document.createElement("div");
+  num.className = "num";
+  num.textContent = total(t);
 
-  /* Onder de stapel per ronde wat die ploeg daar haalde, met hetzelfde
-     pictogram als overal. De stapel zegt "wie staat voor"; dit zegt "waar
-     kwam het vandaan" -- anders zie je alleen een totaal en niet dat je de
-     ene ronde won en de andere verloor. */
-  /* Kop, stapel en voet zijn nu drie vaste rijen die bij beide ploegen op
-     dezelfde hoogte liggen (zie .side-by-side, subgrid). Ze hingen eerder
+  /* En daaronder waar ze vandaan komt: per ronde wat die ploeg daar haalde,
+     met hetzelfde pictogram als overal. Zonder die regels zie je alleen een
+     totaal en niet dat je de ene ronde won en de andere verloor.
+
+     Kop, totaal en uitsplitsing zijn drie vaste rijen die bij beide ploegen
+     op dezelfde hoogte liggen (zie .side-by-side, subgrid). Ze hingen eerder
      los onder elkaar, waardoor het rondelijstje van de ene ploeg 235 px
      lager stond dan dat van de andere -- en dan valt er niets meer te
      vergelijken, terwijl vergelijken het enige is wat dit scherm doet. */
@@ -3342,13 +3324,8 @@ function tallyNode(t, newest) {
     foot.appendChild(row);
   }
 
-  const num = document.createElement("div");
-  num.className = "num";
-  num.textContent = total(t);
-  foot.appendChild(num);
-
   wrap.setAttribute("aria-label", TEAMS[t].naam + ": " + total(t) + " punten");
-  wrap.append(head, pile, foot);
+  wrap.append(head, num, foot);
   return wrap;
 }
 

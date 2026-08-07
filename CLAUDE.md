@@ -411,19 +411,42 @@ Alle tekst staat op papier, nooit rechtstreeks op de ploegkleur: `--ink-2`
 haalt op ploegblauw maar 1,5:1 en op ploegrood 2,0:1, en de uitleg bij de
 regel is juist de enige tekst in het spel die een speler moet kunnen lezen.
 
-De stand (`#hoTally`) toont geen stapel fiches, zoals de winnaar dat wel
-doet: dat scherm is verder leeg, maar hier deelt de stand de ruimte met de
-opdracht. Een stapel van dertig-plus fiches duwde tegen ronde 3 de startknop
-van het scherm af -- onzichtbaar in de test tot je 'm met een screenshot ziet
-staan. Een totaal met een groen "+N" ernaast zegt hetzelfde in vaste breedte,
-met een kroon boven wie voorstaat (hetzelfde teken als op het winnaarsscherm,
-want twee getallen vergelijken kan een vierjarige nog niet). Die stand blijft
-kleiner dan de opdrachtkaart: ze is naslag, en de opdracht is het enige waar
-de speler íets mee moet.
+De stand (`#hoTally`) toont geen fiche per punt. Zo'n stapel duwde tegen
+ronde 3 de startknop van het scherm af -- onzichtbaar in de test tot je 'm met
+een screenshot ziet staan. Een totaal met een groen "+N" ernaast zegt
+hetzelfde in vaste breedte, met een kroon boven wie voorstaat (hetzelfde teken
+als op het winnaarsscherm, want twee getallen vergelijken kan een vierjarige
+nog niet). Die stand blijft kleiner dan de opdrachtkaart: ze is naslag, en de
+opdracht is het enige waar de speler íets mee moet.
 
 De knop rechtsboven draagt hier een huisje en geen pauzeteken: er loopt geen
 klok, dus er valt niets te pauzeren. De enige reden om er te tikken is
 weggaan -- en dat is wat het huisje op het winnaarsscherm ook betekent.
+
+## De eindstand telt niet, ze noemt
+
+Het winnaarsscherm hield de fiches nog even -- het was "verder leeg", dus
+daar was ruimte. Dat klopte niet meer: bij 42 tegen 20 stond er een raster
+van negen rijen bolletjes dat een derde van het scherm vulde, en hetzelfde
+getal stond er vier keer (de stapel, de drie rondes, het totaal, en de kroon
+zei allang wie won). Nergens in de app ligt dus nog één bolletje per punt.
+
+Er is niets voor in de plaats gekomen. Geen kolom, geen balk, geen tweede
+grafiek: **wie won staat in de kroon en in de mascotte die groeit, en dat
+zijn de twee kanalen die een niet-lezer nodig heeft.** Hoevéél is naslag, en
+naslag is een getal. Vandaar de volgorde per ploeg: mascotte, dan het totaal
+groot, dan de drie rondes klein eronder met hun pictogram. Eerst de uitslag,
+dan waar ze vandaan komt.
+
+De twee totalen staan even groot. Het is verleidelijk om de winnaar ook
+daar te laten groeien, maar dan zeggen kroon, mascotte én cijfergrootte
+alle drie hetzelfde, terwijl twee cijfers van verschillend formaat juist
+lastiger naast elkaar te leggen zijn.
+
+Let op de klassenaam als je hier ooit tóch iets bijtekent: `.bar` bestond
+al -- dat is de streep door de pas-knop als de stapel op is. Een tweede
+`.bar` erbij zette meteen `display: flex` en een rand op dat SVG-pad. Grep
+even voor je een korte naam pakt.
 
 ## Eén label voor "wat er bij komt", op beide schermen
 
