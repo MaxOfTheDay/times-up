@@ -701,7 +701,13 @@ button.btn-ghost, button.btn-icon, button.btn-danger, button.chip, button.pv {
 .chip small { display: block; font-size: 11px; letter-spacing: .04em; color: var(--ink-2); font-weight: 700; }
 .chip[aria-checked="true"] { background: var(--go); }
 /* De keuze hangt niet aan de kleur alleen: er komt een vinkje bij staan. */
-.chip .tick { display: none; position: absolute; top: 3px; right: 3px; width: 16px; height: 16px; }
+/* Het vinkje stond rechtsboven, op de regel van het woord zelf. Met korte
+   labels (Klein, Midden, Groot) rekte flex de chip zo ver op dat er ruimte
+   overbleef, maar "Makkelijk" vult de chip en dan loopt de letter onder het
+   vinkje door. Meer binnenmarge zou de drie chips op 390 px naar twee regels
+   duwen, dus het vinkje verhuist naar de onderhoek: daar staat de kleine
+   leeftijdsregel, en die is smal genoeg om hem ruim te laten staan. */
+.chip .tick { display: none; position: absolute; bottom: 2px; right: 2px; width: 12px; height: 12px; }
 .chip[aria-checked="true"] .tick { display: block; }
 
 .slider-row { display: flex; align-items: center; gap: 14px; }
@@ -1647,13 +1653,19 @@ input[type=range]::-moz-range-thumb {
          twee nepknoppen eronder is erger dan geen kop, dus weg ermee. -->
 
     <fieldset class="field">
-      <legend>Moeilijkheid</legend>
-      <div class="chips" id="tierChips" role="radiogroup" aria-label="Moeilijkheid">
-        <button class="chip" role="radio" aria-checked="false" data-tier="klein">Klein<small>3–5 jaar</small>
+      <legend>Moeilijkheid van de kaarten</legend>
+      <!-- De labels zeggen nu hoe moeilijk de kaarten zijn, niet hoe groot
+           iets is: "Klein/Midden/Groot" stond direct boven "Aantal kaarten"
+           met 16/24/32, en dan leest "klein" als een kleine stapel.
+           De sleutels (data-tier, DECKS, opgeslagen instellingen) blijven
+           klein/midden/groot -- alleen wat je léést verandert, zodat een
+           bestaande keuze in localStorage gewoon blijft werken. -->
+      <div class="chips" id="tierChips" role="radiogroup" aria-label="Moeilijkheid van de kaarten">
+        <button class="chip" role="radio" aria-checked="false" data-tier="klein">Makkelijk<small>3–5 jaar</small>
           <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-        <button class="chip" role="radio" aria-checked="false" data-tier="midden">Midden<small>6–8 jaar</small>
+        <button class="chip" role="radio" aria-checked="false" data-tier="midden">Medium<small>6–8 jaar</small>
           <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-        <button class="chip" role="radio" aria-checked="false" data-tier="groot">Groot<small>9+ jaar</small>
+        <button class="chip" role="radio" aria-checked="false" data-tier="groot">Moeilijk<small>9+ jaar</small>
           <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
       </div>
     </fieldset>
