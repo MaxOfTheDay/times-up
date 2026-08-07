@@ -1278,21 +1278,64 @@ input[type=range]::-moz-range-thumb {
 .card[data-time="crit"] .timerframe .band { stroke: var(--time-1); }
 
 /* Geraden en gepast zagen er precies hetzelfde uit, terwijl ze het
-   tegenovergestelde betekenen. Nu wordt een geraden kaart van de stapel
-   gedeeld -- schuin van boven erop -- en zakt een gepaste kaart eerst weg
-   onder de stapel voor de volgende bovenkomt. Zonder te kijken weet je
-   welke knop het deed. */
-@keyframes deal {
-  0%   { transform: translate(-10px, -14px) rotate(-3deg); }
-  100% { transform: translate(0, 0) rotate(0); }
+   tegenovergestelde betekenen. Beide gebaren gaan nu over de kaart die
+   wég is -- dat is de enige vraag die de speler op dat moment heeft:
+   waar ging mijn kaart heen?
+
+   - pas:  ze zakt weg ónder de stapel en de volgende komt boven. Daar
+           gaat ze ook echt heen (G.pile.push, onderop).
+   - goed: ze tilt van de stapel áf richting de teller (zie .cardgone) en
+           de volgende komt eronder vandaan -- uit de stapel, precies waar
+           .u1 ligt, dus in de tegenrichting van tuck.
+
+   "Goed" ging hiervoor over de kaart die eráán kwam: die werd schuin van
+   linksboven op de stapel gedeeld. Twee bezwaren. Ze kwam uit de hoek
+   waar de teller staat, dus het punt dat naar de teller vliegt en de
+   nieuwe kaart kruisten elkaar in hetzelfde gangetje, tegen elkaar in.
+   En van de kaart die je zojuist geraden hebt bleef geen spoor over,
+   terwijl het spel aan tafel juist dáárop draait: geraden kaarten liggen
+   op een stapeltje voor je neus, en dat stapeltje ís de stand. */
+@keyframes rise {
+  0%   { transform: rotate(1.4deg) translate(3px, 5px) scale(.975); }
+  100% { transform: rotate(0) translate(0, 0) scale(1); }
 }
 @keyframes tuck {
   0%   { transform: translateY(0) scale(1); }
   45%  { transform: translateY(16px) scale(.965); }
   100% { transform: translateY(0) scale(1); }
 }
-.card.in   { animation: deal calc(var(--t-card) / max(var(--dur), .001)) ease-out; }
+.card.in   { animation: rise calc(var(--t-card) / max(var(--dur), .001)) ease-out; }
 .card.tuck { animation: tuck calc(.28s / max(var(--dur), .001)) ease-in-out; }
+
+/* De kaart die net geraden is, tilt van de stapel af richting de teller.
+
+   Een aparte kopie en niet de kaart zelf: #card is één element dat alleen
+   zijn inhoud wisselt, dus wie hém laat vertrekken laat de vólgende kaart
+   vertrekken. De kopie draagt de tekening en het woord van de kaart die
+   weg is, en verder niets.
+
+   Zonder klokbaan, met opzet. De klok hoort bij de beurt en niet bij de
+   kaart -- ze loopt gewoon door -- en twee ringen van verschillende maat
+   over elkaar zijn twee klokken. Doordat de kopie krimpt in plaats van
+   groeit, blijft de ring van de kaart eronder de hele tijd heel.
+
+   Wat er dus wél twee keer ligt is een kaartsilhouet: contour plus
+   slagschaduw, op een kaart die die ook heeft. Dat is hier geen derde rand
+   maar twee kaarten -- dezelfde figuur als de scheve .under-lagen van de
+   stapel, alleen boven de bovenste in plaats van eronder.
+
+   Krimpen en niet wegvliegen, en dat is het hele verschil met het punt
+   ernaast. Dit is het grootste vlak van het scherm, tot vijftien keer per
+   beurt; zou het de hele reis naar de teller maken, dan dekt het bij een
+   goede reeks vrijwel onafgebroken de nieuwe kaart af -- juist het enige
+   waar de omschrijver op dat moment íets mee moet. De kaart zet dus de
+   eerste centimeter en het punt legt de rest af. */
+.cardgone {
+  position: absolute; inset: 0; z-index: 1;
+  pointer-events: none;
+}
+/* .card zet display: grid, en dat wint van het UA-voorschrift bij [hidden]. */
+.cardgone[hidden] { display: none; }
 /* Een tik die niet meetelt (twee vingers op dezelfde kaart binnen 280 ms)
    werd stilletjes weggegooid. Nu knippert de rand één keer, zodat je ziet
    dát hij binnenkwam. */
@@ -2335,7 +2378,7 @@ function show(name) {
   /* Een punt dat nog onderweg is naar de teller landt hier alsnog. Het
      hangt aan de body en niet aan het spelscherm, dus zonder dit zou het
      over het overdrachtscherm heen blijven vliegen. */
-  if (name !== "play") { stopClock(); releaseWake(); landFly(); }
+  if (name !== "play") { stopClock(); releaseWake(); landFly(); hideCardOff(); }
 
   if (name === "setup") paintSetup();
 
@@ -2944,6 +2987,9 @@ function remaining() { return Math.max(0, deadline - performance.now()); }
 /* ---------- kaarten ---------- */
 function nextCard(how) {
   if (!G.pile.length) { G.card = null; return; }
+  /* Nog vóór de wissel: de kopie moet de kaart tonen die wég is, en één
+     regel verderop draagt #card de volgende al. */
+  if (how === "goed") cardOff($("#glyph").textContent, $("#cardWord").textContent);
   G.card = G.pile.shift();
   $("#glyph").textContent = G.deck[G.card][0];
   $("#cardWord").textContent = G.deck[G.card][1];
@@ -3077,7 +3123,7 @@ function flyGain(from, to) {
     { transform: `translate(${from.x + dx * .5}px, ${from.y + dy * .5 - Math.abs(dx) * .1}px) `
                + `translate(-50%, -50%) scale(1.45)`, offset: .5 },
     { transform: `translate(${to.x}px, ${to.y}px) translate(-50%, -50%) scale(1)` }
-  ], { duration: vlucht(), easing: "cubic-bezier(.3,0,.2,1)", fill: "forwards" });
+  ], { duration: duur("--t-fly", 220), easing: "cubic-bezier(.3,0,.2,1)", fill: "forwards" });
 
   flyAnim.onfinish = landFly;
 }
@@ -3098,11 +3144,87 @@ function landFly() {
   popTurnScore();
 }
 
-/* De duur uit --t-fly, zodat er maar één plek is waar hij staat. */
-function vlucht() {
-  const v = getComputedStyle(document.documentElement).getPropertyValue("--t-fly");
+/* De duur uit een --t-eigenschap, zodat er maar één plek is waar hij staat.
+   De terugval is er voor de browser die getComputedStyle op een eigen
+   eigenschap leeg teruggeeft. */
+function duur(prop, terug) {
+  const v = getComputedStyle(document.documentElement).getPropertyValue(prop);
   const n = parseFloat(v);
-  return n ? (v.indexOf("ms") > -1 ? n : n * 1000) : 220;
+  return n ? (v.indexOf("ms") > -1 ? n : n * 1000) : terug;
+}
+
+/* De geraden kaart die van de stapel aftilt. Zie .cardgone voor het waarom.
+
+   Eén kopie die hergebruikt wordt, net als bij het vliegende punt: twee
+   tikken liggen minstens 280 ms uit elkaar (zie acts()) en dit duurt er
+   180. Komt er toch iets overheen, dan wordt de vorige opgeruimd.
+
+   Web Animations en geen CSS-animatie, om dezelfde reden als flyGain() en
+   holdButton(): bij beperkte beweging ligt er een animation: none
+   !important over alles heen, en dan zou de kopie op haar BEGINbeeld
+   blijven staan -- een kaart die de volgende afdekt tot de beurt om is.
+   Beperkte beweging slaat de kopie daarom expliciet over; de nieuwe kaart
+   staat er dan gewoon meteen. */
+let ghostEl = null, ghostAnim = null;
+function cardOff(glyph, word) {
+  const stil = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const card = $("#card");
+  if (stil || !document.body.animate || !card.clientWidth) return;
+
+  hideCardOff();                            // een vorige kopie eerst weg
+  if (!ghostEl) {
+    ghostEl = document.createElement("div");
+    ghostEl.className = "card cardgone";
+    ghostEl.setAttribute("aria-hidden", "true");
+    const g = document.createElement("span"), w = document.createElement("b");
+    g.className = "glyph";
+    w.className = "cardword";
+    ghostEl.append(g, w);
+    $("#cardslot").appendChild(ghostEl);
+  }
+  /* De maten van teken en woord staan als inline eigenschappen op #card --
+     sizeCard() zet ze na elke meting -- en erven dus niet naar een broer.
+     Zonder dit staat er een emoji van 20vmin (de terugval van .glyph) op
+     een kaart van een heel andere maat. */
+  ["--glyph", "--cardword", "--cardgap"].forEach(p =>
+    ghostEl.style.setProperty(p, card.style.getPropertyValue(p)));
+  ghostEl.firstElementChild.textContent = glyph;
+  ghostEl.lastElementChild.textContent = word;
+  ghostEl.hidden = false;
+
+  /* Omhoog en naar links: daar staat de teller, en daar gaat het punt ook
+     heen. Twee bewegingen dezelfde kant op in plaats van tegen elkaar in.
+
+     In procenten en niet in pixels, want translate rekent tegen de kaart
+     zelf: zo is het gebaar op een telefoon van 280 px even groot als op
+     een tablet van 744, in plaats van daar een tik en hier een zwaai.
+
+     Het wegvallen komt pas op het eind. Vertrekken is de mededeling,
+     verdwijnen is het opruimen erna -- een kaart die halverwege al
+     doorzichtig is, ging niet weg maar loste op.
+
+     Vandaar ook `easing: linear` op de animatie zélf met de vaart in de
+     eerste keyframe. Een timing-functie op de animatie loopt over de hele
+     tijdlijn, en offsets zijn voortgang en geen tijd: met een ease-out
+     eroverheen zit je op .45 voortgang al na een vijfde van de duur, en
+     dan begint het wegvallen na 32 ms in plaats van na 100. */
+  ghostAnim = ghostEl.animate([
+    { transform: "translate(0, 0) scale(1)", opacity: 1,
+      easing: "cubic-bezier(.3, 0, .2, 1)" },
+    { transform: "translate(-9%, -11%) scale(.86)", opacity: 1, offset: .5 },
+    { transform: "translate(-16%, -20%) scale(.74)", opacity: 0 }
+  ], { duration: duur("--t-card", 180), easing: "linear" });
+  ghostAnim.onfinish = hideCardOff;
+}
+
+/* Opruimen: als de animatie klaar is, als er een tweede overheen komt, en
+   als het scherm wisselt terwijl er nog een kopie ligt. De handler wordt
+   eerst losgekoppeld, zodat het afbreken niet nóg een keer hier uitkomt. */
+function hideCardOff() {
+  const a = ghostAnim;
+  ghostAnim = null;
+  if (a) { a.onfinish = null; if (a.playState !== "finished") a.cancel(); }
+  if (ghostEl) ghostEl.hidden = true;
 }
 
 /* Het midden van een element in venstercoördinaten, of null als het er
