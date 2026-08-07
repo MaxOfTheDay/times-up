@@ -83,6 +83,22 @@ de knoppen, niet op het scorebord. Tekst hoort op het instellingenscherm, dat
 voor de volwassene is. Waar tekst elders toch helpt, staat ze náást een beeld
 dat hetzelfde vertelt — nooit in plaats daarvan.
 
+Op de kaart stáát nu zo'n woord, onder de tekening, en hier stond eerst dat
+spelers het nooit te zien kregen. Dat was geen regel maar een misverstand
+over de eis: "hoeft niet te lezen" is niet hetzelfde als "mag niets zien".
+Een emoji is dubbelzinnig — een luiaard leest als beertje, een zeehond als
+dolfijn, een eekhoorn als muis — en de omschrijver moet weten wélk woord
+telt, anders krijg je "ik zei toch beer!" aan tafel. Het woord beslecht dat
+zonder dat iemand iets moet: het zegt exact hetzelfde als het beeld erboven,
+en wie niet leest mist niets. Dezelfde constructie als de ronde-tegel
+(pictogram plus OMSCHRIJVEN) en de voorvertoning op de instellingen.
+
+Wat de eis wél verbiedt is tekst die iets toevoegt dat het beeld niet zegt.
+Een woord dat pas na tien seconden verschijnt als hint zou daaronder vallen,
+en een woord dat de kaart moeilijker of makkelijker maakt ook. Blijf dus bij
+"zoals een vierjarige het zou zeggen", en zet het in `--ink-2` zonder kader:
+het teken is de mededeling, het woord is het bijschrift.
+
 ## Kleur betekent één ding
 
 Rood is Vos en blauw is Uil, en verder niets. Wie een kleur nodig heeft voor
@@ -156,9 +172,54 @@ neutraliseren — maar `--paper` is de pagina, dus dat werd geen rand maar een
 spleet van vier pixels tussen de plaat en haar eigen lagen. Wie een contour
 niet wil, zet `border: 0` en niet een kleur die toevallig wegvalt.
 
+Wat wél mag: **twee lagen op precies hetzelfde pad zijn geen twee ringen maar
+één ring in twee toestanden.** De klokbaan om de kaart heeft er zo een — een
+lege baan in `--paper-2` onder de inkt die afwindt, op dezelfde `d`, dezelfde
+streekdikte, dezelfde plek. Zonder haar zie je alleen hoevéél inkt er nog is
+en niet welk deel op is, en voor een verhouding heb je een referentie nodig.
+Dat "precies" is de hele voorwaarde: wijkt de baan een pixel af, of geeft ze
+zichzelf een contour, dan is het alsnog een rand erbij. `--paper-2` is de
+kleur die deze app al voor tracks en putjes gebruikt, dus het is geen nieuw
+vlak maar een bekend.
+
 Kortom: tel bij elk vlak hoeveel rechthoeken er in het silhouet zitten, niet
 hoeveel je er bedoeld hebt. Een screenshot met de hoeken uitvergroot laat het
-in één blik zien; in de tests is het onzichtbaar.
+in één blik zien; in de tests is het onzichtbaar. Doe die telling met de
+stapel eronder weggehaald (`.cardslot .under` op `display: none`) — anders
+tel je de scheve kaarten van de stapel mee en lijkt elke hoek een trap.
+
+## De klok windt af
+
+Er zijn vier voortgangsmeters in deze app: de rand om de kaart, de
+aftelschijf (`#cdArc`), de overgedragen tijd op het overdrachtscherm
+(`#carryRect`) en de stilstaande wijzerplaat in het pauzepaneel
+(`#pauseRect`). Ze rekenen alle vier met `perim * (1 - p)`, en dat betekent
+dat de inkt aan haar beginpunt vast blijft zitten terwijl het vrije uiteinde
+zich terugtrekt. De band windt dus af, tegen de wijzers in, zoals een
+keukenwekker die je hebt opgedraaid.
+
+Dat is één keer omgedraaid met "een klok loopt nu eenmaal met de wijzers
+mee" als reden, en dat is een regel van buiten deze app: hij zou de kaartrand
+de enige van vier maken die de andere kant op gaat. Aflopende tijd wíndt af.
+
+Wat er wél te kiezen valt is het **ankerpunt**: de plek waar de band vast zit
+en waar dus de laatste inkt overblijft als de tijd bijna om is. Bij de kaart
+lag dat lang linksboven, niet omdat het gekozen was maar omdat een `<rect>`
+zijn pad nu eenmaal linksboven begint — precies in de hoek waar de mascotte
+en de teller al om aandacht vragen. Het is nu een `<path>` die op het midden
+van de bovenrand begint: twaalf uur, pal boven het teken. Wie een meter
+toevoegt, kiest dat punt dus bewust in plaats van het aan de vorm over te
+laten.
+
+En hou de baan in één stuk. Er hebben even inkepingen op de hele seconden in
+gezeten, zodat je de laatste tien tellen kon tellen in plaats van schatten.
+Dat wérkte, maar een band die op het drukste moment van de beurt in stukken
+uiteenvalt trekt de blik weg van de kaart — en de kaart is het enige waar de
+speler dan íets mee moet. Haast hoort in de rand te zitten zonder dat je
+ernaar kijkt. Prijs daarvan: de stap op tien seconden is kleur en niets
+anders (de band verkleurt, en het cijfer ernaast verkleurt mee, wat hetzelfde
+kanaal twee keer is). Wie dat ooit wil repareren, zoekt iets stils — de band
+die dikker wordt, bijvoorbeeld — en niet iets dat beweegt of opbreekt.
 
 ## Vorm zegt wat het is, diepte hoe zwaar
 
@@ -337,6 +398,37 @@ leesrichting.
 Groen en niet de ploegkleur: dit zijn geraden kaarten, en geraden is
 `--good`. De ploeg staat al in de mascotte ernaast.
 
+Bij een goede tik vliegt dat label ook echt van de kaart naar de teller. Er
+was niets dat díe kaart met díe teller verbond: twee gebeurtenissen op twee
+plekken, alleen gelijktijdig — de kaart verdween en ergens ver linksboven
+sprong een getal, en het kind moest zelf bedenken dat het ene het andere
+veroorzaakte. Het vliegende punt draagt daarom exact de huid van zijn
+bestemming (`.gain`, plus `.turn-gain` voor de maat), zodat het als "dit
+wórdt dat" leest en niet als een los effectje. Krimpt onderweg van 1,9 naar
+1: van ver en groot naar dichtbij en klein.
+
+Drie dingen die daarbij vastzitten:
+
+- **De wip hoort bij het aankomen**, niet bij het aantikken. Vandaar dat
+  `popTurnScore()` los staat van `paintTurnScore()`.
+- **Web Animations, geen CSS-animatie**, om dezelfde reden als
+  `holdButton()`: bij `prefers-reduced-motion` ligt er een
+  `animation: none !important` over alles heen, en dan zou de landing — en
+  dus de wip — nooit afgaan. Beperkte beweging wordt daarom expliciet
+  gelezen en de vlucht overgeslagen; het punt komt dan meteen aan.
+- **Een vlucht die nog loopt als het scherm wisselt, landt alsnog**
+  (`landFly()` in `show()`). Het punt hangt aan de `body` en niet aan het
+  spelscherm — dat moet, want `.screen` krijgt bij binnenkomst een transform
+  en een `position: fixed` nakomeling rekent dan tegen dát vlak in plaats van
+  tegen het venster — dus zonder dat bleef het over het overdrachtscherm heen
+  vliegen.
+
+Hetzelfde stijgt hoorbaar mee: `Snd.goed(i)` gaat een halve toon omhoog per
+geraden kaart van deze beurt, tot zeven. Een reeks klinkt dan als klimmen,
+ook voor het kind dat staat uit te beelden en niet naar het scherm kijkt. Na
+zeven stopt het: een kwint hoger is nog vrolijk, een octaaf hoger is schel,
+en een goede ploeg haalt er twaalf.
+
 ## Eén stand, twee schermen
 
 `#hoTally` en de stand in het pauzepaneel zijn hetzelfde onderdeel met
@@ -408,3 +500,16 @@ op het oudste toestel dat in huis meespeelt.
 pull request. De speltest duurt ruim een halve minuut omdat één beurt echt
 moet uitlopen, en klikt bewust trager dan 280 ms omdat een dubbele tik op
 "goed" met opzet als één telt.
+
+Voor de controle die er écht toe doet — renderen en meten — staan
+`stopClock`, `paintClock` en `sizeCard` onder `?debug` in `window.__tijd`.
+Daarmee zet je de klok stil en schilder je hem op een gekozen stand, zodat je
+tien tellen of vijf tellen kunt fotograferen: in een echt potje duren die
+precies één seconde, en dan mis je ze. Twee valkuilen bij zo'n opname:
+
+- **Screenshot de kaart via `clip` en niet via de locator.** Onder vijf
+  tellen klopt `.cardslot` (`.hurry`) en dan wacht playwright zich suf op een
+  element dat "stabiel" moet zijn.
+- **Wacht na het zetten van de stand.** De kleur van de band en het opdoemen
+  van een laag lopen via een overgang van 0,3 s; lees je `getComputedStyle`
+  meteen, dan krijg je de beginwaarde terug en lijkt er niets te gebeuren.
