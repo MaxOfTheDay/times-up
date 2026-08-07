@@ -168,6 +168,7 @@
      twintig seconden en een snelle ploeg scoort om de twee. */
   --t-press: .09s;
   --t-card:  .18s;
+  --t-fly:   .22s;   /* het "+1" van de kaart naar de teller (zie flyGain) */
   --t-cheer: .32s;
   --e-pop: cubic-bezier(.2, 1.5, .4, 1);
   --dur: 1;        /* animatieschaal, 0 bij prefers-reduced-motion */
@@ -1174,6 +1175,31 @@ input[type=range]::-moz-range-thumb {
 @keyframes gainPop { from { transform: scale(.62); } to { transform: scale(1); } }
 .turn-gain.pop { animation: gainPop calc(.24s / max(var(--dur), .001)) var(--e-pop); }
 
+/* Het punt dat van de kaart naar de teller vliegt.
+   Er was niets dat díe kaart met díe teller verbond: twee gebeurtenissen op
+   twee plekken, alleen gelijktijdig. De kaart verdween en ergens ver
+   linksboven sprong een getal -- het kind moest zelf bedenken dat het ene
+   het andere veroorzaakte.
+
+   Dit ding draagt met opzet exact de huid van zijn bestemming (.gain: groen
+   vlak, inkt-contour, plusteken). Daardoor leest het als "dit wórdt dat" en
+   niet als een los effectje -- dezelfde redenering waarmee de fiches en het
+   overdrachtslabel destijds één ding zijn geworden.
+
+   Aan de body en niet aan het scherm: .screen krijgt bij binnenkomst een
+   transform mee (screenIn), en een position:fixed nakomeling rekent dan
+   tegen dát vlak in plaats van tegen het venster.
+
+   Hij draagt .turn-gain er ook op, en dus dezelfde maat als de teller --
+   ook liggend, waar die van 16 naar 20 px gaat. Zonder dat zou hij op zijn
+   bestemming net even anders zijn dan wat er al staat, en dat is precies
+   het verband dat hij komt leggen. Het krimpen onderweg zit in de schaal
+   die flyGain() animeert, niet in de lettergrootte. */
+.fly-gain {
+  position: fixed; left: 0; top: 0; z-index: 40;
+  pointer-events: none; will-change: transform;
+}
+
 /* ---- de kaart ----
    De kaart is nu zo groot als de plek waar ze in ligt, en het teken is
    zo groot als de kaart. Dat was het niet: de kaart hield op bij 460 px
@@ -1206,6 +1232,10 @@ input[type=range]::-moz-range-thumb {
   position: relative;
   width: 100%; height: 100%;
   display: grid; place-items: center;
+  /* Twee rijen (teken, woord) als één blok in het midden. Zonder dit staat
+     align-content op stretch: dan krijgt elke rij de halve kaart, en zakt
+     het woord tot tegen de onderrand -- waar de klokbaan ligt. */
+  align-content: center; row-gap: var(--cardgap, 0px);
   overflow: hidden;                       /* het toneel houdt zijn eigen randen */
   background: var(--paper);
   border: var(--line) solid var(--ink);
@@ -1220,13 +1250,32 @@ input[type=range]::-moz-range-thumb {
    moment dat de haast het hoogst is. Daarom klopt de kaart zelf mee. */
 @keyframes hurry { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02) rotate(-.4deg); } }
 .cardslot.hurry { animation: hurry calc(.5s / max(var(--dur), .001)) ease-in-out infinite; }
-.timerframe rect {
-  stroke-width: 12; stroke-linecap: butt;
-  transition: stroke calc(.3s * var(--dur)) linear;
-}
-.card[data-time="ok"]   .timerframe rect { stroke: var(--time-3); }
-.card[data-time="warn"] .timerframe rect { stroke: var(--time-2); }
-.card[data-time="crit"] .timerframe rect { stroke: var(--time-1); }
+/* Twee lagen op precies hetzelfde pad, en dat "precies" is de hele truc: op
+   dezelfde geometrie zijn dit geen twee ringen maar één ring in twee
+   toestanden. Wijkt er één een pixel af of krijgt er één een eigen contour,
+   dan heeft de kaart er een rand bij -- en dat is de fout die hierboven al
+   drie keer beschreven staat.
+
+   - .track  de lege baan. Zonder haar zie je alleen hoevéél inkt er nog is
+             en niet welk deel op is: voor een verhouding heb je een
+             referentie nodig, en die moest tot nu toe uit je geheugen komen.
+             --paper-2 is precies de kleur die deze app al voor tracks en
+             putjes gebruikt, dus dit is geen nieuw vlak maar een bekend.
+   - .band   de inkt die afwindt. Zie sizeCard() voor het pad en
+             paintClock() voor de richting.
+
+   Hier heeft even een derde laag gestaan: inkepingen op de hele seconden,
+   zodat je de laatste tien tellen kon tellen in plaats van schatten. Dat
+   werkte ook -- maar een band die op het drukste moment van de beurt in
+   stukken uiteenvalt trekt de blik weg van de kaart, en de kaart is het
+   enige waar de speler dan íets mee moet. Haast hoort in de rand te zitten
+   zonder dat je ernaar kijkt. */
+.timerframe path { fill: none; stroke-width: 12; stroke-linecap: butt; }
+.timerframe .track { stroke: var(--paper-2); }
+.timerframe .band  { transition: stroke calc(.3s * var(--dur)) linear; }
+.card[data-time="ok"]   .timerframe .band { stroke: var(--time-3); }
+.card[data-time="warn"] .timerframe .band { stroke: var(--time-2); }
+.card[data-time="crit"] .timerframe .band { stroke: var(--time-1); }
 
 /* Geraden en gepast zagen er precies hetzelfde uit, terwijl ze het
    tegenovergestelde betekenen. Nu wordt een geraden kaart van de stapel
@@ -1253,6 +1302,35 @@ input[type=range]::-moz-range-thumb {
 /* Eén kaart, één teken, zo groot als de kaart toelaat. --glyph wordt
    door sizeCard() van de gemeten kaart afgeleid. */
 .glyph { font-size: var(--glyph, 20vmin); line-height: 1; }
+
+/* Het woord onder het teken. Het stond al in DECKS en werd alleen op het
+   instellingenscherm getoond; nu staat het ook op de kaart zelf.
+
+   Waarom dat mag, en zelfs moet: een emoji is dubbelzinnig. Een luiaard
+   leest als beertje, een zeehond als dolfijn, een eekhoorn als muis -- en
+   de omschrijver moet weten wélk woord telt, anders krijg je "ik zei toch
+   beer!" aan tafel. Het woord beslecht dat zonder dat iemand het hoeft te
+   lezen: het staat náást een beeld dat exact hetzelfde vertelt, precies
+   zoals .roundchip (pictogram plus OMSCHRIJVEN) en .pv op het
+   instellingenscherm dat al doen. Wie niet leest, mist niets. Wie wel
+   leest, hoeft niet te raden wat de tekenaar bedoelde.
+
+   Kale inkt op papier, geen plaatje en geen kader: de kaart heeft haar
+   contour, haar slagschaduw en de klokbaan al, en een vierde rechthoek om
+   een woordje is de fout die hierboven al drie keer beschreven staat.
+   --ink-2 en niet --ink: het teken is de mededeling, dit is het bijschrift.
+   Maat en snit komen van .pv small -- dat is de bijschriftstem van dit spel.
+
+   Een enkele regel, en te lange woorden krimpen mee in plaats van af te
+   breken: een tweede regel zou de hoogte veranderen die sizeCard() net
+   voor het teken heeft afgetrokken. */
+.cardword {
+  font-size: var(--cardword, 13px); line-height: 1.25;
+  font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--ink-2);
+  max-width: 76%; text-align: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
 /* De stapel: echte kaarten ónder de bovenste, elk een graadje gedraaid.
    Als box-shadow, keurig uitgelijnd, werd het een streepjespatroon in plaats
@@ -1879,8 +1957,14 @@ input[type=range]::-moz-range-thumb {
         <i class="under u1" aria-hidden="true"></i>
         <div class="card" id="card" data-time="ok">
           <span class="glyph" id="glyph">🐘</span>
+          <!-- Het woord bij de tekening: náást een beeld dat hetzelfde
+               vertelt, nooit in plaats daarvan. Zie .cardword. -->
+          <b class="cardword" id="cardWord">olifant</b>
+          <!-- Lege baan en inkt op precies hetzelfde pad; sizeCard() tekent
+               het, paintClock() laat het afwinden. -->
           <svg class="timerframe" id="timerFrame" aria-hidden="true">
-            <rect id="timerRect" fill="none"/>
+            <path class="track" id="timerTrack"/>
+            <path class="band"  id="timerBand"/>
           </svg>
         </div>
       </div>
@@ -2010,8 +2094,11 @@ input[type=range]::-moz-range-thumb {
        teken ook op een oude tablet echt tekent. Een kaart die
        als ▯ verschijnt is onspeelbaar, en een reservebeeld is
        er bewust niet.
-   Vorm: [emoji, woord]. Het woord is alleen voor het instellingen-
-   scherm en de tests -- spelers zien het nooit.
+   Vorm: [emoji, woord]. Het woord staat op de kaart onder de tekening
+   (zie .cardword) en op de voorvertoning van het instellingenscherm.
+   Het is nooit nodig: het zegt hetzelfde als het beeld erboven, en
+   beslecht alleen welk woord telt bij een emoji die twee kanten op
+   leest. Kies het dus zoals een vierjarige het zou zeggen.
    ============================================================== */
 const DECKS = {
   klein: [
@@ -2122,7 +2209,16 @@ const Snd = (() => {
     unlock: ac,
     set enabled(v) { on = !!v; },
     get enabled() { return on; },
-    goed()  { tone(660, .09, "square", .2, 0); tone(990, .13, "square", .2, .08); },
+    /* Hetzelfde motiefje van twee noten, maar per geraden kaart een halve
+       toon hoger: een reeks van vijf klinkt dan als klimmen. Dat is een
+       hoorbaar kanaal voor de teller, en het werkt ook voor het kind dat
+       niet naar het scherm kijkt omdat het staat uit te beelden.
+       Na zeven kaarten stopt het stijgen -- een kwint hoger is nog vrolijk,
+       een octaaf hoger is schel, en een goede ploeg haalt er twaalf. */
+    goed(i) {
+      const s = Math.pow(2, Math.min(i || 0, 7) / 12);
+      tone(660 * s, .09, "square", .2, 0); tone(990 * s, .13, "square", .2, .08);
+    },
     pas()   { tone(200, .13, "sine", .22, 0, 120); },
     tick(f) { tone(f || 1400, .022, "square", .08, 0); },
     timeUp(){ tone(420, .55, "sawtooth", .22, 0, 90); tone(210, .6, "square", .12, .05, 60); },
@@ -2236,7 +2332,10 @@ let started = false;
 function show(name) {
   current = name;
   $$(".screen").forEach(s => s.classList.toggle("on", s.id === "s-" + name));
-  if (name !== "play") { stopClock(); releaseWake(); }
+  /* Een punt dat nog onderweg is naar de teller landt hier alsnog. Het
+     hangt aan de body en niet aan het spelscherm, dus zonder dit zou het
+     over het overdrachtscherm heen blijven vliegen. */
+  if (name !== "play") { stopClock(); releaseWake(); landFly(); }
 
   if (name === "setup") paintSetup();
 
@@ -2601,7 +2700,7 @@ let framePerim = 0;
 
 function sizeCard() {
   const wrap = $(".cardwrap"), slot = $("#cardslot");
-  const card = $("#card"), svg = $("#timerFrame"), rect = $("#timerRect");
+  const card = $("#card"), svg = $("#timerFrame");
 
   /* De kaart is het grootste vierkant dat in de vrije ruimte past. Ze hield
      hiervoor op bij 460 px, waardoor er op een tablet bijna 300 px papier
@@ -2624,20 +2723,46 @@ function sizeCard() {
 
   const inset = 6;                        // halve streekdikte
   svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
-  rect.setAttribute("x", inset); rect.setAttribute("y", inset);
-  rect.setAttribute("width", Math.max(1, w - inset * 2));
-  rect.setAttribute("height", Math.max(1, h - inset * 2));
-  framePerim = 2 * ((w - inset * 2) + (h - inset * 2));
-  rect.style.strokeDasharray = framePerim;
+
+  /* Een <path> en geen <rect>, om precies één reden: een rect begint zijn
+     pad linksboven, en dat is niet gekozen maar wat een rect nu eenmaal
+     doet. Het vaste uiteinde van de band -- de plek waar de laatste inkt
+     zit als de tijd bijna om is -- lag daarmee in de hoek bij de mascotte
+     en de teller, waar al twee dingen om aandacht vragen.
+
+     Dit pad begint op het midden van de bovenrand: twaalf uur. Daar hangt
+     de band vast en daar sterft de laatste inkt, pal boven het teken, waar
+     de blik toch al is. De richting waarin hij afwindt verandert daar niet
+     door -- zie paintClock(). */
+  const x0 = inset, y0 = inset, x1 = w - inset, y1 = h - inset;
+  const mx = Math.round((x0 + x1) / 2);
+  const d = `M${mx} ${y0} H${x1} V${y1} H${x0} V${y0} Z`;
+  $("#timerTrack").setAttribute("d", d);
+  $("#timerBand").setAttribute("d", d);
+  framePerim = 2 * ((x1 - x0) + (y1 - y0));
+  $("#timerBand").style.strokeDasharray = framePerim;
 
   /* De letter is niet zo groot als de kaart: een emoji tekent breder dan
      zijn eigen lettergrootte. Over alle 228 kaarten heen gemeten is de
      breedste inkt 1,248 keer de lettergrootte (de hond) -- 1,28 hieronder
      is dat met een marge. En er moet binnen de klokrand papier overblijven,
      vandaar de 32 px: vier voor de contour, twaalf voor de klok, aan beide
-     kanten. Zo raakt geen enkele kaart ooit de rand die de tijd draagt. */
-  const inner = Math.min(w, h) - 2 * (4 + 12);
-  card.style.setProperty("--glyph", Math.max(24, Math.floor(inner / 1.28)) + "px");
+     kanten. Zo raakt geen enkele kaart ooit de rand die de tijd draagt.
+
+     Van die ruimte gaat nu eerst het woord af (zie .cardword), en daarna
+     nog een marge tussen de twee. Die marge is er niet voor de sier: de
+     emoji tekent ook in de hoogte 1,28 keer zijn lettergrootte, dus steekt
+     hij aan de onderkant 0,11 keer buiten zijn eigen regel -- zonder die
+     ruimte zou de inkt over het woord heen zakken terwijl de opmaak zegt
+     dat er niets aan de hand is. */
+  const side = Math.min(w, h);
+  const inner = side - 2 * (4 + 12);
+  const wordPx = Math.max(11, Math.min(20, Math.round(side * .045)));
+  const wordH = Math.round(wordPx * 1.25);
+  const ink = Math.max(24, inner - wordH - Math.round(inner * .04));
+  card.style.setProperty("--cardword", wordPx + "px");
+  card.style.setProperty("--cardgap", Math.round(ink * .11 + side * .015) + "px");
+  card.style.setProperty("--glyph", Math.max(24, Math.floor(ink / 1.28)) + "px");
 }
 
 /* Eén waarnemer in plaats van een resize-luisteraar: die miste de gevallen
@@ -2670,7 +2795,19 @@ function timerColour(ms) {
 function paintClock(ms, totalMs) {
   lastMs = ms; lastTotal = totalMs;
   const p = Math.max(0, Math.min(1, ms / totalMs));
-  $("#timerRect").style.strokeDashoffset = framePerim * (1 - p);
+  /* De inkt hangt vast op twaalf uur en het vrije uiteinde trekt zich
+     terug: de band windt af, zoals een keukenwekker die je hebt opgedraaid.
+     Dat is dus tegen de wijzers in, en dat is met opzet -- de aftelschijf
+     (#cdArc), de overgedragen tijd (#carryRect) en de stilstaande
+     wijzerplaat op het pauzepaneel (#pauseRect) doen alle drie precies
+     hetzelfde met precies deze formule.
+     Hier heeft even het omgekeerde gestaan, met "een klok loopt nu eenmaal
+     met de wijzers mee" als reden. Dat is een regel van buiten deze app,
+     en hij zou de kaartrand de enige van vier meters maken die de andere
+     kant op gaat. Aflopende tijd wíndt af; wat er te kiezen viel was niet
+     de richting maar het ankerpunt, en dat staat nu op twaalf uur (zie het
+     pad in sizeCard()) in plaats van in de hoek waar een <rect> begint. */
+  $("#timerBand").style.strokeDashoffset = framePerim * (1 - p);
   /* De kleur van de rand staat in CSS, niet hier: één blok waar alle drie
      de standen naast elkaar staan, in plaats van een ternary in JS. */
   $("#card").dataset.time = timerStage(ms);
@@ -2687,7 +2824,7 @@ function paintClock(ms, totalMs) {
   /* Eén klop per hele seconde, en alleen in de laatste vijf: daarbuiten
      zou een cijfer dat elke seconde beweegt de hele beurt lang trekken aan
      een blik die op de kaart hoort. De reflow ertussen is nodig, anders
-     begint dezelfde animatie niet opnieuw (zie ook paintTurnScore). */
+     begint dezelfde animatie niet opnieuw (zie ook popTurnScore). */
   if (secs !== lastDigit) {
     lastDigit = secs;
     dig.classList.remove("pulse");
@@ -2809,6 +2946,7 @@ function nextCard(how) {
   if (!G.pile.length) { G.card = null; return; }
   G.card = G.pile.shift();
   $("#glyph").textContent = G.deck[G.card][0];
+  $("#cardWord").textContent = G.deck[G.card][1];
   if (how) {
     const c = $("#card");
     c.classList.remove("in", "tuck");
@@ -2883,21 +3021,114 @@ function paintTurnScore() {
   box.hidden = n === 0;
   if (n === 0) return;
   box.textContent = "+" + n;
-  // Opnieuw laten opwippen bij elke kaart. Een getal dat van 3 naar 4 gaat
-  // is een kleine verandering op een druk scherm; de wip is het tweede
-  // kanaal dat zegt dat er zojuist iets bij kwam. De reflow ertussen is
-  // nodig, anders begint dezelfde animatie niet opnieuw.
+}
+
+/* De wip op de teller. Die zat vast aan paintTurnScore(), en gaat nu apart:
+   hij hoort bij het móment van aankomen, niet bij het bijwerken van het
+   getal. Een getal dat van 3 naar 4 gaat is een kleine verandering op een
+   druk scherm; de wip is het tweede kanaal dat zegt dat er zojuist iets bij
+   kwam. De reflow ertussen is nodig, anders begint dezelfde animatie niet
+   opnieuw. */
+function popTurnScore() {
+  const box = $("#turnScore");
+  if (box.hidden) return;
   box.classList.remove("pop");
   void box.offsetWidth;
   box.classList.add("pop");
 }
 
+/* Het punt van de kaart naar de teller. Zie .fly-gain voor het waarom.
+
+   Eén element dat hergebruikt wordt: twee tikken liggen minstens 280 ms uit
+   elkaar (zie acts()) en de vlucht duurt er 220, dus ze halen elkaar niet
+   in. Komt er toch een tweede overheen, dan wordt de eerste afgebroken en
+   landt hij alsnog -- de teller mag nooit een punt missen omdat er een
+   animatie in de weg zat.
+
+   Web Animations en geen CSS-animatie, om dezelfde reden als holdButton():
+   bij beperkte beweging staat er een `animation: none !important` over
+   alles heen, en dan zou de landing -- en dus de wip op de teller -- nooit
+   afgaan. Hier wordt beperkte beweging expliciet gelezen en de vlucht
+   overgeslagen; het punt komt dan meteen aan. */
+let flyEl = null, flyAnim = null;
+function flyGain(from, to) {
+  const stil = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (stil || !from || !to || !document.body.animate) { popTurnScore(); return; }
+
+  landFly();                                   // een vorige vlucht komt eerst aan
+  if (!flyEl) {
+    flyEl = document.createElement("b");
+    flyEl.className = "gain turn-gain fly-gain";
+    flyEl.setAttribute("aria-hidden", "true");
+    flyEl.textContent = "+1";
+    document.body.appendChild(flyEl);
+  }
+  flyEl.hidden = false;
+
+  /* Groot bij de kaart, en op het formaat van de teller bij aankomst: van
+     ver en groot naar dichtbij en klein is wat "dit wordt dat" leesbaar
+     maakt. De boog is bescheiden -- een tiende van de afstand omhoog --
+     want dit gebeurt tot vijftien keer per beurt, en dan is een wijde
+     zwaai geen versiering meer maar drukte. */
+  const dx = to.x - from.x, dy = to.y - from.y;
+  flyEl.style.transform = `translate(${from.x}px, ${from.y}px) translate(-50%, -50%) scale(1.9)`;
+  flyAnim = flyEl.animate([
+    { transform: `translate(${from.x}px, ${from.y}px) translate(-50%, -50%) scale(1.9)` },
+    { transform: `translate(${from.x + dx * .5}px, ${from.y + dy * .5 - Math.abs(dx) * .1}px) `
+               + `translate(-50%, -50%) scale(1.45)`, offset: .5 },
+    { transform: `translate(${to.x}px, ${to.y}px) translate(-50%, -50%) scale(1)` }
+  ], { duration: vlucht(), easing: "cubic-bezier(.3,0,.2,1)", fill: "forwards" });
+
+  flyAnim.onfinish = landFly;
+}
+
+/* Laten aankomen: het punt verdwijnt en de teller wipt. Wordt aangeroepen
+   als de vlucht klaar is, als er een tweede overheen komt, en als het
+   scherm wisselt terwijl er nog een onderweg is -- dat laatste omdat een
+   vast gepositioneerd punt anders over het overdrachtscherm heen zou
+   blijven vliegen. De handler wordt eerst losgekoppeld, zodat het afbreken
+   niet nóg een keer hier uitkomt. */
+function landFly() {
+  const a = flyAnim;
+  flyAnim = null;
+  if (!a) return;
+  a.onfinish = null;
+  if (a.playState !== "finished") a.cancel();
+  if (flyEl) flyEl.hidden = true;
+  popTurnScore();
+}
+
+/* De duur uit --t-fly, zodat er maar één plek is waar hij staat. */
+function vlucht() {
+  const v = getComputedStyle(document.documentElement).getPropertyValue("--t-fly");
+  const n = parseFloat(v);
+  return n ? (v.indexOf("ms") > -1 ? n : n * 1000) : 220;
+}
+
+/* Het midden van een element in venstercoördinaten, of null als het er
+   niet staat. position:fixed rekent tegen het venster, dus dit is meteen
+   de plek waar het vliegende punt heen moet. */
+function midden(sel) {
+  const el = $(sel);
+  if (!el || el.hidden) return null;
+  const r = el.getBoundingClientRect();
+  if (!r.width && !r.height) return null;
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+}
+
 $("#btnGoed").addEventListener("click", () => {
   if (!acts()) return;
-  Snd.goed();
+  // De toon stijgt per kaart van deze beurt; nog vóór het ophogen, zodat de
+  // eerste kaart de grondtoon krijgt.
+  Snd.goed(G.gained);
   G.scores[G.team][G.round - 1]++;
   G.gained++;
+  /* Eerst het getal bijwerken, dan pas meten: het label verschijnt bij de
+     eerste kaart en wordt breder bij de tiende, en het punt moet landen
+     waar het straks écht staat. De wip komt bij aankomst (zie flyGain). */
+  const from = midden("#card");
   paintTurnScore();
+  flyGain(from, midden("#turnScore"));
   if (!G.pile.length) { endRound(); return; }
   nextCard("goed");
   syncControls();
@@ -3279,13 +3510,19 @@ show("title");
 started = true;
 
 // Alleen voor de tests: inkijk in de lopende stand (?debug in de URL).
+// stopClock en paintClock staan erbij om de klok op een gekozen stand te
+// kunnen bevriezen en dan te renderen. Geen enkele misser in deze app is
+// ooit door een test gevonden -- ze komen allemaal uit kijken en meten, en
+// de standen die je moet zien (tien tellen, vijf tellen, bijna om) duren in
+// een echt potje precies één seconde.
 if (location.search.indexOf("debug") !== -1) {
   window.__tijd = {
     get G() { return G; },
     set G(v) { G = v; },
     get settings() { return settings; },
     get screen() { return current; },
-    DECKS, TIER_ORDER, poolFor, shuffle, drawDeck, total
+    DECKS, TIER_ORDER, poolFor, shuffle, drawDeck, total,
+    stopClock, paintClock, sizeCard
   };
 }
 </script>
