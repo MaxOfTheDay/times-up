@@ -981,7 +981,7 @@ input[type=range]::-moz-range-thumb {
   box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
 }
 .carry .frame { position: absolute; inset: 0; width: 100%; height: 100%; }
-.carry .frame rect { stroke-width: 12; }
+.carry .frame path { stroke-width: 12; }
 .carry b {
   font-weight: 900; font-size: min(3.4vh, 26px); font-variant-numeric: tabular-nums;
   position: relative; color: var(--ink);
@@ -1946,7 +1946,11 @@ input[type=range]::-moz-range-thumb {
     <!-- Het getal erbij voor wie leest, in inkt in plaats van in marigold. -->
     <div class="carry" id="hoCarry" hidden>
       <svg class="frame" viewBox="0 0 80 80" aria-hidden="true">
-        <rect id="carryRect" x="6" y="6" width="68" height="68" fill="none"/>
+        <!-- Een <path> vanaf het midden van de bovenrand en geen <rect>:
+             zie #timerBand. Een rect begint zijn pad linksboven, en dan
+             ligt het ankerpunt in de hoek in plaats van op twaalf uur.
+             De omtrek blijft 2 * (68 + 68). -->
+        <path id="carryRect" d="M40 6 H74 V74 H6 V6 Z" fill="none"/>
       </svg>
       <b id="carrySecs">15</b>
     </div>
@@ -2059,7 +2063,9 @@ input[type=range]::-moz-range-thumb {
       <div class="bars" aria-hidden="true"><i></i><i></i></div>
       <div class="dial">
         <svg viewBox="0 0 80 80" aria-hidden="true">
-          <rect id="pauseRect" x="5" y="5" width="70" height="70" fill="none" stroke-width="10"/>
+          <!-- Ook hier een <path> vanaf twaalf uur, om dezelfde reden als
+               bij #timerBand en #carryRect. Omtrek blijft 2 * (70 + 70). -->
+          <path id="pauseRect" d="M40 5 H75 V75 H5 V5 Z" fill="none" stroke-width="10"/>
         </svg>
         <b id="pauseSecs">30</b>
       </div>
@@ -3048,12 +3054,11 @@ function paintTurnScore() {
   box.textContent = "+" + n;
 }
 
-/* De wip op de teller. Die zat vast aan paintTurnScore(), en gaat nu apart:
-   hij hoort bij het móment van aankomen, niet bij het bijwerken van het
-   getal. Een getal dat van 3 naar 4 gaat is een kleine verandering op een
-   druk scherm; de wip is het tweede kanaal dat zegt dat er zojuist iets bij
-   kwam. De reflow ertussen is nodig, anders begint dezelfde animatie niet
-   opnieuw. */
+/* De wip op de teller: het tweede kanaal, want een getal dat van 3 naar 4
+   gaat is een kleine verandering op een druk scherm. Blijft een eigen
+   functie naast paintTurnScore(), ook nu ze allebei bij de landing horen --
+   startTurn() schildert de teller leeg en daar hoort geen wip bij. De
+   reflow ertussen is nodig, anders begint dezelfde animatie niet opnieuw. */
 function popTurnScore() {
   const box = $("#turnScore");
   if (box.hidden) return;
@@ -3078,7 +3083,13 @@ function popTurnScore() {
 let flyEl = null, flyAnim = null;
 function flyGain(from, to) {
   const stil = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (stil || !from || !to || !document.body.animate) { popTurnScore(); return; }
+  /* Geen vlucht, dus ook niets om op te wachten: het getal komt hier
+     meteen te staan. Zonder deze regel zou de teller bij beperkte beweging
+     op de vorige stand blijven hangen -- landFly() is dan degene die
+     schildert, en die gaat hier nooit af. */
+  if (stil || !from || !to || !document.body.animate) {
+    paintTurnScore(); popTurnScore(); return;
+  }
 
   landFly();                                   // een vorige vlucht komt eerst aan
   if (!flyEl) {
@@ -3107,12 +3118,20 @@ function flyGain(from, to) {
   flyAnim.onfinish = landFly;
 }
 
-/* Laten aankomen: het punt verdwijnt en de teller wipt. Wordt aangeroepen
-   als de vlucht klaar is, als er een tweede overheen komt, en als het
-   scherm wisselt terwijl er nog een onderweg is -- dat laatste omdat een
-   vast gepositioneerd punt anders over het overdrachtscherm heen zou
-   blijven vliegen. De handler wordt eerst losgekoppeld, zodat het afbreken
-   niet nóg een keer hier uitkomt. */
+/* Laten aankomen: het punt verdwijnt, het getal gaat omhoog en de teller
+   wipt. Wordt aangeroepen als de vlucht klaar is, als er een tweede
+   overheen komt, en als het scherm wisselt terwijl er nog een onderweg is
+   -- dat laatste omdat een vast gepositioneerd punt anders over het
+   overdrachtscherm heen zou blijven vliegen. De handler wordt eerst
+   losgekoppeld, zodat het afbreken niet nóg een keer hier uitkomt.
+
+   Het schilderen hoort hier en niet bij de tik, om dezelfde reden als de
+   wip: het punt komt het getal bréngen. Stond het er al voor het punt
+   vertrok, dan bezorgde de vlucht iets dat er allang lag -- en op de
+   eerste kaart van een beurt stonden er zo twee +1'en tegelijk in beeld,
+   de vliegende en de aangekomene. Beide gebeuren nu bij aankomst; de
+   volgorde is schilderen dan wippen, want popTurnScore() slaat een
+   verborgen label over. */
 function landFly() {
   const a = flyAnim;
   flyAnim = null;
@@ -3120,6 +3139,7 @@ function landFly() {
   a.onfinish = null;
   if (a.playState !== "finished") a.cancel();
   if (flyEl) flyEl.hidden = true;
+  paintTurnScore();
   popTurnScore();
 }
 
@@ -3128,6 +3148,21 @@ function vlucht() {
   const v = getComputedStyle(document.documentElement).getPropertyValue("--t-fly");
   const n = parseFloat(v);
   return n ? (v.indexOf("ms") > -1 ? n : n * 1000) : 220;
+}
+
+/* Waar de teller straks staat, zonder hem nu al te tonen. Het punt moet
+   landen op de stand ná deze kaart -- het label verschijnt bij de eerste
+   en wordt breder bij de tiende -- maar het getal hoort pas te springen
+   als het punt er is. Dus even vooruit schilderen, meten, en terugzetten;
+   tussen die twee regels komt de browser niet aan tekenen toe. */
+function meetTurnScore() {
+  const box = $("#turnScore");
+  const tekst = box.textContent, verborgen = box.hidden;
+  paintTurnScore();
+  const plek = midden("#turnScore");
+  box.textContent = tekst;
+  box.hidden = verborgen;
+  return plek;
 }
 
 /* Het midden van een element in venstercoördinaten, of null als het er
@@ -3148,12 +3183,13 @@ $("#btnGoed").addEventListener("click", () => {
   Snd.goed(G.gained);
   G.scores[G.team][G.round - 1]++;
   G.gained++;
-  /* Eerst het getal bijwerken, dan pas meten: het label verschijnt bij de
+  /* Het getal zelf gaat pas omhoog als het punt aankomt (zie landFly).
+     Meten moet wél op de nieuwe stand -- het label verschijnt bij de
      eerste kaart en wordt breder bij de tiende, en het punt moet landen
-     waar het straks écht staat. De wip komt bij aankomst (zie flyGain). */
+     waar het straks écht staat -- dus dat gebeurt op een label dat even
+     vooruit geschilderd en meteen weer teruggezet wordt. */
   const from = midden("#card");
-  paintTurnScore();
-  flyGain(from, midden("#turnScore"));
+  flyGain(from, meetTurnScore());
   if (!G.pile.length) { endRound(); return; }
   nextCard("goed");
   syncControls();
