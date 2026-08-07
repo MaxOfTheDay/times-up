@@ -177,8 +177,8 @@
 }
 
 /* Animaties helemaal uit, niet alleen traag: de duur delen door --dur
-   zou ze bevriezen op hun BEGINbeeld -- de kolommen op het winnaars-
-   scherm staan daar op scaleY(0) en zouden dus leeg blijven.
+   zou ze bevriezen op hun BEGINbeeld -- de kroon op het winnaarsscherm
+   staat daar op opacity 0 en zou dus nooit verschijnen.
 
    Let op wat hier NIET onder valt. De vulling van een knop die je moet
    vasthouden en de ring om de startknop zijn geen versiering maar een
@@ -1437,8 +1437,8 @@ input[type=range]::-moz-range-thumb {
 }
 .tally .head { position: relative; align-self: end; }
 .tally .mascot-sm { width: min(74px, 9vh); display: block; }
-/* Een kroon boven wie voorstaat. Zonder die aanwijzing moet een kind twee
-   kolommen tegen elkaar afmeten voor het weet hoe het ervoor staat. */
+/* Een kroon boven wie voorstaat, en op dit scherm het enige dat dat zegt
+   zonder cijfers -- twee getallen vergelijken kan een vierjarige nog niet. */
 .tally .crown {
   position: absolute; top: -26px; left: 50%; transform: translateX(-50%) rotate(-8deg);
   width: 42px;
@@ -3212,8 +3212,8 @@ function timeUp() {
 /* De stand op het overdrachtscherm, met wat er net bij kwam als groen label.
    Geen fiche per punt hier: zo'n stapel groeit de hele avond door en duwde
    tegen ronde 3 de startknop van het scherm af. Het winnaarsscherm hield ze
-   nog even -- daar is ruimte -- maar ook daar liepen ze uit de hand; dat is
-   nu één kolom per ploeg. Nergens dus meer één bolletje per punt. */
+   nog even -- daar was ruimte -- maar ook daar liepen ze uit de hand.
+   Nergens in de app ligt dus nog één bolletje per punt. */
 function paintHoTally(freshA, freshB) {
   [[0, freshA, "#hoScoreA", "#hoFreshA", "#hoSideA", "#hoCrownA"],
    [1, freshB, "#hoScoreB", "#hoFreshB", "#hoSideB", "#hoCrownB"]]

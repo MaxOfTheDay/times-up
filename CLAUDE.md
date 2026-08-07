@@ -443,9 +443,10 @@ daar te laten groeien, maar dan zeggen kroon, mascotte én cijfergrootte
 alle drie hetzelfde, terwijl twee cijfers van verschillend formaat juist
 lastiger naast elkaar te leggen zijn.
 
-Let op de klassenaam: `.bar` bestond al -- dat is de streep door de
-pas-knop als de stapel op is. Een tweede `.bar` erbij zette meteen
-`display: flex` op dat SVG-pad. Grep even voor je een korte naam pakt.
+Let op de klassenaam als je hier ooit tóch iets bijtekent: `.bar` bestond
+al -- dat is de streep door de pas-knop als de stapel op is. Een tweede
+`.bar` erbij zette meteen `display: flex` en een rand op dat SVG-pad. Grep
+even voor je een korte naam pakt.
 
 ## Eén label voor "wat er bij komt", op beide schermen
 
