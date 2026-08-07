@@ -61,7 +61,9 @@ De instellingen (het knopje rechtsboven) regelen de
 moeilijkheid, het aantal kaarten, de tijd per beurt en het geluid. Je ziet
 daar ook het deck van vanavond; tik een kaart aan om ze te vervangen. Het is
 het enige scherm met tekst, en meteen de korte uitleg voor wie Time's Up niet
-kent.
+kent. Die uitleg staat open tot je één keer een spel gestart hebt en klapt
+daarna dicht tot één regel — terug te vinden, maar niet meer het eerste wat je
+elke avond ziet.
 
 De moeilijkheid werkt als een bovengrens, niet als een band: elke stand
 speelt met zijn eigen kaarten én die van de stand eronder. Aan een tafel met

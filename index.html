@@ -659,6 +659,30 @@ button.btn-ghost, button.btn-icon, button.btn-danger, button.chip, button.pv {
    Eigen inspringing in plaats van de standaard van veertig pixels: dit blok
    staat al ingesprongen achter een gouden regel, en dubbel inspringen laat
    de nummers los van de tekst erboven zweven. */
+/* Dichtgeklapt is dit één regel achter dezelfde gouden streep; de rest van
+   het scherm schuift dan 200 px omhoog. Geen driehoekje van de browser: dat
+   is op iedere machine een ander tekentje. In plaats daarvan een plus die
+   een min wordt -- hetzelfde inkt-op-papier als de rest, en het teken zegt
+   wat er gebeurt in plaats van waar je bent.
+   list-style op none is nodig voor Safari, dat de markering anders via
+   ::-webkit-details-marker terugzet. */
+.rules > summary {
+  list-style: none; cursor: pointer;
+  display: flex; align-items: center; gap: var(--s-2);
+  font-weight: 900; color: var(--ink); text-transform: uppercase;
+  letter-spacing: .06em; font-size: 12px;
+  padding: 2px 0;
+}
+.rules > summary::-webkit-details-marker { display: none; }
+.rules > summary::before {
+  content: "+";
+  font-weight: 900; font-size: 17px; line-height: 1;
+  width: 1.1em; text-align: center;
+}
+.rules[open] > summary::before { content: "−"; }
+/* Lucht tussen de kop en de tekst pas als hij openstaat: dichtgeklapt hoort
+   die regel strak tegen de streep te liggen. */
+.rules[open] > summary { margin-bottom: var(--s-2); }
 .rules ol {
   margin: 0 0 var(--s-2); padding-left: 1.4em;
 }
@@ -1595,7 +1619,13 @@ input[type=range]::-moz-range-thumb {
   <div class="setup-scroll">
     <h1>Tijd is Om</h1>
 
-    <div class="rules">
+    <!-- De regels staan open tot je één keer een spel gestart hebt, en
+         daarna dichtgeklapt. Ze zijn 243 van de 1286 px die dit scherm hoog
+         is, en dat is elke avond opnieuw het eerste wat je ziet terwijl je
+         ze in augustus één keer gelezen hebt. Wie ze nog nooit zag -- een
+         oppas, een opa -- krijgt ze wél ongevraagd. -->
+    <details class="rules" id="rules">
+      <summary>Hoe speel je dit?</summary>
       <p>Twee ploegen spelen 3 rondes met dezelfde kaarten:</p>
       <ol>
         <li><b>Omschrijven</b> — gebruik zoveel woorden als je wilt.</li>
@@ -1608,7 +1638,7 @@ input[type=range]::-moz-range-thumb {
       <p>Is de stapel leeg, dan stopt de ronde meteen — ook midden in een
         beurt. <b>De resterende tijd gaat mee</b> naar de volgende ronde en
         dezelfde ploeg begint.</p>
-    </div>
+    </details>
 
     <!-- Hier stond een kopje "Ploegen" boven twee vakjes met een mascotte
          erin. Ze zagen eruit als knoppen -- zelfde papier, zelfde slagschaduw
@@ -2055,7 +2085,10 @@ let settings = {
   tier: "klein",
   size: 24,
   secs: 30,
-  sound: true
+  sound: true,
+  /* De regeluitleg staat open tot je één keer een spel gestart hebt. Daarna
+     klapt ze dicht en blijft dat, tenzij iemand haar zelf weer openzet. */
+  rulesOpen: true
 };
 let G = null;          // lopend spel, of null
 let draft = [];        // getrokken kaarten op het instellingenscherm
@@ -2168,6 +2201,7 @@ function paintSetup() {
     c.setAttribute("aria-checked", String(Number(c.dataset.size) === settings.size)));
   $("#secs").value = settings.secs;
   $("#secsOut").textContent = settings.secs + "s";
+  $("#rules").open = !!settings.rulesOpen;
   paintPreview();
 }
 
@@ -2291,6 +2325,15 @@ $("#btnGear").addEventListener("click", () => { Snd.unlock(); openSetup(); });
 
 $("#btnGo").addEventListener("click", () => { Snd.unlock(); newGame(); });
 
+/* Zelf open- of dichtklappen wordt onthouden, zodat het scherm niet elke
+   keer terugveert naar wat de app wil. */
+$("#rules").addEventListener("toggle", () => {
+  const open = $("#rules").open;
+  if (open === !!settings.rulesOpen) return;
+  settings.rulesOpen = open;
+  saveSettings();
+});
+
 /* Te vroeg losgelaten: schudden, én de rand even in waarschuwingskleur.
    Dat tweede is er voor wie beperkte beweging aan heeft: daar valt de
    schud weg, en dan bleef er niets over. */
@@ -2311,6 +2354,11 @@ function openSetup() {
    6. SPELVERLOOP
    ============================================================== */
 function newGame() {
+  /* Wie op Beginnen drukt heeft de regels gehad. Ze klappen daarna dicht en
+     staan er de volgende avond als één regel -- terug te vinden, maar niet
+     meer het eerste wat je ziet. Eén keer, niet elke keer: daarna beslist de
+     volwassene zelf, en dat wordt onthouden. */
+  if (settings.rulesOpen) { settings.rulesOpen = false; saveSettings(); }
   if (!draft.length) redraw();
   G = {
     deck: draft.slice(),
