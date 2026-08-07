@@ -211,6 +211,20 @@ van de bovenrand begint: twaalf uur, pal boven het teken. Wie een meter
 toevoegt, kiest dat punt dus bewust in plaats van het aan de vorm over te
 laten.
 
+Die regel stond hier wel opgeschreven maar was nooit doorgetrokken, en dat
+is precies de fout die de stand in twee kopieën ook al eens maakte: alleen
+de kaartband kreeg zijn `<path>`. `#carryRect` en `#pauseRect` bleven een
+`<rect>` en hielden dus hun anker in de hoek linksboven, terwijl de
+kaartband en de aftelschijf (die zijn twaalf uur van `rotate(-90deg)` op
+`.cd-disc .ring` krijgt) op twaalf uur stonden. Twee tegen twee, op
+schermen die elkaar direct opvolgen. Alle vier staan nu op twaalf uur. Bij
+een vaste `viewBox` kan dat gewoon in de opmaak — `M40 6 H74 V74 H6 V6 Z`
+voor de 68×68 van de overdracht, `M40 5 H75 V75 H5 V5 Z` voor de 70×70 van
+het paneel — en de omtrek die de JS al hardcodeert blijft kloppen, want een
+gesloten pad om dezelfde rechthoek is even lang. Controleer dat door te
+tékenen en niet door te rekenen: zet alle vier op 60% en kijk waar het gat
+valt.
+
 En hou de baan in één stuk. Er hebben even inkepingen op de hele seconden in
 gezeten, zodat je de laatste tien tellen kon tellen in plaats van schatten.
 Dat wérkte, maar een band die op het drukste moment van de beurt in stukken
@@ -435,8 +449,17 @@ wórdt dat" leest en niet als een los effectje. Krimpt onderweg van 1,9 naar
 
 Drie dingen die daarbij vastzitten:
 
-- **De wip hoort bij het aankomen**, niet bij het aantikken. Vandaar dat
-  `popTurnScore()` los staat van `paintTurnScore()`.
+- **Het getal én de wip horen bij het aankomen**, niet bij het aantikken:
+  het punt komt het getal brengen. Hier stond alleen de wip, en dat was de
+  halve maatregel — `popTurnScore()` verhuisde naar de landing, maar
+  `paintTurnScore()` bleef bij de tik staan omdat de meting hem daar nodig
+  had. Gevolg: de teller sprong 230 ms voordat het punt aankwam, en op de
+  eerste kaart van een beurt stonden er twee `+1`'en tegelijk in beeld — de
+  vliegende en de aangekomene, terwijl de vlucht juist moet zeggen dat het
+  er één is. Beide gebeuren nu in `landFly()`. Wat de meting nodig had is
+  niet vervallen maar apart gezet: `meetTurnScore()` schildert vooruit,
+  meet, en zet meteen terug. De volgorde bij aankomst is schilderen dan
+  wippen, want `popTurnScore()` slaat een verborgen label over.
 - **Web Animations, geen CSS-animatie**, om dezelfde reden als
   `holdButton()`: bij `prefers-reduced-motion` ligt er een
   `animation: none !important` over alles heen, en dan zou de landing — en
