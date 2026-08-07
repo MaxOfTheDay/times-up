@@ -449,44 +449,6 @@ Drie dingen die daarbij vastzitten:
   tegen het venster — dus zonder dat bleef het over het overdrachtscherm heen
   vliegen.
 
-De kaart zet de eerste centimeter van diezelfde reis. Bij "goed" tilt een
-kopie van de geraden kaart (`.cardgone`, zie `cardOff()`) van de stapel af
-richting de teller, en komt de volgende eronder vandaan. Daarmee gaan **beide
-knoppen over de kaart die wég is** — de enige vraag die de speler op dat moment
-heeft. Passen deed dat al (`tuck`, de kaart zakt onder de stapel waar ze ook
-echt heen gaat); "goed" ging over de kaart die eráán kwam, schuin van
-linksboven op de stapel gedeeld. Dat kwam uit de hoek waar de teller staat, dus
-het vliegende punt en de nieuwe kaart kruisten elkaar in hetzelfde gangetje,
-tegen elkaar in. De nieuwe kaart komt nu omhoog uit de stapel, precies waar
-`.u1` ligt: de tegenrichting van `tuck`.
-
-Vier dingen die bij die kopie vastzitten:
-
-- **Een kopie en niet de kaart zelf.** `#card` is één element dat alleen zijn
-  inhoud wisselt, dus wie hém laat vertrekken laat de vólgende kaart
-  vertrekken. `cardOff()` wordt daarom bovenin `nextCard()` aangeroepen, vóór
-  de wissel.
-- **Geen klokbaan op de kopie.** De klok hoort bij de beurt en niet bij de
-  kaart — ze loopt gewoon door — en twee ringen van verschillende maat over
-  elkaar zijn twee klokken. Doordat de kopie krimpt in plaats van groeit blijft
-  de ring van de kaart eronder heel. Wat er wél twee keer ligt is een
-  kaartsilhouet, en dat is hier geen derde rand maar twee kaarten: dezelfde
-  figuur als de scheve `.under`-lagen, alleen boven de bovenste.
-- **Krimpen, niet wegvliegen.** Dit is het grootste vlak van het scherm, tot
-  vijftien keer per beurt. Zou het de hele reis naar de teller maken, dan dekt
-  het bij een goede reeks vrijwel onafgebroken de nieuwe kaart af — juist het
-  enige waar de omschrijver op dat moment íets mee moet. Het gebaar staat in
-  procenten en niet in pixels, zodat het op een telefoon van 280 px even groot
-  is als op een tablet van 744.
-- **Het wegvallen komt pas op het eind.** Vertrekken is de mededeling,
-  verdwijnen het opruimen erna. Let op de valkuil die dat de eerste keer brak:
-  een `easing` op de animatie zelf loopt over de héle tijdlijn, en
-  keyframe-`offset`s zijn voortgang en geen tijd. Met een ease-out eroverheen
-  zit je op `.45` voortgang al na een vijfde van de duur, en dan begint het
-  wegvallen na 32 ms in plaats van na 100 — de kaart loste dan halverwege op in
-  plaats van weg te gaan. Vandaar `easing: "linear"` op de animatie, met de
-  vaart in de eerste keyframe.
-
 Hetzelfde stijgt hoorbaar mee: `Snd.goed(i)` gaat een halve toon omhoog per
 geraden kaart van deze beurt, tot zeven. Een reeks klinkt dan als klimmen,
 ook voor het kind dat staat uit te beelden en niet naar het scherm kijkt. Na
