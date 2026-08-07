@@ -135,6 +135,34 @@
 
   --tap: 48px;     /* niets dat aangeraakt wordt is kleiner dan dit */
 
+  /* ---- veilige randen ----
+     `env(safe-area-inset-*)` zegt hoeveel het tóéstel opeist: statusbalk,
+     gebarenbalk, een notch. Het zegt niets over de ronding van het scherm.
+
+     Twee dingen volgen daaruit, allebei op een Pixel misgegaan.
+
+     1. Altijd `calc(inset + eigen marge)`, nooit `max(inset, marge)`. Met
+        max() verdwijnt je eigen marge zodra het toestel iets opeist.
+     2. De ronding moet je zelf aanhouden, en in een hoek langs twee assen
+        tegelijk. Vandaar één maat voor allebei: **elk blijvend geplaatst
+        rechthoekig vlak houdt --corner van beide schermranden.** Wat
+        voorbijscrolt hoeft dat niet -- dat komt vanzelf weer vrij.
+
+     De maat komt niet uit een gok maar uit een opname van het toestel: als
+     PWA in app-modus meldt die Pixel gewoon **nul** onderaan -- de oude
+     regel `max(12px, env(...))` leverde exact 12 px op -- en de knop stond
+     dus twaalf pixels van de fysieke onderrand, ruim binnen de bocht.
+     Onderaan valt er dus niets van het toestel te verwachten; die marge
+     moet volledig uit onszelf komen.
+
+     Hoever 32 px reikt, gemeten en niet geschat: een hoek op (32, 32) ligt
+     met zijn slagschaduw van 5 px feitelijk op (27, 27), en die blijft
+     binnen een scherm met een straal tot 93 px. Dat is ruim twee keer de
+     ronding die een telefoon werkelijk heeft -- uit de opname volgt dat
+     dit toestel er minstens 48 px heeft (een hoek op 16,12 werd afgesneden,
+     en dat kan pas vanaf 48). */
+  --corner: 32px;
+
   /* ---- beweging ----
      Niets in de speellus duurt langer dan --t-card: een beurt is
      twintig seconden en een snelle ploeg scoort om de twee. */
@@ -210,8 +238,8 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .screen {
   position: fixed; inset: 0; z-index: 1;
   display: none; flex-direction: column;
-  padding: max(var(--s-4), env(safe-area-inset-top)) var(--s-4)
-           max(var(--s-4), env(safe-area-inset-bottom));
+  padding: calc(env(safe-area-inset-top, 0px) + var(--s-4)) var(--s-4)
+           calc(env(safe-area-inset-bottom, 0px) + var(--s-4));
 }
 /* Elke schermwissel was een harde knip: display van none naar flex, en het
    volgende scherm stond er in één frame. Alles binnen een scherm bewoog al
@@ -439,7 +467,12 @@ button.btn-ghost, button.btn-icon, button.btn-danger, button.chip, button.pv {
    de toelichting bij de titel voor waarom het geen eigen ronde knop meer
    is. */
 .btn-icon {
-  position: absolute; top: max(var(--s-4), env(safe-area-inset-top)); right: var(--s-4);
+  /* Een rechthoek in een hoek, dus --corner. Ook nodig zonder statusbalk:
+     deze app draait als PWA in `standalone`, en dan kan die balk weg zijn
+     terwijl de ronding blijft. */
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + var(--corner));
+  right: calc(env(safe-area-inset-right, 0px) + var(--corner));
   z-index: 3;
   width: var(--tap); height: var(--tap);
   display: grid; place-items: center;
@@ -621,7 +654,7 @@ button.btn-ghost, button.btn-icon, button.btn-danger, button.chip, button.pv {
 .setup-scroll {
   flex: 1 1 auto; min-height: 0; overflow-y: auto;
   display: flex; flex-direction: column; gap: var(--s-5);
-  padding: max(var(--s-4), env(safe-area-inset-top)) var(--s-4) var(--s-4);
+  padding: calc(env(safe-area-inset-top, 0px) + var(--s-4)) var(--s-4) var(--s-4);
 }
 /* De hoofdknop stond onderaan een scherm dat je eerst helemaal moest
    afrollen -- op een telefoon was er bij het openen niets van te zien.
@@ -629,7 +662,12 @@ button.btn-ghost, button.btn-icon, button.btn-danger, button.chip, button.pv {
 .setup-foot {
   flex: 0 0 auto;
   display: flex; flex-direction: column; gap: var(--s-2);
-  padding: var(--s-3) var(--s-4) max(var(--s-3), env(safe-area-inset-bottom));
+  /* Deze twee knoppen lopen van rand tot rand en blijven staan, dus hun
+     onderhoeken liggen het diepst in de bocht. Beide assen op --corner --
+     smaller aan de zijkant helpt niet: in een hoek telt de afstand tot
+     allebei de randen mee. Ze staan daardoor iets verder naar binnen dan de
+     chips erboven; die scrollen, deze twee niet. */
+  padding: var(--s-3) var(--corner) calc(env(safe-area-inset-bottom, 0px) + var(--corner));
   background: var(--paper);
   border-top: var(--line-2) solid var(--rule);
 }
@@ -947,9 +985,15 @@ input[type=range]::-moz-range-thumb {
    verbond alleen díe kleur ze nog, over de volle schermbreedte heen --
    terwijl nabijheid dat werk hoort te doen. Zo staat de ploegkleur boven-
    dien nog maar op één plek in de balk. */
+/* Deze balk raakt allebei de bovenhoeken. Op de andere schermen hangt de
+   hulpknop absoluut en zet die zijn eigen --corner; hier staat hij in de rij
+   (zie `#s-play .btn-icon`) en krijgt hij de zijmarge van .screen mee. Deze
+   balk telt het verschil met --corner erbij op, links zo goed als rechts --
+   de mascotte staat even dicht op de andere hoek. */
 .play-top {
   display: grid; grid-template-columns: 1fr auto 1fr;
   align-items: start; gap: var(--s-3);
+  padding: calc(var(--corner) - var(--s-4)) calc(var(--corner) - var(--s-4)) 0;
 }
 /* Mascotte met het label ernaast, in die volgorde -- precies zoals de stand
    op het overdrachtscherm, waar het "+N" ook rechts van de mascotte staat.
@@ -1247,10 +1291,12 @@ input[type=range]::-moz-range-thumb {
    uit. */
 .btn-skip {
   position: absolute; z-index: 2;
-  left: max(18px, env(safe-area-inset-left));
-  /* Twaalf en niet vier: de slagschaduw valt naar rechtsonder en liep
-     anders het scherm af. */
-  bottom: max(12px, env(safe-area-inset-bottom));
+  /* Een vierkant van 76 px in de hoek linksonder: het meest blootgestelde
+     vlak van de app, want een rechthoekige hoek loopt door tot in de punt
+     waar een cirkel al terugwijkt. Daarom is "goed" ernaast nooit
+     opgevallen. Beide assen op --corner, bovenop wat het toestel opeist. */
+  left: calc(env(safe-area-inset-left, 0px) + var(--corner));
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--corner));
 }
 
 /* ============================================================
