@@ -79,7 +79,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
 
     // Wat de opdracht is moet op het overdrachtscherm kloppen: dat is waar
     // je kijkt als je het toestel aangereikt krijgt.
-    const woord = ['Uitleggen', 'Eén woord', 'Uitbeelden'][round - 1];
+    const woord = ['Omschrijven', 'Eén woord', 'Uitbeelden'][round - 1];
     const icoon = ['#r-praten', '#r-eenwoord', '#r-mimen'][round - 1];
     ok(await page.textContent('#hoRoundWord') === woord,
        `ronde ${round}: verkeerd woord op het overdrachtscherm`);

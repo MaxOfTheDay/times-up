@@ -39,9 +39,9 @@ welke knop het deed.
 
 Twee ploegen, drie rondes over hetzelfde deck:
 
-1. **Uitleggen** — omschrijven met woorden, behalve het woord zelf.
-2. **Eén woord** — één woord, meer niet.
-3. **Uitbeelden** — alleen mimen, geen geluid.
+1. **Omschrijven** — gebruik zoveel woorden als je wilt, behalve het woord zelf.
+2. **Eén woord** — geef één woord als hint.
+3. **Uitbeelden** — niet praten, alleen uitbeelden.
 
 Dat je dezelfde kaarten drie keer ziet is de bedoeling: tegen ronde drie kent
 iedereen ze half uit het hoofd, en beginnen de jongsten te winnen.
@@ -61,7 +61,9 @@ De instellingen (het knopje rechtsboven) regelen de
 moeilijkheid, het aantal kaarten, de tijd per beurt en het geluid. Je ziet
 daar ook het deck van vanavond; tik een kaart aan om ze te vervangen. Het is
 het enige scherm met tekst, en meteen de korte uitleg voor wie Time's Up niet
-kent.
+kent. Die uitleg staat open tot je één keer een spel gestart hebt en klapt
+daarna dicht tot één regel — terug te vinden, maar niet meer het eerste wat je
+elke avond ziet.
 
 De moeilijkheid werkt als een bovengrens, niet als een band: elke stand
 speelt met zijn eigen kaarten én die van de stand eronder. Aan een tafel met

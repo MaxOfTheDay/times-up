@@ -653,6 +653,41 @@ button.btn-ghost, button.btn-icon, button.btn-danger, button.chip, button.pv {
 }
 .rules p { margin: 0 0 var(--s-2); }
 .rules b { color: var(--ink); }
+/* De drie rondes als genummerde lijst: ze hébben een volgorde, en die stond
+   eerst in een lopende zin ("eerst ..., dan ..., dan ..."). Een lijst laat
+   zien wat de zin moest vertellen.
+   Eigen inspringing in plaats van de standaard van veertig pixels: dit blok
+   staat al ingesprongen achter een gouden regel, en dubbel inspringen laat
+   de nummers los van de tekst erboven zweven. */
+/* Dichtgeklapt is dit één regel achter dezelfde gouden streep; de rest van
+   het scherm schuift dan 200 px omhoog. Geen driehoekje van de browser: dat
+   is op iedere machine een ander tekentje. In plaats daarvan een plus die
+   een min wordt -- hetzelfde inkt-op-papier als de rest, en het teken zegt
+   wat er gebeurt in plaats van waar je bent.
+   list-style op none is nodig voor Safari, dat de markering anders via
+   ::-webkit-details-marker terugzet. */
+.rules > summary {
+  list-style: none; cursor: pointer;
+  display: flex; align-items: center; gap: var(--s-2);
+  font-weight: 900; color: var(--ink); text-transform: uppercase;
+  letter-spacing: .06em; font-size: 12px;
+  padding: 2px 0;
+}
+.rules > summary::-webkit-details-marker { display: none; }
+.rules > summary::before {
+  content: "+";
+  font-weight: 900; font-size: 17px; line-height: 1;
+  width: 1.1em; text-align: center;
+}
+.rules[open] > summary::before { content: "−"; }
+/* Lucht tussen de kop en de tekst pas als hij openstaat: dichtgeklapt hoort
+   die regel strak tegen de streep te liggen. */
+.rules[open] > summary { margin-bottom: var(--s-2); }
+.rules ol {
+  margin: 0 0 var(--s-2); padding-left: 1.4em;
+}
+.rules li { margin: 0 0 2px; }
+.rules li::marker { font-weight: 900; color: var(--ink); }
 
 .chips { display: flex; flex-wrap: wrap; gap: 10px; }
 .chip {
@@ -1584,17 +1619,26 @@ input[type=range]::-moz-range-thumb {
   <div class="setup-scroll">
     <h1>Tijd is Om</h1>
 
-    <div class="rules">
-      <p><b>Twee ploegen, drie rondes over dezelfde kaarten.</b>
-        Eerst omschrijven met woorden, dan met één enkel woord, dan alleen
-        uitbeelden. Dat je de kaarten drie keer ziet is de bedoeling: tegen de
-        derde ronde kent iedereen ze half, en beginnen de jongsten te winnen.</p>
-      <p>Geraden is een punt en meteen de volgende kaart. Passen mag zonder
-        straf. Is de stapel leeg, dan stopt de ronde — ook midden in een beurt —
-        en gaat de resterende tijd mee naar de volgende ronde, voor dezelfde
-        ploeg. Verder hoeft niemand iets te lezen: de kinderen zien alleen
-        beelden.</p>
-    </div>
+    <!-- De regels staan open tot je één keer een spel gestart hebt, en
+         daarna dichtgeklapt. Ze zijn 243 van de 1286 px die dit scherm hoog
+         is, en dat is elke avond opnieuw het eerste wat je ziet terwijl je
+         ze in augustus één keer gelezen hebt. Wie ze nog nooit zag -- een
+         oppas, een opa -- krijgt ze wél ongevraagd. -->
+    <details class="rules" id="rules">
+      <summary>Hoe speel je dit?</summary>
+      <p>Twee ploegen spelen 3 rondes met dezelfde kaarten:</p>
+      <ol>
+        <li><b>Omschrijven</b> — gebruik zoveel woorden als je wilt.</li>
+        <li><b>Eén woord</b> — geef één woord als hint.</li>
+        <li><b>Uitbeelden</b> — niet praten, alleen uitbeelden.</li>
+      </ol>
+      <p>Tijdens je beurt probeer je zoveel mogelijk kaarten te laten raden.
+        Goed geraden = <b>1 punt</b> en meteen door naar de volgende kaart.
+        Passen mag.</p>
+      <p>Is de stapel leeg, dan stopt de ronde meteen — ook midden in een
+        beurt. <b>De resterende tijd gaat mee</b> naar de volgende ronde en
+        dezelfde ploeg begint.</p>
+    </details>
 
     <!-- Hier stond een kopje "Ploegen" boven twee vakjes met een mascotte
          erin. Ze zagen eruit als knoppen -- zelfde papier, zelfde slagschaduw
@@ -1708,7 +1752,7 @@ input[type=range]::-moz-range-thumb {
        vervangen, zodat de ronde niet twee keer in beeld staat. -->
   <div class="roundcard surface" id="hoRoundCard">
     <div class="ico" id="hoRoundIco"><svg viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
-    <b id="hoRoundWord">Uitleggen</b>
+    <b id="hoRoundWord">Omschrijven</b>
     <p id="hoRoundHow"></p>
   </div>
 
@@ -1753,7 +1797,7 @@ input[type=range]::-moz-range-thumb {
     </div>
     <div class="roundchip" id="plRoundChip">
       <div class="ico"><svg id="plRound" viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
-      <b id="plRoundWord">Uitleggen</b>
+      <b id="plRoundWord">Omschrijven</b>
     </div>
     <div class="turnbox">
       <div class="secs-left" id="clockDigits">30</div>
@@ -2041,7 +2085,10 @@ let settings = {
   tier: "klein",
   size: 24,
   secs: 30,
-  sound: true
+  sound: true,
+  /* De regeluitleg staat open tot je één keer een spel gestart hebt. Daarna
+     klapt ze dicht en blijft dat, tenzij iemand haar zelf weer openzet. */
+  rulesOpen: true
 };
 let G = null;          // lopend spel, of null
 let draft = [];        // getrokken kaarten op het instellingenscherm
@@ -2154,6 +2201,7 @@ function paintSetup() {
     c.setAttribute("aria-checked", String(Number(c.dataset.size) === settings.size)));
   $("#secs").value = settings.secs;
   $("#secsOut").textContent = settings.secs + "s";
+  $("#rules").open = !!settings.rulesOpen;
   paintPreview();
 }
 
@@ -2277,6 +2325,15 @@ $("#btnGear").addEventListener("click", () => { Snd.unlock(); openSetup(); });
 
 $("#btnGo").addEventListener("click", () => { Snd.unlock(); newGame(); });
 
+/* Zelf open- of dichtklappen wordt onthouden, zodat het scherm niet elke
+   keer terugveert naar wat de app wil. */
+$("#rules").addEventListener("toggle", () => {
+  const open = $("#rules").open;
+  if (open === !!settings.rulesOpen) return;
+  settings.rulesOpen = open;
+  saveSettings();
+});
+
 /* Te vroeg losgelaten: schudden, én de rand even in waarschuwingskleur.
    Dat tweede is er voor wie beperkte beweging aan heeft: daar valt de
    schud weg, en dan bleef er niets over. */
@@ -2297,6 +2354,11 @@ function openSetup() {
    6. SPELVERLOOP
    ============================================================== */
 function newGame() {
+  /* Wie op Beginnen drukt heeft de regels gehad. Ze klappen daarna dicht en
+     staan er de volgende avond als één regel -- terug te vinden, maar niet
+     meer het eerste wat je ziet. Eén keer, niet elke keer: daarna beslist de
+     volwassene zelf, en dat wordt onthouden. */
+  if (settings.rulesOpen) { settings.rulesOpen = false; saveSettings(); }
   if (!draft.length) redraw();
   G = {
     deck: draft.slice(),
@@ -2321,7 +2383,7 @@ function total(t) { return G.scores[t].reduce((a, b) => a + b, 0); }
    letterlijk hetzelfde beeld, zodat de herinnering en de aankondiging
    niet twee dingen zijn die je apart moet leren. */
 const RI_ART = [
-  /* 1 — uitleggen: drie woorden die stuiteren */
+  /* 1 — omschrijven: drie woorden die stuiteren */
   `<svg viewBox="0 0 200 200">
      <circle cx="100" cy="100" r="92" fill="#F2B705" stroke="#14110F" stroke-width="8"/>
      <g transform="translate(100 104) scale(1.45) translate(-50 -50)">
@@ -2366,11 +2428,22 @@ const RI_ART = [
    Het pictogram draagt de ronde (drie stippen, één stip, doorgestreept),
    het woord staat eronder en de routekaart zegt de hoeveelste het is; alle
    drie de schijven staan nu in goud, de kleur van "dit gebeurt er nu". */
-const ROUND_WORD = ["Uitleggen", "Eén woord", "Uitbeelden"];
+/* Ronde 1 heette hier "Uitleggen" en op het instellingenscherm
+   "Omschrijven": dezelfde ronde, twee namen, en de volwassene moest ze zelf
+   op elkaar leggen. Nu overal Omschrijven -- ook in de regeluitleg en het
+   README. Het woord is elf tekens in plaats van negen; nagemeten op 320,
+   390 en liggend: de chip groeit van 60 naar 76 px en botst nergens.
+
+   De regels hieronder zeggen hetzelfde als de uitleg op het
+   instellingenscherm, in dezelfde bewoording. Ronde 1 houdt er één ding bij
+   dat daar niet staat: dat het woord zelf niet mag. Dat is geen stijl maar
+   een spelregel, en hier is de plek waar iemand hem nodig heeft -- vlak
+   voor zijn beurt. */
+const ROUND_WORD = ["Omschrijven", "Eén woord", "Uitbeelden"];
 const ROUND_HOW = [
-  "Zeg er alles over wat je wil — behalve het woord zelf.",
-  "Eén enkel woord. Meer mag niet.",
-  "Alleen uitbeelden. Geen geluid."
+  "Gebruik zoveel woorden als je wilt — behalve het woord zelf.",
+  "Geef één woord als hint. Meer mag niet.",
+  "Niet praten, alleen uitbeelden."
 ];
 
 const ROUND_ICON = ["#r-praten", "#r-eenwoord", "#r-mimen"];
