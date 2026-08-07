@@ -653,6 +653,17 @@ button.btn-ghost, button.btn-icon, button.btn-danger, button.chip, button.pv {
 }
 .rules p { margin: 0 0 var(--s-2); }
 .rules b { color: var(--ink); }
+/* De drie rondes als genummerde lijst: ze hébben een volgorde, en die stond
+   eerst in een lopende zin ("eerst ..., dan ..., dan ..."). Een lijst laat
+   zien wat de zin moest vertellen.
+   Eigen inspringing in plaats van de standaard van veertig pixels: dit blok
+   staat al ingesprongen achter een gouden regel, en dubbel inspringen laat
+   de nummers los van de tekst erboven zweven. */
+.rules ol {
+  margin: 0 0 var(--s-2); padding-left: 1.4em;
+}
+.rules li { margin: 0 0 2px; }
+.rules li::marker { font-weight: 900; color: var(--ink); }
 
 .chips { display: flex; flex-wrap: wrap; gap: 10px; }
 .chip {
@@ -1585,15 +1596,18 @@ input[type=range]::-moz-range-thumb {
     <h1>Tijd is Om</h1>
 
     <div class="rules">
-      <p><b>Twee ploegen, drie rondes over dezelfde kaarten.</b>
-        Eerst omschrijven met woorden, dan met één enkel woord, dan alleen
-        uitbeelden. Dat je de kaarten drie keer ziet is de bedoeling: tegen de
-        derde ronde kent iedereen ze half, en beginnen de jongsten te winnen.</p>
-      <p>Geraden is een punt en meteen de volgende kaart. Passen mag zonder
-        straf. Is de stapel leeg, dan stopt de ronde — ook midden in een beurt —
-        en gaat de resterende tijd mee naar de volgende ronde, voor dezelfde
-        ploeg. Verder hoeft niemand iets te lezen: de kinderen zien alleen
-        beelden.</p>
+      <p>Twee ploegen spelen 3 rondes met dezelfde kaarten:</p>
+      <ol>
+        <li><b>Omschrijven</b> — gebruik zoveel woorden als je wilt.</li>
+        <li><b>Eén woord</b> — geef één woord als hint.</li>
+        <li><b>Uitbeelden</b> — niet praten, alleen uitbeelden.</li>
+      </ol>
+      <p>Tijdens je beurt probeer je zoveel mogelijk kaarten te laten raden.
+        Goed geraden = 1 punt en meteen door naar de volgende kaart. Passen
+        mag.</p>
+      <p>Is de stapel leeg, dan stopt de ronde meteen — ook midden in een
+        beurt. De resterende tijd gaat mee naar de volgende ronde en dezelfde
+        ploeg begint.</p>
     </div>
 
     <!-- Hier stond een kopje "Ploegen" boven twee vakjes met een mascotte
