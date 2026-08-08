@@ -315,14 +315,17 @@ button.btn-icon, button.btn-danger, button.chip, button.pv {
   transition: transform calc(var(--t-press) * var(--dur)) ease,
               box-shadow calc(var(--t-press) * var(--dur)) ease;
 }
-.btn-go:active, .btn-good:active, .btn-skip:active, .btn-wide:active {
+.btn-go:active, .btn-good:active, .btn-wide:active {
   transform: translate(var(--lift-2), var(--lift-2));
   box-shadow: 0 0 0 var(--ink);
 }
 /* Stoppen zakt mee in: het is nu een knop met reliëf zoals alle andere, en
    dat het ingedrukt blijft zolang je hem vasthoudt is precies de
-   terugkoppeling die deze knop nodig heeft. */
-.btn-icon:active, .btn-danger:active, .chip:active, .pv:active {
+   terugkoppeling die deze knop nodig heeft.
+   "Pas" hoort hierbij en niet bij --lift-2: het is de mindere keuze naast
+   "goed", niet de handeling waar dit scherm voor bestaat, en droeg tot nu
+   toe per ongeluk hetzelfde gewicht. */
+.btn-icon:active, .btn-danger:active, .chip:active, .pv:active, .btn-skip:active {
   transform: translate(var(--lift-1), var(--lift-1));
   box-shadow: 0 0 0 var(--ink);
 }
@@ -430,20 +433,26 @@ button.btn-icon, button.btn-danger, button.chip, button.pv {
   animation: cdOut calc(.2s / max(var(--dur), .001)) ease-in forwards;
 }
 
-/* ---- geraden ---- */
+/* ---- geraden ----
+   Nooit op alleen min(): op een lage staande stand kromp deze knop anders
+   onder de 76 px van "pas" -- en dan weegt de mindere keuze zwaarder dan
+   de handeling waar dit scherm voor bestaat. Zelfde regel als de
+   pauzepaneel-knop. */
 .btn-good {
-  width: min(40vw, 20vh, 164px); aspect-ratio: 1;
+  width: max(120px, min(40vw, 20vh, 164px)); aspect-ratio: 1;
   border-radius: 50%; background: var(--good);
   border: var(--line) solid var(--ink); box-shadow: var(--lift-2) var(--lift-2) 0 var(--ink);
   display: grid; place-items: center;
 }
 .btn-good svg { width: 52%; }
 
-/* ---- passen ---- */
+/* ---- passen ----
+   --lift-1 en niet --lift-2: dit is de mindere keuze naast "goed", niet de
+   handeling waar het scherm voor bestaat. Ze wogen tot nu toe even zwaar. */
 .btn-skip {
   width: 76px; height: 76px;
   background: var(--paper-2);
-  border: var(--line) solid var(--ink); box-shadow: var(--lift-2) var(--lift-2) 0 var(--ink);
+  border: var(--line) solid var(--ink); box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
   display: grid; place-items: center;
 }
 .btn-skip svg { width: 44px; }
@@ -1172,11 +1181,16 @@ input[type=range]::-moz-range-thumb {
    te ver uitzet duwt de rest opzij. Daarom ook transform en geen font-size:
    een transform hertekent geen layout. */
 @keyframes digitPulse {
-  0%   { transform: scale(1); }
-  35%  { transform: scale(1.14); }
-  100% { transform: scale(1); }
+  0%   { transform: scale(var(--restscale, 1)); }
+  35%  { transform: scale(calc(var(--restscale, 1) * 1.14)); }
+  100% { transform: scale(var(--restscale, 1)); }
 }
 .secs-left.pulse { animation: digitPulse calc(.24s / max(var(--dur), .001)) var(--e-pop); }
+/* Onder vijf seconden blijft het cijfer ook tússen de klop-tellen in
+   groter staan, in plaats van elke seconde terug te vallen naar zijn
+   gewone maat. --restscale is de basis waarop digitPulse voortbouwt, dus
+   de klop en de blijvende groei botsen niet: ze delen hetzelfde kanaal. */
+.secs-left.crit { --restscale: 1.25; transform: scale(var(--restscale)); }
 
 /* ---- wat er deze beurt bij komt ----
    Eén label, twee schermen. Dit waren fiches in de ploegkleur: een rijtje
@@ -1302,10 +1316,19 @@ input[type=range]::-moz-range-thumb {
    zonder dat je ernaar kijkt. */
 .timerframe path { fill: none; stroke-width: 12; stroke-linecap: butt; }
 .timerframe .track { stroke: var(--paper-2); }
-.timerframe .band  { transition: stroke calc(.3s * var(--dur)) linear; }
+.timerframe .band  {
+  transition: stroke calc(.3s * var(--dur)) linear,
+              stroke-width calc(.3s * var(--dur)) linear;
+}
 .card[data-time="ok"]   .timerframe .band { stroke: var(--time-3); }
 .card[data-time="warn"] .timerframe .band { stroke: var(--time-2); }
-.card[data-time="crit"] .timerframe .band { stroke: var(--time-1); }
+/* Onder vijf seconden wordt de band ook dikker, niet alleen donkerder: een
+   tweede, stilstaand kanaal naast de kleur -- stil, want de vorige poging
+   met inkepingen op de hele seconden brak de baan in stukken en trok de
+   blik van de kaart af (zie hierboven). --time-1 grenst al aan --ink, dus
+   waar de band nu een fractie buiten haar eigen baan groeit, verdikt ze
+   de rand van de kaart in plaats van er een tweede kleur naast te zetten. */
+.card[data-time="crit"] .timerframe .band { stroke: var(--time-1); stroke-width: 17; }
 
 /* Geraden en gepast zagen er precies hetzelfde uit, terwijl ze het
    tegenovergestelde betekenen. Nu wordt een geraden kaart van de stapel
@@ -1386,7 +1409,12 @@ input[type=range]::-moz-range-thumb {
    knop, zodat de hoofdhandeling daar niet meer aan te tikken was. */
 .controls {
   display: flex; align-items: flex-end; justify-content: flex-end;
-  padding: 0 6px; min-height: min(40vw, 20vh, 164px);
+  /* "Goed" is een cirkel en dus vrijgesteld van --corner tegen de hoek --
+     maar dit is geen hoek, het is de volle onderrand, waar Android's
+     terugveeg-strook net zo goed ligt. .screen geeft hier van zichzelf maar
+     --s-4 (16 px); dit vult aan tot --corner, zodat de knop die per beurt
+     tot vijftien keer valt niet in die strook hangt. */
+  padding: 0 6px calc(var(--corner) - var(--s-4)); min-height: min(40vw, 20vh, 164px);
 }
 /* "Pas" hangt aan het scherm, niet aan de bedieningsstrook: linksonder,
    waar een linkerduim vanzelf uitkomt, terwijl "goed" rechtsonder ligt voor
@@ -2420,8 +2448,11 @@ const Tril = (() => {
     supported: kan,
     set enabled(v) { on = !!v; },
     get enabled() { return on; },
-    tik()   { buzz(12); },                    // geraden
-    pas()   { buzz(10); },                    // overgeslagen
+    tik()   { buzz(12); },                    // geraden -- kort en scherp
+    pas()   { buzz(28); },                    // overgeslagen -- langer en dof,
+                                               // dof genoeg om naast tik() een
+                                               // eigen ritme te zijn en niet
+                                               // een paar milliseconden ervan
     nee()   { buzz([20, 40, 20]); },          // geweigerd -- de enige "nee" in de app
     zag()   { buzz([8, 60, 8]); },            // dubbele tik, niet geteld
     tel()   { buzz(10); },                    // 3 - 2 - 1
@@ -3056,6 +3087,7 @@ function paintClock(ms, totalMs) {
   dig.textContent = secs;
   dig.style.setProperty("--tcol",
     ms <= 10000 ? timerColour(ms) : "var(--ink-2)");
+  dig.classList.toggle("crit", ms > 0 && ms <= 5000);
   /* Eén klop per hele seconde, en alleen in de laatste vijf: daarbuiten
      zou een cijfer dat elke seconde beweegt de hele beurt lang trekken aan
      een blik die op de kaart hoort. De reflow ertussen is nodig, anders
@@ -3064,6 +3096,11 @@ function paintClock(ms, totalMs) {
     lastDigit = secs;
     dig.classList.remove("pulse");
     if (ms > 0 && ms <= 5000) { void dig.offsetWidth; dig.classList.add("pulse"); }
+    /* Dezelfde drie tikken als het aftellen vóór de beurt, nu aan het einde:
+       de beurt opent met "3 - 2 - 1" en sluit er ook mee. Eén tik per hele
+       seconde, niet per klok-tik (die loopt onder vijf seconden op 4 Hz) --
+       anders werd dit een aanhoudend gezoem in plaats van een telling. */
+    if (secs > 0 && secs <= 3) Tril.tel();
   }
   $("#cardslot").classList.toggle("hurry", ms > 0 && ms <= 5000);
 }
@@ -3223,17 +3260,22 @@ function nextCard(how) {
   }
 }
 
-/* Twee tikken vlak na elkaar zijn in de praktijk één enthousiaste vinger,
-   geen twee geraden kaarten. De tweede telt niet mee -- maar hij wordt wel
-   beantwoord: de rand van de kaart knippert één keer. Zonder dat verdween
-   de tik in het niets en leek het toestel te haperen op het drukste moment
-   van de beurt. */
-let lastAct = 0;
-function acts() {
+/* Twee tikken vlak na elkaar op dezelfde knop zijn in de praktijk één
+   enthousiaste vinger, geen twee geraden kaarten. De tweede telt niet mee --
+   maar hij wordt wel beantwoord: de rand van de kaart knippert één keer.
+   Zonder dat verdween de tik in het niets en leek het toestel te haperen op
+   het drukste moment van de beurt.
+
+   De klok loopt apart per knop. "Goed" en "pas" vlak na elkaar is een
+   geldige snelle beslissing -- deze kaart nog, de volgende meteen weg -- en
+   geen dubbele tik; met één gedeelde klok ving dat verschil ze allebei in
+   hetzelfde vangnet. */
+let lastAct = { goed: 0, pas: 0 };
+function acts(key) {
   if (current !== "play" || !G || G.card === null) return false;
   const now = performance.now();
-  if (now - lastAct < 280) { flash("seen"); Tril.zag(); return false; }
-  lastAct = now;
+  if (now - lastAct[key] < 280) { flash("seen"); Tril.zag(); return false; }
+  lastAct[key] = now;
   return true;
 }
 
@@ -3413,7 +3455,7 @@ function midden(sel) {
 }
 
 $("#btnGoed").addEventListener("click", () => {
-  if (!acts()) return;
+  if (!acts("goed")) return;
   // De toon stijgt per kaart van deze beurt; nog vóór het ophogen, zodat de
   // eerste kaart de grondtoon krijgt.
   Snd.goed(G.gained);
@@ -3438,7 +3480,7 @@ $("#btnPas").addEventListener("click", () => {
   // Eigen geluid: dit is een weigering, geen overslag, en die twee moeten
   // niet hetzelfde klinken. nudge() verzorgt de trilling.
   if (G.pile.length === 0) { Snd.nee(); nudge($("#btnPas")); return; }
-  if (!acts()) return;
+  if (!acts("pas")) return;
   Snd.pas();
   Tril.pas();
   G.pile.push(G.card);      // onderop, zonder straf
@@ -3454,7 +3496,12 @@ function timeUp() {
   if (G.card !== null) G.pile.push(G.card);   // onafgemaakte kaart terug
   G.card = null;
   G.pendingMs = 0;
-  turnEnd();
+  /* Even laten staan in plaats van meteen doorklikken: de kaart verdween
+     hier midden in een zin, precies op het moment dat de tafel nog "ballon!"
+     wil roepen. Er valt niets stuk te tikken in die adem -- G.card staat
+     hierboven al op null, en dat is dezelfde vlag waar de knoppen en acts()
+     zelf al op controleren. */
+  setTimeout(turnEnd, 700);
 }
 
 /* De stand op het overdrachtscherm, met wat er net bij kwam als groen label.
@@ -3675,6 +3722,10 @@ $("#btnHome").addEventListener("click", () => { clearConfetti(); redraw(); show(
 let pauseMs = 0, pauseReturn = null;
 
 function openPause() {
+  /* De adempauze na tijd-om (zie timeUp()) heeft geen paneel nodig: er
+     loopt dan al niets meer, en een paneel erover zou middenin die adem
+     opengaan en het overdrachtscherm er zo weer onder wisselen. */
+  if (current === "play" && (!G || G.card === null)) return;
   if (current === "play") {
     pauseMs = remaining();
     stopClock();
