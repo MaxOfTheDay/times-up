@@ -177,8 +177,13 @@
 }
 
 /* Animaties helemaal uit, niet alleen traag: de duur delen door --dur
-   zou ze bevriezen op hun BEGINbeeld -- de kroon op het winnaarsscherm
-   staat daar op opacity 0 en zou dus nooit verschijnen.
+   zou ze bevriezen op hun BEGINbeeld -- en elk scherm staat daar op
+   opacity 0 (screenIn), dus er zou helemaal niets meer verschijnen.
+   Hier stond de kroon van het winnaarsscherm als voorbeeld. Die begint
+   inmiddels op vol en alleen te klein: vervagen doet in een keten nog maar
+   één vlak, en dat is het scherm zelf (zie slotIn). Het voorbeeld is dus
+   naar dat scherm verhuisd -- waar het altijd al sterker was, want daar
+   hangt alles aan.
 
    Let op wat hier NIET onder valt. De vulling van een knop die je moet
    vasthouden en de ring om de startknop zijn geen versiering maar een
@@ -261,16 +266,28 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   animation: screenIn calc(.22s / max(var(--dur), .001)) ease-out;
 }
 
-/* Het overdrachtscherm heeft een leesvolgorde -- stand, opdracht, start --
-   en die stond er tot nu toe in één klap. Nu komen de drie vakken in die
-   volgorde binnen, zeventig milliseconden na elkaar. De beweging zegt
-   hetzelfde als de indeling, en de startknop is als laatste in beeld:
-   precies het moment waarop er iets te tikken valt.
-   backwards, anders staan de latere vakken al in beeld te wachten tot hun
-   vertraging voorbij is. */
+/* EEN VLAK IN EEN KETEN VERVAAGT MAAR OP ÉÉN PLEK.
+   Opacity van een kind en van zijn ouder vermenigvuldigen, en het scherm
+   hierboven loopt zelf al van 0 naar 1. Een kind dat óók vervaagt komt dus
+   veel later aan dan het scherm, en zit ondertussen op een waarde die deze
+   app nergens gebruikt: inkt op een kwart over crème is grijs, en er is
+   geen grijs in dit ontwerp. Gemeten op dit scherm, toen deze keyframe zijn
+   eigen opacity nog had: het scherm was dekkend na 220 ms, de startknop pas
+   na ruim 400 -- op +195 ms stond het scherm op 0,91 en de knop op 0,15.
+   Dat is de langste vervaging in de app, op het scherm dat per potje het
+   vaakst binnenkomt.
+   De regel is daarom: de ouder doet de vervaging, de kinderen doen de
+   volgorde. Wie hier een vak bij zet, geeft het schuif of schaal -- geen
+   opacity. Hetzelfde geldt voor panelIn onder scrimIn en voor crownIn.
+
+   De volgorde zelf blijft: stand, opdracht, start, zeventig milliseconden
+   na elkaar. De beweging zegt hetzelfde als de indeling, en de startknop is
+   als laatste stil: precies het moment waarop er iets te tikken valt.
+   backwards, anders staan de latere vakken op hun eindplek te wachten tot
+   hun vertraging voorbij is. */
 @keyframes slotIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { transform: translateY(8px); }
+  to   { transform: translateY(0); }
 }
 #s-handoff.on > #hoTally,
 #s-handoff.on > #hoRoundCard,
@@ -1157,8 +1174,14 @@ input[type=range]::-moz-range-thumb {
    Alleen bij openen. Wegklikken hoort meteen te gebeuren: wie op verder
    tikt, wil spelen, en een uitloop van twee tienden is daar precies twee
    tienden te veel. */
+/* Het paneel schaalt alleen; de sluier doet de vervaging voor allebei. Zie
+   slotIn: opacity van kind en ouder vermenigvuldigen, en het paneel hángt in
+   de sluier. Hier was het verschil klein -- één beeld op 0,08 waar de sluier
+   op 0,18 stond, daarna liepen ze gelijk op, want --e-pop klimt steil -- maar
+   het is dezelfde fout, en één regel die overal geldt is meer waard dan drie
+   plekken die je stuk voor stuk moet nameten. */
 @keyframes scrimIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes panelIn { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes panelIn { from { transform: scale(.96); } to { transform: scale(1); } }
 .overlay:not([hidden]) { animation: scrimIn calc(.15s / max(var(--dur), .001)) ease-out; }
 .overlay:not([hidden]) .panel {
   animation: panelIn calc(.22s / max(var(--dur), .001)) var(--e-pop) backwards;
@@ -1538,9 +1561,13 @@ input[type=range]::-moz-range-thumb {
   position: absolute; top: -26px; left: 50%; transform: translateX(-50%) rotate(-8deg);
   width: 42px;
 }
+/* Ook hier geen eigen opacity -- zie slotIn. De kroon zit op het
+   winnaarsscherm onder screenIn en op de overdracht onder screenIn én
+   slotIn, dus dat waren twee tot drie vervagingen over elkaar. Ze valt en
+   groeit; het scherm eronder regelt of ze al te zien is. */
 @keyframes crownIn {
-  from { transform: translateX(-50%) rotate(-8deg) translateY(-14px) scale(.5); opacity: 0; }
-  to   { transform: translateX(-50%) rotate(-8deg) translateY(0) scale(1); opacity: 1; }
+  from { transform: translateX(-50%) rotate(-8deg) translateY(-14px) scale(.5); }
+  to   { transform: translateX(-50%) rotate(-8deg) translateY(0) scale(1); }
 }
 .tally .crown { animation: crownIn calc(.4s / max(var(--dur), .001)) var(--e-pop) backwards; }
 /* De uitsplitsing per ronde: pictogram + aantal, klein en rustig. Staat
