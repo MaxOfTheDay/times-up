@@ -246,7 +246,41 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   padding: calc(env(safe-area-inset-top, 0px) + var(--s-4)) var(--s-4)
            calc(env(safe-area-inset-bottom, 0px) + var(--s-4));
 }
-/* Elke schermwissel was een harde knip: display van none naar flex, en het
+/* ============================================================
+   DE BEWEGINGSLADDER — vijf trappen, en meer zijn er niet
+   ============================================================
+   Deze stonden er al, verspreid, maar nergens opgeschreven, en dat is hoe
+   je aan een zesde komt die niets nieuws zegt. Wie beweging toevoegt, kiest
+   hieruit. Wil geen enkele trap wat je nodig hebt, dan is dat een reden om
+   je af te vragen of het wel beweegt.
+
+   0. NIETS.       Meteen op zijn plek.
+   1. AANKOMEN.    Vervagen + 6 px omhoog, .22s ease-out. Elk scherm.
+                   (screenIn)
+   2. OP VOLGORDE. 8 px omhoog per vak, .26s ease-out, 70 tot 90 ms uit
+                   elkaar, hoogstens drie stappen. Voor een scherm met een
+                   leesvolgorde. (slotIn, markIn/goIn)
+   3. OPKOMEN.     Schaal naar 1 in .22 tot .4s met --e-pop. Alleen voor
+                   iets dat zojuist is ontstaan of verdiend: het paneel, de
+                   kroon, het "+N", de ronde-tekening. (panelIn, crownIn,
+                   freshIn, gainPop, roundPop)
+   4. FEEST.       Alleen het winnaarsscherm: 1 en 3 plus de lussen.
+
+   En één band die er los van staat, omdat hij honderd keer per potje
+   speelt: EEN KAART KOMT AAN, 180 ms ease-out, hoogstens 14 px (--t-card,
+   deal en tuck). Die mag nooit de aandacht trekken.
+
+   Vier regels eromheen:
+   - een omhullend vlak gebruikt trap 1 of 2 en schiet nooit door; --e-pop
+     is voor wat ontstaat, niet voor wat aankomt;
+   - vervagen doet in een keten maar één vlak (zie slotIn hieronder);
+   - geen vertrekanimaties;
+   - geen richting. Deze app heeft geen ruimtelijk model -- het huisje gaat
+     vanaf elk scherm naar de titel, en instellingen ligt niet "links van"
+     het spel. Schuiven op looprichting zou een navigatiemodel beweren dat
+     er niet is.
+
+   Elke schermwissel was een harde knip: display van none naar flex, en het
    volgende scherm stond er in één frame. Alles binnen een scherm bewoog al
    (de kaart wordt gedeeld, het label wipt, de klok klopt), maar tussen de
    schermen gebeurde niets -- en dat is precies waar de app het meest van
@@ -975,6 +1009,21 @@ input[type=range]::-moz-range-thumb {
   width: min(16vh, 30vw, 132px); height: min(16vh, 30vw, 132px);
   border: 0; background: none;
 }
+/* Een rondewissel en een gewone beurtwissel kwamen precies hetzelfde binnen:
+   zelfde screenIn, zelfde drie vakken op volgorde. Het enige verschil stond
+   stil -- de kaart is uitgeklapt. Maar een nieuwe ronde is de grotere
+   gebeurtenis, en zes tot twaalf keer per potje is een beurtwissel juist de
+   kleinste; dan hoort de ladder daar iets van te zeggen.
+   Eén trede, niet meer: de tekening komt op (trap 3), want zij is het
+   nieuwe. Ze valt ná haar kaart, die zelf al zeventig milliseconden achter
+   de stand aan komt -- dus eerst staat de kaart er, dan blijkt wat erin
+   staat. Alleen in .big, dus alleen bij een rondewissel; bij een beurtwissel
+   gebeurt er niets extra's, en dat verschil ís de mededeling. */
+@keyframes roundPop { from { transform: scale(.82); } to { transform: scale(1); } }
+#s-handoff.on .roundcard.big .ico {
+  animation: roundPop calc(.32s / max(var(--dur), .001)) var(--e-pop) backwards;
+  animation-delay: calc(.12s / max(var(--dur), .001));
+}
 .roundcard.big .ico svg { width: 100%; height: 100%; overflow: visible; }
 .roundcard.big b { font-size: min(8vw, 4vh, 34px); line-height: 1; }
 .roundcard.big p {
@@ -1407,21 +1456,37 @@ input[type=range]::-moz-range-thumb {
 .card[data-time="crit"] .timerframe .band { stroke: var(--time-1); stroke-width: 17; }
 
 /* Geraden en gepast zagen er precies hetzelfde uit, terwijl ze het
-   tegenovergestelde betekenen. Nu wordt een geraden kaart van de stapel
-   gedeeld -- schuin van boven erop -- en zakt een gepaste kaart eerst weg
-   onder de stapel voor de volgende bovenkomt. Zonder te kijken weet je
-   welke knop het deed. */
+   tegenovergestelde betekenen. Ze verschillen nu in de richting waaruit de
+   volgende kaart komt: geraden wordt er schuin van boven op gedeeld, gepast
+   komt van onder de stapel omhoog. Zonder te kijken weet je welke knop het
+   deed.
+
+   Allebei een aankomst, en dat is een correctie. "Gepast" was een duik: de
+   kaart zakte 16 px weg en kwam weer terug, als een kaart die onder de
+   stapel wordt geschoven. Alleen is dat niet de kaart die je zag. nextCard()
+   zet het teken en het woord in de kaart en hángt er pas dáárna de klasse
+   aan, dus tegen de tijd dat de duik begint staat de vólgende kaart er al.
+   Gemeten: teken 🐶 op het moment van tikken, 60 ms later ⛄, en die ⛄ zakte
+   vervolgens naar 15,9 px en terug. Het gebaar "deze gaat terug de stapel
+   in" werd dus uitgevoerd door de kaart die net was aangekomen -- 280 ms
+   lang, honderd keer per potje, op de drukste plek van het spel. Wie de duik
+   wél wil, moet de oude kaart apart laten staan; met één element kan het
+   niet.
+
+   En even lang als deal, allebei --t-card. Passen duurde 280 ms tegen 180
+   voor geraden, dus de mindere keuze woog het zwaarst -- precies andersom
+   als overal elders (zie --lift-1 op .btn-skip). Het verschil tussen de twee
+   zit in de richting, en verder in het geluid, de tril en de teller. */
 @keyframes deal {
   0%   { transform: translate(-10px, -14px) rotate(-3deg); }
   100% { transform: translate(0, 0) rotate(0); }
 }
 @keyframes tuck {
-  0%   { transform: translateY(0) scale(1); }
-  45%  { transform: translateY(16px) scale(.965); }
+  0%   { transform: translateY(14px) scale(.98); }
   100% { transform: translateY(0) scale(1); }
 }
 .card.in   { animation: deal calc(var(--t-card) / max(var(--dur), .001)) ease-out; }
-.card.tuck { animation: tuck calc(.28s / max(var(--dur), .001)) ease-in-out; }
+.card.tuck { animation: tuck calc(var(--t-card) / max(var(--dur), .001)) ease-out; }
 /* Een tik die niet meetelt (twee vingers op dezelfde kaart binnen 280 ms)
    werd stilletjes weggegooid. Nu knippert de rand één keer, zodat je ziet
    dát hij binnenkwam. */
