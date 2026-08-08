@@ -599,33 +599,43 @@ button.btn-icon, button.btn-danger, button.chip, button.pv {
    klapt op het laatste beeld scheef. De rotatie hoort dus in allebei de
    frames te staan.
 
-   De knop komt niet alleen later, hij komt ook omhoog uit zijn eigen
-   schaduw: van de ingedrukte stand (verschoven over --lift-2, schaduw op
-   nul) naar de ruststand. Dat is letterlijk de :active-stand van deze knop,
-   achterstevoren. Reliëf zegt in deze app niet dat iets indrukbaar is --
-   beweging doet dat -- en tot nu toe bewoog deze knop pas nádat je hem al
-   ingedrukt had. Nu laat hij het één keer zien voor je hem aanraakt.
+   Alleen schuiven, geen eigen opacity. Die stond er wel, en dat was een
+   rekenfout: .screen.on laat het scherm zelf al van 0 naar 1 lopen, dus
+   een kind dat óók vervaagt vermenigvuldigt de twee. Gemeten kwam de plaat
+   daardoor honderd milliseconden lang op 0,26 uit -- inkt op een kwart
+   over crème is grijs, en deze app heeft nergens grijs. De knop was pas na
+   340 ms dekkend waar het scherm er 220 over doet. Het scherm doet de
+   vervaging, de vakken doen de volgorde.
 
-   ease-out en niet --e-pop: die easing schiet door (1,5), en een knop die
-   over zijn eigen schaduw heen wipt is een stuiterend logo, geen landing.
+   De knop kwam hier ook omhoog uit zijn eigen schaduw: van de ingedrukte
+   stand naar de ruststand, letterlijk zijn :active-stand achterstevoren.
+   Dat is er weer uit, om twee redenen. De titelknop en de startknop op het
+   overdrachtscherm zijn met opzet dezelfde knop -- ze betekenen allebei
+   "spelen" -- en die op de overdracht komt gewoon met de rij mee omhoog.
+   Eén van de twee een eigen landing geven maakt ze weer verschillend, en
+   dan is de regel dat ze hetzelfde horen te zijn de eerste die sneuvelt.
+   En de reden eronder hield geen stand: het idee was dat de knop zo laat
+   zien dát je hem kunt indrukken, maar wat die beweging letterlijk toont
+   is een knop die omhoog kómt -- loslaten, niet uitnodigen. Dat is niet
+   nagelopen bij iemand die het spel voor het eerst ziet, en zolang dat
+   niet gebeurd is, is het geen reden om twee knoppen uit elkaar te laten
+   lopen. Beide vakken schuiven nu, meer niet.
 
    Het tandwiel doet niet mee. Dat is de uitgang van dit scherm, geen stap
    in wat het te vertellen heeft. */
 @keyframes markIn {
-  from { opacity: 0; transform: translateY(8px) rotate(-2deg); }
-  to   { opacity: 1; transform: translateY(0)   rotate(-2deg); }
+  from { transform: translateY(8px) rotate(-2deg); }
+  to   { transform: translateY(0)   rotate(-2deg); }
 }
-@keyframes goLand {
-  from { opacity: 0; transform: translate(var(--lift-2), var(--lift-2));
-         box-shadow: 0 0 0 var(--ink); }
-  to   { opacity: 1; transform: translate(0, 0);
-         box-shadow: var(--lift-2) var(--lift-2) 0 var(--ink); }
+@keyframes goIn {
+  from { transform: translateY(8px); }
+  to   { transform: translateY(0); }
 }
 #s-title.on > .wordmark {
   animation: markIn calc(.26s / max(var(--dur), .001)) ease-out backwards;
 }
 #s-title.on > #btnStart {
-  animation: goLand calc(.26s / max(var(--dur), .001)) ease-out backwards;
+  animation: goIn calc(.26s / max(var(--dur), .001)) ease-out backwards;
   animation-delay: calc(.09s / max(var(--dur), .001));
 }
 
