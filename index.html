@@ -586,6 +586,49 @@ button.btn-icon, button.btn-danger, button.chip, button.pv {
    ============================================================ */
 #s-title { justify-content: center; align-items: center; gap: 6vh; }
 
+/* Dit scherm kwam in één klap binnen: .screen.on laat het hele vlak
+   opkomen, dus het merk en de knop verschijnen tegelijk en er is geen
+   leesvolgorde. Het overdrachtscherm hiernaast doet dat wél -- stand,
+   opdracht, start, zeventig milliseconden na elkaar -- en de titel heeft
+   dezelfde twee dingen te zeggen: dit is het spel, en hier druk je.
+   Zelfde idioom en zelfde duur, alleen twee vakken in plaats van drie.
+
+   Het merk krijgt een eigen keyframe en niet slotIn. .wordmark staat op
+   rotate(-2deg), en een keyframe die alleen translateY zet, overschrijft
+   die draaiing zolang de animatie loopt: de plaat komt dan recht binnen en
+   klapt op het laatste beeld scheef. De rotatie hoort dus in allebei de
+   frames te staan.
+
+   De knop komt niet alleen later, hij komt ook omhoog uit zijn eigen
+   schaduw: van de ingedrukte stand (verschoven over --lift-2, schaduw op
+   nul) naar de ruststand. Dat is letterlijk de :active-stand van deze knop,
+   achterstevoren. Reliëf zegt in deze app niet dat iets indrukbaar is --
+   beweging doet dat -- en tot nu toe bewoog deze knop pas nádat je hem al
+   ingedrukt had. Nu laat hij het één keer zien voor je hem aanraakt.
+
+   ease-out en niet --e-pop: die easing schiet door (1,5), en een knop die
+   over zijn eigen schaduw heen wipt is een stuiterend logo, geen landing.
+
+   Het tandwiel doet niet mee. Dat is de uitgang van dit scherm, geen stap
+   in wat het te vertellen heeft. */
+@keyframes markIn {
+  from { opacity: 0; transform: translateY(8px) rotate(-2deg); }
+  to   { opacity: 1; transform: translateY(0)   rotate(-2deg); }
+}
+@keyframes goLand {
+  from { opacity: 0; transform: translate(var(--lift-2), var(--lift-2));
+         box-shadow: 0 0 0 var(--ink); }
+  to   { opacity: 1; transform: translate(0, 0);
+         box-shadow: var(--lift-2) var(--lift-2) 0 var(--ink); }
+}
+#s-title.on > .wordmark {
+  animation: markIn calc(.26s / max(var(--dur), .001)) ease-out backwards;
+}
+#s-title.on > #btnStart {
+  animation: goLand calc(.26s / max(var(--dur), .001)) ease-out backwards;
+  animation-delay: calc(.09s / max(var(--dur), .001));
+}
+
 /* Dit kaartje stond in vermiljoen: de bedoeling was het merk een eigen
    gezicht te geven op een scherm waar nog geen ploegen bestaan. Maar het
    titelscherm is het allereerste wat iedereen ziet, en de allereerste
@@ -1653,8 +1696,26 @@ input[type=range]::-moz-range-thumb {
      boven de viewport uit en de zandloper viel letterlijk van het scherm
      af. Hij rekent hier met vh in plaats van vw: de kortste zijde van het
      scherm is nu wat de maat bepaalt, niet de langste. */
+  /* Die krimp gold ook voor het gat tussen het merk en de knop, en dat
+     ging te ver: 1,6vh is op een liggende telefoon van 390 px hoog nog
+     6 px, en het merk laat zelf een gouden slagschaduw van --lift-1 (5 px)
+     naar rechtsonder vallen. Er bleef dus één pixel papier over -- de
+     plaat en de knop raakten elkaar en lazen als één blok, terwijl het
+     juist de twee dingen zijn die dit scherm uit elkaar moet houden: dit
+     is het spel, en hier druk je.
+     De ruimte was er wel: bij 844x390 stond er 74 px lucht boven de plaat
+     en 76 px onder de knop, want de rij staat gecentreerd. Het gat was dus
+     dichtgeknepen om hoogte te sparen die nergens opging. Een ondergrens
+     in pixels en niet in vh: de schaduw die het moet vrijhouden staat ook
+     in pixels, dus mag dit gat niet met het scherm meekrimpen. Staand
+     verandert er niets -- daar is 6vh al ruim 50 px.
+     24 px en geen rondere 16: staand staat er 47 px tussen op een scherm
+     van 844, oftewel 5,6% van de hoogte, en 5,6% van 390 is 22. De plaat
+     staat bovendien op rotate(-2deg), dus haar onderste hoek hangt nog
+     2,4 px lager dan haar vak -- meten doe je hier met de omhullende, niet
+     met de opmaak. */
   #s-title {
-    gap: 1.6vh;
+    gap: max(var(--s-5), 1.6vh);
     padding-top: min(1.6vh, 10px); padding-bottom: min(1.6vh, 10px);
   }
   .wordmark {
