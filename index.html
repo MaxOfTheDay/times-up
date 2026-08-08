@@ -2388,15 +2388,20 @@ const Snd = (() => {
        beelden kijkt niet naar het scherm; geluid is daar het enige kanaal,
        en één geluid hoort dan één ding te betekenen.
 
-       Drie zachte dalende noten. Dalen, omdat stijgen al bezet is door
-       goed(), haul() én fanfare() -- een stijgend drieklankje vóór de beurt
-       zou klinken als de eerste drie noten van de overwinning. Dat het
-       daalt, zegt bovendien "zet je klaar" in plaats van "er komt iets
-       binnen". En de toonhoogte vertelt waar je in het aftellen zit: drie
-       gelijke piepjes deden dat niet.
+       Drie noten die klimmen naar go() toe, niet ernaar toe zakken. Hier
+       stond eerst een dalende reeks, met als reden dat stijgen al bezet was
+       door goed(), haul() en fanfare() -- maar die klinken alleen tijdens
+       het spelen of bij een rondegrens, nooit op het moment dat dit scherm
+       op het scherm staat, dus verwarring was daar nooit echt een risico.
+       Wat een dalende reeks wél deed: hetzelfde zeggen als het cijfer en de
+       schijf ernaast, die ook al aftellen. Klimmend zegt iets dat die twee
+       niet kunnen -- de spanning loopt op naar het startsein toe -- en sluit
+       bovendien aan op go() zelf, dat verder klimt (990 → 1175 → 1560): één
+       ononderbroken opbouw van "zet je klaar" naar "daar gaat ie", in plaats
+       van een dalende reeks die met een sprong wordt afgekapt.
 
        Triangle en niet square: square blijft van de klok. */
-    count(i){ tone([990, 880, 784][Math.min(Math.max(i || 0, 0), 2)], .10, "triangle", .13, 0); },
+    count(i){ tone([784, 880, 990][Math.min(Math.max(i || 0, 0), 2)], .10, "triangle", .13, 0); },
     /* Het startsein. Langer en helderder dan welke tick ook, met een veeg
        omhoog -- het enige moment in een beurt waarop er iets begint in
        plaats van verstrijkt. Eén noot, dus geen verwarring met goed(), dat
@@ -2405,9 +2410,11 @@ const Snd = (() => {
     timeUp(){ tone(420, .55, "sawtooth", .22, 0, 90); tone(210, .6, "square", .12, .05, 60); },
     /* De buit van de hele beurt, in één cue -- er staat ook maar één "+N"
        op het scherm. De omvang zit in het interval: bij twee kaarten een
-       kleine terts, bij een dozijn een octaaf. Wordt vertraagd aangeroepen
-       (zie turnEnd/endRound) zodat hij nooit boven timeUp() of fanfare()
-       heen speelt. */
+       kleine terts, bij een dozijn een octaaf. Klinkt nooit samen met
+       timeUp(): turnEnd() -- de enige aanroeper -- loopt zelf al 700 ms na
+       die horen (zie de setTimeout in timeUp()), dus is er bij aankomst
+       hier niets meer om overheen te spelen. Bij endRound() (stapel leeg)
+       speelt hij sowieso nooit: dat pad heeft leeg(). */
     haul(n) {
       if (!n) return;
       const top = 523 * Math.pow(2, Math.min(n, 12) / 12);
@@ -3534,10 +3541,13 @@ function turnEnd() {
   const freshA = G.team === 0 ? G.gained : 0;
   const freshB = G.team === 1 ? G.gained : 0;
   /* Eén cue voor de hele buit in plaats van een tik per punt: er staat ook
-     maar één "+N" op het scherm. Vertraagd, zodat hij niet boven de horen
-     van timeUp() heen speelt -- één cue per grens, de grootste wint. */
-  const n = G.gained;
-  if (n) setTimeout(() => Snd.haul(n), 450);
+     maar één "+N" op het scherm. turnEnd() loopt zelf al 700 ms na Snd.timeUp()
+     (zie de setTimeout in timeUp()) -- de horen is dan al uitgeklonken, dus
+     hoeft haul() niet nog eens apart te wachten. Hier stond een eigen
+     vertraging van 450 ms uit de tijd dat turnEnd() nog synchroon liep; met
+     die 700 ms erbovenop kwam het geluid drie kwart seconde ná het label dat
+     het moest bevestigen. Nu speelt hij samen met het scherm dat 'm toont. */
+  if (G.gained) Snd.haul(G.gained);
   G.team = 1 - G.team;
   G.pendingMs = 0;
 
