@@ -315,8 +315,26 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    opacity. Hetzelfde geldt voor panelIn onder scrimIn en voor crownIn.
 
    De volgorde zelf blijft: stand, opdracht, start, zeventig milliseconden
-   na elkaar. De beweging zegt hetzelfde als de indeling, en de startknop is
-   als laatste stil: precies het moment waarop er iets te tikken valt.
+   na elkaar, en de startknop is als laatste stil -- precies het moment
+   waarop er iets te tikken valt.
+
+   Reken die zeventig milliseconden niet als drie losse aankomsten. Ze
+   staan tegen een duur van 260, dus de drie overlappen voor bijna
+   driekwart: gemeten schuiven ze op +160 ms alle drie tegelijk (nog 1,4,
+   3,7 en 6,7 px te gaan). Wat je ziet is één golf van boven naar beneden
+   die op de knop eindigt, niet drie vakken die om de beurt aankomen. Dat
+   is ook de bedoeling: écht om de beurt zou vragen om een vertraging die
+   groter is dan de duur, en dan duurt deze binnenkomst 780 ms in plaats
+   van 400. Wie de stapjes groter maakt om het "duidelijker" te krijgen,
+   koopt dus vooral wachttijd.
+
+   En het gaat nergens iets tegenhouden: sinds de vakken geen eigen opacity
+   meer hebben staat alles vanaf het eerste beeld leesbaar in beeld, alleen
+   acht pixels lager, en de startknop is op t+0 al raak. De vierhonderd
+   milliseconden zijn versiering waar je doorheen kunt tikken -- en dat is
+   waarom ze op een scherm dat zes tot twaalf keer per potje binnenkomt
+   niet gaan irriteren.
+
    backwards, anders staan de latere vakken op hun eindplek te wachten tot
    hun vertraging voorbij is. */
 @keyframes slotIn {
@@ -1015,14 +1033,28 @@ input[type=range]::-moz-range-thumb {
    gebeurtenis, en zes tot twaalf keer per potje is een beurtwissel juist de
    kleinste; dan hoort de ladder daar iets van te zeggen.
    Eén trede, niet meer: de tekening komt op (trap 3), want zij is het
-   nieuwe. Ze valt ná haar kaart, die zelf al zeventig milliseconden achter
-   de stand aan komt -- dus eerst staat de kaart er, dan blijkt wat erin
-   staat. Alleen in .big, dus alleen bij een rondewissel; bij een beurtwissel
-   gebeurt er niets extra's, en dat verschil ís de mededeling. */
+   nieuwe. Alleen in .big, dus alleen bij een rondewissel; bij een
+   beurtwissel gebeurt er niets extra's, en dat verschil ís de mededeling.
+
+   Ze rijdt mee met haar eigen kaart: zelfde vertraging van zeventig
+   milliseconden, en klaar op 350 ms tegen de 330 van de kaart. Hier stond
+   een vertraging van 120 ms met de bedoeling dat de tekening ná haar kaart
+   zou vallen -- eerst de kaart, dan wat erin staat. Gemeten deed ze dat
+   niet: ze liep van 120 tot 440 ms en dus tweehonderd milliseconden lang
+   binnenin een kaart die zelf nog aan het schuiven was, twee gebaren over
+   elkaar in dezelfde honderddertig pixels. Echt ná de kaart komen kan ook
+   niet zonder de hele binnenkomst boven de 600 ms te tillen. Meerijden is
+   het eerlijke alternatief: drie vakken die schuiven, waarvan er één ook
+   groeit -- één golf met een opkomer erin, in plaats van een vierde
+   losse gebeurtenis.
+
+   Twee dingen komen daarmee weer op hun plek. De startknop is weer als
+   laatste stil (400 ms tegen 350), zoals bij slotIn staat, en de tekening
+   vecht niet meer met het vlak waar ze in zit. */
 @keyframes roundPop { from { transform: scale(.82); } to { transform: scale(1); } }
 #s-handoff.on .roundcard.big .ico {
-  animation: roundPop calc(.32s / max(var(--dur), .001)) var(--e-pop) backwards;
-  animation-delay: calc(.12s / max(var(--dur), .001));
+  animation: roundPop calc(.28s / max(var(--dur), .001)) var(--e-pop) backwards;
+  animation-delay: calc(.07s / max(var(--dur), .001));
 }
 .roundcard.big .ico svg { width: 100%; height: 100%; overflow: visible; }
 .roundcard.big b { font-size: min(8vw, 4vh, 34px); line-height: 1; }
