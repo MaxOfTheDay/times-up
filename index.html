@@ -702,6 +702,20 @@ button.btn-icon, button.btn-danger, button.chip, button.pv {
   font-size: 13px; font-weight: 900; text-transform: uppercase;
   letter-spacing: .12em; margin: 0 0 10px; padding: 0; color: var(--ink-2);
 }
+.field-group { display: flex; flex-direction: column; gap: var(--s-5); }
+/* Twee groepen op dit scherm: wat voor vanavond geldt (moeilijkheid, aantal,
+   tijd, de kaarten zelf) en wat altijd zo blijft staan (geluid, trilling).
+   Zonder een zichtbaar verschil tussen die twee las het als één
+   ononderbroken lijst van vijf gelijkwaardige instellingen. Deze kop is
+   daarom groter dan een legend en in volle inkt -- niet in --ink-2 -- met
+   een eigen lijn eronder in --rule. Geen goud: dat betekent op dit scherm
+   al "verder", en een zesde plek voor diezelfde kleur zou hem weer minder
+   laten zeggen. */
+.group-head {
+  font-size: 15px; font-weight: 900; text-transform: uppercase;
+  letter-spacing: .1em; margin: 0; color: var(--ink);
+  padding-bottom: var(--s-2); border-bottom: var(--line-2) solid var(--rule);
+}
 .rules {
   border-left: 6px solid var(--go); padding: 2px 0 2px 14px;
   font-size: 13.5px; line-height: 1.5; color: var(--ink-2);
@@ -1795,7 +1809,12 @@ input[type=range]::-moz-range-thumb {
 <!-- ======================= INSTELLINGEN ========================= -->
 <section class="screen" id="s-setup">
   <div class="setup-scroll">
-    <h1>Tijd is Om</h1>
+    <!-- Stond hier als "Tijd is Om" -- hetzelfde woordmerk dat net op het
+         titelscherm stond waar je vandaan tikte. Dat beantwoordt niet de
+         vraag die je stelt na een tik op een tandwiel: waar ben ik nu? Het
+         tandwiel zelf heeft aria-label="Instellingen" -- die kop zegt nu
+         hetzelfde. -->
+    <h1>Instellingen</h1>
 
     <!-- De regels staan open tot je één keer een spel gestart hebt, en
          daarna dichtgeklapt. Ze zijn 243 van de 1286 px die dit scherm hoog
@@ -1824,78 +1843,100 @@ input[type=range]::-moz-range-thumb {
          stonden er nog, de velden zelf waren er nooit gekomen. Een kop met
          twee nepknoppen eronder is erger dan geen kop, dus weg ermee. -->
 
-    <fieldset class="field">
-      <legend>Moeilijkheid van de kaarten</legend>
-      <!-- De labels zeggen nu hoe moeilijk de kaarten zijn, niet hoe groot
-           iets is: "Klein/Midden/Groot" stond direct boven "Aantal kaarten"
-           met 16/24/32, en dan leest "klein" als een kleine stapel.
-           De sleutels (data-tier, DECKS, opgeslagen instellingen) blijven
-           klein/midden/groot -- alleen wat je léést verandert, zodat een
-           bestaande keuze in localStorage gewoon blijft werken. -->
-      <div class="chips" id="tierChips" role="radiogroup" aria-label="Moeilijkheid van de kaarten">
-        <button class="chip" role="radio" aria-checked="false" data-tier="klein">Makkelijk<small>3+ jaar</small>
-          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-        <button class="chip" role="radio" aria-checked="false" data-tier="midden">Medium<small>6+ jaar</small>
-          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-        <button class="chip" role="radio" aria-checked="false" data-tier="groot">Moeilijk<small>9+ jaar</small>
-          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-      </div>
-      <!-- Wie dit weet, kiest bij een tafel met een vijfjarige én een
-           achtjarige gerust een stap hoger: de makkelijke kaarten blijven
-           er toch in zitten. Dat is precies waar de schuivende pool voor
-           gemaakt is, dus het hoort hier te staan en niet in de
-           regeluitleg -- die staat dichtgeklapt. -->
-      <p class="hint">Elke stand bevat ook de makkelijkere kaarten.</p>
-    </fieldset>
+    <!-- Twee groepen, niet vijf losse instellingen op een rij: alles wat
+         over vanavond gaat (moeilijkheid, aantal, tijd, en het resultaat
+         daarvan) staat nu bij elkaar, gevolgd door wat altijd zo blijft
+         staan (geluid, trilling). De voorvertoning stond eerst hélemaal
+         onderaan, ná Geluid en Trilling -- en sneed daarmee "dit spel" in
+         tweeën met "altijd" ertussenin. -->
+    <div class="field-group">
+      <h2 class="group-head">Dit spel</h2>
 
-    <fieldset class="field">
-      <legend>Aantal kaarten</legend>
-      <div class="chips" id="sizeChips" role="radiogroup" aria-label="Aantal kaarten">
-        <button class="chip" role="radio" aria-checked="false" data-size="16">16
-          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-        <button class="chip" role="radio" aria-checked="false" data-size="24">24
-          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-        <button class="chip" role="radio" aria-checked="false" data-size="32">32
-          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-      </div>
-    </fieldset>
+      <fieldset class="field">
+        <legend>Moeilijkheid van de kaarten</legend>
+        <!-- De labels zeggen nu hoe moeilijk de kaarten zijn, niet hoe groot
+             iets is: "Klein/Midden/Groot" stond direct boven "Aantal kaarten"
+             met 16/24/32, en dan leest "klein" als een kleine stapel.
+             De sleutels (data-tier, DECKS, opgeslagen instellingen) blijven
+             klein/midden/groot -- alleen wat je léést verandert, zodat een
+             bestaande keuze in localStorage gewoon blijft werken. -->
+        <div class="chips" id="tierChips" role="radiogroup" aria-label="Moeilijkheid van de kaarten">
+          <button class="chip" role="radio" aria-checked="false" data-tier="klein">Makkelijk<small>3+ jaar</small>
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-tier="midden">Medium<small>6+ jaar</small>
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-tier="groot">Moeilijk<small>9+ jaar</small>
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+        </div>
+        <!-- Wie dit weet, kiest bij een tafel met een vijfjarige én een
+             achtjarige gerust een stap hoger: de makkelijke kaarten blijven
+             er toch in zitten. Dat is precies waar de schuivende pool voor
+             gemaakt is, dus het hoort hier te staan en niet in de
+             regeluitleg -- die staat dichtgeklapt. -->
+        <p class="hint">Elke stand bevat ook de makkelijkere kaarten.</p>
+      </fieldset>
 
-    <div class="field">
-      <label class="legend-label" for="secs">Tijd per beurt</label>
-      <div class="slider-row">
-        <input type="range" id="secs" min="20" max="60" step="5" value="30">
-        <span class="secs" id="secsOut" aria-live="polite">30s</span>
+      <fieldset class="field">
+        <legend>Aantal kaarten</legend>
+        <div class="chips" id="sizeChips" role="radiogroup" aria-label="Aantal kaarten">
+          <button class="chip" role="radio" aria-checked="false" data-size="16">16
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-size="24">24
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-size="32">32
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+        </div>
+        <!-- Moeilijkheid had al een hint die uitlegt wat de keuze praktisch
+             betekent; dit veld had die uitleg niet, terwijl "meer kaarten"
+             minstens zo'n praktisch gevolg heeft. -->
+        <p class="hint">Meer kaarten = een langer spel.</p>
+      </fieldset>
+
+      <div class="field">
+        <label class="legend-label" for="secs">Tijd per beurt</label>
+        <div class="slider-row">
+          <input type="range" id="secs" min="20" max="60" step="5" value="30">
+          <span class="secs" id="secsOut" aria-live="polite">30s</span>
+        </div>
+        <!-- Bij de chips hierboven zie je alle standen in één oogopslag; bij
+             een schuif niet -- die verklapt zijn bereik pas als je naar de
+             rand sleept. Dezelfde .hint-regel als bij de andere velden. -->
+        <p class="hint">Van 20 tot 60 seconden.</p>
+      </div>
+
+      <div class="field">
+        <h2 id="previewHead">Het spel van vanavond</h2>
+        <div class="preview" id="preview" role="group" aria-labelledby="previewHead"></div>
+        <p class="hint">Tik op een kaart om ze te vervangen. Deze kaarten komen alle drie
+          de rondes terug — dat is de bedoeling: tegen ronde drie kent iedereen ze.</p>
       </div>
     </div>
 
-    <fieldset class="field">
-      <legend>Geluid</legend>
-      <div class="chips" id="soundChips" role="radiogroup" aria-label="Geluid">
-        <button class="chip" role="radio" aria-checked="false" data-sound="1">Aan
-          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-        <button class="chip" role="radio" aria-checked="false" data-sound="0">Uit
-          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-      </div>
-    </fieldset>
+    <div class="field-group">
+      <h2 class="group-head">Voorkeuren</h2>
 
-    <!-- Los van Geluid: de helft van de reden om geluid uit te zetten is een
-         stil huis, en juist dan is een trilling in de hand het meest waard.
-         Staat alleen op toestellen die vibrate() kennen (zie paintSetup). -->
-    <fieldset class="field" id="hapticsField" hidden>
-      <legend>Trilling</legend>
-      <div class="chips" id="hapticsChips" role="radiogroup" aria-label="Trilling">
-        <button class="chip" role="radio" aria-checked="false" data-haptics="1">Aan
-          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-        <button class="chip" role="radio" aria-checked="false" data-haptics="0">Uit
-          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-      </div>
-    </fieldset>
+      <fieldset class="field">
+        <legend>Geluid</legend>
+        <div class="chips" id="soundChips" role="radiogroup" aria-label="Geluid">
+          <button class="chip" role="radio" aria-checked="false" data-sound="1">Aan
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-sound="0">Uit
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+        </div>
+      </fieldset>
 
-    <div class="field">
-      <h2 id="previewHead">Het spel van vanavond</h2>
-      <div class="preview" id="preview" role="group" aria-labelledby="previewHead"></div>
-      <p class="hint">Tik op een kaart om ze te vervangen. Deze kaarten komen alle drie
-        de rondes terug — dat is de bedoeling: tegen ronde drie kent iedereen ze.</p>
+      <!-- Los van Geluid: de helft van de reden om geluid uit te zetten is een
+           stil huis, en juist dan is een trilling in de hand het meest waard.
+           Staat alleen op toestellen die vibrate() kennen (zie paintSetup). -->
+      <fieldset class="field" id="hapticsField" hidden>
+        <legend>Trilling</legend>
+        <div class="chips" id="hapticsChips" role="radiogroup" aria-label="Trilling">
+          <button class="chip" role="radio" aria-checked="false" data-haptics="1">Aan
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-haptics="0">Uit
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+        </div>
+      </fieldset>
     </div>
   </div>
 
@@ -2549,6 +2590,10 @@ function paintPreview() {
     const b = document.createElement("button");
     b.className = "pv";
     b.title = "Vervang deze kaart";
+    // title wordt op een touchscreen nooit getoond, dus de toegankelijke
+    // naam viel terug op alleen het woord -- een schermlezer hoorde een los
+    // zelfstandig naamwoord zonder werkwoord erbij.
+    b.setAttribute("aria-label", "Vervang " + w);
     b.innerHTML = '<span></span><small></small>';
     b.querySelector("span").textContent = e;
     b.querySelector("small").textContent = w;
