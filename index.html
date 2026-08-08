@@ -1850,19 +1850,16 @@ input[type=range]::-moz-range-thumb {
          ze in augustus één keer gelezen hebt. Wie ze nog nooit zag -- een
          oppas, een opa -- krijgt ze wél ongevraagd. -->
     <details class="rules" id="rules">
-      <summary>Hoe speel je dit?</summary>
+      <summary>Zo speel je</summary>
       <p>Twee ploegen spelen 3 rondes met dezelfde kaarten:</p>
       <ol>
-        <li><b>Omschrijven</b> — gebruik zoveel woorden als je wilt.</li>
-        <li><b>Eén woord</b> — geef één woord als hint.</li>
-        <li><b>Uitbeelden</b> — niet praten, alleen uitbeelden.</li>
+        <li><b>Omschrijven</b> — alles mag, behalve het woord zelf.</li>
+        <li><b>Eén woord</b> — geef precies één woord als hint.</li>
+        <li><b>Uitbeelden</b> — niet praten.</li>
       </ol>
-      <p>Tijdens je beurt probeer je zoveel mogelijk kaarten te laten raden.
-        Goed geraden = <b>1 punt</b> en meteen door naar de volgende kaart.
-        Passen mag.</p>
-      <p>Is de stapel leeg, dan stopt de ronde meteen — ook midden in een
-        beurt. <b>De resterende tijd gaat mee</b> naar de volgende ronde en
-        dezelfde ploeg begint.</p>
+      <p>Goed geraden? <b>1 punt</b> en meteen door. Passen mag.</p>
+      <p>Is de stapel leeg? Dan begint de volgende ronde met dezelfde kaarten.
+        <b>De resterende tijd gaat mee.</b></p>
     </details>
 
     <!-- Hier stond een kopje "Ploegen" boven twee vakjes met een mascotte
@@ -1881,7 +1878,7 @@ input[type=range]::-moz-range-thumb {
       <h2 class="group-head">Dit spel</h2>
 
       <fieldset class="field">
-        <legend>Moeilijkheid van de kaarten</legend>
+        <legend>Moeilijkheid</legend>
         <!-- De labels zeggen nu hoe moeilijk de kaarten zijn, niet hoe groot
              iets is: "Klein/Midden/Groot" stond direct boven "Aantal kaarten"
              met 16/24/32, en dan leest "klein" als een kleine stapel.
@@ -1901,23 +1898,20 @@ input[type=range]::-moz-range-thumb {
              er toch in zitten. Dat is precies waar de schuivende pool voor
              gemaakt is, dus het hoort hier te staan en niet in de
              regeluitleg -- die staat dichtgeklapt. -->
-        <p class="hint">Elke stand bevat ook de makkelijkere kaarten.</p>
+        <p class="hint">Elke stand bevat ook kaarten uit de vorige, makkelijkere stand.</p>
       </fieldset>
 
       <fieldset class="field">
         <legend>Aantal kaarten</legend>
         <div class="chips" id="sizeChips" role="radiogroup" aria-label="Aantal kaarten">
-          <button class="chip" role="radio" aria-checked="false" data-size="16">16
+          <button class="chip" role="radio" aria-checked="false" data-size="16">16<small>Kort</small>
             <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-          <button class="chip" role="radio" aria-checked="false" data-size="24">24
+          <button class="chip" role="radio" aria-checked="false" data-size="24">24<small>Normaal</small>
             <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-          <button class="chip" role="radio" aria-checked="false" data-size="32">32
+          <button class="chip" role="radio" aria-checked="false" data-size="32">32<small>Lang</small>
             <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
         </div>
-        <!-- Moeilijkheid had al een hint die uitlegt wat de keuze praktisch
-             betekent; dit veld had die uitleg niet, terwijl "meer kaarten"
-             minstens zo'n praktisch gevolg heeft. -->
-        <p class="hint">Meer kaarten = een langer spel.</p>
+
       </fieldset>
 
       <div class="field">
@@ -1926,17 +1920,14 @@ input[type=range]::-moz-range-thumb {
           <input type="range" id="secs" min="20" max="60" step="5" value="30">
           <span class="secs" id="secsOut" aria-live="polite">30s</span>
         </div>
-        <!-- Bij de chips hierboven zie je alle standen in één oogopslag; bij
-             een schuif niet -- die verklapt zijn bereik pas als je naar de
-             rand sleept. Dezelfde .hint-regel als bij de andere velden. -->
-        <p class="hint">Van 20 tot 60 seconden.</p>
+        <p class="hint">30 seconden werkt goed voor de meeste groepen.</p>
       </div>
 
       <div class="field">
-        <h2 id="previewHead">Het spel van vanavond</h2>
+        <h2 id="previewHead">Jullie kaarten</h2>
         <div class="preview" id="preview" role="group" aria-labelledby="previewHead"></div>
-        <p class="hint">Tik op een kaart om ze te vervangen. Deze kaarten komen alle drie
-          de rondes terug — dat is de bedoeling: tegen ronde drie kent iedereen ze.</p>
+        <p class="hint">Tik op een kaart om ze te vervangen. Dezelfde kaarten komen in alle
+          3 rondes terug.</p>
       </div>
     </div>
 
