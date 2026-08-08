@@ -1878,6 +1878,19 @@ input[type=range]::-moz-range-thumb {
       </div>
     </fieldset>
 
+    <!-- Los van Geluid: de helft van de reden om geluid uit te zetten is een
+         stil huis, en juist dan is een trilling in de hand het meest waard.
+         Staat alleen op toestellen die vibrate() kennen (zie paintSetup). -->
+    <fieldset class="field" id="hapticsField" hidden>
+      <legend>Trilling</legend>
+      <div class="chips" id="hapticsChips" role="radiogroup" aria-label="Trilling">
+        <button class="chip" role="radio" aria-checked="false" data-haptics="1">Aan
+          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+        <button class="chip" role="radio" aria-checked="false" data-haptics="0">Uit
+          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+      </div>
+    </fieldset>
+
     <div class="field">
       <h2 id="previewHead">Het spel van vanavond</h2>
       <div class="preview" id="preview" role="group" aria-labelledby="previewHead"></div>
@@ -2247,11 +2260,25 @@ const DECKS = {
    ============================================================== */
 const Snd = (() => {
   let ctx = null;
+  let bus = null;                // één uitgang, zodat gestapelde cues niet klippen
   let on = true;                 // te wisselen in de instellingen
   function ac() {
     if (!ctx) { const C = window.AudioContext || window.webkitAudioContext; if (C) ctx = new C(); }
     if (ctx && ctx.state === "suspended") ctx.resume();
     return ctx;
+  }
+  /* Alle noten monden hier samen uit voordat ze de luidspreker raken. Zonder
+     deze knoop ging elke oscillator los naar ctx.destination, en dan klipt
+     een fanfare die nog naklinkt terwijl er ondertussen getikt wordt. */
+  function out() {
+    const c = ac(); if (!c) return null;
+    if (!bus) {
+      bus = c.createGain();
+      bus.gain.value = .9;
+      const comp = c.createDynamicsCompressor();
+      bus.connect(comp).connect(c.destination);
+    }
+    return bus;
   }
   function tone(freq, dur, type, vol, at, glide) {
     if (!on) return;
@@ -2264,7 +2291,7 @@ const Snd = (() => {
     g.gain.setValueAtTime(0.0001, t0);
     g.gain.exponentialRampToValueAtTime(vol || .18, t0 + 0.012);
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-    o.connect(g).connect(c.destination);
+    o.connect(g).connect(out() || c.destination);
     o.start(t0); o.stop(t0 + dur + .02);
   }
   return {
@@ -2276,13 +2303,25 @@ const Snd = (() => {
        hoorbaar kanaal voor de teller, en het werkt ook voor het kind dat
        niet naar het scherm kijkt omdat het staat uit te beelden.
        Na zeven kaarten stopt het stijgen -- een kwint hoger is nog vrolijk,
-       een octaaf hoger is schel, en een goede ploeg haalt er twaalf. */
+       een octaaf hoger is schel, en een goede ploeg haalt er twaalf.
+
+       Triangle en niet square: square is de klok (zie tick/go), en deze cue
+       klinkt tot vijftien keer per beurt -- dan moet hij zacht zijn, niet
+       scherp. */
     goed(i) {
       const s = Math.pow(2, Math.min(i || 0, 7) / 12);
-      tone(660 * s, .09, "square", .2, 0); tone(990 * s, .13, "square", .2, .08);
+      tone(660 * s, .07, "triangle", .2, 0); tone(990 * s, .10, "triangle", .2, .07);
     },
-    pas()   { tone(200, .13, "sine", .22, 0, 120); },
-    tick(f) { tone(f || 1400, .022, "square", .08, 0); },
+    /* Overslaan: neutraal en kort. Geen diepe daling meer -- die klonk
+       enigszins treurig voor iets dat tot vijftien keer per beurt gebeurt en
+       niets betekent behalve "volgende". */
+    pas()   { tone(200, .08, "sine", .2, 0, 150); },
+    /* Geweigerd: de laatste kaart kun je niet overslaan. Twee gelijke lage
+       noten, vlak en zonder veeg -- alles in deze app glijdt of stijgt, dus
+       vlak is hier vrij en betekent precies één ding: dit kan niet. Nooit
+       hetzelfde geluid als pas(), want dat is een ander bericht. */
+    nee()   { tone(220, .05, "sine", .2, 0); tone(220, .05, "sine", .2, .11); },
+    tick(f, v) { tone(f || 1600, .022, "square", v || .08, 0); },
     /* Het aftellen is de klok niet. Allebei stonden ze op tick(1300) --
        letterlijk dezelfde blip -- dus hoorde je vier gelijke piepjes waarvan
        de vierde toevallig het startsein was. Het kind dat staat uit te
@@ -2290,7 +2329,7 @@ const Snd = (() => {
        en één geluid hoort dan één ding te betekenen.
 
        Drie zachte dalende noten. Dalen, omdat stijgen al bezet is door
-       goed(), token() én fanfare() -- een stijgend drieklankje vóór de beurt
+       goed(), haul() én fanfare() -- een stijgend drieklankje vóór de beurt
        zou klinken als de eerste drie noten van de overwinning. Dat het
        daalt, zegt bovendien "zet je klaar" in plaats van "er komt iets
        binnen". En de toonhoogte vertelt waar je in het aftellen zit: drie
@@ -2304,8 +2343,53 @@ const Snd = (() => {
        er twee heeft. */
     go()    { tone(1175, .18, "square", .2, 0, 1560); },
     timeUp(){ tone(420, .55, "sawtooth", .22, 0, 90); tone(210, .6, "square", .12, .05, 60); },
-    token(i){ tone(520 + Math.min(i, 12) * 45, .07, "triangle", .16, i * .075); },
+    /* De buit van de hele beurt, in één cue -- er staat ook maar één "+N"
+       op het scherm. De omvang zit in het interval: bij twee kaarten een
+       kleine terts, bij een dozijn een octaaf. Wordt vertraagd aangeroepen
+       (zie turnEnd/endRound) zodat hij nooit boven timeUp() of fanfare()
+       heen speelt. */
+    haul(n) {
+      if (!n) return;
+      const top = 523 * Math.pow(2, Math.min(n, 12) / 12);
+      tone(523, .10, "triangle", .18, 0); tone(top, .22, "triangle", .18, .09);
+    },
+    /* De stapel leeggespeeld: tot nu toe het enige einde van een beurt
+       zonder eigen geluid, terwijl het de beste uitkomst is -- het loont om
+       de stapel leeg te spelen. Drie stijgende noten, de grote broer van
+       goed() en het spiegelbeeld van timeUp(). */
+    leeg() { [523, 784, 1047].forEach((f, i) => tone(f, .12, "triangle", .2, i * .08)); },
     fanfare(){ [523,659,784,1047].forEach((f,i)=>tone(f,.26,"square",.2,i*.13)); tone(1568,.5,"square",.16,.55); }
+  };
+})();
+
+/* ==============================================================
+   2b. TRILLING — hetzelfde model als Snd: korte cues, één betekenis
+   per cue, en nooit het enige kanaal. navigator.vibrate bestaat niet
+   op iOS, dus alles hieronder staat naast een geluid of een beeld;
+   wie het mist, mist niets.
+
+   Er is op het web geen sterkte te kiezen, alleen duur en ritme.
+   "Zwaarder" is dus langer, en "anders" is een ander ritme -- niet
+   een hardere klop, want die knop bestaat niet. */
+const Tril = (() => {
+  let on = true;
+  const kan = typeof navigator !== "undefined" && !!navigator.vibrate;
+  const buzz = p => { if (on && kan) { try { navigator.vibrate(p); } catch (e) {} } };
+  return {
+    supported: kan,
+    set enabled(v) { on = !!v; },
+    get enabled() { return on; },
+    tik()   { buzz(12); },                    // geraden
+    pas()   { buzz(10); },                    // overgeslagen
+    nee()   { buzz([20, 40, 20]); },          // geweigerd -- de enige "nee" in de app
+    zag()   { buzz([8, 60, 8]); },            // dubbele tik, niet geteld
+    tel()   { buzz(10); },                    // 3 - 2 - 1
+    go()    { buzz(35); },                    // de klok loopt
+    ijk()   { buzz(15); },                    // lange druk, halverwege
+    doe()   { buzz(50); },                    // lange druk voltooid
+    om()    { buzz([60, 70, 60]); },          // tijd om
+    leeg()  { buzz([20, 50, 20, 50, 40]); },  // stapel leeg
+    feest() { buzz([40, 60, 40, 60, 90]); }   // gewonnen
   };
 })();
 
@@ -2328,6 +2412,9 @@ let settings = {
   size: 24,
   secs: 30,
   sound: true,
+  /* Los van geluid: wie het geluid uitzet om het huis stil te houden heeft
+     een trilling in de hand juist het hardst nodig. */
+  haptics: true,
   /* De regeluitleg staat open tot je één keer een spel gestart hebt. Daarna
      klapt ze dicht en blijft dat, tenzij iemand haar zelf weer openzet. */
   rulesOpen: true
@@ -2440,6 +2527,11 @@ function show(name) {
 function paintSetup() {
   $$("#soundChips .chip").forEach(c =>
     c.setAttribute("aria-checked", String((c.dataset.sound === "1") === !!settings.sound)));
+  // Alleen tonen op een toestel dat vibrate() kent -- anders staat er een
+  // knop die niets doet, en dat is precies wat de app nergens anders heeft.
+  $("#hapticsField").hidden = !Tril.supported;
+  $$("#hapticsChips .chip").forEach(c =>
+    c.setAttribute("aria-checked", String((c.dataset.haptics === "1") === !!settings.haptics)));
   $$("#tierChips .chip").forEach(c =>
     c.setAttribute("aria-checked", String(c.dataset.tier === settings.tier)));
   $$("#sizeChips .chip").forEach(c =>
@@ -2498,6 +2590,13 @@ $("#soundChips").addEventListener("click", e => {
   saveSettings(); paintSetup();
   if (settings.sound) { Snd.unlock(); Snd.goed(); }   // even laten horen
 });
+$("#hapticsChips").addEventListener("click", e => {
+  const c = e.target.closest(".chip"); if (!c) return;
+  settings.haptics = c.dataset.haptics === "1";
+  Tril.enabled = settings.haptics;
+  saveSettings(); paintSetup();
+  if (settings.haptics) Tril.tik();   // even laten voelen
+});
 $("#btnBack").addEventListener("click", () => show("title"));
 
 /* ==============================================================
@@ -2534,7 +2633,7 @@ function holdButton(el, ms, run, paint) {
   function step(now) {
     const p = Math.min(1, (now - t0) / ms);
     draw(p);
-    if (p >= 1) { cancel(false); run(); }
+    if (p >= 1) { cancel(false); Tril.doe(); run(); }
     else raf = requestAnimationFrame(step);
   }
   function cancel(complain) {
@@ -2558,7 +2657,13 @@ function holdButton(el, ms, run, paint) {
    omslag is het enige ijkpunt onderweg: voorbij de helft. */
 const fillY = (el, btn) => p => {
   el.style.transform = "scaleY(" + p + ")";
-  if (btn) btn.classList.toggle("flooded", p > .5);
+  if (btn) {
+    const was = btn.classList.contains("flooded"), now = p > .5;
+    // De trilling hoort bij het overslaan van de helft, niet bij elk frame
+    // erna -- dus alleen op de overgang zelf.
+    if (now && !was) Tril.ijk();
+    btn.classList.toggle("flooded", now);
+  }
 };
 
 /* Eén tik, zoals elke andere knop op de titel. Zie de toelichting boven
@@ -2582,11 +2687,14 @@ $("#rules").addEventListener("toggle", () => {
 /* Te vroeg losgelaten: schudden, én de rand even in waarschuwingskleur.
    Dat tweede is er voor wie beperkte beweging aan heeft: daar valt de
    schud weg, en dan bleef er niets over. */
+/* Eén "nee" in de app, op elke plek waar iets geweigerd wordt: hier zit de
+   trilling daarom centraal, niet bij elke aanroeper apart. */
 function nudge(el) {
   el.classList.remove("nudge", "refuse");
   void el.offsetWidth;
   el.classList.add("nudge", "refuse");
   setTimeout(() => el.classList.remove("nudge", "refuse"), 500);
+  Tril.nee();
 }
 
 function openSetup() {
@@ -2954,6 +3062,7 @@ function countdown(done) {
      drie verschillende wel. */
   let last = COUNT_FROM;
   Snd.count(0);
+  Tril.tel();
   const t0 = performance.now();
   const step = now => {
     /* Ook aan de bovenkant afknellen. De tijdstempel van de eerste
@@ -2963,7 +3072,9 @@ function countdown(done) {
     const left = Math.min(MS, Math.max(0, MS - (now - t0)));
     arc.style.strokeDashoffset = LEN * (1 - left / MS);
     const shown = Math.ceil(left / 1000);
-    if (shown !== last && shown > 0) { last = shown; num.textContent = shown; Snd.count(COUNT_FROM - shown); }
+    if (shown !== last && shown > 0) {
+      last = shown; num.textContent = shown; Snd.count(COUNT_FROM - shown); Tril.tel();
+    }
     if (left <= 0) { handOffCountdown(); done(); return; }
     countRaf = requestAnimationFrame(step);
   };
@@ -2990,6 +3101,7 @@ function stopCountdown() {
 function handOffCountdown() {
   cancelAnimationFrame(countRaf); countRaf = null;
   Snd.go();
+  Tril.go();
   const el = $("#countdown");
   el.classList.add("out");
   setTimeout(() => { el.classList.remove("out"); el.hidden = true; }, 200);
@@ -3023,17 +3135,26 @@ function beginTurn() {
   runClock(totalMs);
 }
 
+/* De klok zwijgt tot tien seconden voor het einde: go() heeft al gezegd dat
+   ze loopt, en een blip per seconde daarvóór voegt niets toe -- het is
+   alleen ruis onder vier pratende spelers, een avond lang. Pas onder tien
+   seconden krijgt de tik iets te zeggen, en dan komt ze uit niets: dat is
+   sterker dan een tempowissel binnen een stroom die al twintig seconden
+   loopt. Ze versnelt daarna nog eens (2 Hz, dan 4 Hz) én wordt luider --
+   haast in drie kanalen: tempo, toonhoogte, volume. */
 function runClock(totalMs) {
   cancelAnimationFrame(clockRaf);
   const step = now => {
     const left = deadline - now;
     if (left <= 0) { paintClock(0, totalMs); timeUp(); return; }
     paintClock(left, totalMs);
-    // De tik versnelt naar het einde toe: 1 Hz, dan 2 Hz, dan 4 Hz.
-    const iv = left <= 5000 ? 250 : left <= 10000 ? 500 : 1000;
-    if (now - lastTickAt >= iv) {
-      lastTickAt = now;
-      Snd.tick(left <= 5000 ? 1900 : left <= 10000 ? 1600 : 1300);
+    if (left <= 10000) {
+      const crit = left <= 5000;
+      const iv = crit ? 250 : 500;
+      if (now - lastTickAt >= iv) {
+        lastTickAt = now;
+        Snd.tick(crit ? 1900 : 1600, crit ? .10 : .06);
+      }
     }
     clockRaf = requestAnimationFrame(step);
   };
@@ -3066,7 +3187,7 @@ let lastAct = 0;
 function acts() {
   if (current !== "play" || !G || G.card === null) return false;
   const now = performance.now();
-  if (now - lastAct < 280) { flash("seen"); return false; }
+  if (now - lastAct < 280) { flash("seen"); Tril.zag(); return false; }
   lastAct = now;
   return true;
 }
@@ -3251,6 +3372,7 @@ $("#btnGoed").addEventListener("click", () => {
   // De toon stijgt per kaart van deze beurt; nog vóór het ophogen, zodat de
   // eerste kaart de grondtoon krijgt.
   Snd.goed(G.gained);
+  Tril.tik();
   G.scores[G.team][G.round - 1]++;
   G.gained++;
   /* Het getal zelf gaat pas omhoog als het punt aankomt (zie landFly).
@@ -3268,9 +3390,12 @@ $("#btnGoed").addEventListener("click", () => {
 $("#btnPas").addEventListener("click", () => {
   if (current !== "play" || !G || G.card === null) return;
   // Laatste kaart: er valt niets over te slaan. Antwoorden doet hij wel.
-  if (G.pile.length === 0) { Snd.pas(); nudge($("#btnPas")); return; }
+  // Eigen geluid: dit is een weigering, geen overslag, en die twee moeten
+  // niet hetzelfde klinken. nudge() verzorgt de trilling.
+  if (G.pile.length === 0) { Snd.nee(); nudge($("#btnPas")); return; }
   if (!acts()) return;
   Snd.pas();
+  Tril.pas();
   G.pile.push(G.card);      // onderop, zonder straf
   nextCard("pas");
   syncControls();
@@ -3280,6 +3405,7 @@ $("#btnPas").addEventListener("click", () => {
 function timeUp() {
   stopClock(); releaseWake();
   Snd.timeUp();
+  Tril.om();
   if (G.card !== null) G.pile.push(G.card);   // onafgemaakte kaart terug
   G.card = null;
   G.pendingMs = 0;
@@ -3324,7 +3450,11 @@ function paintHoTally(freshA, freshB) {
 function turnEnd() {
   const freshA = G.team === 0 ? G.gained : 0;
   const freshB = G.team === 1 ? G.gained : 0;
-  for (let i = 0; i < G.gained; i++) Snd.token(i);
+  /* Eén cue voor de hele buit in plaats van een tik per punt: er staat ook
+     maar één "+N" op het scherm. Vertraagd, zodat hij niet boven de horen
+     van timeUp() heen speelt -- één cue per grens, de grootste wint. */
+  const n = G.gained;
+  if (n) setTimeout(() => Snd.haul(n), 450);
   G.team = 1 - G.team;
   G.pendingMs = 0;
 
@@ -3343,9 +3473,13 @@ function endRound() {
   // het om de stapel leeg te spelen.
   G.pendingMs = Math.round(remaining());
   G.card = null;
-  for (let i = 0; i < G.gained; i++) Snd.token(i);
 
+  // Laatste ronde: winner() laat zo meteen de fanfare horen, en die moet
+  // alleen klinken. Elders is leeggespeeld zelf al de beste uitkomst van
+  // een beurt en verdient een eigen cue.
   if (G.round >= ROUNDS) { winner(); return; }
+  Snd.leeg();
+  Tril.leeg();
 
   const freshA = G.scores[0][G.round - 1], freshB = G.scores[1][G.round - 1];
 
@@ -3430,6 +3564,9 @@ function winner() {
   rays(win === null ? "#F2B705" : TEAMS[win].hex);
   confetti(win === null ? ["#E8452B", "#1B6FC4", "#F2B705"] : [TEAMS[win].hex, "#F2B705"]);
   Snd.fanfare();
+  // Het lange feestritme is versiering, geen mededeling -- net als de
+  // confetti valt het weg bij beperkte beweging.
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) Tril.feest();
   G = null;
   show("winner");
 }
@@ -3619,6 +3756,7 @@ $("#btnStart").addEventListener("click", () => {
 
 load();
 Snd.enabled = settings.sound !== false;
+Tril.enabled = settings.haptics !== false;
 redraw();
 paintSetup();
 show("title");
@@ -3637,7 +3775,7 @@ if (location.search.indexOf("debug") !== -1) {
     get settings() { return settings; },
     get screen() { return current; },
     DECKS, TIER_ORDER, poolFor, shuffle, drawDeck, total,
-    stopClock, paintClock, sizeCard
+    stopClock, paintClock, sizeCard, Snd, Tril
   };
 }
 </script>
