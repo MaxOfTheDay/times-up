@@ -4009,7 +4009,12 @@ holdButton($("#btnStop"), 1100, () => {
 let wake = null;
 async function requestWake() {
   try {
-    if ("wakeLock" in navigator && !wake) wake = await navigator.wakeLock.request("screen");
+    /* De browser laat een lock zelf los zodra het document verborgen raakt
+       (tabblad wisselen, naar de achtergrond) -- maar zet "wake" niet terug
+       naar null. Zonder wake.released hier te toetsen bleef !wake dus altijd
+       false na zo'n terugkeer, en kwam er nooit meer een nieuwe lock bij. */
+    if ("wakeLock" in navigator && (!wake || wake.released))
+      wake = await navigator.wakeLock.request("screen");
   } catch (e) { wake = null; }
 }
 function releaseWake() {
@@ -4019,7 +4024,11 @@ function releaseWake() {
    in stilte af terwijl niemand kijkt, en is de tijd bij terugkomst op. */
 let frozenMs = 0;
 document.addEventListener("visibilitychange", () => {
-  if (current !== "play") return;
+  /* Pauze is een paneel óver het spelscherm heen, dus "current" blijft
+     "play" terwijl het openstaat. Zonder deze toets zette het weer
+     zichtbaar worden van het tabblad de klok stiekem weer aan -- en de
+     lock weer aan -- onder een openstaand pauzepaneel. */
+  if (current !== "play" || !$("#pauze").hidden) return;
   if (document.visibilityState === "hidden") {
     frozenMs = remaining();
     stopClock();
