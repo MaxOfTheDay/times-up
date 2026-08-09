@@ -3661,8 +3661,23 @@ $("#btnGoed").addEventListener("click", () => {
      waar het straks écht staat -- dus dat gebeurt op een label dat even
      vooruit geschilderd en meteen weer teruggezet wordt. */
   const from = midden("#card");
+  const klaar = !G.pile.length;
   flyGain(from, meetTurnScore());
-  if (!G.pile.length) { endRound(); return; }
+  if (klaar) {
+    /* De beste uitkomst van een beurt was de enige zonder eigen adempauze:
+       endRound() liep hier synchroon door in dezelfde tik, en show() (diep
+       in handoff()) snijdt een nog lopende vlucht af -- zie landFly() in
+       show(). Het punt van de laatste kaart landde dus nooit zichtbaar,
+       terwijl elke andere kaart die wip wel krijgt. G.card gaat net als bij
+       timeUp() vast op null: dezelfde vlag waar acts() en openPause() al op
+       controleren, zodat er niets tussen kan komen terwijl het punt
+       onderweg is. Zonder animatie (flyAnim staat dan al op null, zie
+       flyGain) is er niets om op te wachten. */
+    G.card = null;
+    if (flyAnim) flyAnim.onfinish = () => { landFly(); endRound(); };
+    else endRound();
+    return;
+  }
   nextCard("goed");
   syncControls();
 });
