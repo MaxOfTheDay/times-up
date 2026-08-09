@@ -1877,6 +1877,15 @@ input[type=range]::-moz-range-thumb {
   .turn-gain { font-size: 20px; padding: 1px 9px; }
   .btn-icon { width: 56px; height: 56px; }
   .btn-icon svg { width: 26px; }
+  /* Instellingen kreeg hier nooit een eigen regel: .setup-scroll en
+     .setup-foot stonden op de volle breedte van het scherm, en .chips (flex:
+     1 1 auto, geen bovengrens) rekte daarmee mee -- op een liggende tablet
+     werden de keuzeknoppen brede platte balken en de schuif een streep van
+     rand tot rand, terwijl de tekst erin dezelfde telefoonmaat hield. Dezelfde
+     kolombreedte als .side-by-side hierboven, gecentreerd: smal genoeg om als
+     rij knoppen te lezen in plaats van als een uitgerekte balk. */
+  #s-setup.screen { align-items: center; }
+  .setup-scroll, .setup-foot { width: 100%; max-width: 560px; }
 }
 </style>
 </head>
@@ -2549,8 +2558,28 @@ const Snd = (() => {
     o.connect(g).connect(out() || c.destination);
     o.start(t0); o.stop(t0 + dur + .02);
   }
+  /* De allereerste toon die ooit door de compressor gaat, komt er zachter
+     uit dan elke identieke toon erna -- gemeten met een offline render:
+     -32.7 dBFS voor de eerste tel van het aftellen tegen -21.3 dBFS voor de
+     tweede, hetzelfde motiefje, hetzelfde volume in de code. Dat is de
+     compressor die koud start: zijn schatting van het niveau begint bij
+     niets en heeft een fractie van een seconde nodig om bij te trekken. Bij
+     0 tot 200 ms sinds die start staat de piep nog gedempt; ruim erna, in
+     dezelfde render, is hij op volle sterkte.
+     Zonder tegenmaatregel is dat bijna altijd de "3" van het allereerste
+     aftellen van de avond: de ene tel die zachter klinkt dan de twee erna,
+     zonder dat er iets in de code verschilt. Vandaar dat unlock() de bus nu
+     alvast opstart en met een toon ver onder gehoordrempel warm maakt, op
+     het eerste moment dat er toch al een aanraking is (tandwiel, chip,
+     Beginnen) en niet pas bij de eerste tel zelf -- er zit dan allang een
+     schermwissel en een momentje kijken tussen, ruim genoeg om bij te
+     trekken voor de klok gaat lopen. */
   return {
-    unlock: ac,
+    unlock() {
+      const c = ac();
+      if (c && !bus) tone(100, .05, "sine", .00001, 0);
+      return c;
+    },
     set enabled(v) { on = !!v; },
     get enabled() { return on; },
     /* Hetzelfde motiefje van twee noten, maar per geraden kaart een halve
@@ -2911,6 +2940,18 @@ function holdButton(el, ms, run, paint) {
     if (complain) nudge(el);
   }
 
+  /* Een lange druk is precies wat een tablet als "lang indrukken" leest --
+     Safari en Chrome allebei -- en dat opent zonder tegenmaatregel de eigen
+     tekst-/afbeeldingsmenu van het toestel ("Kopiëren", "Zoeken", "Deel via
+     ...") bovenop de knop. e.preventDefault() op pointerdown voorkomt dat
+     niet: dat menu komt van een apart, later "contextmenu"-event. De
+     globale regel (html, body { user-select: none }) dekt alleen tekst-
+     selectie, niet het losse callout-menu dat -webkit-touch-callout regelt.
+     Zonder deze twee regels laat een tablet je nooit bij de 1100 ms komen --
+     het menu opent er ruim voor, en de knop onder je vinger raakt niet meer
+     aan. */
+  el.style.webkitTouchCallout = "none";
+  el.addEventListener("contextmenu", e => e.preventDefault());
   el.addEventListener("pointerdown", e => { e.preventDefault(); Snd.unlock(); start(); });
   ["pointerup", "pointerleave", "pointercancel"].forEach(ev =>
     el.addEventListener(ev, () => cancel(true)));
