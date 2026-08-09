@@ -2598,8 +2598,16 @@ const Snd = (() => {
     },
     /* Overslaan: neutraal en kort. Geen diepe daling meer -- die klonk
        enigszins treurig voor iets dat tot vijftien keer per beurt gebeurt en
-       niets betekent behalve "volgende". */
-    pas()   { tone(200, .08, "sine", .2, 0, 150); },
+       niets betekent behalve "volgende".
+
+       Volume stond op .2, gelijk aan goed() -- maar een sinustoon draagt bij
+       gelijke pieken meer RMS-energie dan de triangle van goed() (geen
+       boventonen om de energie over te verdelen), dus gemeten kwam pas()
+       daarmee lúider uit dan goed(): -15,5 dBFS tegen -17,6. Het signaal
+       zonder betekenis werd zo nadrukkelijker dan het signaal voor "goed
+       geraden". .17 landt op -17,3 dBFS, naast goed() in plaats van
+       erboven. */
+    pas()   { tone(200, .08, "sine", .17, 0, 150); },
     /* Geweigerd: de laatste kaart kun je niet overslaan. Twee gelijke lage
        noten, vlak en zonder veeg -- alles in deze app glijdt of stijgt, dus
        vlak is hier vrij en betekent precies één ding: dit kan niet. Nooit
@@ -2639,8 +2647,18 @@ const Snd = (() => {
        het geluid dat één keer per avond klinkt. .16 landt op -15,3 dBFS:
        nog altijd duidelijk boven de laatste telling (-20,4), en nog steeds
        even nadrukkelijk als timeUp() en goed(), maar niet langer boven ze
-       uit -- en niet langer gelijk aan fanfare(). */
-    go()    { tone(1175, .18, "square", .16, 0, 1560); },
+       uit -- en niet langer gelijk aan fanfare().
+
+       De duur ging daarna nog van .18 naar .12. Een spectrale meting van de
+       drie kanten waarlangs dit kon (smallere veeg, korter, ander baltype)
+       liet zien dat de helderheid van deze toon vrijwel volledig uit het
+       golftype komt, niet uit hóe ver de veeg reikt: 1175→1320 in plaats
+       van 1175→1560 gaf vrijwel hetzelfde spectrale zwaartepunt (~6250 Hz
+       tegen ~6300 Hz) -- dat scheelt dus niets. Wat wél scheelt is hoe lang
+       je aan dat zwaartepunt blootstaat. Zelfde golftype (square blijft van
+       de klok, zie count() hierboven), zelfde veeg, alleen korter: nog
+       steeds even fel, maar zes tiende van een tel eerder voorbij. */
+    go()    { tone(1175, .12, "square", .16, 0, 1560); },
     timeUp(){ tone(420, .55, "sawtooth", .22, 0, 90); tone(210, .6, "square", .12, .05, 60); },
     /* De buit van de hele beurt, in één cue -- er staat ook maar één "+N"
        op het scherm. De omvang zit in het interval: bij twee kaarten een
