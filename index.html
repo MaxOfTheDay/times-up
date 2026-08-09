@@ -2629,8 +2629,18 @@ const Snd = (() => {
     /* Het startsein. Langer en helderder dan welke tick ook, met een veeg
        omhoog -- het enige moment in een beurt waarop er iets begint in
        plaats van verstrijkt. Eén noot, dus geen verwarring met goed(), dat
-       er twee heeft. */
-    go()    { tone(1175, .18, "square", .2, 0, 1560); },
+       er twee heeft.
+
+       Het volume stond op .2, en gemeten (dezelfde offline render als
+       hierboven bij unlock()) kwam dat neer op -13,6 dBFS piek -- exact
+       even luid als fanfare(), de viering bij het einde van het hele spel,
+       en luider dan timeUp() (-16,7) en goed() (-16,9). Een geluid dat zes
+       tot twaalf keer per potje klinkt hoort niet net zo zwaar te wegen als
+       het geluid dat één keer per avond klinkt. .16 landt op -15,3 dBFS:
+       nog altijd duidelijk boven de laatste telling (-20,4), en nog steeds
+       even nadrukkelijk als timeUp() en goed(), maar niet langer boven ze
+       uit -- en niet langer gelijk aan fanfare(). */
+    go()    { tone(1175, .18, "square", .16, 0, 1560); },
     timeUp(){ tone(420, .55, "sawtooth", .22, 0, 90); tone(210, .6, "square", .12, .05, 60); },
     /* De buit van de hele beurt, in één cue -- er staat ook maar één "+N"
        op het scherm. De omvang zit in het interval: bij twee kaarten een
