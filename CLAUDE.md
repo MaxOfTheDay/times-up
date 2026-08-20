@@ -594,8 +594,14 @@ alle drie de standen -- dit hangt aan de kaart, niet aan de moeilijkheid.
 Elke kaart zit in precies één band, en dus in hoogstens twee standen (een
 makkelijke in Makkelijk en Medium, een moeilijke in Medium en Moeilijk).
 Wie van Makkelijk naar Moeilijk springt ziet zijn weggelegde kaarten dus
-verdwijnen; `#cbElders` zegt dan dat ze er nog zijn, want zonder die regel
-leest het als "de app is het vergeten".
+verdwijnen, en dat mag niet lezen als "de app is het vergeten". Daar stond
+eerst een regel voor ("2 weggelegde kaarten horen niet bij deze stand"), en
+die moest weg: een zin die een afwezigheid verklaart, in beeld bij iedereen
+die één kaart weglegt en daarna van stand wisselt. Het getal op
+"Alles terugleggen (2)" telt de hele lijst en daalt dus niet bij het
+wisselen -- een getal dat blijft staan is het bewijs dat er niets zoek is,
+zonder dat er iets beweerd hoeft te worden. **Zet zo'n uitleg niet terug**;
+zoek iets dat het zonder zin doet.
 
 Vier keuzes in de lijst die er anders uitzien dan ze bedoeld zijn:
 
