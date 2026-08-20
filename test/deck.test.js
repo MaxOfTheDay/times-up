@@ -79,6 +79,54 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   });
   ok(!tofu.length, 'emoji zonder glyph: ' + tofu.join(', '));
 
+  /* ------------------------------------------------------------------
+   * De kaartenbak: wat de volwassene weglegt, komt niet meer langs.
+   *
+   * Dit is de enige plek in de app waar een keuze van de volwassene een
+   * kaart uit het spel houdt, en ze is met het blote oog niet te
+   * controleren: je zou tweehonderd potjes moeten spelen om te zien of
+   * "boom" echt weg is.
+   * ------------------------------------------------------------------ */
+  const bak = await page.evaluate(() => {
+    const T = window.__tijd;
+    const zet = w => { T.settings.hidden = w; };
+    const out = {};
+
+    zet([]);
+    out.vol = T.bakFor('klein').length;
+
+    // Eén kaart weg: uit de bak van elke stand waar ze in zit, en uit elk
+    // potje dat daarna getrokken wordt.
+    zet(['boom']);
+    out.naEen = T.bakFor('klein').length;
+    out.inPotjes = false;
+    for (let i = 0; i < 300; i++)
+      if (T.drawDeck('klein', 32).some(c => c[1] === 'boom')) out.inPotjes = true;
+    // "boom" is een makkelijke kaart: die zit in Makkelijk en in Medium,
+    // en niet in Moeilijk. De bak van Moeilijk hoort dus niet te krimpen.
+    out.medium = T.poolFor('midden').length - T.bakFor('midden').length;
+    out.moeilijk = T.poolFor('groot').length - T.bakFor('groot').length;
+
+    // De ondergrens kijkt naar álle drie de standen, ook die waar je nu
+    // niet in staat: anders leeg je vanuit Medium (183 kaarten) de bak van
+    // Makkelijk (90) zonder dat er ooit iets tegenhoudt.
+    zet(window.__tijd.DECKS.klein.slice(0, 50).map(c => c[1]));
+    out.kleinOver = T.bakFor('klein').length;
+    out.nogEenMakkelijke = T.canHide(window.__tijd.DECKS.klein[50][1]);
+    out.nogEenMoeilijke = T.canHide(window.__tijd.DECKS.groot[0][1]);
+
+    zet([]);
+    return out;
+  });
+
+  ok(bak.naEen === bak.vol - 1, `een weggelegde kaart verdwijnt niet uit de bak (${bak.vol} -> ${bak.naEen})`);
+  ok(!bak.inPotjes, 'een weggelegde kaart wordt in 300 potjes tóch nog getrokken');
+  ok(bak.medium === 1, 'een weggelegde makkelijke kaart zit nog in de bak van Medium');
+  ok(bak.moeilijk === 0, 'een weggelegde makkelijke kaart krimpt de bak van Moeilijk, en die kent haar niet eens');
+  ok(bak.kleinOver === 40, `Makkelijk houdt ${bak.kleinOver} kaarten over in plaats van 40`);
+  ok(!bak.nogEenMakkelijke, 'de ondergrens van 40 laat er tóch nog een makkelijke kaart uit');
+  ok(bak.nogEenMoeilijke, 'de ondergrens houdt een moeilijke kaart tegen terwijl Makkelijk daar niet door krimpt');
+
   await browser.close();
   if (fails.length) { console.log('\nFOUT:\n' + fails.map(f => ' - ' + f).join('\n')); process.exit(1); }
   console.log('  kaarten in orde');
