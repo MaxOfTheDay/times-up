@@ -2233,13 +2233,22 @@ input[type=range]::-moz-range-thumb {
           <!-- Alleen te zien als er iets weg ligt. Een knop die zegt dat er
                niets terug te leggen valt, is een knop te veel. -->
           <div class="cb-aside" id="cbAsideBar" hidden>
-            <p class="hint" id="cbElders" hidden></p>
             <!-- De ondergrens schudt de tegel weg met dezelfde "nee" als
                  overal in de app, maar een schud zegt niet waarom. Op dit
                  scherm mag tekst, en dit is precies zo'n geval: zonder deze
-                 regel lijkt de app stuk in plaats van vol. -->
+                 regel lijkt de app stuk in plaats van vol. Hij staat er
+                 alleen in een stand die je met vijftig tikken bereikt, dus
+                 vrijwel niemand ziet hem ooit -- en wie hem ziet, heeft hem
+                 nodig. -->
             <p class="hint" id="cbVol" hidden></p>
-            <button class="btn-plain" id="btnRestoreAll">Alles terugleggen</button>
+            <!-- Het getal telt de hele lijst, niet alleen wat er in deze
+                 stand zichtbaar is. Dat is met opzet: hier stond een regel
+                 die uitlegde dat de rest bij een andere stand hoort, en een
+                 zin die een afwezigheid verklaart is precies de soort tekst
+                 die dit scherm niet moet hebben. Een getal dat niet daalt
+                 als je van stand wisselt, zegt hetzelfde zonder iets te
+                 beweren: er ligt niets zoek. -->
+            <button class="btn-plain" id="btnRestoreAll"></button>
           </div>
           <div class="cards" id="cbAll"></div>
         </div>
@@ -3115,7 +3124,6 @@ function paintCardCounts() {
   const pool = poolFor(settings.tier);
   const bak = pool.filter(c => !weg.has(c[1])).length;
   const hier = pool.length - bak;
-  const elders = settings.hidden.length - hier;
 
   $("#cbCount").textContent = hier
     ? bak + " in het spel · " + hier + " weggelegd"
@@ -3128,13 +3136,18 @@ function paintCardCounts() {
      kaarten zitten in Makkelijk en Medium, de moeilijke in Medium en
      Moeilijk. Wie van Makkelijk naar Moeilijk springt, ziet zijn
      weggelegde kaarten dus uit de lijst verdwijnen -- ze horen daar
-     gewoon niet. Zonder deze regel leest dat als "de app is het vergeten",
-     en dat is het niet: zet de stand terug en ze staan er weer. */
-  const el = $("#cbElders");
-  el.hidden = elders <= 0;
-  el.textContent = elders === 1
-    ? "1 weggelegde kaart hoort niet bij deze stand en staat er dus niet bij."
-    : elders + " weggelegde kaarten horen niet bij deze stand en staan er dus niet bij.";
+     gewoon niet.
+
+     Hier stond een regel die dat uitlegde ("2 weggelegde kaarten horen
+     niet bij deze stand"). Dat was een zin die een afwezigheid verklaart,
+     en die staat er dus bij iedereen die één kaart weglegt en daarna van
+     stand wisselt -- dat is precies de tekst die dit scherm niet moet
+     hebben. Het getal op de knop doet hetzelfde werk stiller: het telt de
+     hele lijst en daalt dus niet als je van stand wisselt. Wat de regel
+     moest voorkomen was "de app is het vergeten", en daarvoor is een
+     getal dat blijft staan genoeg bewijs. */
+  $("#btnRestoreAll").textContent =
+    "Alles terugleggen (" + settings.hidden.length + ")";
 
   /* Zodra één van de drie standen op de ondergrens staat, worden er tikken
      geweigerd -- ook op deze stand, want er zitten kaarten in die de bak
@@ -3142,8 +3155,8 @@ function paintCardCounts() {
   const vol = $("#cbVol");
   vol.hidden = !TIER_ORDER.some(t =>
     poolFor(t).filter(c => !weg.has(c[1])).length <= MIN_BAK);
-  vol.textContent = "Een bak blijft altijd op minstens " + MIN_BAK + " kaarten " +
-    "staan. Leg er eerst een terug om een andere te kunnen wegleggen.";
+  vol.textContent = "De bak blijft op minstens " + MIN_BAK +
+    " kaarten staan — leg er eerst een terug.";
 
   /* De enige plek in de app waar staat wannéér er getrokken wordt. Hij
      staat onder "Kaarten per potje" en wijst met "die N" terug naar de
