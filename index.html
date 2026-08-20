@@ -380,7 +380,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    chips, "terug", het tandwiel, de pauzeknop en de kaartjes in de
    voorvertoning dood aanvoelden. */
 button.btn-go, button.btn-good, button.btn-skip, button.btn-wide,
-button.btn-icon, button.btn-danger, button.chip, button.pv {
+button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   transition: transform calc(var(--t-press) * var(--dur)) ease,
               box-shadow calc(var(--t-press) * var(--dur)) ease;
 }
@@ -394,10 +394,15 @@ button.btn-icon, button.btn-danger, button.chip, button.pv {
    "Pas" hoort hierbij en niet bij --lift-2: het is de mindere keuze naast
    "goed", niet de handeling waar dit scherm voor bestaat, en droeg tot nu
    toe per ongeluk hetzelfde gewicht. */
-.btn-icon:active, .btn-danger:active, .chip:active, .pv:active, .btn-skip:active {
+.btn-icon:active, .btn-danger:active, .chip:active, .pv:active, .btn-skip:active,
+.btn-plain:active {
   transform: translate(var(--lift-1), var(--lift-1));
   box-shadow: 0 0 0 var(--ink);
 }
+/* Een weggelegde kaart houdt haar eigen, lichtere schaduw -- anders zakt ze
+   bij een duw naar een rand die er niet stond en springt ze even donkerder
+   dan ze in rust is. */
+.pv.aside:active { box-shadow: 0 0 0 var(--rule); }
 
 /* Knoppen die je moet vasthouden negeren een tik. Zonder terugkoppeling
    lijkt het toestel dan stuk, dus schudt de knop even: "blijf duwen".
@@ -926,20 +931,112 @@ input[type=range]::-moz-range-thumb {
 }
 .secs { font-weight: 900; font-size: 22px; min-width: 62px; text-align: right; font-variant-numeric: tabular-nums; }
 
-/* Geen eigen rolgebied meer binnen een scherm dat zelf al rolt: dat
-   maakte van de kaartenlijst een kijkgaatje van twee rijen hoog. */
-.preview {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); gap: var(--s-2);
-  padding: 10px;
-  border: var(--line-2) dashed var(--rule);
+/* ============================================================
+   DE KAARTENBAK — alle kaarten waar een potje uit getrokken kan worden.
+
+   Dichtgeklapt is dit één regel met een telling erin; opengeklapt is het
+   de volledige bak, alfabetisch, waar je kaarten uit weglegt en weer in
+   terugzet. De vouwregel draagt dezelfde plus-wordt-min als de
+   regeluitleg bovenaan dit scherm: één teken voor "hier zit meer achter",
+   op de twee plekken in de app waar dat zo is.
+
+   De typografie is wél die van een veldkop en niet die van de
+   regeluitleg, want dit ís een veld -- het staat tussen Moeilijkheid en
+   Kaarten per potje in en hoort in dat rijtje mee te lezen.
+   ============================================================ */
+.cardbox { margin: 0; }
+.cardbox > summary {
+  list-style: none; cursor: pointer;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 2px var(--s-2);
+  min-height: var(--tap);
+  font-size: 13px; font-weight: 900; text-transform: uppercase;
+  letter-spacing: .12em; color: var(--ink-2);
+}
+.cardbox > summary::-webkit-details-marker { display: none; }
+.cardbox > summary::before {
+  content: "+";
+  font-weight: 900; font-size: 17px; line-height: 1;
+  width: 1.1em; text-align: center;
+}
+.cardbox[open] > summary::before { content: "−"; }
+/* De telling zelf is geen kop maar een uitkomst, dus ze staat in de maat en
+   de kleur van een bijschrift -- direct achter de kop, als één zin.
+
+   Ze stond eerst rechts uitgelijnd met margin-left:auto, en dat is precies
+   de kolom waar het zwevende huisje hangt: "89 in het spel · 1 weggelegd"
+   verdween er half achter zodra je dit veld in beeld scrollde. Alles op dit
+   scherm lijnt links uit, en dat is niet toevallig -- rechtsboven is van de
+   uitgang. */
+.cb-count {
+  font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  text-transform: none; color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.cb-body { padding-top: var(--s-2); }
+.cb-body .hint { margin-top: 0; margin-bottom: var(--s-3); }
+.cb-aside { margin-bottom: var(--s-3); }
+/* Geen eigen rolgebied binnen een scherm dat zelf al rolt: dat maakte van
+   de kaartenlijst een kijkgaatje van twee rijen hoog. */
+/* 96 px en niet de 74 van de oude voorvertoning van 24 kaarten. Die 74
+   gaven op een telefoon vier kolommen van 84 px, en daar past het woord
+   van 24 van de 275 kaarten niet op één regel: "bouwvakker" brak dan af
+   als BOUWVAKKE / R. Op drie kolommen van 114 px blijven er nog drie over,
+   en dat zijn de kaarten die écht lang zijn (lieveheersbeestje).
+   Het scrollen dat het kost -- 62 rijen in plaats van 47 voor de grootste
+   bak -- is de goedkoopste helft van die ruil: je komt hier voor één
+   kaart, en je vindt haar op de letter. */
+.cards {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: var(--s-2);
 }
 .pv {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
   padding: 6px 2px; border: var(--line-2) solid var(--ink); background: var(--paper);
   box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
 }
-.pv span { font-size: 26px; line-height: 1.1; }
-.pv small { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; }
+.pv span { font-size: 30px; line-height: 1.1; }
+.pv small {
+  font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .03em;
+  /* De bak toont álle woorden, dus ook "lieveheersbeestje" en
+     "brandblusser" -- 26 van de 275 zijn te lang voor één regel op een
+     tegel van 84 px. De voorvertoning van 24 kaarten kwam die zelden
+     tegen; hier lopen ze over de rand van hun eigen tegel heen.
+     Afbreken op een lettergreep als de browser een Nederlands woordenboek
+     heeft (de pagina staat op lang="nl"), en anders gewoon ergens --
+     "anywhere" en niet "break-word", want alleen de eerste rekent mee in
+     de kleinst mogelijke breedte van de tegel. Met break-word groeide het
+     woord dwars over zijn buren heen in plaats van af te breken.
+     balance verdeelt die twee regels netjes: anders bleef er van
+     "bouwvakker" een losse R op de tweede regel over. */
+  text-align: center; line-height: 1.15; max-width: 100%;
+  hyphens: auto; overflow-wrap: anywhere; text-wrap: balance;
+}
+/* Weggelegd. Twee kanalen naast elkaar, zoals overal in deze app:
+   de tegel verbleekt (papier, lijn en inkt zakken allemaal een stap terug)
+   én er staat een streep door het woord. De tekening blijft flauw
+   zichtbaar, want je moet de kaart nog wel kunnen herkennen als je haar
+   komt terughalen.
+
+   Bewust geen kleur erbij: rood is Vos, blauw is Uil, en --danger hoort
+   bij stoppen. Een weggelegde kaart is niets gevaarlijks -- ze ligt
+   gewoon opzij, en één tik zet haar terug. */
+.pv.aside {
+  background: var(--paper-2); border-color: var(--rule);
+  box-shadow: var(--lift-1) var(--lift-1) 0 var(--rule);
+}
+.pv.aside span { opacity: .3; }
+.pv.aside small { color: var(--ink-2); text-decoration: line-through; }
+/* De hulpknop met tekst: dezelfde huid als pauze, huisje en terug (papier,
+   inkt-rand, --lift-1), want hij weegt hetzelfde. Geen cirkel: de enige
+   cirkel op tapmaat per scherm is de hoofdhandeling, en dat is hier
+   "Beginnen" onderin. */
+.btn-plain {
+  min-height: var(--tap); padding: 0 var(--s-4);
+  background: var(--paper); border: var(--line-2) solid var(--ink);
+  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
+  font-weight: 900; text-transform: uppercase; letter-spacing: .06em; font-size: 12px;
+  color: var(--ink);
+}
 .hint { font-size: 12px; color: var(--ink-2); margin: var(--s-2) 0 0; line-height: 1.45; }
 
 /* ============================================================
@@ -2105,9 +2202,55 @@ input[type=range]::-moz-range-thumb {
         <p class="hint">Elke stand bevat ook kaarten uit de vorige, makkelijkere stand.</p>
       </fieldset>
 
+      <!-- Hier stond "Jullie kaarten": de 24 kaarten van het eerstvolgende
+           potje, als raster. Dat raster deed twee dingen tegelijk en werd
+           daardoor verkeerd gelezen -- het tóónde de greep van dit potje en
+           het wérd gelezen als "de kaarten van het spel". Wie na een potje
+           ging kijken zag bovendien een andere 24 dan hij net gespeeld had,
+           want elk nieuw potje trok stilletjes opnieuw.
+
+           Nu staat er de bak zelf: alle kaarten waar ooit uit getrokken kan
+           worden, met de telling in de vouwregel. De greep van 24 is
+           nergens meer te zien vóór je speelt -- die wordt pas getrokken als
+           je op Beginnen tikt (zie newGame). Daarmee is het verschil tussen
+           "wat ik zag" en "wat ik kreeg" niet gerepareerd maar onmogelijk.
+
+           Dichtgeklapt, met dezelfde plus-wordt-min als de regeluitleg: de
+           lijst is 90 tot 185 tegeltjes lang en dat is niets wat je elke
+           avond langs wil scrollen. De telling staat wél altijd in beeld,
+           dus het antwoord op "waar wordt uit getrokken" kost geen tik. -->
+      <details class="cardbox" id="cardBox">
+        <summary>
+          Alle kaarten
+          <span class="cb-count" id="cbCount"></span>
+        </summary>
+        <div class="cb-body">
+          <!-- Eerst waar dit vak voor is, dan pas de uitweg. Andersom stond
+               "Alles terugleggen" als eerste ding onder de kop, terwijl het
+               het zeldzaamste is wat je hier doet. -->
+          <p class="hint">Tik op een kaart om ze weg te leggen: dan komt ze in geen
+            enkel potje meer terug. Nog een tik legt ze terug.</p>
+          <!-- Alleen te zien als er iets weg ligt. Een knop die zegt dat er
+               niets terug te leggen valt, is een knop te veel. -->
+          <div class="cb-aside" id="cbAsideBar" hidden>
+            <p class="hint" id="cbElders" hidden></p>
+            <!-- De ondergrens schudt de tegel weg met dezelfde "nee" als
+                 overal in de app, maar een schud zegt niet waarom. Op dit
+                 scherm mag tekst, en dit is precies zo'n geval: zonder deze
+                 regel lijkt de app stuk in plaats van vol. -->
+            <p class="hint" id="cbVol" hidden></p>
+            <button class="btn-plain" id="btnRestoreAll">Alles terugleggen</button>
+          </div>
+          <div class="cards" id="cbAll"></div>
+        </div>
+      </details>
+
       <fieldset class="field">
-        <legend>Aantal kaarten</legend>
-        <div class="chips" id="sizeChips" role="radiogroup" aria-label="Aantal kaarten">
+        <!-- "Aantal kaarten" stond hier vlak onder een stapel van 90 tot 185
+             en betekende toch 16, 24 of 32. Twee getallen die allebei
+             "kaarten" heten, met verschillende betekenis, boven elkaar. -->
+        <legend>Kaarten per potje</legend>
+        <div class="chips" id="sizeChips" role="radiogroup" aria-label="Kaarten per potje">
           <button class="chip" role="radio" aria-checked="false" data-size="16">16<small>Kort</small>
             <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
           <button class="chip" role="radio" aria-checked="false" data-size="24">24<small>Normaal</small>
@@ -2115,7 +2258,10 @@ input[type=range]::-moz-range-thumb {
           <button class="chip" role="radio" aria-checked="false" data-size="32">32<small>Lang</small>
             <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
         </div>
-
+        <!-- De enige plek waar staat wannéér er getrokken wordt. Die zin is
+             het antwoord op de vraag waar dit hele blok voor gemaakt is,
+             dus hij staat er voluit en met de echte getallen erin. -->
+        <p class="hint" id="drawHint"></p>
       </fieldset>
 
       <div class="field">
@@ -2125,13 +2271,6 @@ input[type=range]::-moz-range-thumb {
           <span class="secs" id="secsOut" aria-live="polite">30s</span>
         </div>
         <p class="hint">30 seconden werkt goed voor de meeste groepen.</p>
-      </div>
-
-      <div class="field">
-        <h2 id="previewHead">Jullie kaarten</h2>
-        <div class="preview" id="preview" role="group" aria-labelledby="previewHead"></div>
-        <p class="hint">Tik op een kaart om ze te vervangen. Dezelfde kaarten komen in alle
-          3 rondes terug.</p>
       </div>
     </div>
 
@@ -2739,10 +2878,19 @@ let settings = {
   haptics: true,
   /* De regeluitleg staat open tot je één keer een spel gestart hebt. Daarna
      klapt ze dicht en blijft dat, tenzij iemand haar zelf weer openzet. */
-  rulesOpen: true
+  rulesOpen: true,
+  /* De kaartenbak begint dichtgeklapt -- 90 tot 185 tegeltjes zijn niets
+     wat je elke avond langs wil scrollen -- maar wie hem openzet, vindt
+     hem de volgende keer open. Zelfde afspraak als bij de regeluitleg. */
+  cardsOpen: false,
+  /* Weggelegde kaarten, op het wóórd. Niet op de emoji: als een tekening
+     ooit vervangen wordt door een betere voor hetzelfde woord, hoort de
+     keuze van de volwassene te blijven staan.
+     Eén lijst voor alle drie de standen, want dit hangt aan de kaart en
+     niet aan de moeilijkheid: boom weggelegd is boom weggelegd. */
+  hidden: []
 };
 let G = null;          // lopend spel, of null
-let draft = [];        // getrokken kaarten op het instellingenscherm
 
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
@@ -2757,6 +2905,11 @@ function load() {
     const s = JSON.parse(localStorage.getItem(KEY_SET) || "null");
     if (s && typeof s === "object") settings = Object.assign(settings, s);
   } catch (e) { /* kapotte opslag: gewoon opnieuw beginnen */ }
+  // Opslag van vóór de kaartenbak heeft dit veld niet, en een kapotte
+  // opslag kan er van alles in gezet hebben. Alles wat geen lijst van
+  // woorden is, telt als "niets weggelegd".
+  if (!Array.isArray(settings.hidden)) settings.hidden = [];
+  settings.hidden = settings.hidden.filter(w => typeof w === "string");
 }
 function saveSettings() {
   try { localStorage.setItem(KEY_SET, JSON.stringify(settings)); } catch (e) {}
@@ -2801,8 +2954,34 @@ function poolFor(tier) {
                 : DECKS[TIER_ORDER[i - 1]].concat(DECKS[tier]);
 }
 
+/* poolFor() zegt wat er in een stand zit; bakFor() zegt waar écht uit
+   getrokken wordt -- dat is die stand minus wat de volwassene weggelegd
+   heeft. Alles wat een potje aanraakt loopt via bakFor(); poolFor() blijft
+   zuiver, want test/deck.test.js gebruikt hem om de kaarten zelf te keuren
+   en die keuring hoort niet af te hangen van wat er thuis weggelegd is. */
+function bakFor(tier) {
+  const weg = new Set(settings.hidden);
+  return poolFor(tier).filter(c => !weg.has(c[1]));
+}
+
+/* De bak mag nooit onder deze grens zakken. Niet omdat het spel dan stukgaat
+   -- 32 kaarten zijn er genoeg voor een potje -- maar omdat elk potje dan
+   ongeveer dezelfde kaarten trekt, en dat merk je pas de derde avond.
+   Veertig is 32 (het langste potje) plus lucht. */
+const MIN_BAK = 40;
+
+/* De controle gaat over álle drie de standen, ook de stand waar je nu niet
+   in zit. Anders leg je op Medium -- 183 kaarten, ruim zat -- vijftig
+   makkelijke kaarten weg en sta je later op Makkelijk voor een lege bak,
+   zonder dat er ooit iets gewaarschuwd heeft. */
+function canHide(word) {
+  const weg = new Set(settings.hidden); weg.add(word);
+  return TIER_ORDER.every(t =>
+    poolFor(t).filter(c => !weg.has(c[1])).length >= MIN_BAK);
+}
+
 function drawDeck(tier, size) {
-  return shuffle(poolFor(tier)).slice(0, size);
+  return shuffle(bakFor(tier)).slice(0, size);
 }
 
 /* ==============================================================
@@ -2861,48 +3040,164 @@ function paintSetup() {
   $("#secs").value = settings.secs;
   $("#secsOut").textContent = settings.secs + "s";
   $("#rules").open = !!settings.rulesOpen;
-  paintPreview();
+  $("#cardBox").open = !!settings.cardsOpen;
+  paintCards();
 }
 
-function paintPreview() {
-  const box = $("#preview");
+/* ==============================================================
+   DE KAARTENBAK
+
+   Twee helften, en dat verschil doet er echt toe:
+
+   buildCards() bouwt het raster opnieuw op. Dat gebeurt alleen als de
+   stand verandert of als het vak voor het eerst opengaat -- 185 knoppen
+   maken is niet duur, maar het raster opnieuw laten stromen terwijl je
+   vinger op een tegel ligt wél: dan springt de kaart weg onder je hand.
+
+   paintCardCounts() zet de getallen bij. Dat gebeurt élke keer, ook als de
+   bak dichtgeklapt is, want de telling in de vouwregel en de zin onder
+   "Kaarten per potje" moeten kloppen zonder dat je iets hoeft open te
+   doen.
+
+   Wegleggen en terugleggen raken het raster dus niet aan: ze zetten één
+   klasse om en tellen opnieuw. De tegel blijft liggen waar ze lag, op haar
+   plek in het alfabet.
+   ============================================================== */
+let cardsBuilt = null;    // voor welke stand het raster nu klaarstaat
+
+function paintCards() {
+  paintCardCounts();
+  if (!$("#cardBox").open) return;
+  if (cardsBuilt !== settings.tier) { buildCards(); cardsBuilt = settings.tier; }
+}
+
+/* Alfabetisch, en niet in de volgorde van DECKS. Die volgorde is er een van
+   het schrijven (dieren bij elkaar, dan eten, dan spullen) en die kent
+   niemand die de app gebruikt. Wie hier komt, komt voor één kaart -- "boom
+   moet eruit" -- en dan is de enige bruikbare ordening de letter. Het is
+   meteen de manier om haar terug te vinden als je haar wilt terugleggen. */
+function buildCards() {
+  const box = $("#cbAll");
+  const weg = new Set(settings.hidden);
+  const frag = document.createDocumentFragment();
+  poolFor(settings.tier)
+    .slice()
+    .sort((a, b) => a[1].localeCompare(b[1], "nl"))
+    .forEach(([e, w]) => {
+      const b = document.createElement("button");
+      b.className = "pv";
+      b.dataset.word = w;
+      b.innerHTML = '<span></span><small></small>';
+      b.querySelector("span").textContent = e;
+      b.querySelector("small").textContent = w;
+      markCard(b, weg.has(w));
+      frag.appendChild(b);
+    });
   box.textContent = "";
-  draft.forEach(([e, w], i) => {
-    const b = document.createElement("button");
-    b.className = "pv";
-    b.title = "Vervang deze kaart";
-    // title wordt op een touchscreen nooit getoond, dus de toegankelijke
-    // naam viel terug op alleen het woord -- een schermlezer hoorde een los
-    // zelfstandig naamwoord zonder werkwoord erbij.
-    b.setAttribute("aria-label", "Vervang " + w);
-    b.innerHTML = '<span></span><small></small>';
-    b.querySelector("span").textContent = e;
-    b.querySelector("small").textContent = w;
-    b.addEventListener("click", () => swapCard(i));
-    box.appendChild(b);
-  });
+  box.appendChild(frag);
 }
 
-function swapCard(i) {
-  const used = new Set(draft.map(c => c[0]));
-  const pool = poolFor(settings.tier).filter(c => !used.has(c[0]));
-  if (!pool.length) return;
-  draft[i] = pool[Math.floor(Math.random() * pool.length)];
-  paintPreview();
+/* De toestand van één tegel, op drie kanalen tegelijk: de bleke huid, de
+   streep door het woord (allebei in de stijlen) en de naam die een
+   schermlezer voorleest. aria-pressed maakt er een schakelaar van, want
+   dat is wat het is: dezelfde tik zet hem heen en terug. */
+function markCard(b, aside) {
+  const w = b.dataset.word;
+  b.classList.toggle("aside", aside);
+  b.setAttribute("aria-pressed", String(aside));
+  b.setAttribute("aria-label",
+    aside ? w + " — weggelegd, tik om terug te leggen"
+          : w + " — tik om weg te leggen");
 }
 
-function redraw() {
-  draft = drawDeck(settings.tier, settings.size);
-  paintPreview();
+function paintCardCounts() {
+  const weg = new Set(settings.hidden);
+  const pool = poolFor(settings.tier);
+  const bak = pool.filter(c => !weg.has(c[1])).length;
+  const hier = pool.length - bak;
+  const elders = settings.hidden.length - hier;
+
+  $("#cbCount").textContent = hier
+    ? bak + " in het spel · " + hier + " weggelegd"
+    : bak + " in het spel";
+
+  // De knop verschijnt pas als er iets terug te leggen valt.
+  $("#cbAsideBar").hidden = !settings.hidden.length;
+
+  /* Elke kaart zit in hoogstens twee van de drie standen: de makkelijke
+     kaarten zitten in Makkelijk en Medium, de moeilijke in Medium en
+     Moeilijk. Wie van Makkelijk naar Moeilijk springt, ziet zijn
+     weggelegde kaarten dus uit de lijst verdwijnen -- ze horen daar
+     gewoon niet. Zonder deze regel leest dat als "de app is het vergeten",
+     en dat is het niet: zet de stand terug en ze staan er weer. */
+  const el = $("#cbElders");
+  el.hidden = elders <= 0;
+  el.textContent = elders === 1
+    ? "1 weggelegde kaart hoort niet bij deze stand en staat er dus niet bij."
+    : elders + " weggelegde kaarten horen niet bij deze stand en staan er dus niet bij.";
+
+  /* Zodra één van de drie standen op de ondergrens staat, worden er tikken
+     geweigerd -- ook op deze stand, want er zitten kaarten in die de bak
+     van een andere stand vullen. */
+  const vol = $("#cbVol");
+  vol.hidden = !TIER_ORDER.some(t =>
+    poolFor(t).filter(c => !weg.has(c[1])).length <= MIN_BAK);
+  vol.textContent = "Een bak blijft altijd op minstens " + MIN_BAK + " kaarten " +
+    "staan. Leg er eerst een terug om een andere te kunnen wegleggen.";
+
+  /* De enige plek in de app waar staat wannéér er getrokken wordt. Hij
+     staat onder "Kaarten per potje" en wijst met "die N" terug naar de
+     telling van de bak er vlak boven. */
+  $("#drawHint").textContent =
+    "Elk potje trekt " + settings.size + " nieuwe kaarten uit die " + bak +
+    ", op het moment dat je op Beginnen tikt. Alle 3 de rondes spelen met " +
+    "diezelfde " + settings.size + ".";
 }
+
+/* Eén tik heen, één tik terug. Geen lange druk: die is in deze app
+   voorbehouden aan het enige dat écht niet ongedaan te maken is (stoppen),
+   en een kaart wegleggen is juist het tegenovergestelde daarvan. */
+$("#cbAll").addEventListener("click", e => {
+  const b = e.target.closest(".pv"); if (!b) return;
+  const w = b.dataset.word;
+  const i = settings.hidden.indexOf(w);
+  if (i !== -1) {
+    settings.hidden.splice(i, 1);
+  } else if (canHide(w)) {
+    settings.hidden.push(w);
+  } else {
+    // De bak zou onder MIN_BAK zakken. Dezelfde "nee" als overal.
+    nudge(b);
+    return;
+  }
+  saveSettings();
+  markCard(b, i === -1);
+  paintCardCounts();
+});
+
+$("#btnRestoreAll").addEventListener("click", () => {
+  settings.hidden = [];
+  saveSettings();
+  $$("#cbAll .pv").forEach(b => markCard(b, false));
+  paintCardCounts();
+  // De knop die je net indrukte verdwijnt; zonder dit valt de focus terug
+  // op <body> en is wie met een toetsenbord werkt zijn plek kwijt.
+  $("#cardBox > summary").focus();
+});
+
+$("#cardBox").addEventListener("toggle", () => {
+  const open = $("#cardBox").open;
+  if (open !== !!settings.cardsOpen) { settings.cardsOpen = open; saveSettings(); }
+  if (open) paintCards();
+});
 
 $("#tierChips").addEventListener("click", e => {
   const c = e.target.closest(".chip"); if (!c) return;
-  settings.tier = c.dataset.tier; saveSettings(); redraw(); paintSetup();
+  settings.tier = c.dataset.tier; saveSettings(); paintSetup();
 });
 $("#sizeChips").addEventListener("click", e => {
   const c = e.target.closest(".chip"); if (!c) return;
-  settings.size = Number(c.dataset.size); saveSettings(); redraw(); paintSetup();
+  settings.size = Number(c.dataset.size); saveSettings(); paintSetup();
 });
 $("#secs").addEventListener("input", e => {
   settings.secs = Number(e.target.value);
@@ -3036,7 +3331,6 @@ function nudge(el) {
 }
 
 function openSetup() {
-  if (!draft.length) redraw();
   paintSetup();
   show("setup");
 }
@@ -3050,10 +3344,21 @@ function newGame() {
      meer het eerste wat je ziet. Eén keer, niet elke keer: daarna beslist de
      volwassene zelf, en dat wordt onthouden. */
   if (settings.rulesOpen) { settings.rulesOpen = false; saveSettings(); }
-  if (!draft.length) redraw();
+  /* Hier, en nergens anders, worden de kaarten van dit potje getrokken.
+
+     Vroeger stonden ze al klaar vanaf het laden van de app: het
+     instellingenscherm toonde die greep als "Jullie kaarten", en elk nieuw
+     potje gooide hem stilletjes weg en trok opnieuw. Wie ná een potje ging
+     kijken zag dus andere kaarten dan hij net gespeeld had, en wie er een
+     kaart uit wegtikte was die keuze het potje daarna weer kwijt.
+
+     Door pas hier te trekken bestaat er geen greep meer die alvast getoond
+     kan worden en dus ook niet meer verouderen kan. Wat er te kiezen valt,
+     staat in de bak (zie bakFor) en dat is een keuze die blijft staan. */
+  const deck = drawDeck(settings.tier, settings.size);
   G = {
-    deck: draft.slice(),
-    pile: shuffle(draft.map((_, i) => i)),
+    deck: deck,
+    pile: shuffle(deck.map((_, i) => i)),
     card: null,
     round: 1,
     team: 0,
@@ -3990,9 +4295,9 @@ function clearConfetti() {
    begint hij er ook echt een, met dezelfde instellingen en een vers deck.
    Terug naar de titel is een eigen knop geworden. */
 $("#btnAgain").addEventListener("click", () => {
-  clearConfetti(); Snd.unlock(); redraw(); newGame();
+  clearConfetti(); Snd.unlock(); newGame();
 });
-$("#btnHome").addEventListener("click", () => { clearConfetti(); redraw(); show("title"); });
+$("#btnHome").addEventListener("click", () => { clearConfetti(); show("title"); });
 
 /* ==============================================================
    PAUZE EN STOPPEN
@@ -4083,7 +4388,6 @@ holdButton($("#btnStop"), 1100, () => {
   stopClock(); releaseWake();
   $("#pauze").hidden = true;
   G = null;
-  redraw();
   show("title");
 }, fillY($("#btnStop i"), $("#btnStop")));
 
@@ -4135,14 +4439,12 @@ document.addEventListener("visibilitychange", () => {
    ============================================================== */
 $("#btnStart").addEventListener("click", () => {
   Snd.unlock();
-  if (!draft.length) redraw();
   newGame();
 });
 
 load();
 Snd.enabled = settings.sound !== false;
 Tril.enabled = settings.haptics !== false;
-redraw();
 paintSetup();
 show("title");
 started = true;
@@ -4159,7 +4461,7 @@ if (location.search.indexOf("debug") !== -1) {
     set G(v) { G = v; },
     get settings() { return settings; },
     get screen() { return current; },
-    DECKS, TIER_ORDER, poolFor, shuffle, drawDeck, total,
+    DECKS, TIER_ORDER, poolFor, bakFor, canHide, MIN_BAK, shuffle, drawDeck, total,
     stopClock, paintClock, sizeCard, Snd, Tril
   };
 }

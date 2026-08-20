@@ -91,7 +91,7 @@ dolfijn, een eekhoorn als muis — en de omschrijver moet weten wélk woord
 telt, anders krijg je "ik zei toch beer!" aan tafel. Het woord beslecht dat
 zonder dat iemand iets moet: het zegt exact hetzelfde als het beeld erboven,
 en wie niet leest mist niets. Dezelfde constructie als de ronde-tegel
-(pictogram plus OMSCHRIJVEN) en de voorvertoning op de instellingen.
+(pictogram plus OMSCHRIJVEN) en de kaarten in de bak op de instellingen.
 
 Wat de eis wél verbiedt is tekst die iets toevoegt dat het beeld niet zegt.
 Een woord dat pas na tien seconden verschijnt als hint zou daaronder vallen,
@@ -250,7 +250,7 @@ Drie kanalen, en ze doen elk één ding:
 - **Diepte.** `--lift-2` (8 px) is de hoofdhandeling, `--lift-1` (5 px) al
   het andere. Dit stond ooit als "5 staat stil, 8 kun je indrukken"
   genoteerd en dat is nooit waar geweest: de pauzeknop, "terug", de chips
-  en de voorvertoningskaartjes liggen allemaal op 5 px en zijn allemaal
+  en de kaarttegels in de bak liggen allemaal op 5 px en zijn allemaal
   indrukbaar, op dezelfde hoogte als de kaart en de opdracht, die het niet
   zijn. Reken dus niet uit de schaduw af of iets een knop is.
 - **Beweging.** Dát is waar indrukbaarheid staat: elke knop zakt bij
@@ -565,6 +565,74 @@ verse letterfamilie. Een splinternieuwe emoji komt daar dus doorheen en staat
 op een oude tablet alsnog als ▯. De grens is dus een keuze, geen hek. Er staan
 nu bewust nieuwere kaarten in (🧸 🪁 🦥 🪑 🧩 🪐 …); kijk bij twijfel één keer
 op het oudste toestel dat in huis meespeelt.
+
+## De bak en de greep
+
+Twee dingen, en ze zijn één keer voor elkaar aangezien. De **bak** is alles
+waar ooit uit getrokken kan worden: 90, 183 of 185 kaarten, afhankelijk van
+de stand. De **greep** is wat één potje daaruit meekrijgt: 16, 24 of 32.
+
+Op het instellingenscherm stond de greep, als raster onder de kop "Jullie
+kaarten". Dat werd gelezen als de bak -- en dan klopt er van alles niet:
+"boom zit wel in het spel maar niet in de instellingen" (natuurlijk, het
+waren 24 van de 90), en "wat ik daar zie is niet wat ik krijg" (ook waar:
+elk nieuw potje trok stilletjes opnieuw, dus wie ná een potje ging kijken
+zag een andere 24 dan hij net gespeeld had). Een tik op zo'n kaartje ruilde
+hem om, maar alleen voor dat ene potje -- de volgende keer stond hij er
+gewoon weer.
+
+Nu staat de bak er, en de greep bestaat pas op het moment dat je op
+Beginnen tikt (`drawDeck` in `newGame`, nergens anders). Er ís dus geen
+getoonde greep meer die verouderen kan. **Trek nooit opnieuw vooruit** --
+zodra er weer ergens een greep klaarligt vóór het potje, is die hele klasse
+fouten terug.
+
+Wat er te kiezen valt zit in de bak, en die keuze blijft staan:
+`settings.hidden`, op het wóórd en niet op de emoji, want een tekening kan
+ooit door een betere vervangen worden voor hetzelfde woord. Eén lijst voor
+alle drie de standen -- dit hangt aan de kaart, niet aan de moeilijkheid.
+Elke kaart zit in precies één band, en dus in hoogstens twee standen (een
+makkelijke in Makkelijk en Medium, een moeilijke in Medium en Moeilijk).
+Wie van Makkelijk naar Moeilijk springt ziet zijn weggelegde kaarten dus
+verdwijnen; `#cbElders` zegt dan dat ze er nog zijn, want zonder die regel
+leest het als "de app is het vergeten".
+
+Vier keuzes in de lijst die er anders uitzien dan ze bedoeld zijn:
+
+- **Weggelegde kaarten blijven op hun plek in het alfabet**, verbleekt en
+  met een streep door het woord. Ze verhuizen níet naar een groepje
+  bovenaan -- dat stond wel in het voorstel, maar dan springt de tegel weg
+  onder de vinger die haar net aantikte, en moet je scrollen om te zien
+  waar ze heen ging. `buildCards()` bouwt daarom alleen opnieuw op bij een
+  andere stand; wegleggen en terugleggen zetten één klasse om.
+- **Alfabetisch**, niet in de volgorde van `DECKS`. Die volgorde is er een
+  van het schrijven (dieren, dan eten, dan spullen) en kent niemand die de
+  app gebruikt. Je komt hier voor één kaart, en de letter is de enige
+  manier om haar te vinden -- heen én terug.
+- **Eén tik, geen lange druk.** Vasthouden is in deze app het teken voor
+  het onomkeerbare, en dit is juist het tegenovergestelde: dezelfde tik
+  zet de kaart terug.
+- **Een tegel is minstens 96 px breed.** Op de 74 van de oude
+  voorvertoning gaf dat vier kolommen van 84 px, en daar past het woord van
+  24 van de 275 kaarten niet op één regel: "bouwvakker" brak af als
+  BOUWVAKKE / R. Drie kolommen van 114 px laten er drie over. En let op met
+  `overflow-wrap: break-word` -- alleen `anywhere` telt mee in de kleinst
+  mogelijke breedte, dus met `break-word` groeit het woord dwars over zijn
+  buurtegels heen in plaats van af te breken.
+
+De ondergrens (`MIN_BAK`, 40) wordt gecontroleerd over **alle drie de
+standen**, ook de stand waar je niet in staat. Anders leeg je vanuit Medium
+(183 kaarten, ruim zat) de bak van Makkelijk (90) zonder dat er ooit iets
+tegenhoudt, en sta je twee avonden later voor een stand die elk potje
+dezelfde kaarten trekt. De weigering is de gewone `nudge()`, met een regel
+erbij die zegt waarom -- een schud alleen laat de app stuk lijken in plaats
+van vol.
+
+Eén ding om te zien en niet uit te rekenen: de telling in de vouwregel
+stond eerst rechts uitgelijnd, en dat is precies de kolom waar het zwevende
+huisje hangt. "89 in het spel · 1 weggelegd" verdween er half achter zodra
+je dat veld in beeld scrollde. Alles op dit scherm lijnt links uit, en dat
+is niet toevallig: rechtsboven is van de uitgang.
 
 ## Tests
 
