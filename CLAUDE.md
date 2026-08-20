@@ -594,14 +594,26 @@ alle drie de standen -- dit hangt aan de kaart, niet aan de moeilijkheid.
 Elke kaart zit in precies één band, en dus in hoogstens twee standen (een
 makkelijke in Makkelijk en Medium, een moeilijke in Medium en Moeilijk).
 Wie van Makkelijk naar Moeilijk springt ziet zijn weggelegde kaarten dus
-verdwijnen, en dat mag niet lezen als "de app is het vergeten". Daar stond
-eerst een regel voor ("2 weggelegde kaarten horen niet bij deze stand"), en
-die moest weg: een zin die een afwezigheid verklaart, in beeld bij iedereen
-die één kaart weglegt en daarna van stand wisselt. Het getal op
-"Alles terugleggen (2)" telt de hele lijst en daalt dus niet bij het
-wisselen -- een getal dat blijft staan is het bewijs dat er niets zoek is,
-zonder dat er iets beweerd hoeft te worden. **Zet zo'n uitleg niet terug**;
-zoek iets dat het zonder zin doet.
+uit de lijst verdwijnen. Daar zijn twee dingen op geprobeerd die allebei
+niet deugden, en de les eronder is dezelfde.
+
+Eerst een regel die het uitlegde ("2 weggelegde kaarten horen niet bij deze
+stand") -- een zin die een afwezigheid verklaart, in beeld bij iedereen die
+één kaart weglegt en daarna van stand wisselt. Daarna het getal op de knop,
+dat de hele lijst telde: "Alles terugleggen (2)" boven een lijst zonder één
+weggelegde kaart. Dat is erger dan ruis. Het is een knop waarvan je het
+effect niet kunt zien, en een getal dat een vraag oproept die het scherm
+niet kan beantwoorden ("welke twee dan?").
+
+**Alles op dit paneel gaat over de stand die je voor je hebt** -- de
+telling, de zin over trekken, de lijst, en dus ook de knop: hij verschijnt
+alleen als er in dít lijstje iets weg ligt, en hij legt ook alleen dít
+lijstje terug. Zou hij de hele lijst legen, dan haalde één tik op Makkelijk
+ook stilletjes de kaarten terug die op Moeilijk weggelegd zijn.
+
+Dat er in een andere stand nog iets ligt, hoeft nergens te staan: zet die
+stand terug en het staat er weer. **Zet daar geen uitleg voor terug** --
+niet als zin en niet als getal.
 
 Vier keuzes in de lijst die er anders uitzien dan ze bedoeld zijn:
 
