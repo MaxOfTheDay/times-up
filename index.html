@@ -2300,6 +2300,17 @@ input[type=range]::-moz-range-thumb {
             <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
         </div>
       </fieldset>
+
+      <!-- Verschijnt alleen als het toestel zelf zegt dat installeren kan
+           (het beforeinstallprompt-event), en verdwijnt weer zodra dat
+           gebeurd is. Op iOS bestaat dat event niet -- daar blijft dit veld
+           dus dicht, en doet de apple-touch-icon/meta-tags hierboven in de
+           <head> hun werk via "Zet op beginscherm" in Safari zelf. Geen
+           lange druk: installeren is niets onomkeerbaars, net als het
+           tandwiel. -->
+      <div class="field" id="installField" hidden>
+        <button class="btn-plain" id="btnInstall">App installeren</button>
+      </div>
     </div>
   </div>
 
@@ -4453,6 +4464,49 @@ document.addEventListener("visibilitychange", () => {
 $("#btnStart").addEventListener("click", () => {
   Snd.unlock();
   newGame();
+});
+
+/* ==============================================================
+   9. PWA — SERVICE WORKER EN INSTALLEREN
+   sw.js is het enige bestand naast index.html: een service worker moet een
+   los same-origin script zijn, dat kan niet als blob-URL (zoals het
+   manifest hierboven wel kan). Hij cachet alleen het document zelf -- er
+   zijn geen aparte JS/CSS/icoonbestanden om mee te nemen.
+
+   Geregistreerd met een relatief pad, dus de scope volgt vanzelf de map
+   waarin index.html staat -- ook onder een GitHub Pages-subpad. Uitgesloten
+   op file://, want daar laadt de testharnas de app vandaan (zie
+   test/browser.js) en op file:// wijst een registratiepoging zichzelf toch
+   af; dit voorkomt alleen de nutteloze poging en de foutmelding erover. */
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+
+/* beforeinstallprompt vuurt alleen als het toestel zelf installeerbaar
+   vindt (geldig manifest, https, genoeg betrokkenheid) -- precies het
+   signaal waarop de knop op de instellingen verschijnt. Chrome/Android
+   heeft dit; Safari/iOS niet, en daar blijft het veld dus dicht. */
+let deferredInstall = null;
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  deferredInstall = e;
+  $("#installField").hidden = false;
+});
+$("#btnInstall").addEventListener("click", async () => {
+  if (!deferredInstall) return;
+  const prompt = deferredInstall;
+  deferredInstall = null;
+  $("#installField").hidden = true; // een prompt is maar één keer te gebruiken
+  prompt.prompt();
+  await prompt.userChoice;
+});
+// Ook als de installatie via de eigen UI van de browser liep in plaats van
+// deze knop (adresbalk-icoon e.d.), moet de knop hier alsnog verdwijnen.
+window.addEventListener("appinstalled", () => {
+  $("#installField").hidden = true;
+  deferredInstall = null;
 });
 
 load();
