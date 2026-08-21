@@ -2145,6 +2145,25 @@ input[type=range]::-moz-range-thumb {
          hetzelfde. -->
     <h1>Instellingen</h1>
 
+    <!-- Verschijnt alleen als het toestel zelf zegt dat installeren kan
+         (het beforeinstallprompt-event), en verdwijnt weer zodra dat gebeurd
+         is. Op iOS bestaat dat event niet -- daar blijft dit veld dus dicht,
+         en doet de apple-touch-icon/meta-tags hierboven in de <head> hun
+         werk via "Zet op beginscherm" in Safari zelf. Geen lange druk:
+         installeren is niets onomkeerbaars, net als het tandwiel.
+
+         Staat los van de twee groepen eronder, vooraan in plaats van onder
+         Geluid/Trilling: het hoort bij geen van beide (geen instelling die
+         blijft staan, maar een eenmalige actie) en de plek onderaan, vlak
+         boven de vaste "Beginnen"-knop, werd nooit gezien door wie niet tot
+         daar scrolt. Vooraan is ook het moment dat het er het meest toe
+         doet -- de eerste keer dat dit scherm open gaat, vóór er ooit
+         geïnstalleerd is. -->
+    <div class="field" id="installField" hidden>
+      <button class="btn-plain" id="btnInstall">App installeren</button>
+      <p class="hint">Zet de app op je beginscherm, met een eigen icoon.</p>
+    </div>
+
     <!-- De regels staan open tot je één keer een spel gestart hebt, en
          daarna dichtgeklapt. Ze zijn 243 van de 1286 px die dit scherm hoog
          is, en dat is elke avond opnieuw het eerste wat je ziet terwijl je
@@ -2300,17 +2319,6 @@ input[type=range]::-moz-range-thumb {
             <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
         </div>
       </fieldset>
-
-      <!-- Verschijnt alleen als het toestel zelf zegt dat installeren kan
-           (het beforeinstallprompt-event), en verdwijnt weer zodra dat
-           gebeurd is. Op iOS bestaat dat event niet -- daar blijft dit veld
-           dus dicht, en doet de apple-touch-icon/meta-tags hierboven in de
-           <head> hun werk via "Zet op beginscherm" in Safari zelf. Geen
-           lange druk: installeren is niets onomkeerbaars, net als het
-           tandwiel. -->
-      <div class="field" id="installField" hidden>
-        <button class="btn-plain" id="btnInstall">App installeren</button>
-      </div>
     </div>
   </div>
 
