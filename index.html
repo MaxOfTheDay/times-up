@@ -1414,6 +1414,50 @@ input[type=range]::-moz-range-thumb {
 }
 .roundcard.big .ico svg { width: 100%; height: 100%; overflow: visible; }
 .roundcard.big b { font-size: max(20px, min(8vw, 4vh, 34px)); line-height: 1; }
+/* "Dezelfde kaarten komen terug."
+
+   Dat is de regel waar dit hele spel op draait, en hij stond nergens: de
+   stapel liep in ronde 1 leeg, en in ronde 2 kwamen precies dezelfde woorden
+   opnieuw langs zonder dat iets dat had aangekondigd. Wie het spel kent weet
+   het; wie het net geinstalleerd heeft denkt dat de app in de herhaling
+   schiet.
+
+   Geen zin erover, want dat zou de enige tekst in het spel zijn die iets
+   zegt wat het beeld niet zegt. Wel drie kaartjes die terugschuiven, en met
+   opzet drie tekeningen uit dit potje -- die heeft de speler een minuut
+   geleden zelf in handen gehad, en dat is wat "dezelfde" betekent. Uit de
+   verse stapel, dus ze komen ook echt weer langs.
+
+   Eenmalig, bij de wissel naar ronde 2. Bij ronde 3 weet de tafel het, en
+   dan is het een animatie die niets meer meldt.
+
+   De eindstand is de waaier zelf: bij beperkte beweging valt de animatie
+   weg en staan de drie kaartjes er gewoon, in plaats van dat er niets komt.
+   Zie de opmerking bij prefers-reduced-motion. */
+.restack { display: flex; justify-content: center; align-items: center; }
+.restack i {
+  width: 30px; height: 40px; flex: 0 0 auto;
+  display: grid; place-items: center;
+  font-size: 17px; line-height: 1; font-style: normal;
+  background: var(--paper); border: var(--line-2) solid var(--ink);
+}
+/* Overlappend en licht gedraaid: een waaier die net is dichtgeschoven, geen
+   rijtje van drie losse dingen. De middelste ligt bovenop, zoals bij een
+   stapel die je naar je toe haalt. */
+.restack i:nth-child(1) { transform: rotate(-9deg); margin-right: -9px; }
+.restack i:nth-child(2) { transform: rotate(1deg);  z-index: 1; }
+.restack i:nth-child(3) { transform: rotate(8deg);  margin-left: -9px; }
+@keyframes restackIn {
+  from { transform: translateX(46px) rotate(20deg); opacity: 0; }
+}
+#s-handoff.on .restack i {
+  animation: restackIn calc(.34s / max(var(--dur), .001)) var(--e-pop) backwards;
+}
+/* Van rechts naar links terug de stapel in, dus de rechter kaart komt als
+   eerste thuis en de linker als laatste. */
+#s-handoff.on .restack i:nth-child(3) { animation-delay: calc(.20s / max(var(--dur), .001)); }
+#s-handoff.on .restack i:nth-child(2) { animation-delay: calc(.28s / max(var(--dur), .001)); }
+#s-handoff.on .restack i:nth-child(1) { animation-delay: calc(.36s / max(var(--dur), .001)); }
 .roundcard.big p {
   display: block; margin: 0;
   font-size: max(var(--type-note), min(3.6vw, 1.7vh, 15px));
@@ -2890,6 +2934,10 @@ input[type=range]::-moz-range-thumb {
     <div class="ico" id="hoRoundIco"><svg viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
     <b id="hoRoundWord">Omschrijven</b>
     <p id="hoRoundHow"></p>
+    <!-- Alleen bij de wissel naar ronde 2, en dus eenmalig per potje: drie
+         tekeningen uit de verse stapel die terugschuiven. Zie .restack. Wie
+         luistert krijgt hetzelfde in het label van de kaart. -->
+    <div class="restack" id="hoRestack" aria-hidden="true" hidden><i></i><i></i><i></i></div>
     <!-- De hoeveelste van de drie. Zie .rounddots: geen tweede pictogram en
          geen woord, alleen de plek in de rij. -->
     <div class="rounddots" id="hoRoundDots" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -4141,9 +4189,22 @@ function handoff(mode, freshA, freshB) {
   // krijgt hetzelfde in het label van de kaart, en daar mag het een getal
   // zijn -- een schermlezer telt geen vierkantjes.
   $$("#hoRoundDots i").forEach((d, i) => d.classList.toggle("now", i === r));
+
+  /* Eenmalig, bij de wissel naar ronde 2: de kaarten komen terug. Niet in
+     ronde 3 -- dan weet de tafel het, en herhalen voegt niets toe. De drie
+     tekeningen komen uit de verse stapel zelf, dus het zijn er drie die ook
+     echt weer langskomen. Bij minder dan drie kaarten blijft het weg: een
+     waaier van een kaartje meldt niets. */
+  const terug = round && G.round === 2 && G.pile.length >= 3;
+  $("#hoRestack").hidden = !terug;
+  if (terug) $$("#hoRestack i").forEach((el, i) => {
+    el.textContent = G.deck[G.pile[i]][0];
+  });
+
   $("#hoRoundCard").setAttribute("aria-label",
     "Ronde " + G.round + " van " + ROUNDS + ": " + ROUND_WORD[r] +
-    (round ? ". " + ROUND_HOW[r] : ""));
+    (round ? ". " + ROUND_HOW[r] : "") +
+    (terug ? " Dezelfde kaarten komen terug." : ""));
 
   /* Overgedragen tijd. Dit was een los kaartje dat ergens tussen de
      opdracht en de startknop zweefde, met het getal in marigold op papier
