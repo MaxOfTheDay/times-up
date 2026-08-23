@@ -161,6 +161,31 @@
 
   --tap: 48px;     /* niets dat aangeraakt wordt is kleiner dan dit */
 
+  /* ---- ondergrenzen voor tekst ----
+     Deze app rekent haar tekstmaten in vw en vh, en dat is goed: op een
+     tablet hoort alles groter te staan dan op een telefoon. Wat eraan
+     ontbrak is een bodem. Een `min(3.6vw, 1.7vh, 14px)` heeft een plafond
+     maar geen vloer, dus op een laag of smal scherm zakt hij door tot een
+     maat die niemand gekozen heeft -- gemeten haalde de regel op de
+     opdrachtkaart 6,1 px op 740 bij 360, en de rondelijst op het
+     winnaarsscherm 6,8. Dat is niet klein, dat is weg.
+
+     Het is dezelfde fout als bij het merk dat zichzelf in vw mat, en als bij
+     de knoppen die op alleen een min() stonden. Voor knoppen staat de regel
+     hier al: nooit op alleen een min(), er hoort een max() met een
+     ondergrens omheen. Tekst verdient precies dezelfde regel, en deze twee
+     maten zijn de bodem waar ze naar wijst.
+
+     Twee, niet zes. Er zijn in deze app maar twee tekststemmen die op meer
+     dan één plek terugkomen -- het bijschrift en de uitleg -- en de rest is
+     één keer, met een eigen reden die in de opmaak ernaast staat. Een
+     ladder van zes treden zou structuur verzinnen die er niet is, en de
+     bestaande maten passen elk in hun eigen vak (twee mascottes plus twee
+     getallen op 320 px, bijvoorbeeld). De ondergrens is dus wat er gedeeld
+     wordt, niet de maat zelf. */
+  --type-label: 12px;   /* alles wat je in één blik leest: woord, label   */
+  --type-note:  13px;   /* uitleg, en alles wat je echt moet kunnen lezen */
+
   /* ---- het cijfer van de klok ----
      Twee maten en een vást vak eromheen. Het cijfer stond op 20 px en kon
      alleen door een transform groeien (scale 1.25, dus 25 px), want een
@@ -842,6 +867,67 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
    5. INSTELLINGEN — het enige scherm met tekst. Voor de volwassene.
    ============================================================ */
 #s-setup { padding: 0; }
+/* De kolom is overal even breed, en dat is nieuw.
+
+   Deze regel stond in het blok voor grote schermen, en dat blok eist naast
+   700 px breed óók 700 px hoog. Een liggende telefoon haalt het eerste wel
+   en het tweede niet, dus daar gold hij niet -- en precies daar was hij het
+   hardst nodig: op 844 px breed rekten de keuzeknoppen uit tot platte
+   balken, liep de schuif van rand tot rand en werd de regeluitleg zo'n 105
+   tekens breed. Dat is het probleem dat voor de liggende tablet al eens is
+   opgelost; de voorwaarde reikte alleen niet tot het toestel waarop het
+   vaker gebeurt.
+
+   Staand doet deze regel niets: daar is het scherm smaller dan 560 en vult
+   de kolom hem gewoon. */
+#s-setup.screen { align-items: center; }
+.setup-scroll, .setup-foot { width: 100%; max-width: 560px; }
+
+/* Tekst blijft uit de kolom van het zwevende huisje.
+
+   Dat de inhoud onder die knop door schuift stond hier al opgeschreven als
+   aanvaarde prijs ("het is even druk in die hoek"). Nagemeten valt het
+   duurder uit dan dat: bij het langsrollen van het hele scherm op 320 px
+   komen twaalf verschillende elementen een moment lang onder de knop
+   terecht -- de regeluitleg, de kopjes, elke hint, de vouwregels én drie
+   keuzeknoppen. Het is dus geen eigenaardigheid van de kaartenbak, waar het
+   opviel, maar van elk ding dat voorbijkomt.
+
+   Tekst en knoppen lopen daarbij niet hetzelfde gevaar. Een keuzeknop is
+   een groot omrand vlak: staat er een dekkende knop overheen, dan zie je
+   dat en scroll je door. Een zin verliest stil twee woorden en leest gewoon
+   door -- "dan komt ze in geen [] meer terug" -- en dat merk je niet. Alles
+   wat een zin is houdt daarom de kolom van de knop vrij; de keuzeknoppen
+   houden hun volle breedte.
+
+   Alleen onder 720 px. Daarboven is de kolom van 560 gecentreerd en ligt ze
+   sowieso links van de knop -- de grens is precies waar 560 gelijk wordt aan
+   schermbreedte min 160, en boven die maat valt er niets te vrijwaren.
+
+   Wat hiermee níet opgelost is: die drie keuzeknoppen. De volledige uitweg
+   is een plakkende kop met een dekkende papierband waar alles onderdoor
+   verdwijnt in plaats van half zichtbaar te blijven. Die kost staand zo'n
+   acht procent schermhoogte en liggend drieëntwintig -- en liggend is nu
+   juist het enige formaat waar de knop niets meer raakt. Dat is een aparte
+   afweging en geen tekstmaat, dus hij hoort niet in deze wijziging. */
+@media (max-width: 719px) {
+  .setup-scroll > h1,
+  .setup-scroll .group-head,
+  .setup-scroll legend,
+  .setup-scroll .legend-label,
+  .setup-scroll .hint,
+  .setup-scroll summary,
+  .rules p, .rules li {
+    /* 64 px is precies wat er nodig is, en dat is geen schatting: de knop
+       begint op --corner + --tap van de rechterrand (80), de kolom eindigt
+       op --s-4 (16), dus het verschil is 64. Boven 592 px, waar de kolom op
+       560 vastloopt en gecentreerd staat, loopt die eis juist terug naar
+       nul bij 720 -- 64 dekt dus het hele bereik. Plus --s-2 lucht, zodat
+       de tekst de knop niet raakt maar mijdt. */
+    padding-right: calc(var(--corner) + var(--tap) - var(--s-4) + var(--s-2));
+  }
+}
+
 .setup-scroll {
   flex: 1 1 auto; min-height: 0; overflow-y: auto;
   display: flex; flex-direction: column; gap: var(--s-5);
@@ -952,7 +1038,12 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
    vinkje door. Meer binnenmarge zou de drie chips op 390 px naar twee regels
    duwen, dus het vinkje verhuist naar de onderhoek: daar staat de kleine
    leeftijdsregel, en die is smal genoeg om hem ruim te laten staan. */
-.chip .tick { display: none; position: absolute; bottom: 2px; right: 2px; width: 12px; height: 12px; }
+/* De inzet stond op 2 px, en dat is de enige maat in dit bestand die niet
+   uit de ruimteladder komt. --s-1 (4) zet hem op dezelfde afstand van de
+   rand als al het andere; de leeftijdsregel eronder staat gecentreerd en
+   blijft er ruim vandaan. De plek zelf blijft de onderhoek -- zie hierboven
+   waarom die hoek gekozen is. */
+.chip .tick { display: none; position: absolute; bottom: var(--s-1); right: var(--s-1); width: 12px; height: 12px; }
 .chip[aria-checked="true"] .tick { display: block; }
 
 .slider-row { display: flex; align-items: center; gap: 14px; }
@@ -1141,7 +1232,7 @@ input[type=range]::-moz-range-thumb {
 }
 .roundcard .ico svg { width: 76%; height: 76%; }
 .roundcard b {
-  font-size: min(6vw, 2.9vh, 26px); font-weight: 900;
+  font-size: max(14px, min(6vw, 2.9vh, 26px)); font-weight: 900;
   letter-spacing: .05em; text-transform: uppercase;
 }
 /* De uitleg hoort bij de opdracht, dus staat ze ín de kaart en niet als
@@ -1271,10 +1362,11 @@ input[type=range]::-moz-range-thumb {
   animation-delay: calc(.07s / max(var(--dur), .001));
 }
 .roundcard.big .ico svg { width: 100%; height: 100%; overflow: visible; }
-.roundcard.big b { font-size: min(8vw, 4vh, 34px); line-height: 1; }
+.roundcard.big b { font-size: max(20px, min(8vw, 4vh, 34px)); line-height: 1; }
 .roundcard.big p {
   display: block; margin: 0;
-  font-size: min(3.6vw, 1.7vh, 14px); font-weight: 700; line-height: 1.35;
+  font-size: max(var(--type-note), min(3.6vw, 1.7vh, 15px));
+  font-weight: 700; line-height: 1.35;
   color: var(--ink-2);
 }
 
@@ -1476,7 +1568,7 @@ input[type=range]::-moz-range-thumb {
 }
 .roundchip .ico svg { width: 36px; height: 36px; }
 .roundchip b {
-  font-size: 10px; font-weight: 900; letter-spacing: .02em;
+  font-size: var(--type-label); font-weight: 900; letter-spacing: .02em;
   text-transform: uppercase; white-space: nowrap;
 }
 
@@ -1497,6 +1589,37 @@ input[type=range]::-moz-range-thumb {
 @media (max-width: 340px) {
   :root { --digit-crit: 26px; --digit-w: 32px; }
   .turnbox { gap: var(--s-2); }
+}
+
+/* Het woord bij het rondepictogram houdt zijn oude 10 px op smalle
+   schermen. Overal elders krijgt het de bodem van --type-label.
+
+   De vrije ruimte tussen de ronde-tegel en het cijfervak hangt maar van
+   twee dingen af -- hoe breed de tegel is en hoe breed dat vak -- en niet
+   van de tussenruimte van het raster: de tegel staat gecentreerd en het vak
+   hangt aan de rechterrand, dus wat ertussen overblijft is
+   schermbreedte/2 min tegel/2 min vak. Uitgerekend met "Omschrijven", het
+   langste van de drie ronde-woorden:
+
+       breedte   op 10 px   op 12 px
+          320       2,0       -5,5   (botsing)
+          360      10,0        2,5
+          380      20,0       12,5
+          412      36,0       28,5
+
+   Op 320 botst het dus, en op 360 blijft er tweeënhalve pixel over. Dat is
+   geen marge: de letterfamilie is die van het toestel, en tussen Roboto en
+   een systeemvariant scheelt de breedte van dit woord al gauw een procent
+   of vijf -- ruim genoeg om die 2,5 op te eten. Vandaar de grens op 380 en
+   niet op 340: vanaf 381 px blijft er ruim twaalf pixel staan, en dat
+   overleeft een andere letter wél.
+
+   Dit is bovendien het enige van de drie dingen in die balk dat mag wijken.
+   Het pictogram ernaast draagt de ronde al, en het woord stond seconden
+   eerder op het overdrachtscherm op 14 tot 34 px; de mascotte en de klok
+   hebben geen tweede kanaal om op terug te vallen. */
+@media (max-width: 380px) {
+  .roundchip b { font-size: 10px; }
 }
 
 /* Op het spelscherm staat de pauzeknop in de balk mee in plaats van er
@@ -2049,9 +2172,10 @@ input[type=range]::-moz-range-thumb {
   opacity: .55;
 }
 .tally .sr.now { opacity: 1; }
-.tally .sr svg { width: min(20px, 2.6vh); height: min(20px, 2.6vh); }
+.tally .sr svg { width: max(16px, min(20px, 2.6vh)); height: max(16px, min(20px, 2.6vh)); }
 .tally .sr b {
-  font-weight: 900; font-size: min(14px, 1.9vh); font-variant-numeric: tabular-nums;
+  font-weight: 900; font-size: max(var(--type-label), min(14px, 1.9vh));
+  font-variant-numeric: tabular-nums;
   min-width: 1.4ch; text-align: left;
 }
 /* De uitslag zelf, en het enige getal op dit scherm dat groot mag zijn.
@@ -2294,15 +2418,6 @@ input[type=range]::-moz-range-thumb {
   .turn-gain { font-size: 20px; padding: 1px 9px; }
   .btn-icon { width: 56px; height: 56px; }
   .btn-icon svg { width: 26px; }
-  /* Instellingen kreeg hier nooit een eigen regel: .setup-scroll en
-     .setup-foot stonden op de volle breedte van het scherm, en .chips (flex:
-     1 1 auto, geen bovengrens) rekte daarmee mee -- op een liggende tablet
-     werden de keuzeknoppen brede platte balken en de schuif een streep van
-     rand tot rand, terwijl de tekst erin dezelfde telefoonmaat hield. Dezelfde
-     kolombreedte als .side-by-side hierboven, gecentreerd: smal genoeg om als
-     rij knoppen te lezen in plaats van als een uitgerekte balk. */
-  #s-setup.screen { align-items: center; }
-  .setup-scroll, .setup-foot { width: 100%; max-width: 560px; }
 }
 </style>
 </head>
@@ -3950,7 +4065,14 @@ function sizeCard() {
      dat er niets aan de hand is. */
   const side = Math.min(w, h);
   const inner = side - 2 * (4 + 12);
-  const wordPx = Math.max(11, Math.min(20, Math.round(side * .045)));
+  /* Dezelfde ondergrens als in de opmaak (--type-label): het woord onder het
+     teken is een bijschrift, maar het is wél het bijschrift dat aan tafel
+     beslecht welk woord telt. Op een liggende telefoon meet de kaart zo'n
+     240 px en kwam .045 daarvan op 10,8 uit -- onder de bodem die de rest
+     van de app inmiddels aanhoudt. De 12 kost een pixel of twee van het
+     teken erboven; die staan in de ruimte die hieronder toch al voor het
+     woord gereserveerd wordt. */
+  const wordPx = Math.max(12, Math.min(20, Math.round(side * .045)));
   const wordH = Math.round(wordPx * 1.25);
   const ink = Math.max(24, inner - wordH - Math.round(inner * .04));
   card.style.setProperty("--cardword", wordPx + "px");
