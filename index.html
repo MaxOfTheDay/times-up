@@ -1149,6 +1149,67 @@ input[type=range]::-moz-range-thumb {
    2,0:1 op rood. Op papier blijft het 6,6:1. */
 .roundcard p { display: none; }
 
+/* De hoeveelste ronde van de drie.
+
+   Nergens in de app stond dat. De ronde had wél een identiteit -- het
+   pictogram en het woord -- maar geen plaats: "welke van de drie is dit" kon
+   je alleen beantwoorden door het pictogram te herkennen én de volgorde uit
+   je hoofd te kennen, en "hoeveel spel is er nog" helemaal niet, tot het
+   winnaarsscherm.
+
+   Hier heeft ooit een routekaart gestaan, en die is er terecht uit gegaan:
+   die noemde de ronde nóg een keer met hetzelfde pictogram en hetzelfde
+   woord dat er al boven stond. Plaats is een ander feit dan identiteit, en
+   het kan zonder iets te herhalen. Daarom drie merktekens en verder niets --
+   geen tekening, geen woord, geen cijfer.
+
+   In de kaart en niet eronder: dit gaat over de opdracht ("de hoeveelste van
+   de drie"), dus het hoort bij vak 2 en wordt geen vijfde vak op een scherm
+   dat er met opzet vier heeft. Meteen ook de enige plek op dit scherm waar
+   papier onder ligt; op de ploegkleur zou goud er 3,0:1 op halen.
+
+   Vierkantjes en geen bolletjes. Een cirkel onder tapmaat betekent in deze
+   app "een teken dat je telt" -- dat waren de fiches, en die zijn overal
+   weggehaald juist omdat ze als punten gelezen werden. Drie bolletjes onder
+   een stand met twee getallen zouden precies dat weer oproepen.
+
+   Alleen de huidige is goud: --go is de kleur van "dit gebeurt er nu", en
+   die betekenis heeft ze op dit scherm al (de startknop). De andere twee
+   staan in --paper-2, de kleur die deze app voor putjes en tracks gebruikt:
+   een leeg vakje. Verleden en toekomst zien er dus hetzelfde uit, en dat is
+   met opzet -- je kunt aflezen de hoeveelste je speelt en hoeveel er nog
+   komen, zonder dat er een tweede mededeling over "af" bij komt. */
+.rounddots { display: flex; gap: 5px; flex: 0 0 auto; }
+.rounddots i {
+  display: block; width: 11px; height: 11px;
+  background: var(--paper-2); border: 2px solid var(--ink);
+}
+.rounddots i.now { background: var(--go); }
+
+/* Op een kort scherm loopt de stand onder het zwevende huisje door.
+
+   Gemeten op 320 bij 568 in het drukste geval dat dit scherm kent -- een
+   rondewissel met twee tweecijferige totalen én twee "+N" -- raakte de
+   onderrand van de knop precies de bovenrand van de stand, en viel haar
+   slagschaduw van vijf pixels over 53 px breedte op die rand. Dat is de fout
+   die op het instellingenscherm al eens is opgeschreven: een schaduw die op
+   de rand van het vlak eronder landt, waarna de twee als één blok lezen.
+
+   De stand is hier hoger geworden (de mascotte van wie aan zet is groeit),
+   en op 568 px was die marge er niet meer. Twee kleine besparingen samen --
+   iets minder lucht tussen de vakken, iets minder binnenmarge in de stand --
+   duwen de inhoud ruim zes pixels omlaag, en dat is genoeg. Alleen onder
+   620 px hoog: daarboven staat er al acht pixels of meer tussen en hoeft de
+   compositie niet strakker.
+
+   Liggend geldt dit ook, en daar is het puur winst: hoogte is er het
+   schaarst. De rij-indeling zelf komt uit het blok bij 520 px verderop, dat
+   deze gap daar overschrijft. */
+@media (max-height: 620px) {
+  #s-handoff { gap: 1.6vh; }
+  .mini-score { padding-top: 6px; padding-bottom: 6px; }
+}
+
 /* Uitgeklapt: dezelfde kaart, meer erin. Dat groeien ís het teken dat er
    iets nieuws te leren valt -- daar is geen apart scherm of een tweede
    component voor nodig. Het pictogram wordt hier de ronde-tekening zelf
@@ -1158,6 +1219,22 @@ input[type=range]::-moz-range-thumb {
   flex-direction: column; text-align: center;
   gap: min(1.2vh, 10px);
   padding: min(2vh, 16px) min(5vw, 22px) min(2.2vh, 18px);
+  /* width én max-width, dus de kaart vult haar toegestane breedte altijd in
+     plaats van te krimpen tot wat de regel toevallig nodig heeft.
+
+     Bij een rondewissel staat de stand op haar breedst: twee tweecijferige
+     totalen én twee "+N"-labels, want allebei de ploegen hebben die ronde
+     gescoord. Gemeten werd ze dan bréder dan deze kaart -- 269 tegen 222 op
+     320 px, 363 tegen 316 op een tablet. Dat is precies de omkering die hier
+     eerder al eens rechtgezet is (302 tegen 264), nu langs de andere weg
+     binnengekomen: niet doordat de stand groeide, maar doordat de kaart
+     kromp tot haar tekst.
+
+     Met een vaste breedte wint de kaart weer in allebei de assen, en krijgt
+     de uitleg meteen een vaste regellengte in plaats van een die per ronde
+     verspringt. Liggend gaat dit weer uit -- daar staan de drie vakken naast
+     elkaar en zou 24rem de rij van het scherm duwen. */
+  width: min(88vw, 24rem);
   max-width: min(88vw, 24rem);
 }
 .roundcard.big .ico {
@@ -1227,7 +1304,39 @@ input[type=range]::-moz-range-thumb {
    ook voor wie rood en blauw niet uit elkaar houdt. De rand staat er in
    alle gevallen (doorzichtig als je niet aan zet bent), anders verspringt
    de rij een paar pixels zodra de beurt wisselt. */
-.mini-score .side.up { background: var(--paper-2); border-color: var(--ink); }
+/* Dat "opgetild" stond hier wel beschreven maar was er nooit: de tegel kreeg
+   een vlak en een rand, en verder niets. Reliëf betekent in deze app "dit is
+   het", en dit is het enige vlak dat dat zegt zonder het te dragen. Nu wel,
+   met dezelfde --lift-1 als elk ander bijzaak-vlak. */
+.mini-score .side.up {
+  background: var(--paper-2); border-color: var(--ink);
+  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
+}
+/* En de mascotte van wie aan zet is, groeit -- ruwweg anderhalf keer.
+
+   Dit scherm bestaat om het toestel van hand te laten gaan, dus "wie is er
+   nu" hoort er het tweede-luidste ding op te zijn, na de opdracht zelf. Dat
+   was het niet. Wie net gespeeld heeft draagt de kroon én het groene "+N";
+   wie aan zet is had een tegel met een randje van drie pixels. Het luidste
+   antwoord op "van wie is dit toestel" was daarmee de ploegkleur van het
+   scherm -- precies het kanaal dat wegvalt voor wie rood en blauw niet uit
+   elkaar houdt, en dat je bovendien eerst geleerd moet hebben.
+
+   Groeien en niet kleuren, want de kleur is al vergeven. Het is bovendien
+   hetzelfde gebaar als op het winnaarsscherm, waar de winnaar in de stand
+   groeit: één idee, twee plekken, niets nieuws om te leren.
+
+   Het getal ernaast groeit niet mee. Twee totalen van verschillend formaat
+   zijn juist moeilijker naast elkaar te leggen -- dezelfde reden waarom ze
+   op het winnaarsscherm even groot staan. De mascotte draagt de beurt, het
+   cijfer blijft naslag.
+
+   De kroon verandert ook niet van maat: die zegt "staat voor", en dat heeft
+   niets te maken met wie aan de beurt is. Ze hangt absoluut ten opzichte van
+   .head, dus ze blijft vanzelf even ver boven een grotere mascotte staan. */
+.mini-score .side.up .head > svg:not(.crown) {
+  width: min(11.5vw, 42px); height: min(11.5vw, 42px);
+}
 /* :not(.crown), want de kroon hangt in hetzelfde vakje en heeft haar eigen
    maat -- zonder die uitzondering wint deze regel en wordt de kroon net zo
    groot als de mascotte eronder. */
@@ -2084,6 +2193,30 @@ input[type=range]::-moz-range-thumb {
   .roundchip .ico svg { width: 30px; height: 30px; }
   .btn-icon { width: 44px; height: 44px; }
 
+  /* Liggend staan de stand en de opdrachtkaart náást elkaar in plaats van
+     onder elkaar, en dan is hoogte waarmee ze om aandacht vechten.
+
+     De kaart rekent haar pictogram in vh (min(9vh, 74px)), dus liggend kromp
+     dat tot 35 px -- kleiner dan de mascotte van wie aan zet is. Bij een
+     beurtwissel, waar de kaart compact staat, werd de stand daardoor het
+     hogere blok van de twee: 84 px tegen 56. Dat is dezelfde omkering die
+     eerder in de breedte is rechtgezet (zie de min-width bij .roundcard, die
+     304 tegen 157 moest herstellen), nu in de andere as.
+
+     Twee kanten tegelijk: het pictogram krijgt een bodem in pixels, want wat
+     het moet overtreffen -- de mascotte -- staat ook in pixels; en de
+     mascotte van wie aan zet is groeit hier iets minder hard, want liggend
+     is er breedte zat en hoogte schaars, en het opgetilde vlak valt er in
+     zijn eigen kolom toch al op. Nagemeten: kaart 88 bij 300, stand 78 bij
+     199 -- de kaart wint nu in allebei de assen. */
+  .roundcard { padding: 12px 20px 12px 14px; }
+  .roundcard .ico { width: 64px; height: 64px; }
+  /* Liggend staan de vakken naast elkaar; een kaart die haar volle 24rem
+     opeist zou de rij van het scherm duwen. Hier weer op haar natuurlijke
+     breedte, met de min-width van .roundcard als bodem. */
+  .roundcard.big { width: auto; }
+  .mini-score .side.up .head > svg:not(.crown) { width: 36px; height: 36px; }
+
   /* Het merk mat zichzelf in vw: op een brede maar lage telefoon (844x390)
      rekent 14vw ruim binnen zijn eigen maximum van 88px, dus kromp het
      merk daar helemaal niet mee -- de kaart stak met kop en schouders
@@ -2133,6 +2266,27 @@ input[type=range]::-moz-range-thumb {
   .teamchip, .roundchip .ico { width: 60px; height: 60px; }
   .roundchip .ico svg { width: 46px; height: 46px; }
   .roundchip b { font-size: 12px; }
+  /* De stand stond op een tablet nog steeds op zijn telefoonmaat: de
+     mascottes zaten vast op 27 px, want min(7.4vw, 27px) loopt op 810 px
+     breed allang tegen dat plafond. Twee dieren van 27 px met twee cijfers
+     van 20 op een scherm van 810 bij 1080 is geen naslag meer maar een
+     voetnoot -- en de opgetilde tegel, die hier het antwoord op "wie is er
+     nu" moet dragen, viel er helemaal bij weg.
+
+     De opdrachtkaart gaat mee omhoog, en dat is geen extraatje maar een
+     voorwaarde: de stand hoort kleiner te blijven dan de kaart eronder.
+     Groeide alleen de stand, dan stond op een tablet de naslag groter dan
+     het enige waar de speler íets mee moet. Nagemeten in de compacte stand
+     (een beurtwissel, waar de kaart het laagst is): stand 90 px hoog tegen
+     een kaart van 120. */
+  .mini-score .head > svg:not(.crown) { width: 40px; height: 40px; }
+  .mini-score .side.up .head > svg:not(.crown) { width: 62px; height: 62px; }
+  .mini-score b { font-size: 28px; }
+  .mini-score .crown { width: 28px; height: 28px; top: -13px; }
+  .mini-score .fresh { font-size: 18px; padding: 1px 7px; }
+  .roundcard .ico { width: 96px; height: 96px; }
+  .roundcard b { font-size: 32px; }
+  .rounddots i { width: 14px; height: 14px; }
   /* Het cijfer en zijn vak groeien samen mee: het vak moet "30" op de grote
      maat blijven dragen, anders loopt het cijfer er in de laatste tellen
      uit. Zie --digit in :root. */
@@ -2554,6 +2708,9 @@ input[type=range]::-moz-range-thumb {
     <div class="ico" id="hoRoundIco"><svg viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
     <b id="hoRoundWord">Omschrijven</b>
     <p id="hoRoundHow"></p>
+    <!-- De hoeveelste van de drie. Zie .rounddots: geen tweede pictogram en
+         geen woord, alleen de plek in de rij. -->
+    <div class="rounddots" id="hoRoundDots" aria-hidden="true"><i></i><i></i><i></i></div>
   </div>
 
   <!-- Hier stond hetzelfde pauzeteken als tijdens het spelen, maar op dit
@@ -3680,8 +3837,13 @@ function handoff(mode, freshA, freshB) {
   else ico.appendChild(svgUse(ROUND_ICON[r]));
   $("#hoRoundWord").textContent = ROUND_WORD[r];
   $("#hoRoundHow").textContent = round ? ROUND_HOW[r] : "";
+  // De hoeveelste van de drie. De merktekens zijn aria-hidden; wie luistert
+  // krijgt hetzelfde in het label van de kaart, en daar mag het een getal
+  // zijn -- een schermlezer telt geen vierkantjes.
+  $$("#hoRoundDots i").forEach((d, i) => d.classList.toggle("now", i === r));
   $("#hoRoundCard").setAttribute("aria-label",
-    "Deze ronde: " + ROUND_WORD[r] + (round ? ". " + ROUND_HOW[r] : ""));
+    "Ronde " + G.round + " van " + ROUNDS + ": " + ROUND_WORD[r] +
+    (round ? ". " + ROUND_HOW[r] : ""));
 
   /* Overgedragen tijd. Dit was een los kaartje dat ergens tussen de
      opdracht en de startknop zweefde, met het getal in marigold op papier
