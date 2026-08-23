@@ -70,6 +70,12 @@
   /* ---- papier en inkt ---- */
   --paper:   #F4EBDA;   /* de achtergrond van alles                       */
   --paper-2: #E7D9C0;   /* verzonken vlakken: putjes, hulpknoppen, tracks */
+  /* Het papier van de kaart onder vijf seconden. Zie .card[data-time="crit"]:
+     dit is het kanaal dat gróeit terwijl de band krimpt. Warmer en dieper,
+     niet donkerder: --ink-2 (het woord onder het teken) haalt er nog 5,0:1,
+     en tegen --paper staat het op 1,31 -- genoeg om te zien zonder dat het
+     een tweede vlak wordt.                                                */
+  --paper-hot: #EACB9C;
   --ink:     #14110F;   /* contour én alle primaire tekst      (15,9:1)   */
   --ink-2:   #5C5142;   /* bijschriften en uitleg              ( 6,6:1)   */
   --rule:    #8C8069;   /* scheidingslijnen                    ( 3,3:1)   */
@@ -95,18 +101,38 @@
   --danger:   #8C2F1E;  /* stoppen. Alleen op het pauzepaneel, nooit op de kaart. ( 7,0:1) */
 
   /* ---- de klok ----
-     Eén ramp die steeds donkerder én kleurlozer wordt: goud, gebrand, dan
-     bijna zwart. De laatste stap wás wijnrood (--danger hergebruikt) -- en
-     wijnrood ligt op 9° tint, vermiljoen op 8°: vrijwel dezelfde kleur, alleen
-     donkerder. Speelt Vos, dan staat de mascotte in vermiljoen naast een
-     kaartrand die in de laatste vijf seconden naar diezelfde tint donkert,
-     en dat las als "iets met de vossen" in plaats van "bijna om". Nu wordt de
-     rand ontkleurd in plaats van roder: een schaars verzadigde, bijna zwarte
-     bruinkleur op 24° tint, ruim vijftien graden van elke ploegkleur
-     vandaan. Wat overblijft van kleur is duisternis, niet een tint. */
-  --time-3: #A8790B;         /* ruim tijd    ( 3,3:1) */
-  --time-2: #9E4E10;         /* 10 tot 5 s   ( 5,0:1) */
-  --time-1: #3D2B1F;         /* onder 5 s    (11,4:1) */
+     Eén ramp over drie standen: goud, gebrand, pruim.
+
+     De laatste stap wás wijnrood (--danger hergebruikt) -- en wijnrood ligt
+     op 9° tint, vermiljoen op 8°: vrijwel dezelfde kleur, alleen donkerder.
+     Speelt Vos, dan stond de mascotte in vermiljoen naast een kaartrand die
+     in de laatste vijf seconden naar diezelfde tint donkerde, en dat las als
+     "iets met de vossen" in plaats van "bijna om".
+
+     Daarna is hij ontkléúrd in plaats van roder: #3D2B1F, een bijna zwarte
+     bruinkleur op 24° tint. Dat loste de botsing met Vos op en kocht er een
+     ergere voor terug. De band ligt binnen de inkt-contour van de kaart, en
+     tegen díe contour haalde die kleur nog 1,40:1 -- gemeten, naast 4,84 voor
+     goud en 3,18 voor gebrand. De ramp verloor haar leesbaarheid dus precies
+     op de stand waar ze het hardst nodig is: wat er van de band overblijft
+     las als een dikkere zwarte rand, niet als haast. Onder vijf seconden is
+     er nog maar een stompje band, en een stompje in de kleur van de rand
+     eromheen is geen stompje meer.
+
+     Pruim lost allebei op. Op 323° tint ligt het 45° van Vos en 113° van Uil
+     -- verder van beide ploegen dan de oude kleur van Vos alleen -- en tegen
+     de contour haalt het 2,51:1 in plaats van 1,40. Het cijfer ernaast, dat
+     dezelfde kleur draagt, houdt 6,34:1 op papier. En de ramp stopt met
+     donkerder worden: van gebrand naar pruim is nog maar 1,27 verschil in
+     helderheid, dus de stap is een tíntdraai. Wat het zegt is niet "er is
+     minder licht" maar "dit is iets anders dan daarnet".
+
+     Kleur staat ook hier niet alleen: onder vijf seconden wordt de band
+     dikker, warmt het papier van de kaart op (--paper-hot), groeit het
+     cijfer en versnelt de tik. */
+  --time-3: #A8790B;         /* ruim tijd    ( 3,3:1 op papier) */
+  --time-2: #9E4E10;         /* 10 tot 5 s   ( 5,0:1 op papier) */
+  --time-1: #96276B;         /* onder 5 s    ( 6,3:1 op papier) */
 
   --team: var(--team-vos);   /* per beurt gezet; alleen ploegvlakken lezen dit */
 
@@ -134,6 +160,20 @@
   --s-4: 16px; --s-5: 24px; --s-6: 32px;
 
   --tap: 48px;     /* niets dat aangeraakt wordt is kleiner dan dit */
+
+  /* ---- het cijfer van de klok ----
+     Twee maten en een vást vak eromheen. Het cijfer stond op 20 px en kon
+     alleen door een transform groeien (scale 1.25, dus 25 px), want een
+     echte font-size duwt de pauzeknop ernaast opzij en daarmee de hele
+     bovenbalk. Met een vak dat altijd even groot is -- ruim genoeg voor "30"
+     op de grote maat -- kost groeien geen enkele verschuiving meer, en kan
+     de laatste vijf seconden een echte trap zijn in plaats van een duwtje.
+     Het cijfer staat rechts in dat vak, zodat het naar links de lege ruimte
+     in groeit en de afstand tot de pauzeknop niet verandert. */
+  --digit:      20px;
+  --digit-crit: 34px;
+  --digit-w:    40px;   /* "30" op de grote maat meet 38 px */
+  --digit-h:    42px;   /* 34 px regel, en de klop tilt hem naar 39 */
 
   /* ---- veilige randen ----
      `env(safe-area-inset-*)` zegt hoeveel het tóéstel opeist: statusbalk,
@@ -1278,8 +1318,16 @@ input[type=range]::-moz-range-thumb {
    (zie `#s-play .btn-icon`) en krijgt hij de zijmarge van .screen mee. Deze
    balk telt het verschil met --corner erbij op, links zo goed als rechts --
    de mascotte staat even dicht op de andere hoek. */
+/* minmax(0, 1fr) en niet 1fr: een kale 1fr zakt niet onder de min-content
+   van wat erin staat, dus zodra één zijkolom breder wordt dan haar deel,
+   eet ze van de andere en staat de ronde-tegel ernaast niet meer in het
+   midden van het scherm. Dat gebeurde toen het cijfer een vast vak kreeg:
+   op 360 px trok de rechterkolom 106 px, hield de linker er 90 over, en
+   stond de tegel 8 px links van het hart. Met minmax(0, 1fr) zijn de twee
+   zijkolommen altijd even breed en staat de tegel dus altijd precies in het
+   midden; wat niet past steekt de tussenruimte in, en die is --s-3. */
 .play-top {
-  display: grid; grid-template-columns: 1fr auto 1fr;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: start; gap: var(--s-3);
   padding: calc(var(--corner) - var(--s-4)) calc(var(--corner) - var(--s-4)) 0;
 }
@@ -1326,6 +1374,21 @@ input[type=range]::-moz-range-thumb {
 /* Rechts: de resterende seconden en daarnaast de pauzeknop, die daarmee in
    de rechterbovenhoek uitkomt -- dezelfde hoek als op elk ander scherm. */
 .turnbox { display: flex; align-items: center; gap: var(--s-3); }
+
+/* Op 320 px past het niet meer. De balk heeft daar 256 px voor drie vakken:
+   de ronde-tegel is er 76 en staat in het midden, links staat de mascotte op
+   48, en rechts wil de pauzeknop 48 plus het cijfer. Zolang het cijfer klein
+   is gaat dat goed; op de grote maat steekt het rechtervak zo ver zijn kolom
+   uit dat het over het woord van de tegel heen komt.
+   De uitweg is niet het midden loslaten -- dan verspringt de tegel per
+   seconde -- maar het cijfer daar een maat kleiner te laten groeien: van 20
+   naar 26 in plaats van naar 34. Nog altijd een derde erbij, en het
+   rechtervak blijft binnen zijn kolom plus de tussenruimte. Nagemeten op
+   320: tegel tot 166, cijfervak vanaf 168. */
+@media (max-width: 340px) {
+  :root { --digit-crit: 26px; --digit-w: 32px; }
+  .turnbox { gap: var(--s-2); }
+}
 
 /* Op het spelscherm staat de pauzeknop in de balk mee in plaats van er
    los overheen: zo dekte hij de seconden af. Hij komt daarmee op precies
@@ -1424,27 +1487,45 @@ input[type=range]::-moz-range-thumb {
    1,54:1, oftewel onzichtbaar. Met de eigen klokreeks haalt elke stand het
    wel -- 6,6:1 gedempt, 5,0:1 gebrand, 7,0:1 wijn. */
 .secs-left {
-  font-weight: 900; font-size: 20px; font-variant-numeric: tabular-nums;
+  font-weight: 900; font-size: var(--digit); font-variant-numeric: tabular-nums;
   line-height: 1; color: var(--tcol, var(--ink-2));
-  min-width: 2ch; text-align: right;
+  /* Een vak dat niet meebeweegt met wat erin staat: zie --digit-w/-h. */
+  width: var(--digit-w); height: var(--digit-h); flex: 0 0 auto;
+  display: grid; place-items: center end;
 }
 /* De laatste vijf tellen klopt de kaart al mee (.hurry) en versnelt de tik,
    maar het cijfer zelf stond doodstil -- terwijl dat het enige is wat de
    werkelijke stand noemt. Eén klop per seconde, op de tel die je hoort.
-   Klein houden: dit staat in een balk met vaste hoogte, en een cijfer dat
-   te ver uitzet duwt de rest opzij. Daarom ook transform en geen font-size:
-   een transform hertekent geen layout. */
+
+   Een transform en geen font-size, maar niet meer om de oude reden. Die was
+   dat een groeiend cijfer de balk hertekent en de pauzeknop opzij duwt; dat
+   kan sinds .secs-left een vast vak heeft niet meer gebeuren. Wat overblijft
+   is eenvoudiger: dit is een klop bovenóp de maat die het cijfer op dat
+   moment heeft, en die maat verschilt (20 of 34). Een transform rekent
+   vanzelf in verhouding, een font-size zou je per stand moeten uitrekenen.
+
+   Hier rekende dit met --restscale, de rustmaat waar de klop op voortbouwde.
+   Die bestaat niet meer: het groter worden onder vijf seconden zit nu in de
+   lettergrootte (zie .secs-left.crit), dus de klop begint altijd op 1. */
 @keyframes digitPulse {
-  0%   { transform: scale(var(--restscale, 1)); }
-  35%  { transform: scale(calc(var(--restscale, 1) * 1.14)); }
-  100% { transform: scale(var(--restscale, 1)); }
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.14); }
+  100% { transform: scale(1); }
 }
 .secs-left.pulse { animation: digitPulse calc(.24s / max(var(--dur), .001)) var(--e-pop); }
-/* Onder vijf seconden blijft het cijfer ook tússen de klop-tellen in
-   groter staan, in plaats van elke seconde terug te vallen naar zijn
-   gewone maat. --restscale is de basis waarop digitPulse voortbouwt, dus
-   de klop en de blijvende groei botsen niet: ze delen hetzelfde kanaal. */
-.secs-left.crit { --restscale: 1.25; transform: scale(var(--restscale)); }
+/* Onder vijf seconden blijft het cijfer ook tússen de klop-tellen in groter
+   staan, in plaats van elke seconde terug te vallen naar zijn gewone maat.
+
+   Dat groeien was een transform (scale 1.25, dus 25 px), omdat een echte
+   font-size de balk hertekent en de pauzeknop opzij duwt. Met het vaste vak
+   van .secs-left hierboven kan het nu wél de lettergrootte zelf zijn: van 20
+   naar 34 px, ruim tweeënhalf keer zoveel inkt in plaats van een kwart erbij.
+   Dat is nodig, want dit cijfer is naast het papier van de kaart het enige
+   dat in de laatste tellen gróeit terwijl de band krimpt.
+
+   De klop (digitPulse) blijft een transform en rekent vanaf scale 1: de twee
+   zitten nu in verschillende kanalen en kunnen dus niet meer botsen.        */
+.secs-left.crit { font-size: var(--digit-crit); }
 
 /* ---- wat er deze beurt bij komt ----
    Eén label, twee schermen. Dit waren fiches in de ploegkleur: een rijtje
@@ -1518,6 +1599,9 @@ input[type=range]::-moz-range-thumb {
 .cardslot {
   position: relative; display: grid; place-items: center;
   aspect-ratio: 1; max-width: 100%; max-height: 100%;
+  /* Alleen voor het inzakken als de beurt om is (zie #s-play.over). De klop
+     van .hurry is een animatie en gaat hier dus voor. */
+  transition: transform calc(.18s * var(--dur)) ease-out;
 }
 /* Geen ploegkleur op de kaart. De rand ís de klok en verkleurt van goud
    naar wijn; met een vermiljoenen misregistratie erbij liep er rood over
@@ -1538,6 +1622,9 @@ input[type=range]::-moz-range-thumb {
   background: var(--paper);
   border: var(--line) solid var(--ink);
   box-shadow: var(--lift-1) var(--lift-1) 0 0 var(--ink);
+  /* Dezelfde 0,3 s als de band hieronder: het opwarmen en het verkleuren
+     van de rand horen bij hetzelfde moment en moeten dus samen aankomen. */
+  transition: background-color calc(.3s * var(--dur)) linear;
 }
 
 /* De klok loopt om de kaart heen in plaats van in een wijzerplaat ernaast.
@@ -1569,7 +1656,12 @@ input[type=range]::-moz-range-thumb {
    enige waar de speler dan íets mee moet. Haast hoort in de rand te zitten
    zonder dat je ernaar kijkt. */
 .timerframe path { fill: none; stroke-width: 12; stroke-linecap: butt; }
-.timerframe .track { stroke: var(--paper-2); }
+/* De baan verkleurt alleen als de beurt om is (zie #s-play.over), en dan
+   met dezelfde 0,3 s als de band en het papier. */
+.timerframe .track {
+  stroke: var(--paper-2);
+  transition: stroke calc(.3s * var(--dur)) linear;
+}
 .timerframe .band  {
   transition: stroke calc(.3s * var(--dur)) linear,
               stroke-width calc(.3s * var(--dur)) linear;
@@ -1583,6 +1675,77 @@ input[type=range]::-moz-range-thumb {
    waar de band nu een fractie buiten haar eigen baan groeit, verdikt ze
    de rand van de kaart in plaats van er een tweede kleur naast te zetten. */
 .card[data-time="crit"] .timerframe .band { stroke: var(--time-1); stroke-width: 17; }
+
+/* Het papier van de kaart warmt op in de laatste vijf seconden.
+
+   Dit is de tegenhanger van een band die afwindt. Een aflopende band is een
+   uitstekende hóéveelheid en een beroerd alarm: bij een tiende van de tijd
+   staat er een tiende band, dus het signaal is het zwakst op het moment dat
+   de spanning het hoogst is. Gemeten op een telefoon van 412 px bleef er bij
+   één seconde een stompje van zo'n 75 px over, en verder niets -- de haast
+   zat toen vrijwel helemaal in het geluid, en geluid is precies het kanaal
+   dat een volle kamer wegneemt (en dat in de instellingen uit kan staan).
+
+   Dus komt er een kanaal bij dat gróeit terwijl de band krimpt. Het papier
+   van de kaart, en niet iets anders, om vier redenen: het is het grootste
+   vlak op het scherm en dus leesbaar vanuit een ooghoek en van over de
+   tafel; het staat stil, dus het trekt de blik niet wég van de kaart; het
+   breekt de baan niet in stukken (dat is eerder geprobeerd met inkepingen op
+   de hele seconden en om precies die reden teruggedraaid); en het leent geen
+   ploegkleur.
+
+   De baan (.track) blijft --paper-2. Ze staat tegen het opgewarmde papier op
+   1,12 in plaats van de gewone 1,18 -- op een verhouding die sowieso al
+   fluistert is dat geen verschil dat de moeite van een eigen kleur waard is,
+   en juist onder vijf seconden lees je de band rechtstreeks af in plaats van
+   via haar verhouding tot de baan. */
+.card[data-time="crit"] { background: var(--paper-hot); }
+
+/* ---- de beurt is om ----
+   timeUp() houdt het spelscherm 700 ms vast voordat het overdrachtscherm
+   komt, zodat de tafel "ballon!" kan blijven roepen. In die 700 ms verandert
+   er tot nu toe niets: de kaart lag er nog, het woord stond er nog, de
+   stapel lag er nog, en de geraden-knop stond er in vol groen bij -- een
+   scherm dat er precies zo uitziet als een lopende beurt en dat een tik
+   uitnodigt die stil niets doet. Wát er gebeurde stond alleen in het geluid.
+
+   Er staat nu een punt achter de beurt, in drie dingen tegelijk zodat ze als
+   één gebeurtenis lezen:
+
+   - de baan sluit. Ze wás de lege lane onder de band; nu draagt ze de hele
+     omtrek zelf, donker. De klok is niet leeg, ze is dicht;
+
+     Niet in --ink, en dat is nagemeten met de stapel eronder weggehaald.
+     Op inkt versmolt de baan van 12 px met de contour van 4 tot één zwart
+     blok van zestien, en de slagschaduw stapte daar met haar vijf pixels
+     vanaf: precies het trapje op de hoeken rechtsboven en linksonder dat
+     hierboven al drie keer beschreven staat, en dus een derde rechthoek in
+     het silhouet. --ink-2 is donker genoeg om "op" te betekenen en licht
+     genoeg om een eigen band te blijven binnen die contour. Het aantal
+     rechthoeken blijft daarmee wat het tijdens het spelen ook is: contour,
+     ring, schaduw;
+   - het papier koelt af. Het warmde op in de laatste vijf tellen (zie
+     hierboven), dus het terugvallen zegt precies dat die vijf tellen voorbij
+     zijn -- geen nieuw teken, het wegvallen van een bestaand;
+   - de kaart zakt in. Twee procent, samen met de andere twee: los is het
+     niets, samen is het "hij ligt stil".
+
+   En de twee knoppen gaan uit. Dat is elders in deze app juist verboden --
+   een uitgeschakelde knop krijgt geen tik binnen en kan dus ook niet
+   antwoorden, en dan lijkt de app bevroren (zie syncControls). Het verschil
+   is dat die regel gaat over een knop die je nog wílt gebruiken: daar duw je
+   met een bedoeling en krijg je stilte terug. Hier is de beurt afgelopen, de
+   knop zégt dat vóór je hem aanraakt, en het scherm is binnen 700 ms weg.
+   Niet uitnodigen is hier het vriendelijkere antwoord dan weigeren.
+
+   De streep door het pas-teken is dezelfde als bij de laatste kaart: er valt
+   niets meer over te slaan, en dat is dezelfde mededeling. */
+#s-play.over .card                  { background: var(--paper); }
+#s-play.over .timerframe .track     { stroke: var(--ink-2); }
+#s-play.over .cardslot              { transform: scale(.98); }
+#s-play.over .btn-good,
+#s-play.over .btn-skip              { opacity: .38; pointer-events: none; }
+#s-play.over .btn-skip .bar         { display: block; }
 
 /* Geraden en gepast zagen er precies hetzelfde uit, terwijl ze het
    tegenovergestelde betekenen. Ze verschillen nu in de richting waaruit de
@@ -1970,7 +2133,10 @@ input[type=range]::-moz-range-thumb {
   .teamchip, .roundchip .ico { width: 60px; height: 60px; }
   .roundchip .ico svg { width: 46px; height: 46px; }
   .roundchip b { font-size: 12px; }
-  .secs-left { font-size: 26px; }
+  /* Het cijfer en zijn vak groeien samen mee: het vak moet "30" op de grote
+     maat blijven dragen, anders loopt het cijfer er in de laatste tellen
+     uit. Zie --digit in :root. */
+  :root { --digit: 26px; --digit-crit: 44px; --digit-w: 52px; --digit-h: 52px; }
   .turn-gain { font-size: 20px; padding: 1px 9px; }
   .btn-icon { width: 56px; height: 56px; }
   .btn-icon svg { width: 26px; }
@@ -3686,7 +3852,13 @@ function paintClock(ms, totalMs) {
   dig.textContent = secs;
   dig.style.setProperty("--tcol",
     ms <= 10000 ? timerColour(ms) : "var(--ink-2)");
-  dig.classList.toggle("crit", ms > 0 && ms <= 5000);
+  /* Ook op nul, en dat is een verandering. De grens stond op ms > 0, dus op
+     het moment dat de tijd om was sprong het cijfer terug naar zijn kleine
+     maat -- een "0" die krimpt precies op de tel waar de beurt eindigt. Nu
+     blijft hij groot staan: die nul is het laatste woord van de beurt en
+     hoort bij het punt dat #s-play.over erachter zet. De klop hieronder
+     blijft wél op ms > 0 -- er valt op nul niets meer af te tellen. */
+  dig.classList.toggle("crit", ms <= 5000);
   /* Eén klop per hele seconde, en alleen in de laatste vijf: daarbuiten
      zou een cijfer dat elke seconde beweegt de hele beurt lang trekken aan
      een blik die op de kaart hoort. De reflow ertussen is nodig, anders
@@ -3717,6 +3889,10 @@ function startTurn() {
   $("#s-play").style.setProperty("--team", t.color);
   G.card = null;
   $("#glyph").textContent = "";   // leeg tot nul: niemand leest de kaart vooraf
+  // Het punt achter de vórige beurt weer weghalen (zie timeUp en
+  // #s-play.over). Hier en niet in turnEnd(): daar staat het scherm nog in
+  // beeld, en dan zou de kaart midden in die 700 ms weer aanspringen.
+  $("#s-play").classList.remove("over");
   show("play");
   sizeCard();                  // pas ná show(): daarvoor heeft de kaart geen maat
   paintTurnScore();
@@ -4110,6 +4286,12 @@ function timeUp() {
   if (G.card !== null) G.pile.push(G.card);   // onafgemaakte kaart terug
   G.card = null;
   G.pendingMs = 0;
+  /* Het punt achter de beurt: de baan sluit, het papier koelt af, de kaart
+     zakt in en de twee knoppen gaan uit. Zie
+     #s-play.over voor het waarom -- kort: deze 700 ms zag er tot nu toe
+     precies uit als een lopende beurt, en wát er gebeurde stond alleen in
+     het geluid. startTurn() haalt de klasse er weer af. */
+  $("#s-play").classList.add("over");
   /* Even laten staan in plaats van meteen doorklikken: de kaart verdween
      hier midden in een zin, precies op het moment dat de tafel nog "ballon!"
      wil roepen. Er valt niets stuk te tikken in die adem -- G.card staat
