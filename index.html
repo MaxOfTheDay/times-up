@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tijd is Om</title>
 <meta name="description" content="Time's Up voor kinderen die nog niet kunnen lezen.">
-<meta name="theme-color" content="#F4EBDA">
+<meta name="theme-color" id="chromeColor" content="#F4EBDA">
 <meta name="color-scheme" content="light">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -545,10 +545,9 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
    kapotmaken. Wat eraan mankeerde is dat je pas ontdekte wat de tik deed
    nadat je hem gedaan had.
 
-   Dus staat het er nu: de omgekeerde pas-pijl, hetzelfde teken als op de
-   terugneem-knop, in de hoek waar in deze app de uitgang zit. Klein en
-   rustig -- het is geen knop maar een bijschrift bij een vlak dat al
-   aantikbaar is. */
+   Dus staat het er nu: de pas-pijl omgekeerd, in de hoek waar in deze app
+   de uitgang zit. Klein en rustig -- het is geen knop maar een bijschrift
+   bij een vlak dat al aantikbaar is. */
 .cd-back {
   position: absolute;
   top: calc(env(safe-area-inset-top, 0px) + var(--corner));
@@ -556,6 +555,39 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   width: 26px; height: 26px; transform: scaleX(-1);
   pointer-events: none;
 }
+/* De ronde, tijdens het aftellen.
+
+   Het aftelvlak ligt over het hele spelscherm, dus die drie tellen lang was
+   er niet te zien welke ronde dit is -- en dat zijn precies de drie tellen
+   waarin het toestel van hand gaat. Wie hem aanneemt heeft het
+   overdrachtscherm niet per se gelezen; die krijgt een rood vlak met een
+   gouden 3 en verder niets, en ontdekt de opdracht pas als de kaart er al
+   ligt en de klok loopt.
+
+   Het is geprobeerd door de balk bovenaan hierboven te tillen, en dat kostte
+   drie dingen: de mascotte staat in de kleur van dit vlak en werd een
+   uitgesneden silhouet, de pauzeknop werd aantikbaar op een scherm waar geen
+   klok loopt, en het woord OMSCHRIJVEN kwam op ploegblauw uit op 3,7:1 --
+   onder de grens, en tegen de regel dat tekst hier op papier hoort.
+
+   Dus alleen het teken, in hetzelfde papieren tegeltje als op de balk. Geen
+   woord: op de ploegkleur mag er geen staan, en een tel later staat het er
+   toch. Erboven en niet eronder, zodat de schijf de onderste helft van het
+   scherm houdt zoals ze had. */
+.cd-round {
+  /* Op precies de plek waar het rondetegeltje van de balk zo meteen komt
+     te staan: de balk begint op env(top) + --s-4 en zet er zelf
+     --corner - --s-4 bovenop, dus samen env(top) + --corner. Zo staat het
+     teken niet één tel op de ene plek en de volgende tel op de andere --
+     het blijft gewoon staan terwijl het vlak eronder oplost. Op dezelfde
+     regel als het terug-teken rechtsboven, dat ook op --corner hangt. */
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + var(--corner));
+  left: 50%; transform: translateX(-50%);
+  width: 48px; height: 48px; display: grid; place-items: center;
+  border: var(--line-2) solid var(--ink); background: var(--paper-2);
+}
+.cd-round svg { width: 36px; height: 36px; }
 .cd-disc { position: relative; width: min(46vw, 24vh, 190px); aspect-ratio: 1; display: block; }
 .cd-disc b {
   position: absolute; inset: 0; display: grid; place-items: center;
@@ -2230,14 +2262,30 @@ input[type=range]::-moz-range-thumb {
 #s-winner[data-draw="1"] .tally .mascot-sm { width: min(34vw, 12vh, 130px); }
 
 @keyframes rain { to { transform: translateY(115vh) rotate(540deg); } }
-.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
+/* Achter de stand, en niet erover. De confetti hing als los vlak aan de
+   body met z-index 5 -- boven het scherm zelf (z-index 1), dus boven de
+   kroon, de mascottes en de twee totalen. Gemeten lagen er op een willekeurig
+   moment veertien snippers over het vak met de cijfers, en er viel er
+   telkens één dwars over het gezicht van de verliezer.
+
+   Ze hangt nu in het winnaarsscherm zelf, meteen na .rays en met dezelfde
+   z-index: -1. Dat werkt omdat .screen (position: fixed, z-index: 1) een
+   eigen stapelcontext opent -- de -1 zakt dus tot achter de inhoud van dít
+   scherm en niet daaronder. Volgorde in de opmaak beslist de rest: stralen,
+   dan confetti, dan alles waar je naar kijkt. */
+.confetti { position: absolute; inset: 0; pointer-events: none; z-index: -1; overflow: hidden; }
 /* Confetti was rond, met een zwarte rand, in ploegkleur -- exact een
    fiche. Er regenden dus punten over de stand heen. Nu zijn het
    snippers: even feestelijk, en met geen mogelijkheid te tellen. */
+/* Eindig. Dit stond op infinite, en een viering die niet ophoudt is geen
+   viering meer maar weer: tien seconden na de fanfare regende het nog even
+   hard, en dan kijk je naar een scherm dat blijft bewegen terwijl er niets
+   meer gebeurt. Twee passages en dan klaar -- forwards, dus de laatste
+   stand (onder de rand) blijft staan en er springt niets terug. */
 .confetti i {
   position: absolute; top: -12vh; width: 12px; height: 26px;
   border: 2px solid var(--ink);
-  animation: rain calc(2.6s / max(var(--dur), .001)) linear infinite;
+  animation: rain calc(2.6s / max(var(--dur), .001)) linear 2 forwards;
 }
 
 /* ============================================================
@@ -2946,6 +2994,9 @@ input[type=range]::-moz-range-thumb {
        Tikken breekt af en zet je terug op het overdrachtscherm. -->
   <button class="countdown" id="countdown" hidden aria-label="Aftellen — tik om terug te gaan">
     <svg class="cd-back" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pass"/></svg>
+    <!-- Alleen het teken van de ronde; het woord staat een tel later op de
+         balk en mag hier niet, want dit vlak is ploegkleur. Zie .cd-round. -->
+    <div class="cd-round" aria-hidden="true"><svg id="cdRound" viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
     <span class="cd-disc">
       <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
         <circle class="arc" id="cdArc" cx="50" cy="50" r="46"/>
@@ -2963,6 +3014,10 @@ input[type=range]::-moz-range-thumb {
       <g id="rayGroup"></g>
     </svg>
   </div>
+  <!-- Hier en niet aan de body: zo valt ze binnen de stapelcontext van dit
+       scherm en kan ze met z-index: -1 achter de stand zakken. Zie
+       .confetti. -->
+  <div class="confetti" id="confetti" hidden></div>
   <!-- Geen losse juichende mascotte meer bovenaan: die stond als tweede
        exemplaar van hetzelfde dier boven de gekroonde in de stand. De
        winnaar groeit nu in de stand zelf. -->
@@ -3034,8 +3089,6 @@ input[type=range]::-moz-range-thumb {
     </div>
   </div>
 </div>
-
-<div class="confetti" id="confetti" hidden></div>
 
 <script>
 "use strict";
@@ -3232,6 +3285,19 @@ const Snd = (() => {
        hetzelfde geluid als pas(), want dat is een ander bericht. */
     nee()   { tone(220, .05, "sine", .2, 0); tone(220, .05, "sine", .2, .11); },
     tick(f, v) { tone(f || 1600, .022, "square", v || .08, 0); },
+    /* Halverwege de lange druk op stoppen. Hier zat alleen Tril.ijk(), en
+       dat is nu juist de cue die het niet alleen mag doen: navigator.vibrate
+       bestaat niet op iOS, dus daar had het omslagpunt maar één kanaal --
+       het teken dat naar papier keert -- terwijl elke andere trilling in
+       deze app naast een geluid of een beeld staat.
+
+       Een klik, geen noot: 150 Hz gedurende 30 ms is nog geen vijf
+       trillingen. Square omdat dit mechanisch is, een grendel die overslaat,
+       en de klok -- die deze golfvorm verder als enige heeft -- zit er ruim
+       drie octaven boven (1300 - 1600 Hz) en klinkt nooit terwijl er iets
+       ingedrukt gehouden wordt. Zacht, want dit is een ijkpunt onderweg en
+       geen mededeling. */
+    ijk()   { tone(150, .03, "square", .10, 0); },
     /* Het aftellen is de klok niet. Allebei stonden ze op tick(1300) --
        letterlijk dezelfde blip -- dus hoorde je vier gelijke piepjes waarvan
        de vierde toevallig het startsein was. Het kind dat staat uit te
@@ -3558,9 +3624,27 @@ const PRIMARY = {
 
 let started = false;
 
+/* De balk van de browser -- en in app-modus de statusbalk -- krijgt de
+   kleur van het scherm eronder. Dit stond vast op crème, en het
+   overdrachtscherm is van rand tot rand ploegkleur: dus stond er een crème
+   strook van een centimeter boven een rood of blauw vlak, met de naad
+   ertussen precies waar geen enkele vorm in dit ontwerp een naad heeft.
+
+   Alleen de twee kleuren die er al zijn -- het papier en de ploeg -- en
+   geen derde. */
+const PAPER_HEX = "#F4EBDA";
+function paintChrome(kleur) {
+  const m = $("#chromeColor");
+  if (m) m.setAttribute("content", kleur);
+}
+
 function show(name) {
   current = name;
   $$(".screen").forEach(s => s.classList.toggle("on", s.id === "s-" + name));
+  /* Het overdrachtscherm is het enige dat van rand tot rand ploegkleur is.
+     Het spelscherm staat op papier, ook tijdens het aftellen: dat gekleurde
+     vlak ligt nu ónder de balk bovenaan, en die is crème. */
+  paintChrome(name === "handoff" && G ? TEAMS[G.team].hex : PAPER_HEX);
   /* Een punt dat nog onderweg is naar de teller landt hier alsnog. Het
      hangt aan de body en niet aan het spelscherm, dus zonder dit zou het
      over het overdrachtscherm heen blijven vliegen. */
@@ -3863,9 +3947,8 @@ const fillY = (el, btn) => p => {
   el.style.transform = "scaleY(" + p + ")";
   if (btn) {
     const was = btn.classList.contains("flooded"), now = p > .5;
-    // De trilling hoort bij het overslaan van de helft, niet bij elk frame
-    // erna -- dus alleen op de overgang zelf.
-    if (now && !was) Tril.ijk();
+    // Het omslagpunt hoort bij de overgang zelf, niet bij elk frame erna.
+    if (now && !was) { Snd.ijk(); Tril.ijk(); }
     btn.classList.toggle("flooded", now);
   }
 };
@@ -4299,6 +4382,9 @@ function countdown(done) {
   arc.style.strokeDasharray = LEN;
   el.hidden = false;
   num.textContent = COUNT_FROM;
+  // Welke ronde dit is; zie .cd-round. Het aftelvlak dekt de balk bovenaan
+  // af, dus zonder dit staat de opdracht drie tellen lang nergens.
+  $("#cdRound").firstElementChild.setAttribute("href", ROUND_ICON[G.round - 1]);
   el.focus({ preventScroll: true });
 
   /* De eerste tel klinkt vóór t0 gezet wordt, en niet andersom. Bij een koud
@@ -4876,7 +4962,11 @@ function confetti(colors) {
     const d = document.createElement("i");
     d.style.left = Math.random() * 100 + "vw";
     d.style.background = colors[i % colors.length];
-    d.style.animationDelay = (Math.random() * 2.6) + "s";
+    /* Kleinere spreiding dan de 2,6 s die hier stond. De snippers lopen nu
+       twee passages in plaats van eindeloos, en dan telt de vertraging mee
+       in wanneer het scherm weer stil is: met 2,6 s liep de staart op tot
+       ruim veertien seconden. */
+    d.style.animationDelay = (Math.random() * 1.2) + "s";
     d.style.animationDuration = (2.2 + Math.random() * 1.6) + "s";
     /* Snippers, geen schijfjes. Confetti was rond, zwart omrand en in
        ploegkleur -- dat is exact een fiche, en er regenden dus punten over
