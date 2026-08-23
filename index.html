@@ -1707,64 +1707,6 @@ input[type=range]::-moz-range-thumb {
 /* De twee deuren op één regel, met de ruimte ertussen die ze op het
    spelscherm ook hebben: ze zijn elkaars alternatief, geen lijstje. */
 .doors { display: flex; align-items: center; gap: var(--s-5); }
-
-/* De laatste kaart terugnemen.
-
-   Een tik op geraden is meteen raak, telt een punt en haalt de kaart uit de
-   ronde. Aan een tafel met kinderen die naar het toestel reiken is een
-   verkeerde tik waarschijnlijk, en er was niets om hem mee recht te zetten --
-   je hield een stand over waar iemand het niet mee eens was en geen manier om
-   erover te beslissen. De dubbeltik-drempel van 280 ms vangt een enthousiaste
-   vinger op, geen verkeerde.
-
-   Niet op het spelscherm. Dat scherm heeft precies twee handelingen en dat
-   moet zo blijven; er komt geen derde knop bij naast een kaart waar je in
-   twintig seconden doorheen moet. Hier wel: het pauzepaneel is in deze app al
-   de plek voor "wacht, even stoppen", het zet de klok stil, en het is waar
-   een volwassene naartoe gaat als de tafel het oneens is. Wie het niet nodig
-   heeft, ziet hem nooit -- hij staat er alleen als er in déze beurt iets te
-   halen valt.
-
-   Het teken is de pas-pijl omgekeerd: dezelfde twee driehoeken die "volgende
-   kaart" betekenen, nu de andere kant op. Daarnaast staat de kaart zelf, want
-   "terug" is een richting en pas mét die tekening is het een mededeling: díe
-   gaat terug de stapel in. Geen woord nodig, en geen nieuw pictogram om te
-   leren. */
-/* Naast de stand en niet eronder. Op een eigen regel was dit een derde vlak
-   in een verticale stapel, met dezelfde rand en dezelfde slagschaduw als de
-   stopknop eronder -- en dan leest het als een derde deur naast de twee die
-   er met opzet staan. Het paneel groeide er ook van: 353 naar 417 px, voor
-   een knop die de meeste beurten niet eens verschijnt.
-
-   Naast de stand klopt het bovendien inhoudelijk: die knop verandert precies
-   het getal dat ernaast staat, en nabijheid hoort dat werk te doen. Past het
-   niet op één regel, dan valt hij eronder -- maar met de kleine tussenruimte
-   van dit blok, dus als onderdeel van de stand en niet als losse rij. */
-.pause-tally {
-  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
-  /* Ruim, en om dezelfde reden waarom de ruimte binnen een ploeg klein is en
-     die ertussen groot: de terugneem-knop draagt dezelfde huid als de
-     opgetilde tegel van wie aan zet is -- papier-2, inkt-rand, --lift-1 --
-     want dat is nu eenmaal de huid van elke hulpknop in deze app. Naast
-     elkaar op één regel las de rij daardoor als tegel, getal, tegel. Met de
-     lucht ertussen is het weer één stand met een knop ernaast.
-
-     Twee maten, want de twee assen vragen het tegenovergestelde. Naast
-     elkaar moet er ruimte tussen (--s-4), anders lezen de twee tegels als
-     één rij. Valt de knop eronder -- op een smal scherm past het niet naast
-     elkaar -- dan moet die ruimte juist klein zijn (--s-2), want anders
-     staat hij er weer als losse vierde rij bij, en dat was nou net het
-     probleem. */
-  gap: var(--s-2) var(--s-4);
-}
-.btn-undo {
-  display: flex; align-items: center; gap: var(--s-1);
-  min-height: var(--tap); padding: 0 var(--s-2);
-  border: var(--line-2) solid var(--ink); background: var(--paper-2);
-  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
-}
-.btn-undo svg { width: 20px; height: 20px; transform: scaleX(-1); }
-.btn-undo b { font-size: 20px; line-height: 1; }
 /* Een gepauzeerd spel moet zeggen dát het stilstaat en waar het stond.
    Het paneel toonde alleen twee pictogrammen op een donker vlak: geen
    tijd, geen stand, geen woord. */
@@ -3058,9 +3000,6 @@ input[type=range]::-moz-range-thumb {
          een keer misgegaan -- de mascottes hadden geen .head om zich heen
          en vielen daardoor buiten de maatregel, zodat ze op 0 bij 0 pixels
          stonden en er twee kale getallen overbleven zonder eigenaar. -->
-    <!-- De stand en het terugnemen horen bij elkaar: die knop verandert
-         precies dit getal. Zie .pause-tally. -->
-    <div class="pause-tally">
     <div class="mini-score" aria-hidden="true">
       <div class="side" id="pauseSideA">
         <span class="head">
@@ -3076,13 +3015,6 @@ input[type=range]::-moz-range-thumb {
         </span>
         <b id="pauseScoreB">0</b>
       </div>
-    </div>
-      <!-- Alleen te zien als er in deze beurt iets terug te nemen valt; zie
-           .btn-undo en paintUndo(). -->
-      <button class="btn-undo" id="btnUndo" hidden>
-        <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pass"/></svg>
-        <b id="undoGlyph" aria-hidden="true"></b>
-      </button>
     </div>
     <!-- Twee deuren naast elkaar, in dezelfde volgorde als tijdens het
          spelen: links het vierkant dat de mindere keuze is (daar zit "pas"),
@@ -3529,14 +3461,14 @@ function loadGame() {
 
   /* Opnieuw opgebouwd in plaats van doorgegeven: zo staan de vluchtige
      velden gegarandeerd op hun beginwaarde, ook als er in de opslag iets
-     anders stond. card is op een grens altijd null, gained hoort bij de
-     beurt die nog moet komen, en lastGoed is niets om terug te nemen. */
+     anders stond. card is op een grens altijd null, en gained hoort bij de
+     beurt die nog moet komen. */
   return {
     mode: s.mode === "round" ? "round" : "turn",
     G: {
       deck: g.deck, pile: g.pile, card: null,
       round: g.round, team: g.team, scores: g.scores,
-      gained: 0, lastGoed: null,
+      gained: 0,
       pendingMs: g.pendingMs, secs: g.secs
     }
   };
@@ -4004,9 +3936,6 @@ function newGame() {
     team: 0,
     scores: [[0, 0, 0], [0, 0, 0]],   // [ploeg][ronde]
     gained: 0,
-    /* De laatst geraden kaart van deze beurt, of null. Alleen om ze terug te
-       kunnen nemen vanuit het pauzepaneel; zie neemTerug(). */
-    lastGoed: null,
     pendingMs: settings.secs * 1000,  // wat de volgende beurt meekrijgt
     secs: settings.secs
   };
@@ -4343,7 +4272,6 @@ let countRaf = null;
 
 function startTurn() {
   G.gained = 0;
-  G.lastGoed = null;      // een nieuwe beurt neemt niets van de vorige terug
   const t = TEAMS[G.team];
   $("#plMascot").firstElementChild.setAttribute("href", t.mascot);
   paintRound($("#plRoundChip"), $("#plRound"), $("#plRoundWord"));
@@ -4692,10 +4620,6 @@ function midden(sel) {
 
 $("#btnGoed").addEventListener("click", () => {
   if (!acts("goed")) return;
-  // Welke kaart dit was, zodat het pauzepaneel haar kan terugnemen. Eén diep:
-  // dit is er om één verkeerde tik recht te zetten, niet om een beurt terug
-  // te spoelen.
-  G.lastGoed = G.card;
   // De toon stijgt per kaart van deze beurt; nog vóór het ophogen, zodat de
   // eerste kaart de grondtoon krijgt.
   Snd.goed(G.gained);
@@ -4750,7 +4674,6 @@ function timeUp() {
   Tril.om();
   if (G.card !== null) G.pile.push(G.card);   // onafgemaakte kaart terug
   G.card = null;
-  G.lastGoed = null;                         // de beurt is voorbij
   G.pendingMs = 0;
   /* Het punt achter de beurt: de baan sluit, het papier koelt af, de kaart
      zakt in en de twee knoppen gaan uit. Zie
@@ -4830,7 +4753,6 @@ function endRound() {
   // het om de stapel leeg te spelen.
   G.pendingMs = Math.round(remaining());
   G.card = null;
-  G.lastGoed = null;
 
   // Laatste ronde: winner() laat zo meteen de fanfare horen, en die moet
   // alleen klinken. Elders is leeggespeeld zelf al de beste uitkomst van
@@ -4995,11 +4917,7 @@ let pauseMs = 0, pauseReturn = null;
    draad kwijtraakt.
    Andere plek, andere vorm, dus kroon en tegel kunnen samen op één ploeg
    staan. toggleAttribute en niet .hidden: dit is een <svg>, en SVGElement
-   kent die eigenschap niet (zie paintHoTally).
-
-   Een eigen functie sinds de terugneem-knop bestaat: die verandert de stand
-   terwijl het paneel al openstaat, dus het schilderen moest los van het
-   openen kunnen. */
+   kent die eigenschap niet (zie paintHoTally). */
 function paintPauseScore() {
   [[0, "#pauseScoreA", "#pauseCrownA", "#pauseSideA"],
    [1, "#pauseScoreB", "#pauseCrownB", "#pauseSideB"]]
@@ -5039,45 +4957,11 @@ function openPause() {
   // eerder een mededeling dan naslag.
   $("#pauseClock").hidden = current !== "play";
   paintPauseScore();
-  paintUndo();
 
   pauseReturn = document.activeElement;
   $("#pauze").hidden = false;
   $("#btnResume").focus({ preventScroll: true });
 }
-
-/* De knop staat er alleen als er in déze beurt iets terug te nemen valt: op
-   het spelscherm (dus niet tussen de beurten) en met een kaart in lastGoed.
-   Er staat de tekening van die kaart op -- zie .btn-undo. */
-function paintUndo() {
-  const kan = current === "play" && G && G.lastGoed !== null;
-  $("#btnUndo").hidden = !kan;
-  if (!kan) return;
-  $("#undoGlyph").textContent = G.deck[G.lastGoed][0];
-  $("#btnUndo").setAttribute("aria-label",
-    "Laatste kaart terugnemen: " + G.deck[G.lastGoed][1]);
-}
-
-/* Terugnemen: het punt eraf, de kaart bovenop de stapel, en klaar. Bovenop
-   en niet onderop -- dit is geen passen maar een correctie, dus de kaart
-   hoort meteen weer te komen. De kaart die nu in beeld staat blijft staan;
-   die is niet fout aangetikt.
-
-   Eén keer per tik: lastGoed gaat op null, dus de knop verdwijnt en er valt
-   niet twee keer hetzelfde punt af te halen. */
-$("#btnUndo").addEventListener("click", () => {
-  if (current !== "play" || !G || G.lastGoed === null) return;
-  Snd.nee();
-  Tril.nee();
-  G.scores[G.team][G.round - 1]--;
-  G.gained--;
-  G.pile.unshift(G.lastGoed);
-  G.lastGoed = null;
-  paintTurnScore();
-  syncControls();
-  paintUndo();
-  paintPauseScore();
-});
 
 function closePause() {
   $("#pauze").hidden = true;
