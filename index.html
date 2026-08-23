@@ -3324,7 +3324,8 @@ const TEAMS = [
   { mascot: "#m-uil", naam: "Uil", color: "var(--team-uil)", hex: "#1B6FC4" }
 ];
 const ROUNDS = 3;
-const KEY_SET = "tijdisom.settings";
+const KEY_SET  = "tijdisom.settings";
+const KEY_GAME = "tijdisom.game";
 
 let settings = {
   tier: "klein",
@@ -3353,11 +3354,26 @@ let G = null;          // lopend spel, of null
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 
-/* Er wordt bewust geen lopend spel onthouden: het titelscherm start altijd
-   vers, dus een potje overleeft geen herlaadbeurt, dichtklikken of
-   vergrendeld scherm. Dat is geen gat -- het is de eis dat een kind nooit
-   íets hoeft te lezen om verder te komen: geen "verder spelen" versus
-   "nieuw spel" om tussen te kiezen, gewoon altijd dezelfde ene knop. */
+/* Een lopend potje wordt wél onthouden, en dat is nieuw.
+
+   Hier stond dat het bewust niet gebeurde, met als reden dat een kind nooit
+   iets moet hoeven lezen om verder te komen: geen "verder spelen" naast
+   "nieuw spel" om tussen te kiezen, gewoon altijd dezelfde ene knop. Die
+   reden klopt nog steeds -- maar hij gaat over de knoppen, niet over de
+   opslag. Er is geen keuze bijgekomen: de app komt gewoon terug waar ze was.
+
+   Wat het kostte om het niet te doen: een avond stand leefde in één
+   JavaScript-variabele. Een terugveeg langs de schermrand, een kind dat naar
+   beneden trekt om te verversen, een telefoontje waardoor Android de PWA uit
+   het geheugen gooit -- en de tafel staat weer op 0 - 0 zonder dat er iets
+   gezegd wordt. Op een feestje is dat geen randgeval maar een zaterdag.
+
+   Er wordt bewaard op de grens van een beurt, niet tijdens. Zie saveGame:
+   het overdrachtscherm is het enige moment waarop de stand rond is, en dat
+   maakt de terugkomst eenduidig -- je hervat een beurt die nog moet
+   beginnen. Een onderbroken beurt wordt dus overgespeeld, mét de kaarten en
+   zónder de punten die er half in stonden. Dat is ook het eerlijkste: die
+   punten zijn gehaald in een beurt die niemand heeft zien aflopen. */
 function load() {
   try {
     const s = JSON.parse(localStorage.getItem(KEY_SET) || "null");
@@ -3371,6 +3387,70 @@ function load() {
 }
 function saveSettings() {
   try { localStorage.setItem(KEY_SET, JSON.stringify(settings)); } catch (e) {}
+}
+
+/* Twee uur. Een potje duurt een avond; ben je twee uur weg, dan is die avond
+   verder gegaan zonder dit toestel en wil je geen half spel terugkrijgen dat
+   niemand nog herkent. Korter zou een pauze voor het eten niet overleven,
+   langer laat het spel van gisteren opduiken. En vergissen is goedkoop: het
+   huisje rechtsboven staat er, en dat is dezelfde uitweg als altijd. */
+const GAME_MAX_AGE = 2 * 60 * 60 * 1000;
+
+/* Bewaren gebeurt alleen vanuit handoff(), en dat is met opzet de enige
+   plek: daar is de stand rond -- de vorige beurt is verwerkt, de volgende is
+   nog niet begonnen, en G.card staat op null. Elke andere plek zou een halve
+   beurt vastleggen, en dan moet er bij terugkomst besloten worden wat er met
+   de punten van die halve beurt gebeurt. Nu is dat besluit er niet: er is
+   niets halfs om te bewaren. */
+function saveGame(mode) {
+  try {
+    localStorage.setItem(KEY_GAME, JSON.stringify({ t: Date.now(), mode: mode, G: G }));
+  } catch (e) { /* vol of geweigerd: dan speelt het gewoon zonder vangnet */ }
+}
+function clearGame() {
+  try { localStorage.removeItem(KEY_GAME); } catch (e) {}
+}
+
+/* Alles nakijken voordat het spel wordt. Dit is opslag van het toestel: ze
+   kan van een oudere versie komen, half geschreven zijn, of door iets anders
+   overschreven. Eén veld dat niet klopt en de app draait vast op een scherm
+   waar een kind niet uit komt, dus bij de minste twijfel: geen spel, gewoon
+   de titel. Dezelfde houding als bij load() hierboven. */
+function loadGame() {
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(KEY_GAME) || "null"); } catch (e) { return null; }
+  if (!s || typeof s !== "object" || typeof s.t !== "number") return null;
+  if (Date.now() - s.t > GAME_MAX_AGE) return null;
+  const g = s.G;
+  if (!g || typeof g !== "object") return null;
+
+  const heel = n => Number.isInteger(n);
+  const deckOk = Array.isArray(g.deck) && g.deck.length > 0 && g.deck.every(
+    c => Array.isArray(c) && typeof c[0] === "string" && typeof c[1] === "string");
+  if (!deckOk) return null;
+  const pileOk = Array.isArray(g.pile) &&
+    g.pile.every(i => heel(i) && i >= 0 && i < g.deck.length);
+  const scoresOk = Array.isArray(g.scores) && g.scores.length === 2 && g.scores.every(
+    r => Array.isArray(r) && r.length === ROUNDS && r.every(n => heel(n) && n >= 0));
+  const restOk = heel(g.round) && g.round >= 1 && g.round <= ROUNDS &&
+    (g.team === 0 || g.team === 1) &&
+    typeof g.secs === "number" && g.secs > 0 &&
+    typeof g.pendingMs === "number" && g.pendingMs >= 0;
+  if (!(pileOk && scoresOk && restOk)) return null;
+
+  /* Opnieuw opgebouwd in plaats van doorgegeven: zo staan de vluchtige
+     velden gegarandeerd op hun beginwaarde, ook als er in de opslag iets
+     anders stond. card is op een grens altijd null, gained hoort bij de
+     beurt die nog moet komen, en lastGoed is niets om terug te nemen. */
+  return {
+    mode: s.mode === "round" ? "round" : "turn",
+    G: {
+      deck: g.deck, pile: g.pile, card: null,
+      round: g.round, team: g.team, scores: g.scores,
+      gained: 0, lastGoed: null,
+      pendingMs: g.pendingMs, secs: g.secs
+    }
+  };
 }
 
 function shuffle(a) {
@@ -3826,6 +3906,7 @@ function newGame() {
      kan worden en dus ook niet meer verouderen kan. Wat er te kiezen valt,
      staat in de bak (zie bakFor) en dat is een keuze die blijft staan. */
   const deck = drawDeck(settings.tier, settings.size);
+  guardBack();          // vanaf hier vangt de terugveeg het pauzepaneel
   G = {
     deck: deck,
     pile: shuffle(deck.map((_, i) => i)),
@@ -3834,6 +3915,9 @@ function newGame() {
     team: 0,
     scores: [[0, 0, 0], [0, 0, 0]],   // [ploeg][ronde]
     gained: 0,
+    /* De laatst geraden kaart van deze beurt, of null. Alleen om ze terug te
+       kunnen nemen vanuit het pauzepaneel; zie neemTerug(). */
+    lastGoed: null,
     pendingMs: settings.secs * 1000,  // wat de volgende beurt meekrijgt
     secs: settings.secs
   };
@@ -3979,6 +4063,9 @@ function handoff(mode, freshA, freshB) {
     $("#hoCarry").setAttribute("aria-label",
       Math.ceil(G.pendingMs / 1000) + " seconden mee uit de vorige ronde");
   }
+  /* Hier en nergens anders. Dit is de grens waar de stand rond is, dus wat
+     hier bewaard wordt is altijd een beurt die nog moet beginnen. */
+  saveGame(handoffMode);
   show("handoff");
 }
 
@@ -4743,6 +4830,7 @@ function winner() {
   // confetti valt het weg bij beperkte beweging.
   if (!matchMedia("(prefers-reduced-motion: reduce)").matches) Tril.feest();
   G = null;
+  clearGame();          // uitgespeeld: er valt niets meer te hervatten
   show("winner");
 }
 
@@ -4795,7 +4883,7 @@ function clearConfetti() {
 $("#btnAgain").addEventListener("click", () => {
   clearConfetti(); Snd.unlock(); newGame();
 });
-$("#btnHome").addEventListener("click", () => { clearConfetti(); show("title"); });
+$("#btnHome").addEventListener("click", () => { clearConfetti(); clearGame(); show("title"); });
 
 /* ==============================================================
    PAUZE EN STOPPEN
@@ -4886,8 +4974,41 @@ holdButton($("#btnStop"), 1100, () => {
   stopClock(); releaseWake();
   $("#pauze").hidden = true;
   G = null;
+  clearGame();          // met opzet weggegooid: niet stilletjes terugbrengen
   show("title");
 }, fillY($("#btnStop i"), $("#btnStop")));
+
+/* ==============================================================
+   6b. DE TERUGVEEG — één invoer in de geschiedenis als vangnet
+   ==============================================================
+   Android heeft geen terugknop meer maar een veeg langs de schermrand, en
+   die zit precies waar een duim ligt die het toestel vasthoudt. Er stond
+   niets tussen die veeg en het einde van de avond: in een tabblad ging je
+   van de app af, als geïnstalleerde app sloot ze. In allebei de gevallen
+   was het potje weg.
+
+   Eén invoer erbij zodra er een potje loopt, en die vangt de veeg op. Wat
+   er dan gebeurt is het pauzepaneel -- de plek die in deze app al "wacht,
+   even stoppen" betekent, met verdergaan als tik en stoppen als lange druk.
+   Precies de twee dingen die iemand die per ongeluk terugveegt wil kunnen
+   kiezen.
+
+   Daarna komt er meteen een nieuwe invoer voor in de plaats, dus de tweede
+   veeg wordt net zo goed opgevangen. Zolang er een potje loopt kom je er
+   dus niet uit met vegen -- dat is de bedoeling, en de uitweg staat op het
+   paneel zelf. Loopt er geen potje, dan doen we niets en gaat de veeg
+   gewoon door.
+
+   In een try, want pushState mag geweigerd worden (een sandbox, een
+   ongewoon schema). Gaat het niet, dan speelt de app zoals hiervoor. */
+function guardBack() {
+  try { history.pushState({ tijd: 1 }, ""); } catch (e) {}
+}
+addEventListener("popstate", () => {
+  if (!G) return;                       // geen potje: laat de veeg gaan
+  guardBack();                          // en vang ook de volgende op
+  if ($("#pauze").hidden) openPause();
+});
 
 /* ==============================================================
    7. SCHERM WAKKER HOUDEN — stil falen waar het niet bestaat.
@@ -4987,7 +5108,17 @@ load();
 Snd.enabled = settings.sound !== false;
 Tril.enabled = settings.haptics !== false;
 paintSetup();
-show("title");
+
+/* Terugkomen waar we waren. Geen vraag, geen tweede knop: stond er een potje
+   van minder dan twee uur oud, dan opent de app op het overdrachtscherm waar
+   dat potje was, en anders op de titel. Voor wie speelt is er dus niets
+   bijgekomen om te begrijpen -- het scherm staat er gewoon weer.
+
+   Vóór show(), en started staat nog op false: dan blijft de focus met rust,
+   net als bij een gewone start op de titel. */
+const hervat = loadGame();
+if (hervat) { G = hervat.G; guardBack(); handoff(hervat.mode); }
+else show("title");
 started = true;
 
 // Alleen voor de tests: inkijk in de lopende stand (?debug in de URL).
@@ -5003,7 +5134,8 @@ if (location.search.indexOf("debug") !== -1) {
     get settings() { return settings; },
     get screen() { return current; },
     DECKS, TIER_ORDER, poolFor, bakFor, canHide, MIN_BAK, shuffle, drawDeck, total,
-    stopClock, paintClock, sizeCard, Snd, Tril
+    stopClock, paintClock, sizeCard, Snd, Tril,
+    saveGame, loadGame, clearGame, KEY_GAME, GAME_MAX_AGE
   };
 }
 </script>

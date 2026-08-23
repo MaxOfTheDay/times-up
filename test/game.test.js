@@ -3,8 +3,9 @@
  *
  * Speelt een volledig potje in een echte browser: drie rondes over hetzelfde
  * deck, passen, de klok die afloopt, de ploegen die wisselen, de resterende
- * tijd die meegaat naar de volgende ronde, en dat een herlaadbeurt midden in
- * een beurt niets laat terugkomen -- de titelknop begint altijd vers.
+ * tijd die meegaat naar de volgende ronde, dat een herlaadbeurt midden in een
+ * beurt het potje terugbrengt op de grens ervoor, dat de terugveeg het
+ * pauzepaneel opent, en dat stoppen het potje wél weggooit.
  *
  * Draaien: npm run test:spel     (of npm test voor alles)
  * Duurt ruim 20 seconden: één beurt moet echt uitlopen om te zien wat er
@@ -181,20 +182,62 @@ const ok = (c, m) => { if (!c) fails.push(m); };
        return up.classList.contains('up') && !other.classList.contains('up');
      }), 'de ploeg die aan zet is wordt niet opgetild in de stand');
 
-  // --- herladen midden in een beurt laat niets terugkomen ---
-  // Er bestaat geen "verder spelen" meer: de titelknop begint altijd vers,
-  // dus een potje overleeft geen herlaadbeurt.
+  // --- herladen midden in een beurt komt terug op de grens ---
+  // Dit stond hier omgekeerd: een potje overleefde geen herlaadbeurt, en dat
+  // was zo bedoeld. De reden daarvoor ging over de knoppen -- geen "verder
+  // spelen" naast "nieuw spel" om tussen te kiezen -- en die reden staat nog
+  // steeds. Er is ook geen keuze bijgekomen: de app komt gewoon terug waar ze
+  // was. Wat verdween is dat een terugveeg of een telefoontje de hele avond
+  // stand wiste zonder dat er iets gezegd werd.
+  //
+  // Bewaard wordt er op het overdrachtscherm, niet tijdens een beurt. Een
+  // onderbroken beurt wordt dus overgespeeld: de kaarten komen terug, en de
+  // punten die er half in stonden niet.
+  const stand = () => game(() => ({
+    scores: JSON.parse(JSON.stringify(window.__tijd.G.scores)),
+    team: window.__tijd.G.team,
+    round: window.__tijd.G.round
+  }));
+  const voor = await stand();
   await startTurn();
-  await page.waitForTimeout(1200);
+  await page.click('#btnGoed');
+  await page.waitForTimeout(400);
+  ok(await game(() => window.__tijd.G.gained) === 1,
+     'de geraden kaart telde niet mee in de onderbroken beurt');
   await page.reload();
+  await page.waitForTimeout(400);
+  ok(await screen() === 'handoff',
+     'na een herlaadbeurt komt het potje niet terug op het overdrachtscherm');
+  ok(await game(() => !!window.__tijd.G), 'het lopende potje overleeft een herlaadbeurt niet');
+  ok(JSON.stringify(await stand()) === JSON.stringify(voor),
+     'de stand na een herlaadbeurt is niet die van de grens ervoor');
+
+  // --- de terugveeg opent het pauzepaneel in plaats van de app te verlaten ---
+  await page.goBack();
   await page.waitForTimeout(300);
-  ok(await screen() === 'title', 'na een herlaadbeurt komt het spel niet op de titel uit');
-  ok(!await game(() => !!window.__tijd.G), 'lopend spel overleeft een herlaadbeurt');
+  ok(await page.evaluate(() => !document.querySelector('#pauze').hidden),
+     'de terugveeg opent het pauzepaneel niet');
+  await page.click('#btnResume');
+  await page.waitForTimeout(200);
+
+  // --- stoppen gooit het potje wél weg ---
+  // Bewaren mag nooit betekenen dat iets wat je met opzet weggooit terugkomt.
+  await startTurn();
+  await page.waitForTimeout(300);
+  await page.click('#btnPauze');
+  await page.waitForTimeout(250);
+  await hold(page, '#btnStop', 1400);
+  await page.waitForTimeout(250);
+  ok(await screen() === 'title', 'stoppen komt niet op de titel uit');
+  await page.reload();
+  await page.waitForTimeout(400);
+  ok(await screen() === 'title', 'een gestopt potje komt na een herlaadbeurt terug');
+  ok(!await game(() => !!window.__tijd.G), 'een gestopt potje leeft na een herlaadbeurt nog');
   await page.click('#btnStart');
-  await page.waitForTimeout(100);
-  ok(await screen() === 'handoff', 'de titelknop na een herlaadbeurt begint geen vers spel');
+  await page.waitForTimeout(150);
+  ok(await screen() === 'handoff', 'de titelknop begint geen vers spel');
   ok(await page.textContent('#hoScoreA') === '0' && await page.textContent('#hoScoreB') === '0',
-     'een vers spel na een herlaadbeurt begint niet op 0 - 0');
+     'een vers spel begint niet op 0 - 0');
 
   ok(!errs.length, 'consolefouten: ' + errs.join(' | '));
 
