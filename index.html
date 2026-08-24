@@ -5336,12 +5336,27 @@ function releaseBack() {
   try { history.back(); } catch (e) { backEat = false; }
 }
 
+/* Eerst kijken waar we heen gaan, dán pas opnieuw vangen.
+
+   Hier stond het andersom -- eerst pushen, dan terug() -- en dat betekende
+   dat een veeg die op de titel uitkwam een invoer achterliet die daar niet
+   hoort. Die werd meteen daarna weer opgegeten door releaseBack(), en dáár
+   zat het lek: dat is een history.back() vanuit de afhandeling van een
+   popstate, dus een sprong door de geschiedenis terwijl er al een sprong
+   loopt. Doet de browser die niet (of pas later), dan blijft backEat op
+   true staan en slikt de vólgende echte veeg. Eén dode veeg, en niet te
+   zien aankomen.
+
+   Nu wordt er in dit pad helemaal niet meer gepusht als we op de titel
+   eindigen: releaseBack() ziet backGuard op false staan en doet niets. De
+   enige history.back() die overblijft komt uit een tik op het huisje, en
+   die staat buiten elke popstate. */
 addEventListener("popstate", () => {
   backGuard = false;                    // onze invoer is net opgegeten
   if (backEat) { backEat = false; return; }   // door onszelf: klaar
   if (current === "title") return;      // de bodem: laat de veeg gaan
-  guardBack();                          // en vang ook de volgende op
-  terug();
+  terug();                              // dit kán op de titel uitkomen
+  if (current !== "title") guardBack(); // blijven we, dan vangen we opnieuw
 });
 
 /* Wat terug betekent, per scherm -- steeds hetzelfde als de knop rechtsboven.
