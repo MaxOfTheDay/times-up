@@ -5321,9 +5321,32 @@ holdButton($("#btnStop"), 1100, () => {
    ervoor -- dat is precies wat het winnaarsscherm hierboven deed. */
 let backGuard = false;     // ligt onze invoer in de geschiedenis?
 let backEat   = false;     // we halen 'm zelf weg: sla de volgende pop over
+let backBusy  = false;     // we zitten middenin een sprong door de geschiedenis
+let backSoon  = false;     // er staat al een uitgestelde poging klaar
 
+/* Nooit de geschiedenis wijzigen terwijl er een sprong door de geschiedenis
+   loopt. Dat gold al voor history.back() -- daar is het één keer op
+   stukgelopen -- en het geldt net zo goed voor pushState.
+
+   Elke veeg eet onze invoer op, dus na afloop moet er een nieuwe komen,
+   anders vindt de vólgende veeg niets meer en verlaat ze de app. Die nieuwe
+   werd tot nu toe meteen in de afhandeling van de popstate gepusht. Neemt de
+   browser die niet aan -- en Chrome op Android is daar kieskeurig in, zeker
+   met het voorspellende terug-gebaar dat vooraf al bepaalt of de veeg in de
+   pagina blijft of de app sluit -- dan lijkt alles goed te gaan en verdwijnt
+   de app bij de veeg dáárna.
+
+   Uitstellen tot de sprong voorbij is kost niets: nul milliseconden is de
+   eerstvolgende taak, en tussen twee vegen van een mens zit een veelvoud
+   daarvan. backSoon zorgt dat er hoogstens één poging tegelijk klaarstaat,
+   want tijdens een veeg vraagt zowel show() als de afhandeling erom. */
 function guardBack() {
-  if (backGuard) return;
+  if (backGuard || backSoon) return;
+  if (backBusy) {
+    backSoon = true;
+    setTimeout(() => { backSoon = false; guardBack(); }, 0);
+    return;
+  }
   try { history.pushState({ tijd: 1 }, ""); backGuard = true; } catch (e) {}
 }
 
@@ -5355,8 +5378,16 @@ addEventListener("popstate", () => {
   backGuard = false;                    // onze invoer is net opgegeten
   if (backEat) { backEat = false; return; }   // door onszelf: klaar
   if (current === "title") return;      // de bodem: laat de veeg gaan
-  terug();                              // dit kán op de titel uitkomen
-  if (current !== "title") guardBack(); // blijven we, dan vangen we opnieuw
+  /* Alles hierbinnen valt binnen de sprong, ook de guardBack() die show()
+     zelf doet als terug() van scherm wisselt. Vandaar de vlag en niet één
+     uitgestelde aanroep hier: zo wordt élke poging uitgesteld. */
+  backBusy = true;
+  try {
+    terug();                            // dit kán op de titel uitkomen
+    if (current !== "title") guardBack(); // blijven we, dan vangen we opnieuw
+  } finally {
+    backBusy = false;
+  }
 });
 
 /* Wat terug betekent, per scherm -- steeds hetzelfde als de knop rechtsboven.
