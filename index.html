@@ -575,19 +575,25 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
    toch. Erboven en niet eronder, zodat de schijf de onderste helft van het
    scherm houdt zoals ze had. */
 .cd-round {
-  /* Op precies de plek waar het rondetegeltje van de balk zo meteen komt
-     te staan: de balk begint op env(top) + --s-4 en zet er zelf
-     --corner - --s-4 bovenop, dus samen env(top) + --corner. Zo staat het
-     teken niet één tel op de ene plek en de volgende tel op de andere --
-     het blijft gewoon staan terwijl het vlak eronder oplost. Op dezelfde
-     regel als het terug-teken rechtsboven, dat ook op --corner hangt. */
+  /* Op precies de plek waar het rondetegeltje van de balk zo meteen komt te
+     staan, zodat het teken niet één tel op de ene plek staat en de volgende
+     tel op de andere: het blijft gewoon staan terwijl het vlak eronder
+     oplost.
+
+     Die plek wordt gemeten en niet nagerekend. Deze waarden hier zijn de
+     terugval -- ze kloppen staand op een telefoon (de balk begint op
+     env(top) + --s-4 en zet er --corner - --s-4 bovenop), maar liggend en op
+     een tablet is het tegeltje van de balk 40 respectievelijk 60 px en staat
+     het niet in het hart van het scherm. Nagerekend scheelde dat daar 45 px
+     opzij en 8 px in de maat. countdown() legt de gemeten rechthoek er
+     daarom overheen; zie daar. */
   position: absolute;
   top: calc(env(safe-area-inset-top, 0px) + var(--corner));
   left: 50%; transform: translateX(-50%);
   width: 48px; height: 48px; display: grid; place-items: center;
   border: var(--line-2) solid var(--ink); background: var(--paper-2);
 }
-.cd-round svg { width: 36px; height: 36px; }
+.cd-round svg { width: 75%; height: 75%; }
 .cd-disc { position: relative; width: min(46vw, 24vh, 190px); aspect-ratio: 1; display: block; }
 .cd-disc b {
   position: absolute; inset: 0; display: grid; place-items: center;
@@ -4525,9 +4531,28 @@ function countdown(done) {
   arc.style.strokeDasharray = LEN;
   el.hidden = false;
   num.textContent = COUNT_FROM;
-  // Welke ronde dit is; zie .cd-round. Het aftelvlak dekt de balk bovenaan
-  // af, dus zonder dit staat de opdracht drie tellen lang nergens.
+  /* Welke ronde dit is; zie .cd-round. Het aftelvlak dekt de balk bovenaan
+     af, dus zonder dit staat de opdracht drie tellen lang nergens.
+
+     Het tegeltje wordt op de gemeten plek van het echte rondetegeltje
+     gelegd, precies zoals sizeCard() hierboven de kaart van de gemeten
+     ruimte afleidt: het spelscherm staat er al (show("play") ging vooraf),
+     dus die rechthoek klopt. Nagerekend in CSS zou het staand kloppen en
+     liggend 45 px misstaan, want daar is het tegeltje kleiner en staat het
+     niet in het hart van het scherm. Lukt het meten niet, dan blijft de
+     terugval uit de stijlen staan. */
   $("#cdRound").firstElementChild.setAttribute("href", ROUND_ICON[G.round - 1]);
+  const chip = $(".roundchip .ico"), tegel = $(".cd-round");
+  if (chip && tegel) {
+    const c = chip.getBoundingClientRect(), o = el.getBoundingClientRect();
+    if (c.width > 0) {
+      tegel.style.left = (c.left - o.left) + "px";
+      tegel.style.top = (c.top - o.top) + "px";
+      tegel.style.width = c.width + "px";
+      tegel.style.height = c.height + "px";
+      tegel.style.transform = "none";
+    }
+  }
   el.focus({ preventScroll: true });
 
   /* De eerste tel klinkt vóór t0 gezet wordt, en niet andersom. Bij een koud
