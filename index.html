@@ -977,6 +977,13 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
        de tekst de knop niet raakt maar mijdt. */
     padding-right: calc(var(--corner) + var(--tap) - var(--s-4) + var(--s-2));
   }
+  /* Dezelfde 64 px, maar als marge en niet als binnenmarge. De letterbalk
+     schuift zijdelings, dus binnenmarge zou de letters gewoon ónder het
+     huisje door laten rollen -- en daar is een tik op een letter een tik op
+     de uitgang. Met een marge houdt het rolgebied zelf op vóór die kolom,
+     en komt er geen letter meer onder de knop terecht. Kost hier iets minder
+     dan één letter zichtbare breedte. */
+  .cb-index { margin-right: calc(var(--corner) + var(--tap) - var(--s-4) + var(--s-2)); }
 }
 
 .setup-scroll {
@@ -1159,6 +1166,41 @@ input[type=range]::-moz-range-thumb {
 .cb-body .btn-plain { margin-bottom: var(--s-3); }
 /* Geen eigen rolgebied binnen een scherm dat zelf al rolt: dat maakte van
    de kaartenlijst een kijkgaatje van twee rijen hoog. */
+/* De letterbalk.
+
+   De bak is 90, 183 of 185 tegels. Gemeten is dat zeven schermen scrollen op
+   een 412x915, elf op een 360x640 en veertien liggend -- en je komt hier voor
+   één kaart. De lijst staat al op alfabet, precies zodat de letter de manier
+   is om haar te vinden; alleen was er niets om die letter mee aan te wijzen.
+
+   Eén regel en niet omgevouwen. De bak heeft drieentwintig beginletters, en
+   die passen nergens op één scherm: omgevouwen worden het vier rijen van
+   zo'n 160 px, en dat is meer hoogte dan de kaarten eronder krijgen. Dus
+   schuift de balk zijdelings, zoals een toetsenbordrij -- waar een toets van
+   32 px ook normaal is. Ook liggend en op een tablet, want de kolom van dit
+   scherm loopt op 560 px vast: gemeten is de balk 829 px breed tegen
+   hoogstens 528 px zichtbaar. De achtste letter staat overal half in beeld,
+   en dat is het teken dat er meer is.
+
+   Verder gewoon een chip: papier, inkt-rand, --lift-1, en indrukken doet
+   hem zijn eigen schaduw in zakken. Geen gekozen-toestand, want er valt
+   hier niets te kiezen dat blijft staan -- één tik en je bent er. */
+.cb-index {
+  display: flex; gap: 4px; overflow-x: auto; overscroll-behavior-x: contain;
+  /* Ruimte voor de slagschaduw van de onderste rand; zonder deze marge
+     knipt het rolgebied hem eraf. */
+  padding: 0 var(--lift-1) var(--lift-1) 0;
+  margin-bottom: var(--s-3);
+}
+.cb-index button {
+  flex: 0 0 auto; width: 32px; height: 44px;
+  border: var(--line-2) solid var(--ink); background: var(--paper);
+  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
+  font-weight: 900; font-size: 15px; color: var(--ink);
+}
+.cb-index button:active {
+  transform: translate(var(--lift-1), var(--lift-1)); box-shadow: none;
+}
 /* 96 px en niet de 74 van de oude voorvertoning van 24 kaarten. Die 74
    gaven op een telefoon vier kolommen van 84 px, en daar past het woord
    van 24 van de 275 kaarten niet op één regel: "bouwvakker" brak dan af
@@ -2807,6 +2849,8 @@ input[type=range]::-moz-range-thumb {
                restoreHere(): een knop die iets doet aan kaarten die niet in
                beeld staan, is een knop die je niet kunt controleren. -->
           <button class="btn-plain" id="btnRestoreAll" hidden>Alles terugleggen</button>
+          <!-- Springen naar een letter; zie .cb-index en buildCards(). -->
+          <div class="cb-index" id="cbIndex" role="group" aria-label="Spring naar een letter"></div>
           <div class="cards" id="cbAll"></div>
         </div>
       </details>
@@ -3771,6 +3815,10 @@ function buildCards() {
   const box = $("#cbAll");
   const weg = new Set(settings.hidden);
   const frag = document.createDocumentFragment();
+  /* De eerste tegel van elke letter, zodat de letterbalk weet waarheen. Op
+     de tegel zelf en niet op een teller: bij een andere stand wordt deze
+     lijst opnieuw opgebouwd en zijn de plekken andere. */
+  const eerste = new Map();
   poolFor(settings.tier)
     .slice()
     .sort((a, b) => a[1].localeCompare(b[1], "nl"))
@@ -3782,10 +3830,44 @@ function buildCards() {
       b.querySelector("span").textContent = e;
       b.querySelector("small").textContent = w;
       markCard(b, weg.has(w));
+      /* Op de letter van het gesorteerde woord, met dezelfde locale als de
+         sortering -- anders wijst de balk naar een plek die er niet is. */
+      const letter = w[0].toLocaleUpperCase("nl");
+      if (!eerste.has(letter)) eerste.set(letter, b);
       frag.appendChild(b);
     });
   box.textContent = "";
   box.appendChild(frag);
+  buildIndex(eerste);
+}
+
+/* Alleen de letters die in déze stand voorkomen. Een letter die nergens
+   heen wijst is erger dan geen letter: hij belooft kaarten die er niet
+   zijn. Zelfde regel als bij de knop "Alles terugleggen" -- alles op dit
+   paneel gaat over de stand die je voor je hebt. */
+function buildIndex(eerste) {
+  const bar = $("#cbIndex");
+  bar.textContent = "";
+  eerste.forEach((tegel, letter) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = letter;
+    b.setAttribute("aria-label", "Spring naar de " + letter);
+    b.addEventListener("click", () => springNaar(tegel));
+    bar.appendChild(b);
+  });
+}
+
+/* Het scherm rolt, niet de bak: die heeft met opzet geen eigen rolgebied.
+   Dus verschuiven we het scherm zelf tot de tegel bovenaan staat, met een
+   kleine marge zodat ze niet tegen de rand plakt. Onderaan de lijst loopt
+   het scrollen vanzelf vast -- dan staat de tegel gewoon zo hoog als het
+   kan, en dat is precies goed. */
+function springNaar(tegel) {
+  const sc = $(".setup-scroll");
+  if (!sc || !tegel) return;
+  const d = tegel.getBoundingClientRect().top - sc.getBoundingClientRect().top;
+  sc.scrollBy({ top: d - 8, behavior: "smooth" });
 }
 
 /* De toestand van één tegel, op drie kanalen tegelijk: de bleke huid, de
