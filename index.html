@@ -1170,8 +1170,6 @@ input[type=range]::-moz-range-thumb {
 .cb-body { padding-top: var(--s-2); }
 .cb-body .hint { margin-top: 0; margin-bottom: var(--s-3); }
 .cb-body .btn-plain { margin-bottom: var(--s-3); }
-/* Geen eigen rolgebied binnen een scherm dat zelf al rolt: dat maakte van
-   de kaartenlijst een kijkgaatje van twee rijen hoog. */
 /* De letterbalk.
 
    De bak is 90, 183 of 185 tegels. Gemeten is dat zeven schermen scrollen op
@@ -1207,6 +1205,8 @@ input[type=range]::-moz-range-thumb {
 .cb-index button:active {
   transform: translate(var(--lift-1), var(--lift-1)); box-shadow: none;
 }
+/* Geen eigen rolgebied binnen een scherm dat zelf al rolt: dat maakte van
+   de kaartenlijst een kijkgaatje van twee rijen hoog. */
 /* 96 px en niet de 74 van de oude voorvertoning van 24 kaarten. Die 74
    gaven op een telefoon vier kolommen van 84 px, en daar past het woord
    van 24 van de 275 kaarten niet op één regel: "bouwvakker" brak dan af
