@@ -1190,7 +1190,14 @@ input[type=range]::-moz-range-thumb {
    hem zijn eigen schaduw in zakken. Geen gekozen-toestand, want er valt
    hier niets te kiezen dat blijft staan -- één tik en je bent er. */
 .cb-index {
-  display: flex; gap: 4px; overflow-x: auto; overscroll-behavior-x: contain;
+  /* Het gat moet groter zijn dan de slagschaduw. Het stond op 4 px met een
+     --lift-1 van 5, dus viel de schaduw van elke toets één pixel voorbij het
+     gat, op de buurman -- en dan is er nergens crème tussen twee toetsen te
+     zien. De rij werd zo één zwarte balk met inkepingen in plaats van
+     negentien losse toetsen. Dezelfde fout die hier eerder verticaal
+     gemaakt is, tussen "Beginnen" en "Terug": een gat van --s-2 met een
+     schaduw van --s-2 erop. Met 8 px blijft er 3 px papier over. */
+  display: flex; gap: var(--s-2); overflow-x: auto; overscroll-behavior-x: contain;
   /* Ruimte voor de slagschaduw van de onderste rand; zonder deze marge
      knipt het rolgebied hem eraf. */
   padding: 0 var(--lift-1) var(--lift-1) 0;
@@ -1226,7 +1233,12 @@ input[type=range]::-moz-range-thumb {
 }
 .pv span { font-size: 30px; line-height: 1.1; }
 .pv small {
-  font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .03em;
+  /* Dezelfde bodem als overal: --type-label. Dit stond op 10 px, twee onder
+     de ondergrens die er juist voor is ("alles wat je in één blik leest:
+     woord, label"). Het woord op de speelkaart kreeg die bodem wél, via de
+     max(12, ...) in sizeCard(); deze tegel is bij die verhuizing overgeslagen
+     -- dezelfde soort tekst, twee plekken, één ervan vergeten. */
+  font-size: var(--type-label); font-weight: 800; text-transform: uppercase; letter-spacing: .03em;
   /* De bak toont álle woorden, dus ook "lieveheersbeestje" en
      "brandblusser" -- 26 van de 275 zijn te lang voor één regel op een
      tegel van 84 px. De voorvertoning van 24 kaarten kwam die zelden
