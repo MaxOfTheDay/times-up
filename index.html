@@ -3755,6 +3755,9 @@ function show(name) {
      Het spelscherm staat op papier, ook tijdens het aftellen: dat gekleurde
      vlak ligt nu ónder de balk bovenaan, en die is crème. */
   paintChrome(name === "handoff" && G ? TEAMS[G.team].hex : PAPER_HEX);
+  /* De terugveeg wordt overal opgevangen behalve op de titel -- daar is de
+     bodem van de app en hoort ze de app te verlaten. Zie guardBack(). */
+  if (name === "title") releaseBack(); else guardBack();
   /* Een punt dat nog onderweg is naar de teller landt hier alsnog. Het
      hangt aan de body en niet aan het spelscherm, dus zonder dit zou het
      over het overdrachtscherm heen blijven vliegen. */
@@ -4158,7 +4161,6 @@ function newGame() {
      kan worden en dus ook niet meer verouderen kan. Wat er te kiezen valt,
      staat in de bak (zie bakFor) en dat is een keuze die blijft staan. */
   const deck = drawDeck(settings.tier, settings.size);
-  guardBack();          // vanaf hier vangt de terugveeg het pauzepaneel
   G = {
     deck: deck,
     pile: shuffle(deck.map((_, i) => i)),
@@ -5279,28 +5281,87 @@ holdButton($("#btnStop"), 1100, () => {
    van de app af, als geïnstalleerde app sloot ze. In allebei de gevallen
    was het potje weg.
 
-   Eén invoer erbij zodra er een potje loopt, en die vangt de veeg op. Wat
-   er dan gebeurt is het pauzepaneel -- de plek die in deze app al "wacht,
+   Eén invoer erbij op elk scherm behalve de titel, en die vangt de veeg op.
+   Wat er dan gebeurt hangt af van waar je bent, en steeds volgens dezelfde
+   regel: terug doet wat de uitgang rechtsboven op dát scherm doet. Midden
+   in een beurt is dat het pauzepaneel -- de plek die in deze app al "wacht,
    even stoppen" betekent, met verdergaan als tik en stoppen als lange druk.
    Precies de twee dingen die iemand die per ongeluk terugveegt wil kunnen
-   kiezen.
+   kiezen. Zie terug() hieronder voor de rest.
 
    Daarna komt er meteen een nieuwe invoer voor in de plaats, dus de tweede
    veeg wordt net zo goed opgevangen. Zolang er een potje loopt kom je er
    dus niet uit met vegen -- dat is de bedoeling, en de uitweg staat op het
-   paneel zelf. Loopt er geen potje, dan doen we niets en gaat de veeg
-   gewoon door.
+   paneel zelf. Op de titel ligt er geen invoer, en daar verlaat de veeg de
+   app zoals ze hoort.
+
+   Dat vangnet lag er lang voor één geval -- midden in een beurt -- en overal
+   elders deed de veeg iets verkeerds of helemaal niets. Alle vier gemeten
+   met een echte terugveeg, niet beredeneerd:
+
+   - op de instellingen viel ze door en verliet de app, terwijl er
+     rechtsboven een huisje staat dat "terug naar de titel" betekent;
+   - tijdens het aftellen gebeurde er niets, en dat bleef zo: openPause()
+     keert om bij G.card === null -- een poort geschreven voor de adempauze
+     na tijd-om -- en tijdens het aftellen is er ook nog geen kaart, dus ving
+     dezelfde poort allebei. Ondertussen werd er wél opnieuw gepusht, dus het
+     gebaar was dood én vernieuwde zichzelf;
+   - met het paneel al open gebeurde er niets, terwijl terug op Android juist
+     hét gebaar is om iets dat eroverheen ligt weg te halen;
+   - op het winnaarsscherm was G al null, dus viel ze door -- maar de invoeren
+     die het potje had opgestapeld lagen er nog. De eerste veeg at er
+     stilletjes een op en pas de volgende verliet de app, en hoevéél vegen
+     dat waren hing af van hoe vaak je tijdens het spel terug had geveegd.
 
    In een try, want pushState mag geweigerd worden (een sandbox, een
    ongewoon schema). Gaat het niet, dan speelt de app zoals hiervoor. */
+/* Precies één invoer, niet één per veeg. Ze stapelden op omdat er bij elke
+   veeg gepusht werd zonder ooit iets weg te halen; backGuard houdt nu bij of
+   de onze er ligt. Anders erf je op de titel de invoeren van het potje
+   ervoor -- dat is precies wat het winnaarsscherm hierboven deed. */
+let backGuard = false;     // ligt onze invoer in de geschiedenis?
+let backEat   = false;     // we halen 'm zelf weg: sla de volgende pop over
+
 function guardBack() {
-  try { history.pushState({ tijd: 1 }, ""); } catch (e) {}
+  if (backGuard) return;
+  try { history.pushState({ tijd: 1 }, ""); backGuard = true; } catch (e) {}
 }
+
+/* De titel is de bodem van de app: daar hoort terug de app te verlaten, en
+   dus mag onze invoer er niet meer liggen. Zelf opeten in plaats van laten
+   staan, want weghalen kan niet -- history kent geen "pop". */
+function releaseBack() {
+  if (!backGuard) return;
+  backEat = true;
+  try { history.back(); } catch (e) { backEat = false; }
+}
+
 addEventListener("popstate", () => {
-  if (!G) return;                       // geen potje: laat de veeg gaan
+  backGuard = false;                    // onze invoer is net opgegeten
+  if (backEat) { backEat = false; return; }   // door onszelf: klaar
+  if (current === "title") return;      // de bodem: laat de veeg gaan
   guardBack();                          // en vang ook de volgende op
-  if ($("#pauze").hidden) openPause();
+  terug();
 });
+
+/* Wat terug betekent, per scherm -- steeds hetzelfde als de knop rechtsboven.
+   Het paneel gaat voor: ligt er iets overheen, dan haalt terug dát weg en
+   niet het scherm eronder.
+
+   Eén stilte blijft over, met opzet: de zevenhonderd milliseconden na
+   tijd-om. Er loopt dan niets meer en het overdrachtscherm staat al klaar,
+   dus er valt niets te pauzeren en niets te verlaten -- openPause() keert
+   daar zelf om. Een veeg in dat gaatje doet dus niets, en dat is beter dan
+   de app verlaten op de laatste tel van een beurt. */
+function terug() {
+  if (!$("#pauze").hidden) { closePause(); return; }
+  if (current === "setup")  { show("title"); return; }
+  if (current === "winner") { clearConfetti(); clearGame(); show("title"); return; }
+  // Aftellen: dezelfde uitweg als een tik op het vlak, en als het teken
+  // rechtsboven dat die tik aankondigt.
+  if (countRaf !== null) { stopCountdown(); releaseWake(); handoff(handoffMode); return; }
+  openPause();            // spelen en overdracht: allebei het pauzeteken
+}
 
 /* ==============================================================
    7. SCHERM WAKKER HOUDEN — stil falen waar het niet bestaat.
@@ -5409,7 +5470,7 @@ paintSetup();
    Vóór show(), en started staat nog op false: dan blijft de focus met rust,
    net als bij een gewone start op de titel. */
 const hervat = loadGame();
-if (hervat) { G = hervat.G; guardBack(); handoff(hervat.mode); }
+if (hervat) { G = hervat.G; handoff(hervat.mode); }
 else show("title");
 started = true;
 
