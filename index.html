@@ -449,7 +449,7 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   transition: transform calc(var(--t-press) * var(--dur)) ease,
               box-shadow calc(var(--t-press) * var(--dur)) ease;
 }
-.btn-go:active, .btn-good:active, .btn-wide:active {
+.btn-go:active, .btn-good:active {
   transform: translate(var(--lift-2), var(--lift-2));
   box-shadow: 0 0 0 var(--ink);
 }
@@ -460,7 +460,7 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
    "goed", niet de handeling waar dit scherm voor bestaat, en droeg tot nu
    toe per ongeluk hetzelfde gewicht. */
 .btn-icon:active, .btn-danger:active, .chip:active, .pv:active, .btn-skip:active,
-.btn-plain:active {
+.btn-plain:active, .btn-wide:active {
   transform: translate(var(--lift-1), var(--lift-1));
   box-shadow: 0 0 0 var(--ink);
 }
@@ -763,11 +763,36 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
    in deze app rechtsboven (pauze, huisje) -- niet onderaan tegen de
    hoofdhandeling aan geplakt, waar ze als gelijkwaardige keuze leest. Hij
    is nu het huisje in die hoek, en deze voet is van 175 naar 110 px
-   gekrompen (liggend van 45% van het scherm naar 28%). */
+   gekrompen (liggend van 45% van het scherm naar 28%).
+
+   --lift-1 en niet --lift-2, en dat is nieuw. Acht pixels betekenen in deze
+   app "de handeling waar dit scherm voor bestaat", en dat kanaal loopt
+   overal gelijk op met de ronde vorm: de speelknop op de titel, de start op
+   de overdracht, geraden, nog een keer, verder -- vijf cirkels, vijf keer
+   acht pixels. Deze knop was het enige element in de app met acht pixels
+   dat geen cirkel is.
+
+   De vorm was niet de fout: een knop met tekst op het instellingenscherm
+   hóórt een rechthoek te zijn, dat staat hierboven bij de vormregel. Het
+   reliëf was het. Dit scherm bestaat niet voor één handeling, en er valt
+   ook niets te bevestigen -- elke tik op een tegel roept meteen
+   saveSettings() aan, er is geen concept en geen "toepassen". Deze knop is
+   dus geen afronding maar een snelkoppeling naar het spel, en hoort op de
+   hoogte van de andere uitgang op dit scherm: het huisje rechtsboven.
+   Daarmee heeft het instellingenscherm noch een cirkel noch acht pixels,
+   en dat is precies wat er waar is.
+
+   Wat blijft: groen en van rand tot rand. Groen omdat goud hier al
+   "gekozen" betekent op vier tegelrijen plus de schuifknop, en volle
+   breedte omdat de knop onmiskenbaar moet zijn op het moment dat hij onder
+   scrollende inhoud vandaan komt. Zijn :active staat hierboven bij de
+   --lift-1-groep; laat je hem in de --lift-2-groep staan, dan zakt hij acht
+   pixels in een schaduw van vijf en zweeft hij bij het indrukken drie
+   pixels boven het papier. */
 .btn-wide {
   min-height: 68px; width: 100%;
   background: var(--good-ink); color: var(--paper);
-  border: var(--line) solid var(--ink); box-shadow: var(--lift-2) var(--lift-2) 0 var(--ink);
+  border: var(--line) solid var(--ink); box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
   font-weight: 900; text-transform: uppercase; letter-spacing: .1em; font-size: 18px;
   display: grid; place-items: center; gap: var(--s-2);
   grid-auto-flow: column;
@@ -1121,10 +1146,10 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
 @media (max-width: 592px) and (max-height: 559px) {
   .cb-body .cards { margin-right: calc(var(--corner) + var(--tap) - var(--s-4) + var(--s-2)); }
 }
-#s-setup h2 {
-  font-size: 13px; font-weight: 900; text-transform: uppercase;
-  letter-spacing: .12em; margin: 0 0 10px; color: var(--ink-2);
-}
+/* Hier stond een #s-setup h2 met 13 px in --ink-2. Zie de toelichting bij
+   .group-head hieronder: die regel won op zijn ID van de regel die het werk
+   moest doen, en maakte van elke groepskop een veldlabel. Er is geen andere
+   h2 op dit scherm, dus hij kan gewoon weg. */
 .field { margin: 0; border: 0; padding: 0; min-width: 0; }
 .field legend, .legend-label {
   display: block;
@@ -1132,17 +1157,50 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   letter-spacing: .12em; margin: 0 0 10px; padding: 0; color: var(--ink-2);
 }
 .field-group { display: flex; flex-direction: column; gap: var(--s-5); }
-/* Twee groepen op dit scherm: wat voor vanavond geldt (moeilijkheid, aantal,
-   tijd, de kaarten zelf) en wat altijd zo blijft staan (geluid, trilling).
-   Zonder een zichtbaar verschil tussen die twee las het als één
-   ononderbroken lijst van vijf gelijkwaardige instellingen. Deze kop is
-   daarom groter dan een legend en in volle inkt -- niet in --ink-2 -- met
-   een eigen lijn eronder in --rule. Geen goud: dat betekent op dit scherm
-   al "verder", en een zesde plek voor diezelfde kleur zou hem weer minder
-   laten zeggen. */
+/* Een groepsgrens hoort meer lucht te krijgen dan een veld binnen een groep,
+   en kreeg minder. Gemeten op 390 px: 24 px voor de overgang naar
+   "Voorkeuren", tegen 24 tot 34 px voor de velden erboven. De minst
+   gemarkeerde overgang van de hele pagina zat dus precies daar waar de ene
+   soort instelling ophoudt en de andere begint. Met --s-5 erbij staat de
+   grens op 48 en los van het ritme binnen een groep. */
+.field-group + .field-group { margin-top: var(--s-5); }
+/* Drie groepen, en de grens ligt op wat een knop verandert.
+
+   Hier stonden er twee -- "Dit spel" (moeilijkheid, aantal, tijd en de
+   kaarten zelf) tegenover "Voorkeuren" -- en die grens lag op hoe lang een
+   keuze meegaat. Die as bestaat niet. Alles op dit scherm blijft staan tot
+   je het verandert: de weggelegde kaarten net zo goed als het geluid. Wat
+   wél verschilt is wat een knop aanraakt.
+
+     Welke kaarten -- de moeilijkheid en de bak. Een stand verandert geen
+       regel en geen tijd: poolFor() kiest een band, settings.hidden haalt er
+       losse kaarten uit, en "90 in het spel" is de uitkomst van allebei.
+       Twee knoppen op hetzelfde ding, een grove en een fijne.
+     Hoe lang -- kaarten per potje en tijd per beurt. Dat de eerste daar
+       hoort stond al op de knop zelf: die tegels heten Kort, Normaal en
+       Lang, en dat gaat over duur en niet over kaarten.
+     Voorkeuren -- geluid en trilling. Van het toestel, niet van het spel.
+
+   Er verhuist geen element. De volgorde op het scherm is nog precies die
+   van hiervoor; alleen ligt de grens nu ná de kaartenbak in plaats van ná
+   de drie knoppen. Dat is niet alleen de goedkoopste variant maar ook de
+   goede: de bak een eigen groep onder de knoppen geven is geprobeerd en
+   gemeten, en dan zakt ze van 361 naar 724 px en valt ze op een telefoon
+   van 844 px onder de vouw. Uitgerekend het onderdeel waarvan niemand weet
+   dat het bestaat, uit beeld.
+
+   En de kop komt nu ook echt boven een legend uit. Hierboven stond
+   #s-setup h2 met 13 px in --ink-2 -- dezelfde maat en dezelfde kleur als
+   een veldlabel -- en met een ID ervoor won die regel van deze, ongeacht de
+   volgorde in het bestand. Gemeten gaven "Dit spel" en "Moeilijkheid"
+   allebei 13px / 1.56px / rgb(92,81,66) / 900: identiek op elke as. Van de
+   bedoeling hieronder overleefde alleen de streep, en zes labels die er
+   hetzelfde uitzien lezen als zes gelijkwaardige instellingen. Geen goud
+   erbij: dat betekent op dit scherm al "gekozen", op vier tegelrijen en de
+   schuifknop. */
 .group-head {
   font-size: 15px; font-weight: 900; text-transform: uppercase;
-  letter-spacing: .1em; margin: 0; color: var(--ink);
+  letter-spacing: .1em; margin: 0 0 var(--s-3); color: var(--ink);
   padding-bottom: var(--s-2); border-bottom: var(--line-2) solid var(--rule);
 }
 .rules {
@@ -2897,14 +2955,14 @@ input[type=range]::-moz-range-thumb {
          stonden er nog, de velden zelf waren er nooit gekomen. Een kop met
          twee nepknoppen eronder is erger dan geen kop, dus weg ermee. -->
 
-    <!-- Twee groepen, niet vijf losse instellingen op een rij: alles wat
-         over vanavond gaat (moeilijkheid, aantal, tijd, en het resultaat
-         daarvan) staat nu bij elkaar, gevolgd door wat altijd zo blijft
-         staan (geluid, trilling). De voorvertoning stond eerst hélemaal
-         onderaan, ná Geluid en Trilling -- en sneed daarmee "dit spel" in
-         tweeën met "altijd" ertussenin. -->
+    <!-- Drie groepen, niet zes losse instellingen op een rij. De grens ligt
+         op wat een knop verandert: welke kaarten er zijn, hoe lang het
+         duurt, en wat het toestel doet. Zie de toelichting bij .group-head
+         voor waarom dat een bruikbaarder as is dan "dit spel" tegenover
+         "altijd", en waarom er voor deze indeling geen enkel element hoeft
+         te verhuizen. -->
     <div class="field-group">
-      <h2 class="group-head">Dit spel</h2>
+      <h2 class="group-head">Welke kaarten</h2>
 
       <fieldset class="field">
         <legend>Moeilijkheid</legend>
@@ -2975,6 +3033,10 @@ input[type=range]::-moz-range-thumb {
           <div class="cards" id="cbAll"></div>
         </div>
       </details>
+    </div>
+
+    <div class="field-group">
+      <h2 class="group-head">Hoe lang</h2>
 
       <fieldset class="field">
         <!-- "Aantal kaarten" stond hier vlak onder een stapel van 90 tot 185
