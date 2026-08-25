@@ -961,12 +961,16 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
    sowieso links van de knop -- de grens is precies waar 560 gelijk wordt aan
    schermbreedte min 160, en boven die maat valt er niets te vrijwaren.
 
-   Wat hiermee níet opgelost is: die drie keuzeknoppen. De volledige uitweg
-   is een plakkende kop met een dekkende papierband waar alles onderdoor
-   verdwijnt in plaats van half zichtbaar te blijven. Die kost staand zo'n
-   acht procent schermhoogte en liggend drieëntwintig -- en liggend is nu
-   juist het enige formaat waar de knop niets meer raakt. Dat is een aparte
-   afweging en geen tekstmaat, dus hij hoort niet in deze wijziging. */
+   Wat hiermee níet opgelost was: die keuzeknoppen, en -- over het hoofd
+   gezien -- de negentig tot honderdvijfentachtig tegels van de kaartenbak.
+   De volledige uitweg staat hier als een plakkende kop met een dekkende
+   papierband beschreven, met de kosten erbij: staand zo'n acht procent
+   schermhoogte en liggend drieëntwintig, terwijl liggend juist het enige
+   formaat is waar de knop niets raakt. Die band staat er inmiddels wel,
+   maar dan alleen staand, waar hij nodig is en waar hij zichzelf terugbetaalt
+   -- zie "De plakkende titelband" hieronder. Deze regels blijven daarnaast
+   staan: tussen 592 en 719 px, en liggend op een klein scherm, is er geen
+   band en moet de tekst de knop nog steeds mijden. */
 @media (max-width: 719px) {
   .setup-scroll > h1,
   .setup-scroll .group-head,
@@ -1017,6 +1021,105 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
 #s-setup h1 {
   font-size: 26px; font-weight: 900; text-transform: uppercase;
   letter-spacing: .06em; margin: var(--s-2) 0 0;
+}
+
+/* De plakkende titelband: de uitgang ligt op papier in plaats van op de lijst.
+
+   Hierboven staat waarom de keuzeknoppen hun volle breedte houden -- een
+   dekkende knop over een omrand vlak zie je staan, dus scroll je door. Voor
+   de vier rijen keuzeknoppen op dit scherm klopt dat nog steeds. Voor de
+   kaartenbak niet. Daar staan geen vier vlakken maar negentig tot
+   honderdvijfentachtig, in drie kolommen van 114 px, en de knop dekt 48 px
+   van de derde -- inclusief haar middelpunt. Nagemeten op 390 px, de hele
+   lijst langsgerold in stappen van 10 px: op 64% van de scrollstanden ligt
+   het midden van een tegel onder de knop, en over de lijst gaat het om 21
+   verschillende kaarten. Je zoekt één woord, je tikt erop, en je staat op
+   het titelscherm. Terug kost twee tikken plus het terugzoeken van je plek
+   in dertig rijen.
+
+   "Dan zie je dat en scroll je door" gaat hier dus niet op: je kijkt niet
+   naar de hoek maar naar het woord dat je zoekt, en de tegel die eronder
+   ligt is elke stand een andere. Eén vaste hoek kun je leren mijden, een
+   hoek die bij elke veeg een andere kaart pakt niet. Het is dezelfde fout
+   als bij de letterbalk -- "daar is een tik op een letter een tik op de
+   uitgang" -- alleen komt ze hier bij elke veeg terug.
+
+   De uitweg is de plakkende kop die hierboven al beschreven staat, en de
+   reden om hem toen te laten liggen is precies de reden om hem nu wél te
+   zetten: liggend kost hij het meest en is hij het minst nodig. Nagemeten
+   raakt de knop liggend (640x360, 667x375, 740x360, 844x390) geen enkel
+   middelpunt, en op een kolom die niet meer tot de schermrand loopt ook
+   niet -- de derde kolom houdt daar vanzelf op vóór de knop. De band staat
+   er daarom alleen smal én hoog: onder 592 px, waar de kolom van rand tot
+   rand loopt, en vanaf 560 px hoog, waar er hoogte voor is. Dat is de
+   staande telefoon, en alleen die.
+
+   Wat hij kost is 93 px die niet meer meescrolt: op 844 px hoog elf
+   procent, op de plek waar de titel toch al stond. Wat hij oplevert is de
+   72 px die alle tekst hierboven inlevert om de knop te mijden -- die
+   hoeven in dit bereik niet meer ingeleverd te worden, want er komt niets
+   meer onder de knop dat je nog kunt lezen of raken. De regeluitleg wint
+   daarmee een vijfde van haar regelbreedte terug (op 390 px gaat het blok
+   van acht regels naar zes) en de letterbalk twee toetsen: zeven volledig
+   zichtbaar werden er negen.
+
+   Drie maten die vastliggen. De band reikt tot onder de slagschaduw van de
+   knop (--corner + --tap + --lift-1) met --s-2 lucht eronder, en hij bloedt
+   door tot de schermrand: de negatieve marge heft de --s-4 van
+   .setup-scroll op en geeft haar als binnenmarge terug, zodat de knop
+   overal papier onder zich heeft. De streep eronder is dezelfde als die
+   boven .setup-foot -- kop en voet zijn hetzelfde soort band, en zonder
+   haar leest een tegel die halverwege afgesneden wordt als een weeffout in
+   plaats van als iets dat eronderdoor schuift.
+
+   De titel blijft links op --s-4 staan en lijnt dus uit met alles eronder.
+   De hoekregel wordt hier niet horizontaal betaald maar verticaal: in de
+   band staat de titel gecentreerd en begint hij op 42 px in plaats van op
+   25, en dat haalt hem uit de hoek. Met een straal van 70 px -- ruim
+   boven de 50 à 60 van een telefoon -- ligt hij nog binnen de boog, waar
+   hij op de oude plek al bij 70 net buiten viel. Rechts houdt hij wél
+   --corner + --tap + --s-2 vrij: dat is de kolom van de knop, en op 320 px
+   is dat precies de maat waarop "INSTELLINGEN" (209 px) er nog voor past.
+   Zette je hem links op --corner, dan raakte hij daar de knop op één pixel
+   na. */
+@media (max-width: 592px) and (min-height: 560px) {
+  .setup-scroll > h1,
+  .setup-scroll .group-head,
+  .setup-scroll legend,
+  .setup-scroll .legend-label,
+  .setup-scroll .hint,
+  .setup-scroll summary,
+  .rules p, .rules li { padding-right: 0; }
+  .cb-index { margin-right: 0; }
+
+  .setup-scroll { padding-top: 0; }
+  #s-setup .setup-scroll > h1 {
+    position: sticky; top: 0; z-index: 2;
+    box-sizing: border-box; display: flex; align-items: center;
+    min-height: calc(env(safe-area-inset-top, 0px)
+                     + var(--corner) + var(--tap) + var(--lift-1) + var(--s-2));
+    margin: 0 calc(-1 * var(--s-4));
+    padding: calc(env(safe-area-inset-top, 0px) + var(--corner))
+             calc(var(--corner) + var(--tap) + var(--s-2)) var(--s-2) var(--s-4);
+    background: var(--paper);
+    border-bottom: var(--line-2) solid var(--rule);
+  }
+}
+
+/* En waar de band niet past, betaalt de kaartenbak in breedte.
+
+   Onder 592 px breed én onder 560 px hoog -- een kleine telefoon liggend,
+   568x320 -- is er geen hoogte voor een band van 93 px: de voet neemt er al
+   115, en er zou een kijkgaatje van 112 px overblijven. Maar daar is juist
+   breedte over: het raster is er 536 px breed en staat op vijf kolommen van
+   101 px. Eén kolom inleveren houdt er vier over van 108 px -- de tegels
+   worden er dus bréder van -- en dan komt er geen tegel meer onder de knop.
+   Dezelfde marge als bij .cb-index, om dezelfde reden.
+
+   Nagemeten zonder deze regel: op 70 van de 118 scrollstanden ligt op
+   568x320 het midden van een tegel onder de knop. */
+@media (max-width: 592px) and (max-height: 559px) {
+  .cb-body .cards { margin-right: calc(var(--corner) + var(--tap) - var(--s-4) + var(--s-2)); }
 }
 #s-setup h2 {
   font-size: 13px; font-weight: 900; text-transform: uppercase;
@@ -3883,11 +3986,22 @@ function buildIndex(eerste) {
    Dus verschuiven we het scherm zelf tot de tegel bovenaan staat, met een
    kleine marge zodat ze niet tegen de rand plakt. Onderaan de lijst loopt
    het scrollen vanzelf vast -- dan staat de tegel gewoon zo hoog als het
-   kan, en dat is precies goed. */
+   kan, en dat is precies goed.
+
+   "Bovenaan" is niet de bovenrand van het rolgebied maar de onderrand van
+   de titelband: staand plakt die band daar (zie "De plakkende titelband")
+   en zou de tegel waar je net op gesprongen bent er precies onder
+   verdwijnen -- je tikt op de M en ziet dezelfde kaarten als daarvoor.
+   Waar de band niet plakt, liggend en op een breed scherm, meet dit
+   vanzelf de bovenrand van het rolgebied en verandert er niets. */
 function springNaar(tegel) {
   const sc = $(".setup-scroll");
   if (!sc || !tegel) return;
-  const d = tegel.getBoundingClientRect().top - sc.getBoundingClientRect().top;
+  const kop = $("#s-setup h1");
+  const anker = kop && getComputedStyle(kop).position === "sticky"
+    ? kop.getBoundingClientRect().bottom
+    : sc.getBoundingClientRect().top;
+  const d = tegel.getBoundingClientRect().top - anker;
   sc.scrollBy({ top: d - 8, behavior: "smooth" });
 }
 
