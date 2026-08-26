@@ -6,11 +6,15 @@
  *
  *   1. elke tier heeft minstens 60 kaarten;
  *   2. geen dubbele emoji of woorden -- en dat wordt getoetst op de pool
- *      waarmee echt gespeeld wordt, niet op elke tier apart. Sinds poolFor()
- *      speelt een tier met zijn eigen kaarten én die eronder, dus een kaart
- *      die in twee aangrenzende tiers staat zit twee keer in één potje. Dat
- *      is precies hoe "hamer" (klein + midden) en "slapen" (midden + groot)
- *      lang onopgemerkt bleven: per tier klopte het;
+ *      waarmee echt gespeeld wordt, niet op elke tier apart. Een kaart die
+ *      in twee tiers staat zit anders twee keer in één potje, en zo bleven
+ *      "hamer" (klein + midden) en "slapen" (midden + groot) lang
+ *      onopgemerkt: per tier klopte het. Sinds een stand een plafond is
+ *      (poolFor) is de pool van groot de hele verzameling, dus deze controle
+ *      dekt nu in één keer alle 275 kaarten in plaats van twee banden;
+ *   2b. elke stand bevat alles wat eronder zit, en groeit met precies zijn
+ *      eigen band. Dat is de invariant waar de kaartenbak, de telling in de
+ *      vouwregel en de ondergrens allemaal op leunen;
  *   3. elke emoji tekent ook echt. Een kaart die als ▯ verschijnt is
  *      onspeelbaar voor een kind dat niet kan lezen, en een reservebeeld is
  *      er bewust niet. We meten de glyphbreedte en vergelijken die met een
@@ -80,6 +84,45 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(!tofu.length, 'emoji zonder glyph: ' + tofu.join(', '));
 
   /* ------------------------------------------------------------------
+   * Elke stand is een plafond: hij bevat alles wat eronder zit.
+   *
+   * Met het blote oog niet te zien -- je zou 275 kaarten met elkaar moeten
+   * vergelijken. En het is de invariant waar de rest op leunt: de telling
+   * die met elke stap groeit, de zin eronder die zegt dat je gerust hoger
+   * kunt kiezen, en de kaartenbak die weggelegde kaarten laat staan als je
+   * omhoog gaat. Zakt hier iets weg, dan liegt het scherm meteen mee.
+   * ------------------------------------------------------------------ */
+  const plafond = await page.evaluate(() => {
+    const { DECKS, TIER_ORDER, poolFor } = window.__tijd;
+    const woorden = t => new Set(poolFor(t).map(c => c[1]));
+    const stappen = [];
+    for (let i = 1; i < TIER_ORDER.length; i++) {
+      const onder = woorden(TIER_ORDER[i - 1]), boven = woorden(TIER_ORDER[i]);
+      stappen.push({
+        onder: TIER_ORDER[i - 1], boven: TIER_ORDER[i],
+        mist: [...onder].filter(w => !boven.has(w)),
+        groei: boven.size - onder.size,
+        eigen: DECKS[TIER_ORDER[i]].length,
+      });
+    }
+    const top = TIER_ORDER[TIER_ORDER.length - 1];
+    return {
+      stappen,
+      zwaarste: poolFor(top).length,
+      alles: TIER_ORDER.reduce((a, t) => a + DECKS[t].length, 0),
+    };
+  });
+
+  for (const st of plafond.stappen) {
+    ok(!st.mist.length, `${st.boven} mist kaarten die in ${st.onder} wel zitten: ${st.mist}`);
+    ok(st.groei === st.eigen,
+       `${st.boven} groeit met ${st.groei} kaarten in plaats van met zijn eigen ${st.eigen}`);
+  }
+  ok(plafond.zwaarste === plafond.alles,
+     `de zwaarste stand speelt met ${plafond.zwaarste} van de ${plafond.alles} kaarten`);
+  console.log(`  plafond: elke stand bevat alles eronder, zwaarste ${plafond.zwaarste} kaarten`);
+
+  /* ------------------------------------------------------------------
    * De kaartenbak: wat de volwassene weglegt, komt niet meer langs.
    *
    * Dit is de enige plek in de app waar een keuze van de volwassene een
@@ -102,8 +145,9 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     out.inPotjes = false;
     for (let i = 0; i < 300; i++)
       if (T.drawDeck('klein', 32).some(c => c[1] === 'boom')) out.inPotjes = true;
-    // "boom" is een makkelijke kaart: die zit in Makkelijk en in Medium,
-    // en niet in Moeilijk. De bak van Moeilijk hoort dus niet te krimpen.
+    // "boom" is een makkelijke kaart, en elke stand is een plafond: ze zit
+    // dus in alle drie de bakken, en alle drie horen te krimpen. Hier stond
+    // de omgekeerde verwachting, uit de tijd van het schuivende venster.
     out.medium = T.poolFor('midden').length - T.bakFor('midden').length;
     out.moeilijk = T.poolFor('groot').length - T.bakFor('groot').length;
 
@@ -122,7 +166,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(bak.naEen === bak.vol - 1, `een weggelegde kaart verdwijnt niet uit de bak (${bak.vol} -> ${bak.naEen})`);
   ok(!bak.inPotjes, 'een weggelegde kaart wordt in 300 potjes tóch nog getrokken');
   ok(bak.medium === 1, 'een weggelegde makkelijke kaart zit nog in de bak van Medium');
-  ok(bak.moeilijk === 0, 'een weggelegde makkelijke kaart krimpt de bak van Moeilijk, en die kent haar niet eens');
+  ok(bak.moeilijk === 1, 'een weggelegde makkelijke kaart krimpt de bak van Moeilijk niet, terwijl elke stand alles eronder bevat');
   ok(bak.kleinOver === 40, `Makkelijk houdt ${bak.kleinOver} kaarten over in plaats van 40`);
   ok(!bak.nogEenMakkelijke, 'de ondergrens van 40 laat er tóch nog een makkelijke kaart uit');
   ok(bak.nogEenMoeilijke, 'de ondergrens houdt een moeilijke kaart tegen terwijl Makkelijk daar niet door krimpt');
