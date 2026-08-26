@@ -217,7 +217,22 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   await page.waitForTimeout(300);
   ok(await page.evaluate(() => !document.querySelector('#pauze').hidden),
      'de terugveeg opent het pauzepaneel niet');
-  await page.click('#btnResume');
+
+  // --- een tweede terugveeg sluit het weer, ook al opende de eerste het
+  //     paneel zelf (dus zonder dat de knop er ooit aan te pas kwam). Dat
+  //     onderscheid bleek op een echt toestel uit te maken: ging het paneel
+  //     via de knop open, dan werkte de eerstvolgende terugveeg wel; ging
+  //     het via een terugveeg open, dan sloot de veeg erna soms de hele app
+  //     in plaats van het paneel. Zie de voorraad-invoeren in
+  //     guardBack()/releaseBack(). Dit toetst alleen de boekhouding hier in
+  //     JS -- het voorspellende terug-gebaar van Android zelf speelt zich
+  //     buiten bereik van deze test af, dat blijft iets voor een echt
+  //     toestel. ---
+  await page.goBack();
+  await page.waitForTimeout(300);
+  ok(await page.evaluate(() => document.querySelector('#pauze').hidden),
+     'een tweede terugveeg sluit het pauzepaneel niet');
+  ok(await screen() === 'handoff', 'een tweede terugveeg verlaat het overdrachtscherm');
   await page.waitForTimeout(200);
 
   // --- stoppen gooit het potje wél weg ---

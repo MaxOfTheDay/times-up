@@ -5473,7 +5473,7 @@ holdButton($("#btnStop"), 1100, () => {
 }, fillY($("#btnStop i"), $("#btnStop")));
 
 /* ==============================================================
-   6b. DE TERUGVEEG — één invoer in de geschiedenis als vangnet
+   6b. DE TERUGVEEG — een voorraad invoeren in de geschiedenis als vangnet
    ==============================================================
    Android heeft geen terugknop meer maar een veeg langs de schermrand, en
    die zit precies waar een duim ligt die het toestel vasthoudt. Er stond
@@ -5515,11 +5515,33 @@ holdButton($("#btnStop"), 1100, () => {
 
    In een try, want pushState mag geweigerd worden (een sandbox, een
    ongewoon schema). Gaat het niet, dan speelt de app zoals hiervoor. */
-/* Precies één invoer, niet één per veeg. Ze stapelden op omdat er bij elke
-   veeg gepusht werd zonder ooit iets weg te halen; backGuard houdt nu bij of
-   de onze er ligt. Anders erf je op de titel de invoeren van het potje
-   ervoor -- dat is precies wat het winnaarsscherm hierboven deed. */
-let backGuard = false;     // ligt onze invoer in de geschiedenis?
+/* Eerst precies één invoer, niet één per veeg -- zo stapelden ze niet meer
+   op, en de aanvulling ná een veeg werd (via een issue die hier lag)
+   uitgesteld met setTimeout(0), want synchroon pushen midden in een
+   popstate-afhandeling faalde: Chrome op Android accepteerde dat soms niet,
+   en dan leek alles goed te gaan maar verdween de app bij de veeg dáárna.
+
+   Dat loste de snelste vorm van het lek op, maar niet alles. Op een echt
+   toestel bleek een tweede terugveeg -- gewoon na elkaar, niet per se snel
+   -- de app soms alsnog te sluiten, en wel precies wanneer de eérste veeg
+   zélf het pauzepaneel al opende (de val onderaan terug()). Ging datzelfde
+   paneel open via de knop, dan werkte diezelfde terugveeg erna wél. Het
+   verschil tussen die twee is exact de invoer: in het ene geval lag ze er
+   al de hele tijd, in het andere moest ze via de uitgestelde aanvulling
+   worden teruggezet. Zo'n teruggezette invoer telt kennelijk niet altijd
+   mee voor het voorspellende terug-gebaar, ook niet als er allang een taak
+   voorbij is -- dat speelt zich ergens in Chrome af, niet in deze code, en
+   is van hieruit niet te zien, laat staan te repareren.
+
+   Dus niet proberen sneller op tijd te zijn: nooit meer op het randje
+   staan. BACK_BUFFER invoeren tegelijk, aangevuld op de veilige momenten
+   (een tik op een knop, geen popstate in zicht), zodat een reeks vegen
+   achter elkaar uit een voorraad put in plaats van steeds op één zojuist
+   teruggezette invoer te moeten vertrouwen. De uitgestelde aanvulling ná
+   een veeg blijft staan -- kan geen kwaad als ze wél aanslaat -- maar is nu
+   bonus, geen fundament. */
+const BACK_BUFFER = 6;     // ruim boven wat iemand achter elkaar terugveegt
+let backCount = 0;         // hoeveel van onze invoeren er nu liggen (0..BACK_BUFFER)
 let backEat   = false;     // we halen 'm zelf weg: sla de volgende pop over
 let backBusy  = false;     // we zitten middenin een sprong door de geschiedenis
 let backSoon  = false;     // er staat al een uitgestelde poging klaar
@@ -5528,35 +5550,31 @@ let backSoon  = false;     // er staat al een uitgestelde poging klaar
    loopt. Dat gold al voor history.back() -- daar is het één keer op
    stukgelopen -- en het geldt net zo goed voor pushState.
 
-   Elke veeg eet onze invoer op, dus na afloop moet er een nieuwe komen,
-   anders vindt de vólgende veeg niets meer en verlaat ze de app. Die nieuwe
-   werd tot nu toe meteen in de afhandeling van de popstate gepusht. Neemt de
-   browser die niet aan -- en Chrome op Android is daar kieskeurig in, zeker
-   met het voorspellende terug-gebaar dat vooraf al bepaalt of de veeg in de
-   pagina blijft of de app sluit -- dan lijkt alles goed te gaan en verdwijnt
-   de app bij de veeg dáárna.
-
    Uitstellen tot de sprong voorbij is kost niets: nul milliseconden is de
-   eerstvolgende taak, en tussen twee vegen van een mens zit een veelvoud
-   daarvan. backSoon zorgt dat er hoogstens één poging tegelijk klaarstaat,
-   want tijdens een veeg vraagt zowel show() als de afhandeling erom. */
+   eerstvolgende taak. backSoon zorgt dat er hoogstens één poging tegelijk
+   klaarstaat, want tijdens een veeg vraagt zowel show() als de afhandeling
+   erom. */
 function guardBack() {
-  if (backGuard || backSoon) return;
+  if (backCount >= BACK_BUFFER || backSoon) return;
   if (backBusy) {
     backSoon = true;
     setTimeout(() => { backSoon = false; guardBack(); }, 0);
     return;
   }
-  try { history.pushState({ tijd: 1 }, ""); backGuard = true; } catch (e) {}
+  try { while (backCount < BACK_BUFFER) { history.pushState({ tijd: 1 }, ""); backCount++; } }
+  catch (e) {}
 }
 
 /* De titel is de bodem van de app: daar hoort terug de app te verlaten, en
-   dus mag onze invoer er niet meer liggen. Zelf opeten in plaats van laten
-   staan, want weghalen kan niet -- history kent geen "pop". */
+   dus mag er van onze voorraad niets meer liggen. Zelf opeten in plaats van
+   laten staan, want weghalen kan niet -- history kent geen "pop". Eén
+   history.go() voor de hele voorraad tegelijk geeft, net als
+   history.back(), precies één popstate terug op de eindbestemming -- niet
+   één per invoer die onderweg wordt overgeslagen. */
 function releaseBack() {
-  if (!backGuard) return;
+  if (backCount === 0) return;
   backEat = true;
-  try { history.back(); } catch (e) { backEat = false; }
+  try { history.go(-backCount); backCount = 0; } catch (e) { backEat = false; }
 }
 
 /* Eerst kijken waar we heen gaan, dán pas opnieuw vangen.
@@ -5571,11 +5589,11 @@ function releaseBack() {
    zien aankomen.
 
    Nu wordt er in dit pad helemaal niet meer gepusht als we op de titel
-   eindigen: releaseBack() ziet backGuard op false staan en doet niets. De
-   enige history.back() die overblijft komt uit een tik op het huisje, en
+   eindigen: releaseBack() ziet backCount op 0 staan en doet niets. De
+   enige history.go() die overblijft komt uit een tik op het huisje, en
    die staat buiten elke popstate. */
 addEventListener("popstate", () => {
-  backGuard = false;                    // onze invoer is net opgegeten
+  backCount = Math.max(0, backCount - 1); // één invoer uit de voorraad is net opgegeten
   if (backEat) { backEat = false; return; }   // door onszelf: klaar
   if (current === "title") return;      // de bodem: laat de veeg gaan
   /* Alles hierbinnen valt binnen de sprong, ook de guardBack() die show()
