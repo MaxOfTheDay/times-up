@@ -531,29 +531,49 @@ de pictogrammen dan opnieuw met dezelfde vorm.
 ## Kaarten
 
 `DECKS` bovenaan `index.html`, één regel per kaart. Drie tiers, en ze spelen
-niet los van elkaar: `poolFor()` geeft een tier zijn eigen kaarten **plus die
-van de tier eronder**. Klein speelt met 90 kaarten, midden met 183, groot met
-185.
+niet los van elkaar: `poolFor()` geeft een tier **alle kaarten tot en met zijn
+eigen moeilijkheid**. Klein speelt met 90 kaarten, midden met 183, groot met
+alle 275.
 
-Waarom schuivend en niet gestapeld: de moeilijkheid van een avond komt maar
-half uit de kaart. De andere helft komt uit de ronde, en die is voor iedereen
-gelijk -- omschrijven, één woord, zwijgend uitbeelden. Een makkelijke kaart is
-in ronde 3 nog steeds werk; een moeilijke kaart is voor de jongste aan tafel in
-élke ronde muurvast. De tier zegt daarom "tot en met zo moeilijk" in plaats van
-"alleen deze band", zodat een tafel met verschillende leeftijden één stand kan
-kiezen die voor allebei speelbaar is. Niet álles eronder meenemen, want dan is
-bij groot twee derde van de stapel uit de lagere banden en speelt een tafel van
-negenjarigen vooral peuterkaarten.
+Een tier is dus een plafond en geen band -- precies wat deze notitie altijd al
+beweerde ("de tier zegt tot en met zo moeilijk in plaats van alleen deze
+band"). De code deed dat niet. Ze nam één band mee omlaag en liet de rest
+vallen, en de reden daarvoor klopte: zonder venster trekt een tafel van
+negenjarigen ook peuterkaarten. Die prijs wordt nu betaald -- van een greep
+van 24 komen er bij groot zo'n acht uit de makkelijkste band, waar dat er nul
+waren, en de stap van Medium naar Moeilijk is daarmee kleiner.
+
+Wat zwaarder woog: het venster zei iets anders dan de knoppen. "Makkelijk /
+Medium / Moeilijk" met "3+ / 6+ / 9+ jaar" beschrijft een plafond, en op het
+scherm was het verschil alleen te zien aan een telling die van 183 naar 185
+sprong: twee kaarten erbij, terwijl de halve bak omwisselde. Wie voor een
+gemengde tafel een stap hoger deed, haalde ongemerkt precies de kaarten weg
+die de jongste aankon. En die fout is duurder dan saai -- te veel makkelijke
+kaarten verveelt, geen enkele makkelijke kaart zet een kind een derde van de
+avond vast.
+
+De rest van de oude redenering blijft staan en verklaart waarom dit werkt: de
+moeilijkheid van een avond komt maar half uit de kaart. De andere helft komt
+uit de ronde, en die is voor iedereen gelijk -- omschrijven, één woord,
+zwijgend uitbeelden. Een makkelijke kaart is in ronde 3 nog steeds werk.
+
+Wordt die stap naar Moeilijk te klein, stuur dan bij met kaarten en niet met
+code: een grotere moeilijke band trekt het gemiddelde vanzelf omhoog. Trek
+**nooit** scheef uit een volle bak -- dan staat er "275 in het spel" boven een
+greep die dat niet is, en dat is precies het verschil tussen wat je ziet en
+wat je krijgt dat de kaartenbak onmogelijk gemaakt heeft.
 
 Drie regels bij het toevoegen:
 
 - **één betekenis los van context** (geen ⭐, niets cultureel gebonden). Geen
   test ziet dit; dit is mensenwerk;
-- **geen dubbele emoji of woorden in de póól**, niet alleen binnen de tier.
-  Aangrenzende tiers delen een stapel, dus een kaart die in twee tiers staat
-  komt twee keer in één potje. Zo bleven `hamer` (klein + midden) en `slapen`
-  (midden + groot) lang onzichtbaar: per tier klopte het. `test/deck.test.js`
-  toetst nu de samengestelde pool;
+- **geen dubbele emoji of woorden over de tiers heen**, niet alleen binnen
+  één tier. Een kaart die in twee tiers staat komt twee keer in hetzelfde
+  potje. Zo bleven `hamer` (klein + midden) en `slapen` (midden + groot) lang
+  onzichtbaar: per tier klopte het. Sinds een tier een plafond is, is de pool
+  van groot de hele verzameling, dus de controle in `test/deck.test.js` dekt
+  in één keer alle 275 kaarten. Diezelfde test bewaakt ook dat elke tier
+  alles bevat wat eronder zit en met precies zijn eigen band groeit;
 - **geen ZWJ-reeksen en geen huidskleur-modifiers.** Die vallen op een oud
   toestel uiteen in losse tekens. Er zitten er nu nul in; de 26 kaarten met
   een variatieselector (☂️ ✈️ ❤️) zijn de veilige soort.
@@ -569,7 +589,7 @@ op het oudste toestel dat in huis meespeelt.
 ## De bak en de greep
 
 Twee dingen, en ze zijn één keer voor elkaar aangezien. De **bak** is alles
-waar ooit uit getrokken kan worden: 90, 183 of 185 kaarten, afhankelijk van
+waar ooit uit getrokken kan worden: 90, 183 of 275 kaarten, afhankelijk van
 de stand. De **greep** is wat één potje daaruit meekrijgt: 16, 24 of 32.
 
 Op het instellingenscherm stond de greep, als raster onder de kop "Jullie
