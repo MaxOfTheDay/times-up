@@ -36,6 +36,13 @@ const ok = (c, m) => { if (!c) fails.push(m); };
 
   // Opzetten via het echte instellingenscherm, niet door de toestand te porren:
   // zo testen we meteen dat de instellingen ook echt in het spel belanden.
+  //
+  // Verlaten via het huisje en starten op de titel, want het
+  // instellingenscherm heeft geen startknop meer: die was een tweede
+  // speelknop naast de gouden cirkel op de titel. Deze route is meteen de
+  // controle daarop -- gaan de keuzes ook mee als je het scherm verlaat
+  // zonder er iets te bevestigen? Elke tik op een tegel slaat zichzelf op,
+  // dus dat hoort te kloppen.
   async function setup({ tier, size, secs }) {
     await page.click('#btnGear');
     await page.waitForTimeout(150);
@@ -45,7 +52,10 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     await page.$eval('#secs', (el, v) => {
       el.value = v; el.dispatchEvent(new Event('input', { bubbles: true }));
     }, String(secs));
-    await page.click('#btnGo');
+    await page.click('#btnBack');
+    await page.waitForTimeout(150);
+    if (await screen() !== 'title') throw new Error('het huisje kwam niet op de titel uit');
+    await page.click('#btnStart');
     await page.waitForTimeout(150);
   }
 
