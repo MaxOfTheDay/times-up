@@ -444,7 +444,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    een losse klasse die de helft van de knoppen niet had, waardoor de
    chips, "terug", het tandwiel, de pauzeknop en de kaartjes in de
    voorvertoning dood aanvoelden. */
-button.btn-go, button.btn-good, button.btn-skip, button.btn-wide,
+button.btn-go, button.btn-good, button.btn-skip,
 button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   transition: transform calc(var(--t-press) * var(--dur)) ease,
               box-shadow calc(var(--t-press) * var(--dur)) ease;
@@ -460,7 +460,7 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
    "goed", niet de handeling waar dit scherm voor bestaat, en droeg tot nu
    toe per ongeluk hetzelfde gewicht. */
 .btn-icon:active, .btn-danger:active, .chip:active, .pv:active, .btn-skip:active,
-.btn-plain:active, .btn-wide:active {
+.btn-plain:active {
   transform: translate(var(--lift-1), var(--lift-1));
   box-shadow: 0 0 0 var(--ink);
 }
@@ -741,66 +741,35 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
    staat. Inkt op --danger haalt te weinig; papier op --danger haalt 7,3:1. */
 .btn-danger.flooded { color: var(--paper); }
 
-/* ---- de brede knop op het instellingenscherm ----
-   Enkelvoud, en dat is nieuw. Er stond een tweede onder: "Terug", ook van
-   rand tot rand, ook met inkt-contour en reliëf. Twee dingen gingen daar
-   mis, en allebei zijn ze te meten in plaats van te vinden.
+/* ---- hier stond .btn-wide, de brede knop op het instellingenscherm ----
 
-   Het gat ertussen was --s-2 (8 px) en de slagschaduw van deze knop is
-   --lift-2 (ook 8 px). Die schaduw landde dus precies op de bovenrand van
-   de knop eronder: ze deelden een rand en lazen als één aan elkaar gelast
-   blok. Druk je deze knop in, dan zakt hij zijn eigen acht pixels in en
-   raakt hij de ander écht aan.
+   Er is geen brede knop meer: "Beginnen" is weg, en daarmee de enige
+   gebruiker van deze klasse. Zie de toelichting in de opmaak bij #s-setup
+   voor waarom, en .setup-scroll voor wat zijn voet aan hoogte kostte.
 
-   En allebei stonden ze op width:100% met een verschillende --lift, dus
-   hun silhouetten waren 3 px verschillend breed: aan de rechterkant een
-   trapje dat je ziet zonder het te kunnen benoemen. Daar volgt een regel
-   uit: **stapel nooit twee knoppen van rand tot rand met een
-   verschillende --lift.** Ze kunnen dan niet uitlijnen, wat je met het gat
-   ook doet.
+   Wat deze knop in twee stappen heeft geleerd, en wat blijft gelden ook nu
+   het vlak zelf weg is:
 
-   Wat er echt aan de hand was: "Terug" is een uitgang, en uitgangen zitten
-   in deze app rechtsboven (pauze, huisje) -- niet onderaan tegen de
-   hoofdhandeling aan geplakt, waar ze als gelijkwaardige keuze leest. Hij
-   is nu het huisje in die hoek, en deze voet is van 175 naar 110 px
-   gekrompen (liggend van 45% van het scherm naar 28%).
+   Stapel nooit twee knoppen van rand tot rand met een verschillende
+   --lift. Er stond hier een tweede onder ("Terug"), en hun silhouetten
+   liepen 3 px uit de pas -- een trapje rechts dat je ziet zonder het te
+   kunnen benoemen. Uitlijnen kan niet: de schaduw hoort bij het gewicht en
+   het gewicht hoort te verschillen. Het gat ertussen was bovendien --s-2
+   (8 px) en de slagschaduw van de bovenste ook, dus die schaduw landde
+   precies op de rand van de onderste en ze lazen als één blok.
 
-   --lift-1 en niet --lift-2, en dat is nieuw. Acht pixels betekenen in deze
-   app "de handeling waar dit scherm voor bestaat", en dat kanaal loopt
-   overal gelijk op met de ronde vorm: de speelknop op de titel, de start op
-   de overdracht, geraden, nog een keer, verder -- vijf cirkels, vijf keer
-   acht pixels. Deze knop was het enige element in de app met acht pixels
-   dat geen cirkel is.
+   Acht pixels zijn van de cirkel. --lift-2 betekent in deze app "de
+   handeling waar dit scherm voor bestaat", en dat kanaal loopt overal
+   gelijk op met de ronde vorm: speelknop, start, geraden, nog een keer,
+   verder -- vijf cirkels, vijf keer acht pixels. Deze knop was het enige
+   element in de app met acht pixels dat geen cirkel is, en dat is toen
+   naar --lift-1 teruggebracht. Dat was de juiste stap maar niet de laatste:
+   een scherm dat geen hoofdhandeling heeft, hoort er ook geen te tekenen.
 
-   De vorm was niet de fout: een knop met tekst op het instellingenscherm
-   hóórt een rechthoek te zijn, dat staat hierboven bij de vormregel. Het
-   reliëf was het. Dit scherm bestaat niet voor één handeling, en er valt
-   ook niets te bevestigen -- elke tik op een tegel roept meteen
-   saveSettings() aan, er is geen concept en geen "toepassen". Deze knop is
-   dus geen afronding maar een snelkoppeling naar het spel, en hoort op de
-   hoogte van de andere uitgang op dit scherm: het huisje rechtsboven.
-   Daarmee heeft het instellingenscherm noch een cirkel noch acht pixels,
-   en dat is precies wat er waar is.
-
-   Wat blijft: groen en van rand tot rand. Groen omdat goud hier al
-   "gekozen" betekent op vier tegelrijen plus de schuifknop, en volle
-   breedte omdat de knop onmiskenbaar moet zijn op het moment dat hij onder
-   scrollende inhoud vandaan komt. Zijn :active staat hierboven bij de
-   --lift-1-groep; laat je hem in de --lift-2-groep staan, dan zakt hij acht
-   pixels in een schaduw van vijf en zweeft hij bij het indrukken drie
-   pixels boven het papier. */
-.btn-wide {
-  min-height: 68px; width: 100%;
-  background: var(--good-ink); color: var(--paper);
-  border: var(--line) solid var(--ink); box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
-  font-weight: 900; text-transform: uppercase; letter-spacing: .1em; font-size: 18px;
-  display: grid; place-items: center; gap: var(--s-2);
-  grid-auto-flow: column;
-}
-/* Beginnen op de instellingen kon vroeger een lopend spel weggooien, en
-   kreeg dan een wijnrode, vast te houden bevestiging. Er bestaat geen
-   lopend spel meer om weg te gooien -- zie load() -- dus deze knop is nu
-   altijd de gewone, groene "ja, goed, doe maar". */
+   Een uitgang zit rechtsboven. "Terug" stond hier onderaan tegen de
+   hoofdhandeling geplakt en las daar als gelijkwaardige keuze; hij werd het
+   huisje in de hoek, dezelfde als op overdracht en winnaar. Dat huisje is
+   nu de enige knop die dit scherm nog heeft. */
 
 /* ============================================================
    4. TITEL
@@ -963,7 +932,7 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
    Staand doet deze regel niets: daar is het scherm smaller dan 560 en vult
    de kolom hem gewoon. */
 #s-setup.screen { align-items: center; }
-.setup-scroll, .setup-foot { width: 100%; max-width: 560px; }
+.setup-scroll { width: 100%; max-width: 560px; }
 
 /* Tekst blijft uit de kolom van het zwevende huisje.
 
@@ -1021,27 +990,25 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   .cb-index { margin-right: calc(var(--corner) + var(--tap) - var(--s-4) + var(--s-2)); }
 }
 
+/* Onderaan --corner en niet --s-4, en dat is nieuw sinds de voet weg is.
+
+   Scrollende inhoud is vrijgesteld van de hoekregel -- "wat voorbijscrolt
+   komt met één veeg weer vrij" -- maar het éinde van een lijst scrollt niet
+   voorbij: daar loopt het rolgebied vast en blijft de laatste rij tegels
+   staan waar ze staat. Dat is dus wel degelijk een blijvende plek, en het
+   is een rij aanraakbare rechthoeken in twee schermhoeken tegelijk. Op de
+   16 px die hier stond lag ze bij de voet nog achter een band van 115 px;
+   zonder die band zou ze op zestien pixels van de fysieke onderrand
+   eindigen.
+
+   Optellen en niet kiezen, om de reden die bij --corner staat: in
+   app-modus meldt een Pixel onderaan gewoon nul, dus van env() valt hier
+   niets te verwachten en moet de marge volledig uit onszelf komen. */
 .setup-scroll {
   flex: 1 1 auto; min-height: 0; overflow-y: auto;
   display: flex; flex-direction: column; gap: var(--s-5);
-  padding: calc(env(safe-area-inset-top, 0px) + var(--s-4)) var(--s-4) var(--s-4);
-}
-/* De hoofdknop stond onderaan een scherm dat je eerst helemaal moest
-   afrollen -- op een telefoon was er bij het openen niets van te zien.
-   Nu staat hij vast onderin. */
-.setup-foot {
-  flex: 0 0 auto;
-  /* Eén knop, dus geen richting en geen gat meer nodig -- zie .btn-wide
-     voor wat de tweede hier deed en waarom hij weg is. */
-  display: flex;
-  /* Deze knop loopt van rand tot rand en blijft staan, dus zijn onderhoeken
-     liggen het diepst in de bocht. Beide assen op --corner -- smaller aan de
-     zijkant helpt niet: in een hoek telt de afstand tot allebei de randen
-     mee. Hij staat daardoor iets verder naar binnen dan de chips erboven;
-     die scrollen, deze niet. */
-  padding: var(--s-3) var(--corner) calc(env(safe-area-inset-bottom, 0px) + var(--corner));
-  background: var(--paper);
-  border-top: var(--line-2) solid var(--rule);
+  padding: calc(env(safe-area-inset-top, 0px) + var(--s-4)) var(--s-4)
+           calc(env(safe-area-inset-bottom, 0px) + var(--corner));
 }
 #s-setup h1 {
   font-size: 26px; font-weight: 900; text-transform: uppercase;
@@ -1092,10 +1059,11 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
    knop (--corner + --tap + --lift-1) met --s-2 lucht eronder, en hij bloedt
    door tot de schermrand: de negatieve marge heft de --s-4 van
    .setup-scroll op en geeft haar als binnenmarge terug, zodat de knop
-   overal papier onder zich heeft. De streep eronder is dezelfde als die
-   boven .setup-foot -- kop en voet zijn hetzelfde soort band, en zonder
-   haar leest een tegel die halverwege afgesneden wordt als een weeffout in
-   plaats van als iets dat eronderdoor schuift.
+   overal papier onder zich heeft. De streep eronder stond hier als "dezelfde
+   als die boven .setup-foot"; die voet is er niet meer, en de streep blijft
+   op eigen kracht staan -- zonder haar leest een tegel die halverwege
+   afgesneden wordt als een weeffout in plaats van als iets dat eronderdoor
+   schuift.
 
    De titel blijft links op --s-4 staan en lijnt dus uit met alles eronder.
    De hoekregel wordt hier niet horizontaal betaald maar verticaal: in de
@@ -1134,8 +1102,12 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
 /* En waar de band niet past, betaalt de kaartenbak in breedte.
 
    Onder 592 px breed én onder 560 px hoog -- een kleine telefoon liggend,
-   568x320 -- is er geen hoogte voor een band van 93 px: de voet neemt er al
-   115, en er zou een kijkgaatje van 112 px overblijven. Maar daar is juist
+   568x320 -- kost een band van 93 px te veel. Hier stond dat er geen hoogte
+   vóór was: met de voet van 115 px erbij bleef er een kijkgaatje van 112 px
+   over. Die voet is weg, dus het rolvenster is er nu 320 px en zou er 227
+   overhouden -- krap maar niet onmogelijk. De band komt er alsnog niet, en
+   nu om de betere reden: negenentwintig procent van het scherm voor een
+   probleem dat in de breedte gratis op te lossen is. Daar is namelijk
    breedte over: het raster is er 536 px breed en staat op vijf kolommen van
    101 px. Eén kolom inleveren houdt er vier over van 108 px -- de tegels
    worden er dus bréder van -- en dan komt er geen tegel meer onder de knop.
@@ -1203,8 +1175,25 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   letter-spacing: .1em; margin: 0 0 var(--s-3); color: var(--ink);
   padding-bottom: var(--s-2); border-bottom: var(--line-2) solid var(--rule);
 }
+/* Hier stond een gouden streep van 6 px langs de linkerkant, met het blok
+   14 px erachter ingesprongen. Weg, om twee redenen die los van elkaar al
+   genoeg zijn.
+
+   Goud betekent op dit scherm "gekozen". Nagemeten staat het er verder
+   alleen op de aangevinkte tegels en op de knop van de schuif -- dit was de
+   enige gouden vorm die geen keuze aanwees, en tegelijk het opvallendste
+   teken boven de vouw, aan het minst belangrijke blok: een regeluitleg die
+   je in augustus één keer leest. Bij .group-head staat dezelfde regel al
+   opgeschreven voor de kopjes ("Geen goud erbij"); hij gold hier net zo
+   goed.
+
+   En het waren twee vouwregels met twee gezichten. Deze en de kaartenbak
+   doen precies hetzelfde -- een plus die een min wordt, een blok dat
+   open- en dichtklapt -- maar de een stond in inkt van 12 px achter een
+   gouden rail, de ander in --ink-2 van 13 px zonder. Eén ding, dus één
+   vorm: .rules > summary hieronder is nu gelijk aan .cardbox > summary. */
 .rules {
-  border-left: 6px solid var(--go); padding: 2px 0 2px 14px;
+  padding: 2px 0;
   font-size: 13.5px; line-height: 1.5; color: var(--ink-2);
 }
 .rules p { margin: 0 0 var(--s-2); }
@@ -1212,22 +1201,28 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
 /* De drie rondes als genummerde lijst: ze hébben een volgorde, en die stond
    eerst in een lopende zin ("eerst ..., dan ..., dan ..."). Een lijst laat
    zien wat de zin moest vertellen.
-   Eigen inspringing in plaats van de standaard van veertig pixels: dit blok
-   staat al ingesprongen achter een gouden regel, en dubbel inspringen laat
-   de nummers los van de tekst erboven zweven. */
-/* Dichtgeklapt is dit één regel achter dezelfde gouden streep; de rest van
-   het scherm schuift dan 200 px omhoog. Geen driehoekje van de browser: dat
+   Eigen inspringing in plaats van de standaard van veertig pixels: veertig
+   zet de nummers zo ver naar rechts dat ze los van de tekst erboven gaan
+   zweven, en dit is de enige lijst op het scherm. */
+/* Dichtgeklapt is dit één regel; de rest van het scherm schuift dan 200 px
+   omhoog. Geen driehoekje van de browser: dat
    is op iedere machine een ander tekentje. In plaats daarvan een plus die
    een min wordt -- hetzelfde inkt-op-papier als de rest, en het teken zegt
    wat er gebeurt in plaats van waar je bent.
    list-style op none is nodig voor Safari, dat de markering anders via
    ::-webkit-details-marker terugzet. */
+/* Gelijk aan .cardbox > summary, en die min-height is niet cosmetisch: op
+   12 px tekst met 2 px lucht mat deze regel 22 px hoog. De app zet zichzelf
+   op --tap (48) met "niets dat aangeraakt wordt is kleiner dan dit", en dit
+   was het enige wat je kunt aanraken dat daar niet aan voldeed -- minder
+   dan de helft, op het scherm dat een volwassene met één hand bedient
+   terwijl er aan tafel op hem gewacht wordt. */
 .rules > summary {
   list-style: none; cursor: pointer;
   display: flex; align-items: center; gap: var(--s-2);
-  font-weight: 900; color: var(--ink); text-transform: uppercase;
-  letter-spacing: .06em; font-size: 12px;
-  padding: 2px 0;
+  min-height: var(--tap);
+  font-size: 13px; font-weight: 900; text-transform: uppercase;
+  letter-spacing: .12em; color: var(--ink-2);
 }
 .rules > summary::-webkit-details-marker { display: none; }
 .rules > summary::before {
@@ -1236,8 +1231,8 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   width: 1.1em; text-align: center;
 }
 .rules[open] > summary::before { content: "−"; }
-/* Lucht tussen de kop en de tekst pas als hij openstaat: dichtgeklapt hoort
-   die regel strak tegen de streep te liggen. */
+/* Lucht tussen de kop en de tekst pas als hij openstaat, net als
+   .cb-body -- dichtgeklapt is er niets om lucht van te houden. */
 .rules[open] > summary { margin-bottom: var(--s-2); }
 .rules ol {
   margin: 0 0 var(--s-2); padding-left: 1.4em;
@@ -1355,9 +1350,10 @@ input[type=range]::-moz-range-thumb {
      --lift-1 van 5, dus viel de schaduw van elke toets één pixel voorbij het
      gat, op de buurman -- en dan is er nergens crème tussen twee toetsen te
      zien. De rij werd zo één zwarte balk met inkepingen in plaats van
-     negentien losse toetsen. Dezelfde fout die hier eerder verticaal
-     gemaakt is, tussen "Beginnen" en "Terug": een gat van --s-2 met een
-     schaduw van --s-2 erop. Met 8 px blijft er 3 px papier over. */
+     negentien losse toetsen. Dezelfde fout die op dit scherm eerder
+     verticaal gemaakt is, tussen de twee brede knoppen die hier onderin
+     stonden: een gat van --s-2 met een schaduw van --s-2 erop. Zie de
+     plek waar .btn-wide stond. Met 8 px blijft er 3 px papier over. */
   display: flex; gap: var(--s-2); overflow-x: auto; overscroll-behavior-x: contain;
   /* Ruimte voor de slagschaduw van de onderste rand; zonder deze marge
      knipt het rolgebied hem eraf. */
@@ -1430,9 +1426,10 @@ input[type=range]::-moz-range-thumb {
 .pv.aside span { opacity: .3; }
 .pv.aside small { color: var(--ink-2); text-decoration: line-through; }
 /* De hulpknop met tekst: dezelfde huid als pauze, huisje en terug (papier,
-   inkt-rand, --lift-1), want hij weegt hetzelfde. Geen cirkel: de enige
-   cirkel op tapmaat per scherm is de hoofdhandeling, en dat is hier
-   "Beginnen" onderin. */
+   inkt-rand, --lift-1), want hij weegt hetzelfde. Geen cirkel: die is per
+   scherm voorbehouden aan de handeling waar het scherm voor bestaat, en het
+   instellingenscherm heeft er geen -- er staat sinds "Beginnen" weg is geen
+   enkele cirkel meer op. */
 .btn-plain {
   min-height: var(--tap); padding: 0 var(--s-4);
   background: var(--paper); border: var(--line-2) solid var(--ink);
@@ -2921,9 +2918,8 @@ input[type=range]::-moz-range-thumb {
 
          Staat los van de twee groepen eronder, vooraan in plaats van onder
          Geluid/Trilling: het hoort bij geen van beide (geen instelling die
-         blijft staan, maar een eenmalige actie) en de plek onderaan, vlak
-         boven de vaste "Beginnen"-knop, werd nooit gezien door wie niet tot
-         daar scrolt. Vooraan is ook het moment dat het er het meest toe
+         blijft staan, maar een eenmalige actie) en de plek onderaan werd
+         nooit gezien door wie niet tot daar scrolt. Vooraan is ook het moment dat het er het meest toe
          doet -- de eerste keer dat dit scherm open gaat, vóór er ooit
          geïnstalleerd is. -->
     <div class="field" id="installField" hidden>
@@ -2984,9 +2980,22 @@ input[type=range]::-moz-range-thumb {
              niet in de regeluitleg: die staat dichtgeklapt. Elke stand is een
              plafond (zie poolFor), dus een stap hoger neemt alles mee wat er
              al in zat -- en dat is precies wat een tafel met een vijfjarige
-             én een achtjarige moet weten. De telling eronder bevestigt het:
-             90, 183, 275, elke stap groter. -->
-        <p class="hint">Elke stand bevat ook alle kaarten van de standen eronder — bij een gemengde tafel kun je dus gerust hoger kiezen.</p>
+             én een achtjarige moet weten. De knoppen zeggen het niet: "3+ /
+             6+ / 9+ jaar" leest als een band en niet als een plafond.
+
+             Er stond een tweede helft achter: "bij een gemengde tafel kun je
+             dus gerust hoger kiezen". Dat is geen mededeling maar een
+             gevolgtrekking uit de eerste helft, over een tafel die de meeste
+             lezers niet hebben -- en gemeten was het precies de regel: op
+             390 px ging de zin ervan van één naar twee regels, op 320 px van
+             twee naar drie.
+
+             Het scherm doet dat werk trouwens beter dan de zin kon. Tik op
+             Moeilijk en "183 in het spel" wordt "275 in het spel", negentig
+             pixels lager en tegelijk in beeld. Een getal dat oploopt zegt
+             "hoger geeft je méér, niet ánders"; dat hoeft er niet bij
+             geschreven. -->
+        <p class="hint">Elke stand bevat ook alle kaarten van de standen eronder.</p>
       </fieldset>
 
       <!-- Hier stond "Jullie kaarten": de 24 kaarten van het eerstvolgende
@@ -2998,8 +3007,8 @@ input[type=range]::-moz-range-thumb {
 
            Nu staat er de bak zelf: alle kaarten waar ooit uit getrokken kan
            worden, met de telling in de vouwregel. De greep van 24 is
-           nergens meer te zien vóór je speelt -- die wordt pas getrokken als
-           je op Beginnen tikt (zie newGame). Daarmee is het verschil tussen
+           nergens meer te zien vóór je speelt -- die wordt pas getrokken bij
+           de start van het potje (zie newGame). Daarmee is het verschil tussen
            "wat ik zag" en "wat ik kreeg" niet gerepareerd maar onmogelijk.
 
            Dichtgeklapt, met dezelfde plus-wordt-min als de regeluitleg: de
@@ -3096,12 +3105,32 @@ input[type=range]::-moz-range-thumb {
     </div>
   </div>
 
-  <!-- De hoofdknop staat vast onderin: hij stond onder een scherm dat je
-       eerst helemaal moest afrollen. Hij staat er nu alleen; "terug" is het
-       huisje rechtsboven geworden. Zie .setup-foot. -->
-  <div class="setup-foot">
-    <button class="btn-wide" id="btnGo">Beginnen</button>
-  </div>
+  <!-- Hier stond "Beginnen", in een eigen band vast onderin. Weg, en dat is
+       geen bezuiniging maar een correctie: dit scherm had er een tweede
+       speelknop mee.
+
+       Er is er namelijk maar één. De titel en het overdrachtscherm dragen
+       allebei dezelfde gouden cirkel met een driehoek -- zie de toelichting
+       bij holdButton(): "Ze betekenen allebei spelen, dus horen ze er niet
+       verschillend uit te zien." Deze knop betekende hetzelfde en was een
+       brede groene rechthoek.
+
+       Groen was ook het probleem waar hij niet uit kon komen. Op dit scherm
+       betekent goud "gekozen" (twee rijen tegels en de schuifknop), dus de
+       gouden kant was bezet; --good-ink betekent overal elders "geraden".
+       Een hoofdhandeling zonder vrije kleur is het teken dat het scherm er
+       geen hoort te hebben.
+
+       En hij bevestigde niets. Elke tik op een tegel slaat zichzelf al op
+       (zie saveSettings), dus dit was geen "toepassen" maar een sluiproute
+       van precies één tik: het huisje rechtsboven staat op het titelscherm
+       naast de speelknop.
+
+       Wat hij wél kostte was 115 px vaste hoogte, op elk formaat. Gemeten
+       aan het rolvenster van .setup-scroll: staand op 390x844 van 729 naar
+       844 px (+16%), en liggend op 568x320 van 205 naar 320 px (+56%) --
+       daar was ruim een derde van het scherm een knop die twee tikken
+       verderop al stond, boven een lijst waarvan je een vijfde zag. -->
 
   <!-- Rechtsboven, waar op elk ander scherm ook de uitgang zit -- en waar
        je via het tandwiel binnenkwam. Hetzelfde huisje als op het
@@ -3517,8 +3546,8 @@ const Snd = (() => {
      aftellen van de avond: de ene tel die zachter klinkt dan de twee erna,
      zonder dat er iets in de code verschilt. Vandaar dat unlock() de bus nu
      alvast opstart en met een toon ver onder gehoordrempel warm maakt, op
-     het eerste moment dat er toch al een aanraking is (tandwiel, chip,
-     Beginnen) en niet pas bij de eerste tel zelf -- er zit dan allang een
+     het eerste moment dat er toch al een aanraking is (tandwiel, speelknop)
+     en niet pas bij de eerste tel zelf -- er zit dan allang een
      schermwissel en een momentje kijken tussen, ruim genoeg om bij te
      trekken voor de klok gaat lopen. */
   return {
@@ -3914,9 +3943,17 @@ let current = "title";
 
 /* De hoofdknop van elk scherm. Wie met een toetsenbord of een schakelaar
    speelt raakte bij elke schermwissel de focus kwijt -- die viel terug op
-   <body>, want het element dat de focus had werd verborgen. */
+   <body>, want het element dat de focus had werd verborgen.
+
+   Het instellingenscherm hééft geen hoofdhandeling meer sinds "Beginnen"
+   weg is, en dat is het punt van die wijziging -- hier staat dus het
+   huisje. Niet omdat het de belangrijkste knop is maar omdat het de enige
+   is die er altijd staat: de installeerknop verschijnt alleen als het
+   toestel erom vraagt, de trillingskeuze alleen als hij bestaat, en de
+   eerste tegel aanwijzen zou de focus op een niet-gekozen keuzerondje
+   zetten ("Makkelijk") terwijl er "Moeilijk" aan staat. */
 const PRIMARY = {
-  title: "#btnStart", setup: "#btnGo",
+  title: "#btnStart", setup: "#btnBack",
   handoff: "#btnStartTurn", play: "#btnGoed", winner: "#btnAgain"
 };
 
@@ -4147,11 +4184,27 @@ function paintCardCounts() {
 
   /* De enige plek in de app waar staat wannéér er getrokken wordt. Hij
      staat onder "Kaarten per potje" en wijst met "die N" terug naar de
-     telling van de bak er vlak boven. */
+     telling van de bak er vlak boven.
+
+     Twee dingen eraf gehaald. "Alle 3 de rondes spelen met diezelfde N" is
+     een spelregel en geen uitleg bij deze knop, en de regeluitleg bovenaan
+     zegt hem al ("3 rondes met dezelfde kaarten") -- twee zinnen voor
+     hetzelfde op één scherm. En "op het moment dat je op Beginnen tikt"
+     wees naar een knop die er niet meer is.
+
+     Daar is "pas bij de start" voor in de plaats gekomen en niet een
+     verwijzing naar de speelknop op het titelscherm. Een tekening van die
+     knop in de zin zetten is overwogen en afgewezen: #i-play staat in deze
+     app vier keer en elke keer als volle glyph in een gouden cirkel op
+     tapmaat -- op tekstgrootte in inkt is het een driehoekje zonder de twee
+     kanalen waar zijn betekenis aan hangt, en het zou het enige plaatje
+     binnen een zin in de hele app zijn. Bovendien wijst het naar een ander
+     scherm, terwijl beeld-naast-woord hier altijd het ding beschrijft waar
+     het op staat. Eén woord doet het werk: "pas" zegt dat het nog niet
+     gebeurd is, en dus dat je hier geen greep staat te bekijken. */
   $("#drawHint").textContent =
-    "Elk potje trekt " + settings.size + " nieuwe kaarten uit die " + bak +
-    ", op het moment dat je op Beginnen tikt. Alle 3 de rondes spelen met " +
-    "diezelfde " + settings.size + ".";
+    "Elk potje trekt pas bij de start " + settings.size +
+    " nieuwe kaarten uit die " + bak + ".";
 }
 
 /* Eén tik heen, één tik terug. Geen lange druk: die is in deze app
@@ -4311,8 +4364,6 @@ const fillY = (el, btn) => p => {
    scherm. */
 $("#btnGear").addEventListener("click", () => { Snd.unlock(); openSetup(); });
 
-$("#btnGo").addEventListener("click", () => { Snd.unlock(); newGame(); });
-
 /* Zelf open- of dichtklappen wordt onthouden, zodat het scherm niet elke
    keer terugveert naar wat de app wil. */
 $("#rules").addEventListener("toggle", () => {
@@ -4344,7 +4395,7 @@ function openSetup() {
    6. SPELVERLOOP
    ============================================================== */
 function newGame() {
-  /* Wie op Beginnen drukt heeft de regels gehad. Ze klappen daarna dicht en
+  /* Wie een potje start heeft de regels gehad. Ze klappen daarna dicht en
      staan er de volgende avond als één regel -- terug te vinden, maar niet
      meer het eerste wat je ziet. Eén keer, niet elke keer: daarna beslist de
      volwassene zelf, en dat wordt onthouden. */
