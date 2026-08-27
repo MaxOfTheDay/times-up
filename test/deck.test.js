@@ -146,8 +146,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     for (let i = 0; i < 300; i++)
       if (T.drawDeck('klein', 32).some(c => c[1] === 'boom')) out.inPotjes = true;
     // "boom" is een makkelijke kaart, en elke stand is een plafond: ze zit
-    // dus in alle drie de bakken, en alle drie horen te krimpen. Hier stond
-    // de omgekeerde verwachting, uit de tijd van het schuivende venster.
+    // dus in alle drie de bakken, en alle drie horen te krimpen.
     out.medium = T.poolFor('midden').length - T.bakFor('midden').length;
     out.moeilijk = T.poolFor('groot').length - T.bakFor('groot').length;
 
