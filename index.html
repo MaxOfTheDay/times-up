@@ -852,6 +852,34 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   color: var(--paper);
 }
 .wordmark svg { width: clamp(40px, 12vw, 66px); margin-bottom: 6px; }
+/* De zandloper wordt af en toe omgedraaid.
+
+   Het titelscherm is het enige scherm waar niets loopt en niets om aandacht
+   vraagt, en dus de enige plek waar versiering gratis is. Elders zou een
+   bewegend vlak de blik weghalen bij de kaart.
+
+   Traag, en met een lange stilte ertussen: acht seconden staan tegen één
+   seconde draaien. Een snel lopende zandloper zou "haast" zeggen op een
+   scherm waar niets afloopt -- precies de betekenis die in deze app aan de
+   klokrand hangt en die hier niets te zoeken heeft. Dit moet stilstaan en af
+   en toe omvallen, zoals een zandloper op een plank.
+
+   De vorm draait 180 graden en ziet er daarna hetzelfde uit: het silhouet
+   van #i-glass is puntsymmetrisch (twee driehoeken om hetzelfde middelpunt).
+   Dat is precies wat dit betaalbaar maakt -- de beweging is te zien, de
+   ruststand verandert niet, en het symbool zelf blijft ongemoeid. Dat laatste
+   is een eis en geen toeval: de app-pictogrammen zijn met de hand uit deze
+   coördinaten gegenereerd, dus wie #i-glass verbouwt moet ze opnieuw maken.
+   Een transform raakt ze niet.
+
+   Bij beperkte beweging valt dit vanzelf weg: de regel bij
+   prefers-reduced-motion zet alle animaties uit. Er gaat niets verloren --
+   het zegt niets wat elders niet staat. */
+@keyframes glasturn {
+  0%, 88%   { transform: rotate(0deg); }
+  100%      { transform: rotate(180deg); }
+}
+.wordmark svg { animation: glasturn calc(9s / max(var(--dur), .001)) ease-in-out infinite; }
 
 /* De titelknop begint altijd een nieuw spel: er bestaat geen "verder
    spelen" meer om onderscheid mee te maken, dus dit scherm heeft alleen
@@ -1677,6 +1705,25 @@ input[type=range]::-moz-range-thumb {
    .head, dus ze blijft vanzelf even ver boven een grotere mascotte staan. */
 .mini-score .side.up .head > svg:not(.crown) {
   width: min(11.5vw, 42px); height: min(11.5vw, 42px);
+}
+/* En op het overdrachtscherm ademt ze. Een derde kanaal bij het reliëf en de
+   maat: wie aan zet is, is het enige dat op dat scherm beweegt.
+
+   Alleen daar. Dezelfde stand staat ook in het pauzepaneel, en daar loopt
+   een beurt die stilgezet is -- een ademende mascotte zou dan tegenspreken
+   wat het hele paneel zegt. En zeker niet tijdens het spelen: de kaart is
+   dan het enige waar de speler iets mee moet, en dat is dezelfde reden
+   waarom de inkepingen uit de klokband gehaald zijn.
+
+   Zo traag dat je het eerder merkt dan ziet, en klein genoeg om de kroon
+   erboven niet te raken. Bij beperkte beweging valt het weg; het reliëf en
+   de maat zeggen het dan nog steeds. */
+@keyframes ademen {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.06); }
+}
+#s-handoff .mini-score .side.up .head > svg:not(.crown) {
+  animation: ademen calc(2.8s / max(var(--dur), .001)) ease-in-out infinite;
 }
 /* :not(.crown), want de kroon hangt in hetzelfde vakje en heeft haar eigen
    maat -- zonder die uitzondering wint deze regel en wordt de kroon net zo
@@ -3884,6 +3931,9 @@ function show(name) {
      hangt aan de body en niet aan het spelscherm, dus zonder dit zou het
      over het overdrachtscherm heen blijven vliegen. */
   if (name !== "play") { stopClock(); releaseWake(); landFly(); }
+  // Een worp die nog loopt terwijl het scherm wisselt, valt hier alsnog op de
+  // goede ploeg -- om dezelfde reden als landFly() hierboven.
+  if (name !== "handoff") landToss();
 
   if (name === "setup") paintSetup();
 
@@ -4314,12 +4364,25 @@ function newGame() {
     pile: shuffle(deck.map((_, i) => i)),
     card: null,
     round: 1,
-    team: 0,
+    /* Geloot, en dat was het niet. Dit stond op 0, dus Vos opende elk potje
+       van elke avond -- en na een herlaadbeurt weer. Aan een tafel waar twee
+       kinderen elk hun mascotte gekozen hebben is dat het eerste
+       meningsverschil van de avond, en het enige oneerlijke in de app: al het
+       andere is hooguit moeilijk.
+
+       De uitkomst valt hier, vóór er iets te zien is. De worp op het
+       overdrachtscherm (zie tossTeams) is alleen de weergave ervan: gaat die
+       niet af -- beperkte beweging, een tik ertussendoor, een ander scherm --
+       dan verandert dat niets aan wie begint. */
+    team: Math.random() < .5 ? 0 : 1,
     scores: [[0, 0, 0], [0, 0, 0]],   // [ploeg][ronde]
     gained: 0,
     pendingMs: settings.secs * 1000,  // wat de volgende beurt meekrijgt
     secs: settings.secs
   };
+  // Alleen de allereerste overdracht van een potje toont de worp; bij een
+  // rondewissel is allang bekend wie er speelt.
+  tossPending = true;
   // Nog niets om terug te blikken op, dus geen "+N" -- de stand staat er wel,
   // op 0 - 0, zodat elke overdracht dezelfde drie vakken heeft.
   handoff("round");
@@ -4425,6 +4488,7 @@ function handoff(mode, freshA, freshB) {
 
   // Vak 1: de stand, met de ploeg die aan zet is opgetild.
   paintHoTally(freshA || 0, freshB || 0);
+  if (tossPending) { tossPending = false; tossTeams(); }
 
   // Vak 2: de opdracht. Uitgeklapt draagt het pictogramvak de ronde-tekening
   // zelf, ingeklapt het gewone rondepictogram -- twee dichtheden van één
@@ -4665,6 +4729,8 @@ const COUNT_FROM = 3;
 let countRaf = null;
 
 function startTurn() {
+  // De worp kan nog lopen als er meteen op start getikt wordt.
+  landToss();
   G.gained = 0;
   const t = TEAMS[G.team];
   $("#plMascot").firstElementChild.setAttribute("href", t.mascot);
@@ -5134,6 +5200,60 @@ function paintHoTally(freshA, freshB) {
       TEAMS[t].naam + ": " + mine + (fresh ? ", " + fresh + " erbij" : "") +
       (leading ? ", staat voor" : "") + (t === G.team ? ", is aan de beurt" : ""));
   });
+}
+
+/* De worp: wie begint. Puur weergave -- G.team ligt al vast (zie newGame),
+   en deze functie kiest niets. Dat is de hele opzet: elke manier waarop de
+   worp niet afloopt eindigt op dezelfde ploeg als wanneer hij wel afloopt.
+
+   Hij tilt om en om de ene en de andere tegel op, steeds trager, en komt tot
+   stilstand op de ploeg die aan zet is. Geen nieuw teken en geen nieuw
+   scherm: .side.up bestaat al en betekent al "deze is aan de beurt" -- de
+   worp laat alleen zien dat die keuze nog viel. Vier schermen zijn hier ooit
+   tot één teruggebracht; daar hoort er geen vijfde bij voor een muntje.
+
+   De laatste stap valt per constructie op G.team: op stap i staat
+   (G.team + stappen - i) % 2 opgetild, en bij i = stappen is dat G.team zelf.
+   Wie het aantal stappen wijzigt hoeft dus niets na te rekenen.
+
+   Vertraagt kwadratisch: dat is wat een muntje of een rad doet als het
+   uitloopt, en het is meteen de aankondiging dat er zo een antwoord staat.
+   Zeven stappen van 50 + 5i^2 ms samen is ongeveer een seconde -- lang genoeg
+   om als loting te lezen, kort genoeg om niet in de weg te lopen bij het
+   doorgeven. Met de eerste opzet (60 + 8i^2) was het ruim anderhalve seconde
+   en dat is te veel voor een scherm dat je van hand tot hand geeft. */
+let tossPending = false, tossTimer = null;
+
+/* De worp afmaken waar hij ook is. Wordt aangeroepen bij elke schermwissel en
+   bij het starten van een beurt, want een lopende timer die tegels blijft
+   omtoggelen op een scherm dat niet meer in beeld is, laat de stand achter op
+   de verkeerde ploeg. Zelfde reden als landFly() bij de vliegende punt. */
+function landToss() {
+  if (tossTimer !== null) { clearTimeout(tossTimer); tossTimer = null; }
+  if (!G) return;
+  $("#hoSideA").classList.toggle("up", G.team === 0);
+  $("#hoSideB").classList.toggle("up", G.team === 1);
+}
+
+function tossTeams() {
+  landToss();
+  /* Bij beperkte beweging helemaal niet: de stand staat dan meteen goed. Er
+     gaat niets verloren -- het reliëf zegt nog steeds wie aan zet is, en wie
+     begint was toch al geloot. */
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const stappen = 7;
+  let i = 0;
+  const stap = () => {
+    const nu = (G.team + stappen - i) % 2;
+    $("#hoSideA").classList.toggle("up", nu === 0);
+    $("#hoSideB").classList.toggle("up", nu === 1);
+    // Stijgt mee met het uitlopen, zoals een rad dat tot stilstand komt.
+    Snd.tick(900 + i * 90, .06);
+    i++;
+    if (i > stappen) { tossTimer = null; return; }
+    tossTimer = setTimeout(stap, 50 + i * i * 5);
+  };
+  stap();
 }
 
 /* Einde beurt toont beide ploegen, niet alleen wie net speelde: één mascotte
