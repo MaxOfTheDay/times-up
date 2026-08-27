@@ -1131,13 +1131,21 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   font-size: 13px; font-weight: 900; text-transform: uppercase;
   letter-spacing: .12em; margin: 0 0 10px; padding: 0; color: var(--ink-2);
 }
-.field-group { display: flex; flex-direction: column; gap: var(--s-5); }
-/* Een groepsgrens hoort meer lucht te krijgen dan een veld binnen een groep,
-   en kreeg minder. Gemeten op 390 px: 24 px voor de overgang naar
-   "Voorkeuren", tegen 24 tot 34 px voor de velden erboven. De minst
-   gemarkeerde overgang van de hele pagina zat dus precies daar waar de ene
-   soort instelling ophoudt en de andere begint. Met --s-5 erbij staat de
-   grens op 48 en los van het ritme binnen een groep. */
+/* Geen flex-gap meer, om een reden die niets met de groepsafstand te maken
+   had: gap telt bovenop de eigen margin van een kind, en .group-head had
+   die margin (--s-3, 12px) al. Een kop stond daardoor 12 + 24 = 36px van
+   zijn éígen eerste veld -- verder dan twee losse velden in dezelfde groep
+   van elkaar staan (24px). Een label was zo verder van het ding dat het
+   benoemt dan van zijn buurman. Nu expliciete marges: elk kind 24px van
+   zijn voorganger, behalve vlak na een kop, waar het label zelf al de
+   marge levert. Op 390px scheelde dit 96px over de hele pagina (drie
+   koppen keer 24px), zonder dat er iets smaller werd. */
+.field-group { display: flex; flex-direction: column; }
+.field-group > * + * { margin-top: var(--s-5); }
+.group-head + * { margin-top: var(--s-3); }
+/* Een groepsgrens hoort meer lucht te krijgen dan een veld binnen een groep.
+   Met --s-5 erbij staat de grens op 48 en los van het ritme binnen een
+   groep. */
 .field-group + .field-group { margin-top: var(--s-5); }
 /* Drie groepen, en de grens ligt op wat een knop verandert.
 
@@ -1174,7 +1182,7 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
    tegelrijen en de schuifknop. */
 .group-head {
   font-size: 15px; font-weight: 900; text-transform: uppercase;
-  letter-spacing: .1em; margin: 0 0 var(--s-3); color: var(--ink);
+  letter-spacing: .1em; margin: 0; color: var(--ink);
   padding-bottom: var(--s-2); border-bottom: var(--line-2) solid var(--rule);
 }
 /* Geen gouden rail langs de linkerkant. Goud betekent op dit scherm
