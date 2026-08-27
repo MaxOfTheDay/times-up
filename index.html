@@ -879,7 +879,32 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   0%, 88%   { transform: rotate(0deg); }
   100%      { transform: rotate(180deg); }
 }
-.wordmark svg { animation: glasturn calc(9s / max(var(--dur), .001)) ease-in-out infinite; }
+/* De eerste draai valt vlak na binnenkomst, en dat kost geen tweede
+   animatie: dezelfde glasturn krijgt een negatieve vertraging, zodat hij
+   niet aan het begin van zijn rustfase instapt maar vlak vóór de draai.
+
+   Rekenen: de draai zit in de laatste 12% van 9s, dus hij begint op 7,92s.
+   Met -7,4s staat de zandloper op 0,52s na binnenkomst om te vallen en op
+   1,6s stil -- de plaat zelf is dan al 0,26s binnen (markIn) en het scherm
+   0,22s dekkend, dus het leest als een eigen gebeurtenis en niet als
+   onderdeel van de entree. Daarna hervat de gewone cadans van negen
+   seconden vanzelf; er is niets dat eenmalig uitgezet moet worden.
+
+   Onder #s-title.on en niet op .wordmark svg zelf, en dat is de hele truc:
+   show() haalt die klasse eraf en zet hem er weer op, dus de animatie start
+   opnieuw bij élke binnenkomst -- ook als je terugkomt van de instellingen
+   of na een gespeeld potje. Stond de regel op het element zelf, dan liep de
+   klok gewoon door achter een verborgen scherm en was de eerste draai na
+   terugkomst een willekeurig moment binnen negen seconden.
+
+   Wat het níet is: iets wat op een tik reageert. Het merk blijft dood voor
+   aanraking -- elke :active in dit bestand zit op een button, zonder
+   uitzondering, en een vlak dat beweegt als je het aanraakt zegt in deze app
+   "ik ben een knop". Dit beweegt omdat jij aankomt, niet omdat je duwt. */
+#s-title.on > .wordmark svg {
+  animation: glasturn calc(9s / max(var(--dur), .001)) ease-in-out infinite;
+  animation-delay: calc(-7.4s / max(var(--dur), .001));
+}
 
 /* De titelknop begint altijd een nieuw spel: er bestaat geen "verder
    spelen" meer om onderscheid mee te maken, dus dit scherm heeft alleen
