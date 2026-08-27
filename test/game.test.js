@@ -36,13 +36,9 @@ const ok = (c, m) => { if (!c) fails.push(m); };
 
   // Opzetten via het echte instellingenscherm, niet door de toestand te porren:
   // zo testen we meteen dat de instellingen ook echt in het spel belanden.
-  //
-  // Verlaten via het huisje en starten op de titel, want het
-  // instellingenscherm heeft geen startknop meer: die was een tweede
-  // speelknop naast de gouden cirkel op de titel. Deze route is meteen de
-  // controle daarop -- gaan de keuzes ook mee als je het scherm verlaat
-  // zonder er iets te bevestigen? Elke tik op een tegel slaat zichzelf op,
-  // dus dat hoort te kloppen.
+  // Het scherm heeft geen eigen startknop, dus verlaten via het huisje en
+  // starten op de titel -- meteen de controle of de keuzes meegaan zonder
+  // dat er iets te bevestigen viel.
   async function setup({ tier, size, secs }) {
     await page.click('#btnGear');
     await page.waitForTimeout(150);
@@ -95,9 +91,8 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     ok(await page.textContent('#hoRoundWord') === woord,
        `ronde ${round}: verkeerd woord op het overdrachtscherm`);
 
-    // De startknop is een gewone tik geworden; het aftellen erna houdt een
-    // losse aanraking tegen. Afbreken zet je terug op het overdrachtscherm
-    // zonder dat er een beurt begonnen is.
+    // Een gewone tik; het aftellen erna houdt een losse aanraking tegen.
+    // Afbreken zet je terug op het overdrachtscherm, zonder begonnen beurt.
     await page.click('#btnStartTurn');
     await page.waitForTimeout(120);
     ok(await screen() === 'play', `ronde ${round}: aftellen begint niet`);
@@ -173,8 +168,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
      'de drie rondes gebruiken niet hetzelfde deck');
 
   // --- de klok loopt af en geeft de beurt door ---
-  // "Opnieuw" begint nu ook echt opnieuw in plaats van naar de titel te
-  // gaan; terug naar de titel is een eigen knop.
+  // "Opnieuw" begint een nieuw potje; terug naar de titel is een eigen knop.
   await page.click('#btnHome');
   await page.waitForTimeout(100);
   ok(await screen() === 'title', 'de huisknop komt niet uit op de titel');
