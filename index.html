@@ -589,6 +589,37 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   border: var(--line-2) solid var(--ink); background: var(--paper-2);
 }
 .cd-round svg { width: 75%; height: 75%; }
+
+/* De ploeg, tijdens het aftellen.
+
+   Dezelfde redenering als bij .cd-round hierboven, voor het andere feit dat
+   iemand nodig heeft die het toestel net aangereikt krijgt: van wie is deze
+   beurt. Die drie tellen lang stond dat er alleen in de achtergrondkleur --
+   het ene kanaal dat in deze app nooit alleen mag staan, en uitgerekend op
+   het moment dat het toestel fysiek van hand gaat en de ontvanger voor het
+   eerst kijkt.
+
+   Waarom een papieren vlakje eronder: de mascotte staat in de ploegkleur en
+   dit vlak ook, dus zonder achtergrond wordt ze een uitgesneden silhouet.
+   Dat is precies het bezwaar dat het optillen van de hele bovenbalk ooit
+   deed sneuvelen -- maar dat bezwaar gold de bálk (met haar pauzeknop en
+   haar woord op ploegkleur), niet een mascotte op papier.
+
+   Het vlakje is groter dan de mascotte en ligt eromheen: countdown() legt
+   de tegel op de gemeten plek van .teamchip en zet de mascotte erin op
+   precies de gemeten maat. Als de laag oplost blijft de mascotte dus staan
+   waar ze staat -- het papier eromheen verdwijnt en het spelscherm eronder
+   heeft haar daar al. Hetzelfde "blijf staan" als bij het rondetegeltje,
+   alleen andersom opgebouwd. */
+.cd-team {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + var(--corner));
+  left: calc(env(safe-area-inset-left, 0px) + var(--corner));
+  display: grid; place-items: center;
+  padding: 7px;
+  background: var(--paper); border: var(--line-2) solid var(--ink);
+}
+.cd-team svg { width: var(--tap); height: var(--tap); display: block; }
 .cd-disc { position: relative; width: min(46vw, 24vh, 190px); aspect-ratio: 1; display: block; }
 .cd-disc b {
   position: absolute; inset: 0; display: grid; place-items: center;
@@ -1197,6 +1228,18 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
 }
 .rules p { margin: 0 0 var(--s-2); }
 .rules b { color: var(--ink); }
+/* De naam met het dier eraan vast, en op één regel: een naam boven en zijn
+   mascotte onder zou juist het verband kapotmaken waar deze regel voor
+   bestaat.
+
+   Het woord blijft gewoon in de regel staan en alleen het dier zakt; met
+   een inline-flex om de twee heen ging de hele naam mee omlaag en stond
+   "Vos" een halve regel lager dan "Twee ploegen" ernaast. Zo houdt de tekst
+   haar eigen basislijn en hangt het dier eromheen: -.45em zet het midden
+   van een teken van 1,4em op de halve x-hoogte, dus optisch in het hart van
+   het woord. */
+.teamname { white-space: nowrap; }
+.teamname svg { width: 1.4em; height: 1.4em; vertical-align: -.45em; margin-left: 3px; }
 /* De drie rondes als genummerde lijst: ze hébben een volgorde, en die stond
    eerst in een lopende zin ("eerst ..., dan ..., dan ..."). Een lijst laat
    zien wat de zin moest vertellen.
@@ -1480,25 +1523,34 @@ input[type=range]::-moz-range-thumb {
 
 /* De opdracht op het overdrachtscherm: pictogram en woord naast elkaar, op
    papier. Geen kleurplaat (zie --mis bij .surface): de ronde heeft nergens
-   een eigen kleur. */
+   een eigen kleur.
+
+   Dit is de compacte maat, en die is een bijschrift geworden -- zelfde
+   tegel en zelfde woordmaat als .roundchip op het spelscherm. Ze was een
+   plaat van 371 bij 106, het grootste vlak op het scherm, terwijl ze bij
+   een beurtwissel niets meldt wat veranderd is: het pictogram en het woord
+   stonden er de vorige beurt al net zo, en staan er drie tellen later op de
+   balk weer. Gemeten was ze 39.372 px2 tegen 4.484 voor de opgetilde tegel
+   -- het antwoord op de enige vraag die dit scherm stelt was negen keer
+   kleiner dan de herhaling ernaast.
+
+   De uitgeklapte maat (.big) is een andere zaak en houdt haar eigen
+   afmetingen: daar ís de ronde het nieuws. Alle maatvoering voor die stand
+   staat dus in .roundcard.big en niet hier. */
 .roundcard {
-  display: flex; align-items: center; gap: min(1.8vh, 14px);
-  padding: min(1.6vh, 12px) 20px min(1.6vh, 12px) 14px;
-  /* Liggend kromp deze kaart tot 157 px naast een stand van 304: de
-     hoofdzaak was het kleinste ding op het scherm. Staand ligt de natuurlijke
-     breedte hier al boven, dus dit doet daar niets. */
-  min-width: min(42vw, 300px);
+  display: flex; align-items: center; gap: var(--s-2);
+  padding: var(--s-2) var(--s-3);
   justify-content: center;
 }
 .roundcard .ico {
-  width: min(9vh, 74px); height: min(9vh, 74px);
+  width: var(--tap); height: var(--tap);
   display: grid; place-items: center;
   background: var(--paper-2); border: var(--line-2) solid var(--ink);
   flex: 0 0 auto;
 }
 .roundcard .ico svg { width: 76%; height: 76%; }
 .roundcard b {
-  font-size: max(14px, min(6vw, 2.9vh, 26px)); font-weight: 900;
+  font-size: var(--type-label); font-weight: 900;
   letter-spacing: .05em; text-transform: uppercase;
 }
 /* De uitleg hoort bij de opdracht, dus staat ze ín de kaart en niet als
@@ -1542,6 +1594,13 @@ input[type=range]::-moz-range-thumb {
   background: var(--paper-2); border: 2px solid var(--ink);
 }
 .rounddots i.now { background: var(--go); }
+/* Alleen bij een rondewissel. "De hoeveelste van de drie" is een vraag die
+   je op een rondegrens stelt en niet twaalf keer per potje: tussen twee
+   beurten verandert er niets aan het antwoord. In de compacte kaart stonden
+   ze bovendien hard tegen de rechterrand van een brede strook en lazen ze
+   als versiering. Wie luistert houdt ze in beide standen: het getal staat
+   in de aria-label van de kaart. */
+.roundcard:not(.big) .rounddots { display: none; }
 
 /* Op een kort scherm loopt de stand onder het zwevende huisje door.
 
@@ -1755,8 +1814,46 @@ input[type=range]::-moz-range-thumb {
   0%, 100% { transform: scale(1); }
   50%      { transform: scale(1.06); }
 }
-#s-handoff .mini-score .side.up .head > svg:not(.crown) {
+/* En alleen op een beurtwissel. Bij een rondewissel blijft het toestel in
+   dezelfde handen -- endRound() draait G.team niet -- dus valt er niets te
+   onthullen; zie de blokken hieronder. */
+#s-handoff:not(.mode-round) .mini-score .side.up .head > svg:not(.crown) {
   animation: ademen calc(2.8s / max(var(--dur), .001)) ease-in-out infinite;
+}
+
+/* ---- de beurtwissel: wie krijgt het toestel ----
+
+   Twee wissels delen dit scherm, en ze vragen het tegenovergestelde. Bij een
+   beurtwissel gaat het toestel écht van hand en is "wie" het enige waar het
+   scherm voor bestaat; bij een rondewissel houdt dezelfde ploeg het toestel
+   en is de nieuwe regel het nieuws. Ze zagen er tot nu toe hetzelfde uit op
+   één ding na -- de dichtheid van de opdrachtkaart -- en dat is precies het
+   kanaal dat over de handeling níets zegt. Een tafel die de overdracht
+   eenmaal geleerd heeft, geeft het toestel bij ronde 2 dus aan de verkeerde
+   ploeg door.
+
+   Vandaar dat alle drie de kanalen die "wie" dragen aan de beurtwissel
+   hangen: de maat hieronder, de adem hierboven en de opkomer verderop. In
+   de rondestand blijft de mascotte op haar gewone opgetilde maat staan --
+   het reliëf zegt nog steeds wie aan zet is, maar het kondigt niets aan.
+   Dat verschil ís de mededeling.
+
+   Gemeten op 390 bij 844 stond hier 4.484 px2 tegen 39.372 voor de
+   opdrachtkaart. Erger dan de maat was de richting van de blik: wie net
+   gespeeld heeft draagt de kroon én het groene "+N", dus de drie verste
+   opvallende tekens op de stand hoorden alle drie bij de verkeerde ploeg. */
+#s-handoff:not(.mode-round) .mini-score .side.up .head > svg:not(.crown) {
+  width: min(18vw, 66px); height: min(18vw, 66px);
+}
+/* De opkomer. Dezelfde trede op de ladder als roundPop bij de rondewissel,
+   op het andere element: daar komt de tekening op, hier de ploeg. Op .head
+   en niet op de mascotte zelf, want daar zit de adem al -- twee animaties
+   op één element gaan niet samen. De kroon rijdt mee, en dat hoort: ze
+   hangt aan deze ploeg. */
+@keyframes upPop { from { transform: scale(.8); } to { transform: scale(1); } }
+#s-handoff:not(.mode-round).on .mini-score .side.up .head {
+  animation: upPop calc(.28s / max(var(--dur), .001)) var(--e-pop) backwards;
+  animation-delay: calc(.07s / max(var(--dur), .001));
 }
 /* :not(.crown), want de kroon hangt in hetzelfde vakje en heeft haar eigen
    maat -- zonder die uitzondering wint deze regel en wordt de kroon net zo
@@ -2665,26 +2762,28 @@ input[type=range]::-moz-range-thumb {
   /* Liggend staan de stand en de opdrachtkaart náást elkaar in plaats van
      onder elkaar, en dan is hoogte waarmee ze om aandacht vechten.
 
-     De kaart rekent haar pictogram in vh (min(9vh, 74px)), dus liggend kromp
-     dat tot 35 px -- kleiner dan de mascotte van wie aan zet is. Bij een
-     beurtwissel, waar de kaart compact staat, werd de stand daardoor het
-     hogere blok van de twee: 84 px tegen 56. Dat is dezelfde omkering die
-     eerder in de breedte is rechtgezet (zie de min-width bij .roundcard, die
-     304 tegen 157 moest herstellen), nu in de andere as.
+     Hier stond een blok dat de compacte kaart optrok -- pictogram op 64 px,
+     ruimere binnenmarge -- om te voorkomen dat de stand het hogere van de
+     twee blokken werd. Dat was toen de goede kant op: de kaart hoorde te
+     winnen. Bij een beurtwissel is dat inmiddels omgedraaid (zie
+     .roundcard), dus die optrekking is weg: de compacte kaart is er ook
+     liggend een bijschrift, en de stand mág het hogere blok zijn. De
+     uitgeklapte kaart rekent haar eigen maten al in vh en heeft hier niets
+     nodig.
 
-     Twee kanten tegelijk: het pictogram krijgt een bodem in pixels, want wat
-     het moet overtreffen -- de mascotte -- staat ook in pixels; en de
-     mascotte van wie aan zet is groeit hier iets minder hard, want liggend
-     is er breedte zat en hoogte schaars, en het opgetilde vlak valt er in
-     zijn eigen kolom toch al op. Nagemeten: kaart 88 bij 300, stand 78 bij
-     199 -- de kaart wint nu in allebei de assen. */
-  .roundcard { padding: 12px 20px 12px 14px; }
-  .roundcard .ico { width: 64px; height: 64px; }
+     Wat blijft is de bovengrens op de mascotte. Liggend is hoogte het
+     schaarst, en min(18vw, 66px) zou op 844 px breed gewoon 66 px pakken --
+     dan raakt de stand de kaart ernaast. Op 13vh blijft ze een kop groter
+     dan de gewone opgetilde maat en past de rij nog. Nagemeten op 844x390:
+     stand 73 px hoog, kaart 64. */
   /* Liggend staan de vakken naast elkaar; een kaart die haar volle 24rem
      opeist zou de rij van het scherm duwen. Hier weer op haar natuurlijke
-     breedte, met de min-width van .roundcard als bodem. */
+     breedte. */
   .roundcard.big { width: auto; }
   .mini-score .side.up .head > svg:not(.crown) { width: 36px; height: 36px; }
+  #s-handoff:not(.mode-round) .mini-score .side.up .head > svg:not(.crown) {
+    width: min(13vh, 56px); height: min(13vh, 56px);
+  }
 
   /* Het merk mat zichzelf in vw: op een brede maar lage telefoon (844x390)
      rekent 14vw ruim binnen zijn eigen maximum van 88px, dus kromp het
@@ -2750,11 +2849,22 @@ input[type=range]::-moz-range-thumb {
      een kaart van 120. */
   .mini-score .head > svg:not(.crown) { width: 40px; height: 40px; }
   .mini-score .side.up .head > svg:not(.crown) { width: 62px; height: 62px; }
+  /* Op een beurtwissel een kop erbovenop. min(18vw, 66px) uit het blok
+     hierboven pakt op een tablet gewoon 66 px, en dat is vier pixels meer
+     dan de gewone opgetilde maat hiernaast -- geen verschil dat iets
+     aankondigt. De verhouding tot de kale mascotte (40 px) blijft hier
+     dezelfde als op een telefoon. */
+  #s-handoff:not(.mode-round) .mini-score .side.up .head > svg:not(.crown) {
+    width: 96px; height: 96px;
+  }
   .mini-score b { font-size: 28px; }
   .mini-score .crown { width: 28px; height: 28px; top: -13px; }
   .mini-score .fresh { font-size: 18px; padding: 1px 7px; }
-  .roundcard .ico { width: 96px; height: 96px; }
-  .roundcard b { font-size: 32px; }
+  /* De compacte kaart is een bijschrift en groeit dus mee met .roundchip op
+     het spelscherm hierboven (60 px tegel, 12 px woord) in plaats van met de
+     uitgeklapte kaart, die haar eigen maten in vh rekent. */
+  .roundcard .ico { width: 60px; height: 60px; }
+  .roundcard b { font-size: 14px; }
   .rounddots i { width: 14px; height: 14px; }
   /* Het cijfer en zijn vak groeien samen mee: het vak moet "30" op de grote
      maat blijven dragen, anders loopt het cijfer er in de laatste tellen
@@ -2948,7 +3058,17 @@ input[type=range]::-moz-range-thumb {
          oppas, een opa -- krijgt ze wél ongevraagd. -->
     <details class="rules" id="rules">
       <summary>Zo speel je</summary>
-      <p>Twee ploegen spelen 3 rondes met dezelfde kaarten:</p>
+      <!-- De ploegen staan hier bij naam én bij dier, en dat is de enige
+           plek in de app waar dat kan. Verder wordt nergens verteld wie Vos
+           is en wie Uil: de worp op de eerste overdracht landt op een
+           mascotte die de tafel nooit is voorgesteld, en daarna draagt elk
+           scherm die mascotte alsof dat vanzelf spreekt. Dit is het scherm
+           van de volwassene, dus hier mag het met woorden -- met het dier
+           ernaast, zodat de naam aan het beeld vastzit dat straks op de
+           stand staat. -->
+      <p>Twee ploegen — <b class="teamname">Vos<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-vos"/></svg></b>
+        en <b class="teamname">Uil<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-uil"/></svg></b> —
+        spelen 3 rondes met dezelfde kaarten:</p>
       <ol>
         <li><b>Omschrijven</b> — alles mag, behalve het woord zelf.</li>
         <li><b>Eén woord</b> — geef precies één woord als hint.</li>
@@ -3145,32 +3265,17 @@ input[type=range]::-moz-range-thumb {
 
        Staat er vanaf de eerste overdracht, ook op 0 - 0: zo heeft élke
        overdracht dezelfde drie vakken in plaats van de eerste een minder. -->
-  <div class="mini-score surface" id="hoTally">
-    <div class="side" id="hoSideA">
-      <span class="head">
-        <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-vos"/></svg>
-        <svg class="crown" id="hoCrownA" viewBox="0 0 100 100" aria-hidden="true" hidden><use href="#i-kroon"/></svg>
-      </span>
-      <b id="hoScoreA">0</b>
-      <i class="fresh gain" id="hoFreshA" hidden></i>
-    </div>
-    <div class="side" id="hoSideB">
-      <span class="head">
-        <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-uil"/></svg>
-        <svg class="crown" id="hoCrownB" viewBox="0 0 100 100" aria-hidden="true" hidden><use href="#i-kroon"/></svg>
-      </span>
-      <b id="hoScoreB">0</b>
-      <i class="fresh gain" id="hoFreshB" hidden></i>
-    </div>
-  </div>
+  <!-- Leeg in de opmaak: buildTally() vult hem, en vult daarmee ook die in
+       het pauzepaneel. Zie daar waarom dat één functie moet zijn. -->
+  <div class="mini-score surface" id="hoTally"></div>
 
   <!-- 2. WAT. Eén kaart, twee dichtheden: .big voegt de ronde-tekening en
        de regel toe. Het pictogram in .ico wordt dan door de tekening zelf
        vervangen, zodat de ronde niet twee keer in beeld staat. -->
   <div class="roundcard surface" id="hoRoundCard">
     <div class="ico" id="hoRoundIco"><svg viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
-    <b id="hoRoundWord">Omschrijven</b>
-    <p id="hoRoundHow"></p>
+    <b>Omschrijven</b>
+    <p></p>
     <!-- Alleen bij de wissel naar ronde 2, en dus eenmalig per potje: drie
          tekeningen uit de verse stapel die terugschuiven. Zie .restack. Wie
          luistert krijgt hetzelfde in het label van de kaart. -->
@@ -3221,8 +3326,8 @@ input[type=range]::-moz-range-thumb {
       <b class="gain turn-gain" id="turnScore" aria-hidden="true" hidden>+0</b>
     </div>
     <div class="roundchip" id="plRoundChip">
-      <div class="ico"><svg id="plRound" viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
-      <b id="plRoundWord">Omschrijven</b>
+      <div class="ico"><svg viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
+      <b>Omschrijven</b>
     </div>
     <div class="turnbox">
       <div class="secs-left" id="clockDigits">30</div>
@@ -3276,9 +3381,12 @@ input[type=range]::-moz-range-thumb {
        Tikken breekt af en zet je terug op het overdrachtscherm. -->
   <button class="countdown" id="countdown" hidden aria-label="Aftellen — tik om terug te gaan">
     <svg class="cd-back" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pass"/></svg>
-    <!-- Alleen het teken van de ronde; het woord staat een tel later op de
-         balk en mag hier niet, want dit vlak is ploegkleur. Zie .cd-round. -->
-    <div class="cd-round" aria-hidden="true"><svg id="cdRound" viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
+    <!-- Wie en wat: dezelfde twee tegels die een tel later op de balk staan,
+         op dezelfde plek. Alleen het teken van de ronde; het woord staat een
+         tel later op de balk en mag hier niet, want dit vlak is ploegkleur.
+         Zie .cd-team en .cd-round. -->
+    <div class="cd-team" aria-hidden="true"><svg id="cdMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg></div>
+    <div class="cd-round" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
     <span class="cd-disc">
       <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
         <circle class="arc" id="cdArc" cx="50" cy="50" r="46"/>
@@ -3337,22 +3445,7 @@ input[type=range]::-moz-range-thumb {
          een keer misgegaan -- de mascottes hadden geen .head om zich heen
          en vielen daardoor buiten de maatregel, zodat ze op 0 bij 0 pixels
          stonden en er twee kale getallen overbleven zonder eigenaar. -->
-    <div class="mini-score" aria-hidden="true">
-      <div class="side" id="pauseSideA">
-        <span class="head">
-          <svg viewBox="0 0 100 100"><use href="#m-vos"/></svg>
-          <svg class="crown" id="pauseCrownA" viewBox="0 0 100 100" hidden><use href="#i-kroon"/></svg>
-        </span>
-        <b id="pauseScoreA">0</b>
-      </div>
-      <div class="side" id="pauseSideB">
-        <span class="head">
-          <svg viewBox="0 0 100 100"><use href="#m-uil"/></svg>
-          <svg class="crown" id="pauseCrownB" viewBox="0 0 100 100" hidden><use href="#i-kroon"/></svg>
-        </span>
-        <b id="pauseScoreB">0</b>
-      </div>
-    </div>
+    <div class="mini-score" id="pauseTally" aria-hidden="true"></div>
     <!-- Twee deuren naast elkaar, in dezelfde volgorde als tijdens het
          spelen: links het vierkant dat de mindere keuze is (daar zit "pas"),
          rechts de ronde die de hoofdhandeling is (daar zit "goed"). Ze
@@ -4493,10 +4586,39 @@ const ROUND_HOW = [
 
 const ROUND_ICON = ["#r-praten", "#r-eenwoord", "#r-mimen"];
 
-function paintRound(el, iconEl, wordEl) {
-  iconEl.firstElementChild.setAttribute("href", ROUND_ICON[G.round - 1]);
-  wordEl.textContent = ROUND_WORD[G.round - 1];
-  el.setAttribute("aria-label", "Deze ronde: " + ROUND_WORD[G.round - 1]);
+/* Eén schilder voor de drie maten waarin de ronde in beeld komt. Ze werden
+   op drie plekken los bijgewerkt -- de balk op het spelscherm, de
+   opdrachtkaart op de overdracht en het tegeltje tijdens het aftellen -- en
+   alle drie lazen ze dezelfde rijtjes zelf uit. Eén plek die je vergeet en
+   de ronde staat op twee opeenvolgende schermen anders; dat is precies hoe
+   de stand ooit in twee kopieën uit elkaar groeide.
+
+     "teken"  alleen het pictogram. Het aftelvlak draagt ploegkleur, en
+              tekst hoort daar niet -- zie .cd-round.
+     "chip"   pictogram plus woord: de balk tijdens het spelen, en de
+              compacte opdrachtkaart op de overdracht.
+     "kaart"  de ronde-tekening in plaats van het pictogram, met de regel
+              eronder. Alleen hier staat ROUND_HOW, en dus één keer per
+              ronde.
+
+   ico is het vlak waar het beeld in komt; host is het geheel dat de
+   aria-label draagt. Bij "teken" is er geen host -- dat tegeltje is
+   aria-hidden, want een tel later staat hetzelfde op de balk. */
+function paintRound(ico, size, host) {
+  const r = G.round - 1;
+  ico.textContent = "";
+  if (size === "kaart") ico.innerHTML = RI_ART[r];
+  else ico.appendChild(svgUse(ROUND_ICON[r]));
+  if (!host) return;
+  const word = host.querySelector("b"), how = host.querySelector("p");
+  if (word) word.textContent = ROUND_WORD[r];
+  /* De merktekens van de hoeveelste ronde staan alleen in de uitgeklapte
+     kaart (zie .rounddots), maar wie luistert krijgt het getal in beide
+     standen: een schermlezer telt geen vierkantjes. */
+  if (how) how.textContent = size === "kaart" ? ROUND_HOW[r] : "";
+  host.setAttribute("aria-label",
+    "Ronde " + G.round + " van " + ROUNDS + ": " + ROUND_WORD[r] +
+    (size === "kaart" ? ". " + ROUND_HOW[r] : ""));
 }
 
 /* Allebei de wissels vullen dezelfde drie vakken: stand, opdracht, start.
@@ -4525,16 +4647,10 @@ function handoff(mode, freshA, freshB) {
 
   // Vak 2: de opdracht. Uitgeklapt draagt het pictogramvak de ronde-tekening
   // zelf, ingeklapt het gewone rondepictogram -- twee dichtheden van één
-  // kaart, nooit allebei tegelijk in beeld.
-  const ico = $("#hoRoundIco");
-  ico.textContent = "";
-  if (round) ico.innerHTML = RI_ART[r];
-  else ico.appendChild(svgUse(ROUND_ICON[r]));
-  $("#hoRoundWord").textContent = ROUND_WORD[r];
-  $("#hoRoundHow").textContent = round ? ROUND_HOW[r] : "";
-  // De hoeveelste van de drie. De merktekens zijn aria-hidden; wie luistert
-  // krijgt hetzelfde in het label van de kaart, en daar mag het een getal
-  // zijn -- een schermlezer telt geen vierkantjes.
+  // kaart, nooit allebei tegelijk in beeld. Zelfde schilder als de balk op
+  // het spelscherm, andere maat.
+  paintRound($("#hoRoundIco"), round ? "kaart" : "chip", $("#hoRoundCard"));
+  // De hoeveelste van de drie; alleen zichtbaar in de uitgeklapte stand.
   $$("#hoRoundDots i").forEach((d, i) => d.classList.toggle("now", i === r));
 
   /* Eenmalig, bij de wissel naar ronde 2: de kaarten komen terug. Niet in
@@ -4548,10 +4664,11 @@ function handoff(mode, freshA, freshB) {
     el.textContent = G.deck[G.pile[i]][0];
   });
 
-  $("#hoRoundCard").setAttribute("aria-label",
-    "Ronde " + G.round + " van " + ROUNDS + ": " + ROUND_WORD[r] +
-    (round ? ". " + ROUND_HOW[r] : "") +
-    (terug ? " Dezelfde kaarten komen terug." : ""));
+  // De waaier is het enige wat paintRound() hierboven niet weet, dus die
+  // zin komt er hier achteraan in plaats van het hele label opnieuw op te
+  // bouwen.
+  if (terug) $("#hoRoundCard").setAttribute("aria-label",
+    $("#hoRoundCard").getAttribute("aria-label") + " Dezelfde kaarten komen terug.");
 
   /* Overgedragen tijd. Dit was een los kaartje dat ergens tussen de
      opdracht en de startknop zweefde, met het getal in marigold op papier
@@ -4559,7 +4676,14 @@ function handoff(mode, freshA, freshB) {
      het tegen de startknop aan én loopt dezelfde tijd als een boog binnen
      de ring mee: het gaat over wat er gebeurt als je díe knop indrukt, en
      dat mag je zien zonder het te moeten leren. */
-  const carried = G.pendingMs > 0 && G.pendingMs < G.secs * 1000;
+  /* Een hele seconde onder een volle beurt, niet één milliseconde. Loopt de
+     stapel leeg in de eerste tel van een beurt, dan is pendingMs net iets
+     minder dan een volle beurt en rondt Math.ceil hieronder gewoon terug
+     naar boven: er stond dan "30" op een potje van 30 seconden, met een
+     bijna gesloten ring eromheen. Dat is niet fout maar leeg -- het leest
+     als "deze beurt duurt 30 seconden" in plaats van als "je krijgt er 30
+     mee", en het label bestaat juist om dat verschil te melden. */
+  const carried = G.pendingMs > 0 && G.pendingMs <= G.secs * 1000 - 1000;
   $("#hoCarry").hidden = !carried;
   if (carried) {
     const p = Math.max(0, Math.min(1, G.pendingMs / (G.secs * 1000)));
@@ -4767,7 +4891,7 @@ function startTurn() {
   G.gained = 0;
   const t = TEAMS[G.team];
   $("#plMascot").firstElementChild.setAttribute("href", t.mascot);
-  paintRound($("#plRoundChip"), $("#plRound"), $("#plRoundWord"));
+  paintRound($("#plRoundChip .ico"), "chip", $("#plRoundChip"));
   $("#s-play").style.setProperty("--team", t.color);
   G.card = null;
   $("#glyph").textContent = "";   // leeg tot nul: niemand leest de kaart vooraf
@@ -4802,7 +4926,7 @@ function countdown(done) {
      liggend 45 px misstaan, want daar is het tegeltje kleiner en staat het
      niet in het hart van het scherm. Lukt het meten niet, dan blijft de
      terugval uit de stijlen staan. */
-  $("#cdRound").firstElementChild.setAttribute("href", ROUND_ICON[G.round - 1]);
+  paintRound($(".cd-round"), "teken");
   const chip = $(".roundchip .ico"), tegel = $(".cd-round");
   if (chip && tegel) {
     const c = chip.getBoundingClientRect(), o = el.getBoundingClientRect();
@@ -4812,6 +4936,27 @@ function countdown(done) {
       tegel.style.width = c.width + "px";
       tegel.style.height = c.height + "px";
       tegel.style.transform = "none";
+    }
+  }
+
+  /* En van wie deze beurt is; zie .cd-team. Zelfde meting, andere tegel --
+     met dat verschil dat het papier hier óm de mascotte heen ligt in plaats
+     van eronder: de mascotte zelf krijgt precies de maat en de plek van die
+     op de balk, zodat ze bij het oplossen blijft staan waar ze staat. De
+     binnenmarge komt uit de stijlen (7 px) en de rand uit --line-2, dus de
+     tegel is aan elke kant tien pixels groter dan wat erin staat. */
+  const PAD = 7 + 3;
+  $("#cdMascot").firstElementChild.setAttribute("href", TEAMS[G.team].mascot);
+  const chipT = $(".teamchip"), tegelT = $(".cd-team");
+  if (chipT && tegelT) {
+    const c = chipT.getBoundingClientRect(), o = el.getBoundingClientRect();
+    if (c.width > 0) {
+      tegelT.style.left = (c.left - o.left - PAD) + "px";
+      tegelT.style.top = (c.top - o.top - PAD) + "px";
+      tegelT.style.width = (c.width + PAD * 2) + "px";
+      tegelT.style.height = (c.height + PAD * 2) + "px";
+      $("#cdMascot").style.width = c.width + "px";
+      $("#cdMascot").style.height = c.height + "px";
     }
   }
   el.focus({ preventScroll: true });
@@ -5203,6 +5348,58 @@ function timeUp() {
      zelf al op controleren. */
   setTimeout(turnEnd, 700);
 }
+
+/* De stand staat op twee schermen -- de overdracht en het pauzepaneel -- en
+   was twee keer met de hand uitgeschreven. Die twee zijn uit elkaar gegroeid:
+   de kopie in het paneel miste de .head-omhulling en viel daardoor buiten
+   `.mini-score .head > svg`, zodat beide mascottes op 0 bij 0 pixels stonden
+   en er twee kale getallen overbleven zonder eigenaar. Opgeschreven stond
+   sindsdien "wie de ene aanpast, past de andere mee aan, of voegt ze samen".
+   Hier is dat laatste: één bouwer, twee keer aangeroepen bij het laden, dus
+   ze kúnnen niet meer verschillen.
+
+   Het enige echte verschil blijft het groene "+N" -- dat hoort bij een beurt
+   die net afgelopen is, en in het paneel is er geen. Dat is een vlag en geen
+   tweede opmaak.
+
+   De ids blijven hetzelfde als toen ze in de opmaak stonden (hoSideA,
+   pauseScoreB, ...), zodat paintHoTally en paintPauseScore hieronder ze
+   gewoon blijven vinden. */
+function buildTally(host, prefix, withFresh) {
+  host.textContent = "";
+  TEAMS.forEach((t, i) => {
+    const kant = i === 0 ? "A" : "B";
+    const side = document.createElement("div");
+    side.className = "side";
+    side.id = prefix + "Side" + kant;
+
+    const head = document.createElement("span");
+    head.className = "head";
+    const mascot = svgUse(t.mascot);
+    mascot.setAttribute("aria-hidden", "true");
+    const crown = svgUse("#i-kroon", "crown");
+    crown.id = prefix + "Crown" + kant;
+    crown.setAttribute("aria-hidden", "true");
+    crown.setAttribute("hidden", "");
+    head.append(mascot, crown);
+
+    const num = document.createElement("b");
+    num.id = prefix + "Score" + kant;
+    num.textContent = "0";
+    side.append(head, num);
+
+    if (withFresh) {
+      const fresh = document.createElement("i");
+      fresh.className = "fresh gain";
+      fresh.id = prefix + "Fresh" + kant;
+      fresh.hidden = true;
+      side.appendChild(fresh);
+    }
+    host.appendChild(side);
+  });
+}
+buildTally($("#hoTally"), "ho", true);
+buildTally($("#pauseTally"), "pause", false);
 
 /* De stand op het overdrachtscherm, met wat er net bij kwam als groen label.
    Geen fiche per punt hier: zo'n stapel groeit de hele avond door en duwde
