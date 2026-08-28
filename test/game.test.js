@@ -88,8 +88,16 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     // je kijkt als je het toestel aangereikt krijgt.
     const woord = ['Omschrijven', 'Eén woord', 'Uitbeelden'][round - 1];
     const icoon = ['#r-praten', '#r-eenwoord', '#r-mimen'][round - 1];
-    ok(await page.textContent('#hoRoundWord') === woord,
+    ok(await page.textContent('#hoRoundCard b') === woord,
        `ronde ${round}: verkeerd woord op het overdrachtscherm`);
+    // Een rondewissel klapt de opdrachtkaart uit: de regel staat erin en het
+    // pictogramvak draagt de ronde-tekening (een eigen <svg>, geen <use>).
+    // Dat uitklappen is het enige verschil tussen de twee overdrachten, dus
+    // het is ook het enige wat hier te controleren valt.
+    ok(await page.$('#hoRoundCard.big #hoRoundIco > svg') !== null,
+       `ronde ${round}: de opdrachtkaart staat niet uitgeklapt`);
+    ok((await page.textContent('#hoRoundCard p')).trim() !== '',
+       `ronde ${round}: de regel staat niet in de uitgeklapte kaart`);
 
     // Een gewone tik; het aftellen erna houdt een losse aanraking tegen.
     // Afbreken zet je terug op het overdrachtscherm, zonder begonnen beurt.
@@ -112,9 +120,9 @@ const ok = (c, m) => { if (!c) fails.push(m); };
        `ronde ${round}: geen kaart na het aftellen`);
 
     // En tijdens het spelen ook, want daar wordt het vergeten.
-    ok(await page.textContent('#plRoundWord') === woord,
+    ok(await page.textContent('#plRoundChip b') === woord,
        `ronde ${round}: verkeerd woord in de spelbalk`);
-    ok(await page.getAttribute('#plRound use', 'href') === icoon,
+    ok(await page.getAttribute('#plRoundChip .ico use', 'href') === icoon,
        `ronde ${round}: verkeerd pictogram in de spelbalk`);
 
     // Elke getoonde kaart wordt onthouden, ook die van de proefjes hieronder:
@@ -185,6 +193,14 @@ const ok = (c, m) => { if (!c) fails.push(m); };
        const other = document.querySelector('#hoSide' + (t === 0 ? 'B' : 'A'));
        return up.classList.contains('up') && !other.classList.contains('up');
      }), 'de ploeg die aan zet is wordt niet opgetild in de stand');
+  // Een beurtwissel is de andere stand van hetzelfde scherm: de opdracht is
+  // niet veranderd, dus de kaart blijft compact en de regel blijft weg. Zou
+  // ze hier ook uitklappen, dan zegt het scherm bij elke beurt dat er iets
+  // nieuws te leren valt.
+  ok(await page.$('#hoRoundCard.big') === null,
+     'de opdrachtkaart klapt uit bij een gewone beurtwissel');
+  ok((await page.textContent('#hoRoundCard p')).trim() === '',
+     'de regel staat op het scherm bij een gewone beurtwissel');
 
   // --- herladen midden in een beurt komt terug op de grens ---
   // Dit stond hier omgekeerd: een potje overleefde geen herlaadbeurt, en dat

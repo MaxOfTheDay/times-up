@@ -389,11 +389,31 @@ vult altijd dezelfde drie vakken in dezelfde volgorde:
 2. **opdracht** -- wat moet je doen;
 3. **start** -- één tik, de enige handeling; het aftellen komt erna.
 
-Het enige verschil tussen de twee wissels is de dichtheid van vak 2.
-`handoff("turn")` laat de kaart compact (de opdracht is niet veranderd),
-`handoff("round")` klapt hem uit met de ronde-tekening en de regel erin.
-Dat uitklappen ís het teken dat er iets nieuws te leren valt -- daar is geen
-apart scherm of tweede component voor nodig. `.mode-round` schakelt ertussen.
+De twee wissels vragen het tegenovergestelde, en dát is wat het verschil
+tussen de twee standen moet dragen. Bij een **beurtwissel** gaat het toestel
+écht van hand: `turnEnd()` draait `G.team` om, en "wie krijgt hem" is dan het
+enige waar het scherm voor bestaat. Bij een **rondewissel** blijft het toestel
+in dezelfde handen -- `endRound()` raakt `G.team` niet aan, want de
+resterende tijd gaat mee naar dezelfde ploeg -- en is de nieuwe regel het
+nieuws.
+
+Hier stond dat het enige verschil de dichtheid van vak 2 was: compact bij een
+beurtwissel, uitgeklapt bij een rondewissel. Dat kanaal zegt over de handeling
+niets. Een tafel die de overdracht eenmaal geleerd heeft, geeft het toestel
+bij ronde 2 dus aan de verkeerde ploeg door -- het scherm ziet er immers uit
+als "geef door".
+
+Nu hangen álle kanalen die "wie" dragen aan de beurtwissel, en aan die alleen:
+de mascotte van wie aan zet is groeit daar veel harder (66 px tegen 42), ze
+ademt, en ze komt op met dezelfde trede op de ladder die de rondewissel aan
+zijn tekening geeft. In de rondestand blijft ze op haar gewone opgetilde maat
+staan -- het reliëf zegt nog steeds wie aan zet is, maar het kondigt niets
+aan. Dat verschil ís de mededeling. `.mode-round` schakelt ertussen, en elke
+regel die eraan hangt staat als `#s-handoff:not(.mode-round)` genoteerd.
+
+De opdrachtkaart beweegt de andere kant op mee. Uitgeklapt houdt ze haar
+maat: daar ís de ronde het nieuws. Compact is ze een bijschrift geworden --
+dezelfde tegel en dezelfde woordmaat als `.roundchip` op het spelscherm.
 
 Wat er níet meer staat, en waarom:
 
@@ -407,6 +427,14 @@ Wat er níet meer staat, en waarom:
 - **Geen aparte regel-schijf.** Die is de tekening ín de uitgeklapte kaart
   geworden.
 
+De ronde komt in drie maten in beeld -- alleen het teken (het aftellen),
+teken plus woord (de balk en de compacte kaart), en de tekening met de regel
+(de uitgeklapte kaart). Ze werden op drie plekken los bijgewerkt en lazen alle
+drie dezelfde rijtjes zelf uit; één plek die je vergeet en de ronde staat op
+twee opeenvolgende schermen anders. `paintRound(ico, size, host)` doet ze nu
+alle drie, met `size` op `"teken"`, `"chip"` of `"kaart"`. `ROUND_HOW` staat
+alleen in de `"kaart"`-tak, en dus één keer per ronde.
+
 Alle tekst staat op papier, nooit rechtstreeks op de ploegkleur: `--ink-2`
 haalt op ploegblauw maar 1,5:1 en op ploegrood 2,0:1, en de uitleg bij de
 regel is juist de enige tekst in het spel die een speler moet kunnen lezen.
@@ -416,12 +444,53 @@ ronde 3 de startknop van het scherm af -- onzichtbaar in de test tot je 'm met
 een screenshot ziet staan. Een totaal met een groen "+N" ernaast zegt
 hetzelfde in vaste breedte, met een kroon boven wie voorstaat (hetzelfde teken
 als op het winnaarsscherm, want twee getallen vergelijken kan een vierjarige
-nog niet). Die stand blijft kleiner dan de opdrachtkaart: ze is naslag, en de
-opdracht is het enige waar de speler íets mee moet.
+nog niet).
+
+Hier stond dat die stand kleiner blijft dan de opdrachtkaart, want ze is
+naslag. Dat geldt nog steeds bij een **rondewissel**, en daar is het ook
+gemeten (92.355 px2 kaart tegen 16.439 stand). Bij een **beurtwissel** was het
+precies verkeerd om: 39.372 px2 kaart tegen 4.484 voor de opgetilde tegel, dus
+het antwoord op de enige vraag die dat scherm stelt was negen keer kleiner dan
+een herhaling die er de vorige beurt al net zo stond en drie tellen later op
+de balk terugkomt.
+
+Erger dan de maat was de richting van de blik. Wie net gespeeld heeft draagt
+de kroon én het groene "+N", dus de drie opvallendste tekens op de stand
+hoorden alle drie bij de ploeg die het toestel juist kwijtraakt. Nu wint de
+stand daar in beide assen: 23.857 tegen 13.149.
+
+Reken bij een wijziging hier dus per stand, en niet één keer voor allebei.
 
 De knop rechtsboven draagt hier een huisje en geen pauzeteken: er loopt geen
 klok, dus er valt niets te pauzeren. De enige reden om er te tikken is
 weggaan -- en dat is wat het huisje op het winnaarsscherm ook betekent.
+
+De merktekens van de hoeveelste ronde (`.rounddots`) staan alleen in de
+uitgeklapte kaart. "De hoeveelste van de drie" is een vraag die je op een
+rondegrens stelt en niet twaalf keer per potje; tussen twee beurten verandert
+er niets aan het antwoord. Wie luistert houdt het in beide standen, want het
+getal staat in de aria-label van de kaart.
+
+## Het aftellen draagt allebei de feiten
+
+Die drie tellen zijn het moment waarop het toestel fysiek van hand gaat, en
+wie hem aanneemt kijkt dan voor het eerst. Er stond alleen het rondetegeltje
+op -- van wie de beurt was, stond er enkel in de achtergrondkleur, en dat is
+het ene kanaal dat in deze app nooit alleen mag staan.
+
+Er staat nu ook een mascotte (`.cd-team`). Waarom er papier onder moet: de
+mascotte draagt de ploegkleur en dit vlak ook, dus zonder achtergrond wordt ze
+een uitgesneden silhouet. Dat is precies het bezwaar waarop het optillen van
+de hele bovenbalk ooit sneuvelde -- maar dat bezwaar gold de bálk (met haar
+pauzeknop en haar woord op ploegkleur), niet een mascotte op papier.
+
+Allebei de tegels worden op de gemeten plek van hun tegenhanger op de balk
+gelegd, niet in CSS nagerekend: nagerekend klopt het staand op een telefoon
+en staat het liggend 45 px mis. Bij het rondetegeltje ligt het papier eronder,
+bij de mascotte eromheen -- de mascotte krijgt precies de gemeten maat en
+plek, zodat ze bij het oplossen blijft staan waar ze staat en het spelscherm
+eronder haar daar al heeft. Nagemeten op 390 bij 844: 48 bij 48 op (32, 32),
+aan allebei de kanten van de wissel.
 
 ## De eindstand telt niet, ze noemt
 
@@ -509,8 +578,16 @@ dezelfde twee tekens: de kroon boven wie voorstaat, de opgetilde tegel
 uit elkaar: de kopie in het paneel miste de `.head`-omhulling en viel
 daardoor buiten `.mini-score .head > svg`, zodat beide mascottes op 0 bij 0
 pixels stonden en er twee kale getallen overbleven zonder eigenaar --
-precies het soort tekst-zonder-beeld dat de harde eis verbiedt. Wie de ene
-aanpast, past de andere mee aan, of voegt ze samen.
+precies het soort tekst-zonder-beeld dat de harde eis verbiedt.
+
+Hier stond "wie de ene aanpast, past de andere mee aan, of voegt ze samen".
+Ze zijn nu samengevoegd: `buildTally()` bouwt de twee zijden en wordt bij het
+laden twee keer aangeroepen, voor `#hoTally` en voor `#pauseTally`. In de
+opmaak staan allebei de vakken leeg. Ze kúnnen dus niet meer verschillen, en
+de ids blijven dezelfde (`hoSideA`, `pauseScoreB`, ...) zodat
+`paintHoTally()` en `paintPauseScore()` ze gewoon blijven vinden. Het enige
+echte verschil is een vlag: het groene "+N" hoort bij een beurt die net
+afgelopen is, en in het paneel is er geen.
 
 ## App-pictogram en installeerbaarheid
 
