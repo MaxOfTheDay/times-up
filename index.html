@@ -1626,6 +1626,32 @@ input[type=range]::-moz-range-thumb {
   .mini-score { padding-top: 6px; padding-bottom: 6px; }
 }
 
+/* Diezelfde drukste stand -- een rondewissel met twee tweecijferige totalen
+   én twee "+N" -- raakte op een smal scherm ook de zíjrand, en dat is een
+   fout van een andere orde: `--corner` (32 px) geldt voor elk blijvend
+   geplaatst rechthoekig vlak, en dit vlak scrollt nooit weg. Gemeten op 320
+   bij 568 stond de stand nog maar 22 px van de rand.
+
+   `#hoTally` en niet `.mini-score`: dezelfde opmaak bouwt ook de stand in
+   het pauzepaneel (`#pauseTally`), en die zit al in een paneel met eigen
+   marge -- ze had dit probleem niet en hoeft dus niet mee te krimpen.
+
+   Alleen lucht gaat eraf, geen tekst en geen tekening: de tussenruimte
+   tussen de twee ploegen, de binnenmarge van de stand, de ruimte tussen een
+   mascotte/cijfer/label binnen één ploeg, en de eigen marge van het "+N"-
+   label. Elk cijfer en elk pictogram houdt zijn maat. Nagemeten: op 320 komt
+   de stand van 276 op 250 px en de rand van 22 op 35 px; op 360 stond de
+   rand al op precies 32 px (de grens zelf), dus daarboven verandert er
+   niets. Controleer dit door de hoek te tékenen (vier `radial-gradient`-
+   cirkels in een schreeuwkleur over het scherm) en niet met alleen een
+   rekensom: een schaduw of een afgeronde hoek telt niet mee in
+   `getBoundingClientRect()`. */
+@media (max-width: 359px) {
+  #hoTally { gap: 10px; padding-left: 8px; padding-right: 8px; }
+  #hoTally .side { gap: 6px; }
+  #hoTally .fresh { padding: 0 3px; }
+}
+
 /* Uitgeklapt: dezelfde kaart, meer erin. Dat groeien ís het teken dat er
    iets nieuws te leren valt -- daar is geen apart scherm of een tweede
    component voor nodig. Het pictogram wordt hier de ronde-tekening zelf
