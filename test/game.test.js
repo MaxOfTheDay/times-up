@@ -119,9 +119,13 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     ok(await page.textContent('#glyph') !== '',
        `ronde ${round}: geen kaart na het aftellen`);
 
-    // En tijdens het spelen ook, want daar wordt het vergeten.
-    ok(await page.textContent('#plRoundChip b') === woord,
-       `ronde ${round}: verkeerd woord in de spelbalk`);
+    // En tijdens het spelen ook, al staat het woord er zichtbaar niet meer:
+    // het pictogram draagt de ronde alleen, en wie leest krijgt de naam nog
+    // via de aria-label van de tegel zelf.
+    ok(await page.$('#plRoundChip b') === null,
+       `ronde ${round}: er staat toch een woord in de spelbalk`);
+    ok((await page.getAttribute('#plRoundChip', 'aria-label') || '').includes(woord),
+       `ronde ${round}: de spelbalk noemt de ronde niet in zijn aria-label`);
     ok(await page.getAttribute('#plRoundChip .ico use', 'href') === icoon,
        `ronde ${round}: verkeerd pictogram in de spelbalk`);
 

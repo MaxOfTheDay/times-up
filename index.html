@@ -1526,13 +1526,19 @@ input[type=range]::-moz-range-thumb {
    een eigen kleur.
 
    Dit is de compacte maat, en die is een bijschrift geworden -- zelfde
-   tegel en zelfde woordmaat als .roundchip op het spelscherm. Ze was een
-   plaat van 371 bij 106, het grootste vlak op het scherm, terwijl ze bij
-   een beurtwissel niets meldt wat veranderd is: het pictogram en het woord
-   stonden er de vorige beurt al net zo, en staan er drie tellen later op de
-   balk weer. Gemeten was ze 39.372 px2 tegen 4.484 voor de opgetilde tegel
-   -- het antwoord op de enige vraag die dit scherm stelt was negen keer
+   tegel als .roundchip op het spelscherm, met het eigen woord op
+   --type-label, dezelfde bodem die elders in de app voor een label geldt.
+   Ze was een plaat van 371 bij 106, het grootste vlak op het scherm, terwijl
+   ze bij een beurtwissel niets meldt wat veranderd is: het pictogram stond
+   er de vorige beurt al net zo, en staat er drie tellen later op de balk
+   weer. Gemeten was ze 39.372 px2 tegen 4.484 voor de opgetilde tegel --
+   het antwoord op de enige vraag die dit scherm stelt was negen keer
    kleiner dan de herhaling ernaast.
+
+   Het woord zelf staat hier nog wel, en op het spelscherm niet meer: zie
+   .roundchip hieronder voor waarom. Dit kaartje is naslag op het scherm
+   waar je aankomt, niet de kaart waar je middenin zit -- daar mag het
+   bijschrift blijven staan.
 
    De uitgeklapte maat (.big) is een andere zaak en houdt haar eigen
    afmetingen: daar ís de ronde het nieuws. Alle maatvoering voor die stand
@@ -2006,12 +2012,22 @@ input[type=range]::-moz-range-thumb {
 }
 .teamchip svg { width: 100%; height: 100%; }
 
-/* De opdracht van deze ronde, altijd in beeld. Beeld én woord samen: het
-   kind leest de ballon, wie wél leest is meteen zeker. Geen kleur op de
-   ronde -- de mascotte staat ernaast, en elke kleur die vrij lijkt is hier
-   al van iets anders. */
+/* De opdracht van deze ronde, altijd in beeld. Alleen het pictogram: het
+   woord eronder is weggehaald, want tijdens het spelen kijkt niemand naar
+   deze balk om te weten wat de ronde is -- dat weet de tafel al van het
+   overdrachtscherm, drie tellen geleden. De kaart in het midden is het
+   enige waar de speler dan iets mee moet.
+
+   De drie rondes blijven uit elkaar te houden zonder het woord: het
+   pictogram is voor elke ronde een andere vórm in dezelfde ballon (drie
+   stippen, één dikke stip, een doorgestreepte ballon), geen telling die je
+   moet herkennen. Wie wél leest verliest niets -- paintRound() zet de naam
+   nog steeds in de aria-label van #plRoundChip, alleen niet meer zichtbaar.
+
+   Geen kleur op de ronde -- de mascotte staat ernaast, en elke kleur die
+   vrij lijkt is hier al van iets anders. */
 .roundchip {
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  display: flex; flex-direction: column; align-items: center;
   flex: 0 0 auto;
 }
 .roundchip .ico {
@@ -2019,59 +2035,31 @@ input[type=range]::-moz-range-thumb {
   border: var(--line-2) solid var(--ink); background: var(--paper-2);
 }
 .roundchip .ico svg { width: 36px; height: 36px; }
-.roundchip b {
-  font-size: var(--type-label); font-weight: 900; letter-spacing: .02em;
-  text-transform: uppercase; white-space: nowrap;
-}
 
 /* Rechts: de resterende seconden en daarnaast de pauzeknop, die daarmee in
    de rechterbovenhoek uitkomt -- dezelfde hoek als op elk ander scherm. */
 .turnbox { display: flex; align-items: center; gap: var(--s-3); }
 
-/* Op 320 px past het niet meer. De balk heeft daar 256 px voor drie vakken:
-   de ronde-tegel is er 76 en staat in het midden, links staat de mascotte op
-   48, en rechts wil de pauzeknop 48 plus het cijfer. Zolang het cijfer klein
-   is gaat dat goed; op de grote maat steekt het rechtervak zo ver zijn kolom
-   uit dat het over het woord van de tegel heen komt.
-   De uitweg is niet het midden loslaten -- dan verspringt de tegel per
-   seconde -- maar het cijfer daar een maat kleiner te laten groeien: van 20
-   naar 26 in plaats van naar 34. Nog altijd een derde erbij, en het
-   rechtervak blijft binnen zijn kolom plus de tussenruimte. Nagemeten op
-   320: tegel tot 166, cijfervak vanaf 168. */
+/* Hier stonden twee blokken die de balk op smalle telefoons uit elkaar
+   hielden: het kritieke cijfer kromp van 34 naar 26 px, en het woord onder
+   het rondepictogram kromp van --type-label naar 10 px -- en onder 320 px
+   botste het zelfs dan nog (2 van de 12,5 px marge over, en dat op een
+   woordbreedte die met het lettertype van het toestel meebeweegt).
+
+   Het rondepictogram heeft dat woord niet meer (zie .roundchip hierboven),
+   dus is de tegel nu een vast vlak van 48 px zonder tekst -- geen breedte
+   die van scherm tot scherm of van lettertype tot lettertype verschuift.
+   Het kritieke cijfer mag daarom weer op zijn volle maat: gemeten op 320 px
+   staat de tegel op 184 px en begint het cijfervak op 192, een marge van
+   8 px die vaststaat omdat alle drie de vakken nu vaste pixelbreedtes zijn
+   in plaats van tekst. Dezelfde meting op 340 px geeft 18 px.
+
+   `.turnbox` houdt zijn eigen tussenruimte wel iets krapper dan elders in
+   de app (`--s-2` in plaats van `--s-3`): dat kost het cijfer en de
+   pauzeknop niets, en het is precies dié 4 px die de marge hierboven van
+   4 naar 8 brengt. */
 @media (max-width: 340px) {
-  :root { --digit-crit: 26px; --digit-w: 32px; }
   .turnbox { gap: var(--s-2); }
-}
-
-/* Het woord bij het rondepictogram houdt zijn oude 10 px op smalle
-   schermen. Overal elders krijgt het de bodem van --type-label.
-
-   De vrije ruimte tussen de ronde-tegel en het cijfervak hangt maar van
-   twee dingen af -- hoe breed de tegel is en hoe breed dat vak -- en niet
-   van de tussenruimte van het raster: de tegel staat gecentreerd en het vak
-   hangt aan de rechterrand, dus wat ertussen overblijft is
-   schermbreedte/2 min tegel/2 min vak. Uitgerekend met "Omschrijven", het
-   langste van de drie ronde-woorden:
-
-       breedte   op 10 px   op 12 px
-          320       2,0       -5,5   (botsing)
-          360      10,0        2,5
-          380      20,0       12,5
-          412      36,0       28,5
-
-   Op 320 botst het dus, en op 360 blijft er tweeënhalve pixel over. Dat is
-   geen marge: de letterfamilie is die van het toestel, en tussen Roboto en
-   een systeemvariant scheelt de breedte van dit woord al gauw een procent
-   of vijf -- ruim genoeg om die 2,5 op te eten. Vandaar de grens op 380 en
-   niet op 340: vanaf 381 px blijft er ruim twaalf pixel staan, en dat
-   overleeft een andere letter wél.
-
-   Dit is bovendien het enige van de drie dingen in die balk dat mag wijken.
-   Het pictogram ernaast draagt de ronde al, en het woord stond seconden
-   eerder op het overdrachtscherm op 14 tot 34 px; de mascotte en de klok
-   hebben geen tweede kanaal om op terug te vallen. */
-@media (max-width: 380px) {
-  .roundchip b { font-size: 10px; }
 }
 
 /* Op het spelscherm staat de pauzeknop in de balk mee in plaats van er
@@ -2749,13 +2737,6 @@ input[type=range]::-moz-range-thumb {
   .btn-good { width: 100%; }
   .btn-skip { width: max(64px, min(15vh, 84px)); height: max(64px, min(15vh, 84px)); }
   .btn-skip svg { width: 60%; }
-  /* Liggend is de hoogte schaars en de breedte ruim -- precies andersom als
-     staand -- dus legt de ronde-tegel zijn woord náást het pictogram in
-     plaats van eronder. Dat scheelt tien pixels balk, en die tien pixels
-     gaan rechtstreeks naar de kaart. Alleen op het spelscherm: op de
-     overdracht staat de tegel niet in een balk maar in de opdrachtkaart,
-     waar hoogte juist geen probleem is. */
-  #s-play .roundchip { flex-direction: row; align-items: center; gap: var(--s-2); }
 }
 
 /* Laag scherm (telefoon liggend): de overzichtsschermen worden een rij in
@@ -2859,7 +2840,6 @@ input[type=range]::-moz-range-thumb {
   .side-by-side { max-width: 560px; gap: var(--s-3) var(--s-5); }
   .teamchip, .roundchip .ico { width: 60px; height: 60px; }
   .roundchip .ico svg { width: 46px; height: 46px; }
-  .roundchip b { font-size: 12px; }
   /* De stand stond op een tablet nog steeds op zijn telefoonmaat: de
      mascottes zaten vast op 27 px, want min(7.4vw, 27px) loopt op 810 px
      breed allang tegen dat plafond. Twee dieren van 27 px met twee cijfers
@@ -2887,10 +2867,14 @@ input[type=range]::-moz-range-thumb {
   .mini-score .crown { width: 28px; height: 28px; top: -13px; }
   .mini-score .fresh { font-size: 18px; padding: 1px 7px; }
   /* De compacte kaart is een bijschrift en groeit dus mee met .roundchip op
-     het spelscherm hierboven (60 px tegel, 12 px woord) in plaats van met de
-     uitgeklapte kaart, die haar eigen maten in vh rekent. */
+     het spelscherm hierboven (60 px tegel) in plaats van met de uitgeklapte
+     kaart, die haar eigen maten in vh rekent. Het eigen woord blijft op
+     --type-label staan: dat is hier de enige plek die er nog een draagt
+     (zie .roundchip op het spelscherm), en een bijschrift groeit niet mee
+     met het toestel. Hier stond een losse 14 px, ingevoerd naast een
+     opmerking die 12 beloofde -- die twee klopten al niet met elkaar op de
+     telefoonmaat en zijn nu gewoon dezelfde bodem. */
   .roundcard .ico { width: 60px; height: 60px; }
-  .roundcard b { font-size: 14px; }
   .rounddots i { width: 14px; height: 14px; }
   /* Het cijfer en zijn vak groeien samen mee: het vak moet "30" op de grote
      maat blijven dragen, anders loopt het cijfer er in de laatste tellen
@@ -3351,9 +3335,9 @@ input[type=range]::-moz-range-thumb {
       <div class="teamchip"><svg id="plMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg></div>
       <b class="gain turn-gain" id="turnScore" aria-hidden="true" hidden>+0</b>
     </div>
+    <!-- Alleen het pictogram, geen <b> meer: zie .roundchip hieronder. -->
     <div class="roundchip" id="plRoundChip">
       <div class="ico"><svg viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
-      <b>Omschrijven</b>
     </div>
     <div class="turnbox">
       <div class="secs-left" id="clockDigits">30</div>
@@ -4621,8 +4605,13 @@ const ROUND_ICON = ["#r-praten", "#r-eenwoord", "#r-mimen"];
 
      "teken"  alleen het pictogram. Het aftelvlak draagt ploegkleur, en
               tekst hoort daar niet -- zie .cd-round.
-     "chip"   pictogram plus woord: de balk tijdens het spelen, en de
-              compacte opdrachtkaart op de overdracht.
+     "chip"   pictogram, plus het woord áls de host er een <b> voor heeft.
+              De compacte opdrachtkaart op de overdracht heeft er een; de
+              balk tijdens het spelen niet meer -- dat woord is weg, want
+              tijdens het spelen is de kaart het enige waar de speler iets
+              mee moet, en het pictogram onderscheidt de drie rondes al op
+              vorm. Wie leest krijgt de naam nog steeds: die staat hieronder
+              altijd in de aria-label, met of zonder zichtbare <b>.
      "kaart"  de ronde-tekening in plaats van het pictogram, met de regel
               eronder. Alleen hier staat ROUND_HOW, en dus één keer per
               ronde.
