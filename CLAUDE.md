@@ -427,13 +427,32 @@ Wat er níet meer staat, en waarom:
 - **Geen aparte regel-schijf.** Die is de tekening ín de uitgeklapte kaart
   geworden.
 
-De ronde komt in drie maten in beeld -- alleen het teken (het aftellen),
-teken plus woord (de balk en de compacte kaart), en de tekening met de regel
-(de uitgeklapte kaart). Ze werden op drie plekken los bijgewerkt en lazen alle
-drie dezelfde rijtjes zelf uit; één plek die je vergeet en de ronde staat op
-twee opeenvolgende schermen anders. `paintRound(ico, size, host)` doet ze nu
-alle drie, met `size` op `"teken"`, `"chip"` of `"kaart"`. `ROUND_HOW` staat
-alleen in de `"kaart"`-tak, en dus één keer per ronde.
+De ronde komt in drie maten in beeld -- alleen het teken, teken plus woord,
+en de tekening met de regel. Ze werden op drie plekken los bijgewerkt en
+lazen alle drie dezelfde rijtjes zelf uit; één plek die je vergeet en de
+ronde staat op twee opeenvolgende schermen anders. `paintRound(ico, size,
+host)` doet ze nu alle drie, met `size` op `"teken"`, `"chip"` of `"kaart"`.
+`ROUND_HOW` staat alleen in de `"kaart"`-tak, en dus één keer per ronde.
+
+`"chip"` zet het woord alleen als de host er een `<b>` voor heeft -- en de
+balk tijdens het spelen heeft er sindsdien geen meer. Hier stond dat die
+balk juist "teken plus woord" was, met als reden dat beeld én woord samen
+lezen zeker maakt wie wél leest. Dat argument stond niet ter discussie, maar
+de afweging wel: tijdens het spelen is de kaart het enige waar de speler
+iets mee moet, en het pictogram houdt de drie rondes al uit elkaar op vorm
+(drie stippen, één dikke stip, een doorgestreepte ballon) -- geen tekst
+nodig om ze te onderscheiden. Het woord is daarom van de balk gehaald; wie
+leest krijgt de naam nog via de aria-label van de tegel, alleen niet meer
+zichtbaar. De compacte kaart op de overdracht hield haar `<b>` wel -- dat
+scherm is juist naslag, en daar mag een bijschrift blijven staan.
+
+Dat trok twee dingen recht die alleen bestonden om die balk-tekst netjes te
+houden: het kritieke cijfer kromp op smalle telefoons van 34 naar 26 px om
+niet over het woord heen te vallen, en het woord zelf kromp op zijn beurt
+naar 10 px om nog te passen -- op 320 px zelfs dan nog krap. Zonder woord is
+de ronde-tegel een vast vlak van 48 px zonder tekst, met een marge tot het
+cijfervak die niet meer van lettertype tot lettertype kan verschuiven. Het
+cijfer staat weer op zijn volle maat.
 
 Alle tekst staat op papier, nooit rechtstreeks op de ploegkleur: `--ink-2`
 haalt op ploegblauw maar 1,5:1 en op ploegrood 2,0:1, en de uitleg bij de
