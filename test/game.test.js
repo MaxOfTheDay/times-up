@@ -250,6 +250,36 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   await page.waitForTimeout(300);
   await page.click('#btnPauze');
   await page.waitForTimeout(250);
+
+  // --- de achtergrond mag dicht terwijl het paneel openstaat ---
+  // Eerst het toestel zelf: inert maakt de speelknop niet meer focusbaar,
+  // dus een toetsenbord kan er niet meer tot doordringen.
+  await page.evaluate(() => document.querySelector('#btnGoed').focus());
+  ok(await page.evaluate(() => document.activeElement.id !== 'btnGoed'),
+     'de geraden-knop is nog focusbaar terwijl het pauzepaneel openstaat');
+
+  // En dan de app zelf: mócht een toestel zonder inert een klik toch laten
+  // doorkomen, dan moet acts() dat nog steeds weigeren. dispatchEvent
+  // roept de knop-listener rechtstreeks aan -- zonder de hit-test die
+  // inert al regelt -- en toetst dus precies deze tweede laag.
+  const gainedWhilePaused = await game(() => window.__tijd.G.gained);
+  await page.evaluate(() =>
+    document.querySelector('#btnGoed').dispatchEvent(new MouseEvent('click', { bubbles: true })));
+  await page.waitForTimeout(150);
+  ok(await game(() => window.__tijd.G.gained) === gainedWhilePaused,
+     'er kan nog gescoord worden terwijl het pauzepaneel openstaat');
+
+  // Dezelfde tweede laag voor de pauzeknop zelf: een herhaalde aanroep mag
+  // de bevroren tijd niet opnieuw bemonsteren, anders eet elke seconde die
+  // er zo bijkomt een seconde van de beurt (zie openPause()).
+  const dial = await page.textContent('#pauseSecs');
+  await page.waitForTimeout(1200);
+  await page.evaluate(() =>
+    document.querySelector('#btnPauze').dispatchEvent(new MouseEvent('click', { bubbles: true })));
+  await page.waitForTimeout(150);
+  ok(await page.textContent('#pauseSecs') === dial,
+     'een herhaalde pauze-tik eet tijd van de beurt');
+
   await hold(page, '#btnStop', 1400);
   await page.waitForTimeout(250);
   ok(await screen() === 'title', 'stoppen komt niet op de titel uit');
