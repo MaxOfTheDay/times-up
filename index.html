@@ -15,10 +15,25 @@
 <meta name="apple-mobile-web-app-title" content="Tijd is Om">
 <!-- Hetzelfde zeefdruk-hoofdmerk (inkt + goud, zie .wordmark) als
      app-pictogram: op het beginscherm, het tabblad en het startscherm van
-     het toestel staat overal dezelfde plaat. Los gegenereerd (Pillow) en
-     hier als vaste PNG's ingebakken -- geen build, geen los bestand. -->
-<link rel="icon" type="image/png" sizes="192x192" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAEGUlEQVR42u3bsU1rQRSE4d3bgIVEAUQkpNB/AZCSEFGAJcsNGBKQQAKBxTXes/P9BfD07PnPzAbu7QxcXmxeGvCB7W7fz/HvdoFHshRd6JEsQxd8JIvQBR/JInTBR7IEXfiRLMIi/KjOX7LYBR/JbbAIP5LboFcJ//PTvW+3EFfXdyWaYKkQfuBUTbAIP5IlWHxMSGZx/ZHcAovwI1mCRfiRLIE3ALwBXH+ktoAGgAZw/ZHaAhoAGsD1R2oLaABoACBaAPMHqTNIA0ADAAQAAunV9r+fRo7NuX8KOX0DVPuAhV8DDN0Eh4eb7A18+xh9mLwB4BGcXLdrXUDXnwAkAAHg+hNACwg/AXKDAQKUbAGS533m0zSAKST8JpAphGQBTCHXP74BTCGYQHD9kwXQAsIf3wAkgAlk+rj+yQIkt4DwE8AUAgFMH9c/XoCkFtBUBBAw158AkXVu+hDAFAIBAqeQ60+A2C9Y+AlgCoEAppjrT4CgFhB+AphCIIDp4/oTQAuAABkSuP4EMH2EnwCmEAgw8ZV2/QlQsgWEnwCmkClEAFPocai/4/oToFxQNAkBTCHXnwAmlPATQAuAABkSuP4EMH2EnwCmEAgQJIHrTwDTR/gJYAqBAEHX3vUnQFQLgACm0NvVd/0JYAoJPwFMIRCABGQkAISfAAIIApCAfAQACKAFXH8CkED4CQAQILQFXH8CkAsEEFQQIEgCUhEAIABAgAI8P90P/fdAgDLhBwFALAIIKQkI4EKDAEQDAaJDSQICAARIniRagADxe5wEBAAIkHx9tQABhA4EqMjh4YaQBMi8/u/hJwEBTB8QIHn6aAECxE0f7wECmD4gQPL00QIEiJ8+JCCA6QMCJE8fLUCA+OmjxQhg+gwkDgFw9hCbQgQwfUCA5L2sBQgQN31IQADTBwSAFiCA608CAgg/CAAtQADXf7z/PwGEv2QLaACYQsEtECuAhy9iBZgp/FqAAKYQCQhg+oAAwRdOCxCgXNhIQADTBwQwfbQAAUwfh4MApg9RCeCCmUIEcFFBANNHCxDAF0YCApg+IIDpowUIYPqQgACmDwhg+mgBAoAE8QK4/ogVQPi1gAmE8geIAK5/yRbQAMJvChVuARMI0fTLi82L3Yk1uLq+q9cA292+Cz8Sv5vtbt97a61VaAHB1wanEMAbANEQAAQAogWo9hAG1tj/GgAawEeA1Ov/SQAzCBoASBZACyBp/mgAaICfDAFmvf7fNgAJkBB+Ewgm0LHGALNc/x8bgASYOfwmEKLD/ysBtABmDf+vG4AEmDH8rbV2VLAr/oAewr/aG0ATYKbwH90A2gAzhf/oBtAGmCn8f2oATYDKwV9NACKgavhXFYAIqBT8kwlABIwe+n8RgAwYOfj/KgAhMELYv+IVdR94irmOppwAAAAASUVORK5CYII=">
-<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAEM0lEQVR42u2dO04kQRBEmdT6CIkDYOHgLvc/ALjrYHEStO5K7Ej0TE9XfF7YICDzZURNdVdxeny4v0PofxpKgIADAQcCDgQcCDgQcCDgQMCB0vVryU/9/Hij9Jv09PyKcyBiBQEHAg4EHAg4EAIOBBwIOBBwIOBAwIGAAwEHAg4EHAg4EDqj0/KzslvfCvt6f3EdxN9/Nn39kre/tJxjawm2ltiUDGKlqNC3nplYOBQKQaDkLEiNzMPX51TguGBWUsNFx0eHohAoabFiYR7u3qYFR/zK1OvPH/cCyU5nwJIoYfs8Y2Uq6JpDmViHmjmHdbjEfMbOeSrr2xJZpxxKRqDkO4eCeYRt2krDEb+nLu6OQ/mwjYpY8WqSPvdDEVmHejuH+LZH6ssDsW+fKzfMZSFlA4fuTlFioPg5h2C4ZL/qHH6oSa15Xtu+ZnBovUWXfkIi/zikTgvtnhb5wSGypx68DvV2jvWHSAuO3N31nLJf207X1w9Mm70wXBoCxd451vx/mo5A6YqVVa21flnaG46DS19lGwnOofzA1v2MReOdYJfx0bMOjYLjgDa0BUqUc6iFS8aJ8N6rJn/OR2GgpMFxo5Z0Bkq7c9yo8UlXjETBsfueerNtBDrH2sENu5mIu8/P2kPtOjQZjl2aVB4oyc5x/LZH5j2ZzMd3PgiUcDgubhiBUuEcx4RL8N2pxAq20QrHrcc6+8plnAMyiuEov08dOBbw0cAcsQIZ9XAQLsBxBB89nBErCDh2GvqqeKpzjmu627ZwIVYQcFxtAIWfd3AOBBwIOH6iz4+3w74LOPLJwDkQYBXDcX13q/jAORBw7Df0PeYxkAEfOAcCjqMGvcE8BjIQsQJ2wHFs/7L5GMj4V1/vLzgisXKWjK18BJtHLBxH9iyVj4GM74FCuBArey41Is0jEI5d+nQBLnl8DGSc44BwaY+VfQkIM48oOHbvTbl5VDvHT3rfvO2RA8fWrtzOFWL4mE4yCBdiZbd+d4ZLAhw6gRLGx7SRQbgQKxI9djcPbzgOrn6beUwVGdd3t2plWhQrq+belw9XOBZWvCdcpoSMfTtaEi4VsaIw6458+MEhUuWGcJl4Mm7XxfhwCY8Vtfn24sMJDsHKZodLsnNods7IPGzg0Hz0mm0eE0mGuEW5mEdmrOhPswUfBnDIBkp8uAwTRri0xIrXBIvzMdSOcPGDo+ReHuUByIkVETKSjucP80S4OMFReNGb5jAkxIogGRnmMcyQCB+Cf/i4k5H06VGNj6maTn49VzgiL+SzDpfpqTvh4gqHxaPXNoiHWcE8omLFbhZNzWPspsS00I4r09Pjwz3+Kaun51diBSlqjXNgGBYWgnMg4EDAgYADAQcCDgQcCDgQcCDgQMCBEHAg4EDAgYADAQcCDmSixe+QIpwDAQcCDgQcCDgQAg4EHGg3/QUB4LJ5xL331gAAAABJRU5ErkJggg==">
+     het toestel staat overal dezelfde plaat. Als vaste PNG's ingebakken --
+     geen build, geen los bestand.
+
+     Getekend uit de páden van #i-glass en niet uit overgetypte
+     coördinaten. Dat laatste stond hier eerst, en het pictogram was er
+     ongemerkt van afgedreven: de balken misten hun ronde uiteinden en de
+     strik haar ronde hoeken, dus stond op het beginscherm van het toestel
+     een nét andere zandloper dan op het beginscherm van de app. Wijzigt
+     #i-glass, draai dan het generatiescript opnieuw (zie CLAUDE.md).
+
+     Twee maten die vastliggen. Het teken staat op 80% van de tegel -- 10%
+     marge boven en onder, zoals elk ander pictogram op dat scherm; het
+     stond op 90% en drukte daarmee tegen zijn eigen randen. En de plaat
+     loopt tot in de hoeken door: de ronding is van het toestel en niet van
+     ons. Er zat er een van 15,5% in gebakken, de enige niet-ronde ronding
+     in de hele app (elders is elke border-radius 50%, een echte cirkel), en
+     elk platform rondde daar nog eens overheen. -->
+<link rel="icon" type="image/png" sizes="192x192" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADAAgMAAAAvsoSUAAAACVBMVEUUEQ/ytwX069qQNO0kAAAB+klEQVR42u2ZS26DQAxALRZZcIQegfu0ix6BU+QI2WTPopVgTllRPhkInvFDspRI4237BH7Bg21ESpQo8SZRBSWuChDUgBfQLlHrQHcINDrQwxSUJApgAfDvgAH8aOCHT7+nXqugmtxQ4qauepGOf/7chF5v54Ax7Xv8/1+plEXkI4TwGwPfIYSfBFAfAV3mZBpioE1Lmrzuc04BcgQkT8udppykE8BOU07Sk6acpBPATlNWkkgbZz3mPGSAZg/0GWCjKS9pAoY4587wYhyApK0mg6QTQKTJImlTpbn6fPJqsbrRZJIUV2kwAbIFDD3Nqskm6QSwarJJErksmmySIq9WYNVklDQB9ylnG9A8gN4EzJqsktYqbc1A9QBMkhZN5pxPAP+a7JLmKrXVZ+TVbnXWBCQ9ehQrIOkpQO+0ej+gznViR1UaQrjR6cksadEkjkDDJM2aOk+ggpKmrMUTwLfkbwn/cO7PEn68cQHhEvU/NehBho9KfBjj4x6/UPAry/0til/suHXAzQluf3CDRVs43CTiNhQ3uv69Nx0H8MCBRxo8NOGxDA9+7rMoHo/xAI5HfLxEwGsKugjx383gdZH/Bosu1fDaDi8G8eoRLzfx+tR9o4uXzHSNTRflL/gdqHw4etMPR/jRuOjATWAS6dHHfIESJUq8XvwBjQPEimIQzGcAAAAASUVORK5CYII=">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0AgMAAABAo+6hAAAACVBMVEUUEQ/ytwX069qQNO0kAAABxElEQVR42u2YO3LCMBBAFRcUPkKOoFPkEknhI/gUOQIN1C6cGcMpMwIbyY4++zDbZLQlPGbQs1f7MaZGjRo743CNxzFK2wQ9xeDmmorv3XSbpIfdtE3SI6Kn3fQ7+ieaTjSfJXur4Btr3qLwRyof3JefYbgPktljI/T0Ito9oFMAfyUejVf+E9BdSvYTtJNyCeg+p8SYfn1M9+MMbf/QU4ZeS8krofRaSkHJRkpBCaVXUgpK7tfEKTjkmKXbDT1k6VBKUcmNvgSHzNNmQxdKVSClqITSXkpZSSilrITSXopASZBshTTbSBEo8VIkSjzdiehFikjJQ4pICaVnKSIlS7KV0yyUIhO4SBEqmZOtF9LmQYv6wpsUoRJKOylnoRJf748iusk1GvFyL1VCaZtpYlL92KBCN0TJfEyjQ1ug5J5so5hugRJKs3/CTqnomz15zXeQZYNiXrIbgt0+7GbTvGPRbc8qCatSrAKy6soqt2IPwboZ1imxLox1eKx7RJ2pZo/MunXNuQFNMGw6YpMXm+rYxMimUcW5mE3o6+m/e+mugG0t2EYEbVs09z5sA6W5C0NbObTxq/vvuv/+1/vvGjVqyOMX5LMGaFjPFdAAAAAASUVORK5CYII=">
 
 <!-- Installeerbaar als app (logo, volledig scherm, geen browserbalk) zonder
      een los manifest-bestand: het manifest wordt hieronder in het geheugen
@@ -29,7 +44,23 @@
 <script>
 (function () {
   var dir = location.href.replace(/[^\/]*$/, "");
+  /* Het pictogram van 192 staat hierboven al in de <link rel="icon">. Eén
+     keer inbakken en hier uitlezen in plaats van dezelfde base64 een tweede
+     keer neerzetten: zo kunnen het tabblad en het manifest niet uit elkaar
+     groeien, en scheelt het de kilobyte die er anders dubbel in stond. */
+  var klein = document.querySelector('link[rel="icon"]').href;
   var manifest = {
+    /* De identiteit van de geïnstalleerde app. Zonder dit veld leidt de
+       browser haar af uit start_url, en dan is élke wijziging daarvan -- er
+       "index.html" achter zetten, een parameter toevoegen -- een andere
+       app: de geïnstalleerde versie blijft dan naast de nieuwe op het
+       beginscherm staan. Met de map als id mag start_url voortaan bewegen.
+
+       Dit is precies de waarde die de browser nu al zelf afleidt, dus wie
+       de app vandaag geïnstalleerd heeft merkt er niets van. Zet hier dus
+       ook nooit een verzonnen naam neer: dat maakt van elke bestaande
+       installatie in één keer een vreemde. */
+    id: dir,
     name: "Tijd is Om",
     short_name: "Tijd is Om",
     description: "Time's Up voor kinderen die nog niet kunnen lezen.",
@@ -42,9 +73,18 @@
     background_color: "#F4EBDA",
     theme_color: "#F4EBDA",
     icons: [
-      { src: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAEGUlEQVR42u3bsU1rQRSE4d3bgIVEAUQkpNB/AZCSEFGAJcsNGBKQQAKBxTXes/P9BfD07PnPzAbu7QxcXmxeGvCB7W7fz/HvdoFHshRd6JEsQxd8JIvQBR/JInTBR7IEXfiRLMIi/KjOX7LYBR/JbbAIP5LboFcJ//PTvW+3EFfXdyWaYKkQfuBUTbAIP5IlWHxMSGZx/ZHcAovwI1mCRfiRLIE3ALwBXH+ktoAGgAZw/ZHaAhoAGsD1R2oLaABoACBaAPMHqTNIA0ADAAQAAunV9r+fRo7NuX8KOX0DVPuAhV8DDN0Eh4eb7A18+xh9mLwB4BGcXLdrXUDXnwAkAAHg+hNACwg/AXKDAQKUbAGS533m0zSAKST8JpAphGQBTCHXP74BTCGYQHD9kwXQAsIf3wAkgAlk+rj+yQIkt4DwE8AUAgFMH9c/XoCkFtBUBBAw158AkXVu+hDAFAIBAqeQ60+A2C9Y+AlgCoEAppjrT4CgFhB+AphCIIDp4/oTQAuAABkSuP4EMH2EnwCmEAgw8ZV2/QlQsgWEnwCmkClEAFPocai/4/oToFxQNAkBTCHXnwAmlPATQAuAABkSuP4EMH2EnwCmEAgQJIHrTwDTR/gJYAqBAEHX3vUnQFQLgACm0NvVd/0JYAoJPwFMIRCABGQkAISfAAIIApCAfAQACKAFXH8CkED4CQAQILQFXH8CkAsEEFQQIEgCUhEAIABAgAI8P90P/fdAgDLhBwFALAIIKQkI4EKDAEQDAaJDSQICAARIniRagADxe5wEBAAIkHx9tQABhA4EqMjh4YaQBMi8/u/hJwEBTB8QIHn6aAECxE0f7wECmD4gQPL00QIEiJ8+JCCA6QMCJE8fLUCA+OmjxQhg+gwkDgFw9hCbQgQwfUCA5L2sBQgQN31IQADTBwSAFiCA608CAgg/CAAtQADXf7z/PwGEv2QLaACYQsEtECuAhy9iBZgp/FqAAKYQCQhg+oAAwRdOCxCgXNhIQADTBwQwfbQAAUwfh4MApg9RCeCCmUIEcFFBANNHCxDAF0YCApg+IIDpowUIYPqQgACmDwhg+mgBAoAE8QK4/ogVQPi1gAmE8geIAK5/yRbQAMJvChVuARMI0fTLi82L3Yk1uLq+q9cA292+Cz8Sv5vtbt97a61VaAHB1wanEMAbANEQAAQAogWo9hAG1tj/GgAawEeA1Ov/SQAzCBoASBZACyBp/mgAaICfDAFmvf7fNgAJkBB+Ewgm0LHGALNc/x8bgASYOfwmEKLD/ysBtABmDf+vG4AEmDH8rbV2VLAr/oAewr/aG0ATYKbwH90A2gAzhf/oBtAGmCn8f2oATYDKwV9NACKgavhXFYAIqBT8kwlABIwe+n8RgAwYOfj/KgAhMELYv+IVdR94irmOppwAAAAASUVORK5CYII=", sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: "data:image/png;base64,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", sizes: "512x512", type: "image/png", purpose: "any" },
-      { src: "data:image/png;base64,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", sizes: "512x512", type: "image/png", purpose: "maskable" }
+      { src: klein, sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "data:image/png;base64,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", sizes: "512x512", type: "image/png", purpose: "any" },
+      /* Het toestel legt hier zijn eigen masker overheen -- rond, squircle,
+         wat de fabrikant ook kiest -- en dus moet alles binnen een cirkel
+         van 80% blijven. Met een zandloper van 66 bij 90 eenheden is 64%
+         van de tegel de bovengrens: de halve diagonaal komt dan op 39,7%
+         en de limiet is 40. Dit teken staat daarom kleiner dan de twee
+         hierboven, en dat is geen slordigheid maar meetkunde -- kleiner
+         hoeft niet, groter kan niet. Controleer een wijziging door het
+         pictogram onder een ronde uitsnede te leggen en de pixels te
+         tellen die erbuiten vallen, niet door ernaar te kijken. */
+      { src: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIAAgMAAACJFjxpAAAACVBMVEUUEQ/ytwX069qQNO0kAAAFFUlEQVR42u2dMW7jMBBFGRUp1KfZI+gUPkTWhY/gU/gIbtKriAFFp1xgsUhkS6QogjMvWf1fL1YPsZ45ksmZEBRFURRFURRFURRFURRFURRFURRFURRFURRFURRFURRFURQlJ89jQa71rt+MRblUA+jKAIZqAGNhal2/LQXo2U+g3mcwjuxn8FQOcCAlrCdiWw7Q/x8AXTnAIAD4a6DSF4EABCAAAeirGAf4yQVJnaczvCbEy3L+weRXKcA7+3Re8fmcfjou/QzeqwEE+A8QQng5bb367bXua6oGuwFLn9EPlQECeQPcfx3+Tqb+G7JvA/C5KL+lrn+s/YJsQYM8gIsdwC0FcLIDCNsADN6Yn//91x8pgM9/ZACQpYGdBBMNcgB6S4A3xMI8DSwlyNLAUoIvgI91CWwAunyAwQQgQwPLezBHg6MtQJMPYCLBV1V2W5XgEBgNbCXI0MBWgozlaDQGWNPAWIJ1DYwlWF+OTtYAIRfA6vprVZllPZalgbUEq8uRtQRrHh7tAdIa2EuwooG9BCvL0dkBoMsBGAwBkhrY34NpDY4eAE0OgKEEyarMuh5b1cBDgqQGHhIkl6PRBSCugYsEKQ1cJEgtRycfgLAOYHv9eFXmI0FCg9EJoF0D6L0A3iISXI0BYhp4SRDVwEuC6HJ0dgPo0gCDOUBEAy8JYhoc/QCaNIC5BJGqzKceS2jgJ0FEAz8JIsvR6Aiw5KGjBMsaOEqwvBydPAFCCsDj+ksaeEqwqMHoCtDGAXoXgOeZBm71WEwDXwkWNPCVYGE5OjsDdDGAwQlgpoGvBPOq7OgN0MQAnCSYVWWe9diiBt4SzDTwlmC2HI3uAO0yQO8GcK+BuwSPy9HJHyAsA/hd/14DfwkeNBgBgHYJoHcEmFZlzvXYXANCgjsNCAnulqMzAtDNAQZXgIkGhATTquzIADRzAFcJJlWZfz32oAEjwUQDRoKF01feAK1Vw4vNGjASfAOAYH6oZeNdOOwPoGUlmLUouroDNLAEjxqEHQJ0rAQPGvR7BGhgCe7PYB4CrAFx/akGwz4BWlaCOw0u+wQIsASTu3DYK0DLSjCpyq57BcA/AllAfxFpLcCXY1VEdFGKl+X4g4meDfHH892/IcFfUuGv6fAXlXpXTL+u1y8m+I9W+M92+A+X9E+3+I/X+M/3+AYGfAsHvokF38ZDb2TCt3Lhm9nw7Xz4hkZ8Sye9qRXf1otvbMa3duOb2/Ht/fQBB/yIB37IBT/mgx90wo964Yfd6ON++IFH/MgnfugVP/aLH3ymj37jh9/x4/9tCqBnJPDVAG+CQbcBwRuh4K1g8GY4eDsgvCES3hKKboqFtwXDG6PhreHw5nh4e0C6QSLeIhJvkom3CcUbpeKtYulmuXi7YLxhMt4yGm+ajbcNxxun063j8eb5+PgAfIACPkICH6JBjxHBB6ngo2TwYTr4OCF8oBI9UgofqoWPFcMHq+Gj5fDhevh4QXrAIj5iEh+yiY8ZxQet4qNm6WG7+LhhfOAyPnJaU7/pwev46PlmK0BlDV5OWwFur+QNUPs2aMsAevgPUO9P0JQC1LoRf5UCvNf+EtyaAb4Fat0ETTnAhZSwnog4QFcOMAgAtrCShwIQgAAEoK9iHEAFCV4TPpUDVHpGp8ty/sGkZe/Bb/B0XPoZ1HtT1pAS/s1zyfWpxpGKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoiiKoijKT8sfoAMum+YSUFUAAAAASUVORK5CYII=", sizes: "512x512", type: "image/png", purpose: "maskable" }
     ]
   };
   var blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
@@ -1020,6 +1060,7 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   .setup-scroll legend,
   .setup-scroll .legend-label,
   .setup-scroll .hint,
+  .setup-scroll .handmatig,
   .setup-scroll summary,
   .rules p, .rules li {
     /* 64 px is precies wat er nodig is, en dat is geen schatting: de knop
@@ -1122,6 +1163,7 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   .setup-scroll legend,
   .setup-scroll .legend-label,
   .setup-scroll .hint,
+  .setup-scroll .handmatig,
   .setup-scroll summary,
   .rules p, .rules li { padding-right: 0; }
   .cb-index { margin-right: 0; }
@@ -1478,6 +1520,50 @@ input[type=range]::-moz-range-thumb {
   color: var(--ink);
 }
 .hint { font-size: 12px; color: var(--ink-2); margin: var(--s-2) 0 0; line-height: 1.45; }
+
+/* ---- Installeren ------------------------------------------------------
+   De plaat op de knop is geen versiering maar de belofte zelf: dít vlak
+   komt na een tik op het beginscherm te staan. Dezelfde plaat als op de
+   titel (.wordmark) en als het app-pictogram in de <head> -- inkt, gouden
+   zandloper, crème contour.
+
+   Dit was de enige knop in het hele bestand met alleen tekst erop, op een
+   scherm waar elk ander vlak een tekening draagt. De harde eis staat tekst
+   hier toe, maar wel náást een beeld dat hetzelfde vertelt, en het beeld
+   dat hier hetzelfde vertelt bestond al.
+
+   De plaat krijgt géén eigen schaduw en géén contour. Ze ligt ín een knop
+   die haar lift al draagt, en reliëf op reliëf leest als een knop op een
+   knop; een inkt-vlak op papier heeft zijn rand al. Eén rechthoek dus, niet
+   drie. De 2px binnenmarge zet de zandloper op ~79% van de plaat, dezelfde
+   verhouding als op het app-pictogram (80%) -- het symbool zelf vult zijn
+   eigen vak voor 90%. */
+.plaat { flex: 0 0 auto; display: block; background: var(--ink); padding: 2px; }
+.plaat svg { display: block; width: 100%; height: 100%; }
+.btn-plain { display: inline-flex; align-items: center; gap: var(--s-3); }
+#btnInstall .plaat { width: 32px; height: 32px; }
+
+/* Dezelfde plaat, dezelfde belofte, zonder knop: op iOS valt er niets aan
+   te tikken en na een weggetikte dialoog is de knop opgebruikt. Beeld met
+   bijschrift, zoals de kaartjes in de bak -- dus dezelfde inkt als een
+   .hint, want de plaat is de mededeling en de zin het bijschrift. */
+.handmatig {
+  display: flex; align-items: center; gap: var(--s-3);
+  margin: 0; font-size: 13px; line-height: 1.45; color: var(--ink-2);
+}
+.handmatig .plaat { width: 40px; height: 40px; padding: 3px; }
+.handmatig b { color: var(--ink); font-weight: 900; }
+/* Het deel-teken staat middenin een zin, dus loopt het met de regel mee in
+   plaats van op een vaste pixelmaat te staan: wie hier inzoomt, zoomt het
+   teken mee in. */
+.handmatig .teken { width: 1.3em; height: 1.3em; vertical-align: -.3em; }
+
+/* Een eenmalige handeling is geen instelling, en krijgt dus de afstand van
+   een groepsgrens (48) en niet die van een veld binnen een groep (24).
+   .setup-scroll geeft al 24 via gap; dit legt de tweede helft erbij, net
+   zoals .field-group + .field-group dat doet. Zonder dit las het veld als
+   de eerste regel van de regeluitleg eronder. */
+#installField { margin-bottom: var(--s-5); }
 
 /* ============================================================
    6. RONDE-REGEL — geen eigen scherm en geen eigen blok meer: de tekening
@@ -2968,6 +3054,20 @@ input[type=range]::-moz-range-thumb {
           stroke-linecap="round" stroke-linejoin="round"/>
   </symbol>
 
+  <!-- Het deel-teken van iOS: een bakje met een pijl die er bovenuit komt.
+       Staat alleen naast de zin die uitlegt hoe je daar op een iPhone of
+       iPad de app op het beginscherm zet. Nagetekend en niet nagemaakt: de
+       speler moet het terugvinden in de balk van Safari, dus het moet
+       lijken op wat daar staat -- alleen in deze streekdikte. -->
+  <symbol id="i-deel" viewBox="0 0 100 100">
+    <g fill="none" stroke="#14110F" stroke-width="10"
+       stroke-linecap="round" stroke-linejoin="round">
+      <path d="M34 42 H18 V88 H82 V42 H66"/>
+      <path d="M50 60 V14"/>
+      <path d="M31 33 L50 14 L69 33"/>
+    </g>
+  </symbol>
+
   <!-- schuifregelaars i.p.v. een tandwiel: dat las als een zonnetje -->
   <symbol id="i-gear" viewBox="0 0 100 100">
     <g stroke="#14110F" stroke-width="10" stroke-linecap="round">
@@ -3043,22 +3143,47 @@ input[type=range]::-moz-range-thumb {
          hetzelfde als de aria-label van het tandwiel. -->
     <h1>Instellingen</h1>
 
-    <!-- Verschijnt alleen als het toestel zelf zegt dat installeren kan
-         (het beforeinstallprompt-event), en verdwijnt weer zodra dat gebeurd
-         is. Op iOS bestaat dat event niet -- daar blijft dit veld dus dicht,
-         en doet de apple-touch-icon/meta-tags hierboven in de <head> hun
-         werk via "Zet op beginscherm" in Safari zelf. Geen lange druk:
-         installeren is niets onomkeerbaars, net als het tandwiel.
+    <!-- Geen lange druk: installeren is niets onomkeerbaars, net als het
+         tandwiel.
 
          Staat los van de twee groepen eronder, vooraan in plaats van onder
          Geluid/Trilling: het hoort bij geen van beide (geen instelling die
          blijft staan, maar een eenmalige actie) en de plek onderaan werd
          nooit gezien door wie niet tot daar scrolt. Vooraan is ook het
          moment dat het er het meest toe doet -- de eerste keer dat dit
-         scherm open gaat, vóór er ooit geïnstalleerd is. -->
+         scherm open gaat, vóór er ooit geïnstalleerd is. Het krijgt de
+         afstand van een groepsgrens mee (zie #installField in de stijlen),
+         want een eenmalige handeling is geen instelling.
+
+         Hier stond dat dit veld op iOS "dus dicht blijft" en dat de
+         meta-tags in de <head> daar hun werk doen via "Zet op beginscherm"
+         in Safari. Het eerste klopte, het tweede is een aanname: die tags
+         wérken, maar niets in de app wees de ouder ooit de weg erheen, en
+         op een tablet in huis is dat de helft van de toestellen. Er staat
+         nu een tweede stand met het deelmenu erin -- zie #installHand en
+         de afhandelaar onderaan. -->
     <div class="field" id="installField" hidden>
-      <button class="btn-plain" id="btnInstall">App installeren</button>
-      <p class="hint">Zet de app op je beginscherm, met een eigen icoon.</p>
+      <!-- De knop. Verschijnt op het signaal van het toestel zelf en
+           verdwijnt pas als er echt geïnstalleerd is -- niet al bij de tik,
+           zie de afhandelaar. -->
+      <button class="btn-plain" id="btnInstall" hidden>
+        <span class="plaat" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
+        App installeren
+      </button>
+
+      <!-- De weg met de hand. Dezelfde plaat, dezelfde belofte, alleen
+           zonder knop: op iOS bestaat er niets om aan te tikken, en na een
+           weggetikte dialoog is de knop hierboven opgebruikt. Twee zinnen,
+           altijd hoogstens één zichtbaar. -->
+      <p class="handmatig" id="installHand" hidden>
+        <span class="plaat" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
+        <span class="zin" id="handDeel" hidden>Tik op <svg class="teken" viewBox="0 0 100 100"
+          role="img" aria-label="delen"><use href="#i-deel"/></svg> en kies <b>Zet op beginscherm</b>.</span>
+        <span class="zin" id="handMenu" hidden>Het kan ook via het menu van de browser:
+          kies daar <b>App installeren</b>.</span>
+      </p>
+
+      <p class="hint" id="installHint"></p>
     </div>
 
     <!-- De regels staan open tot je één keer een spel gestart hebt, en
@@ -5991,30 +6116,113 @@ if ("serviceWorker" in navigator && location.protocol !== "file:") {
   });
 }
 
-/* beforeinstallprompt vuurt alleen als het toestel zelf installeerbaar
-   vindt (geldig manifest, https, genoeg betrokkenheid) -- precies het
-   signaal waarop de knop op de instellingen verschijnt. Chrome/Android
-   heeft dit; Safari/iOS niet, en daar blijft het veld dus dicht. */
+/* Installeren. Er zijn twee wegen naar het beginscherm en er staat er
+   altijd hoogstens één in beeld.
+
+   De knop hangt aan beforeinstallprompt: dat vuurt alleen als het toestel
+   de app zelf installeerbaar vindt (geldig manifest, https) -- precies het
+   signaal waarop de knop mag verschijnen. Chrome en Android hebben het,
+   Safari niet.
+
+   Op iOS staat daarom de weg met de hand. Dat is daar geen tweede keus
+   maar de enige: "Zet op beginscherm" in het deelmenu werkt er prima, en
+   het apple-touch-icon en de meta-tags in de <head> zorgen dat het er goed
+   uitziet -- alleen wees niets in de app de ouder de weg erheen. Nagemeten
+   is die weg niet moeilijker dan de knop, hij was alleen onvindbaar.
+
+   Draait de app al ín app-modus, dan valt er niets te installeren en blijft
+   het veld dicht. display-mode dekt Android en desktop; navigator.standalone
+   is de iOS-variant, die geen display-mode kent.
+
+   Eén ding dat iOS níet vertelt: of de app al op het beginscherm staat
+   terwijl je in Safari kijkt. navigator.standalone is daar alleen waar
+   binnen de geïnstalleerde app zelf, en er is geen tweede signaal. Wie hem
+   op iOS al geïnstalleerd heeft en daarna in Safari de instellingen opent,
+   ziet de aanwijzing dus nog staan. Dat is te verkiezen boven de andere
+   kant op raden: een aanwijzing te veel kost één regel op het scherm van de
+   volwassene, een aanwijzing te weinig kost de installatie. Verzin er dus
+   geen vlag in localStorage voor -- die weet niet of de app er nog staat,
+   en dan verdwijnt de weg voorgoed voor wie hem van zijn beginscherm
+   veegt. */
+const inAppModus = () =>
+  matchMedia("(display-mode: standalone)").matches ||
+  matchMedia("(display-mode: fullscreen)").matches ||
+  navigator.standalone === true;
+
+/* iPadOS meldt zich sinds 13 als "Macintosh", dus het toestel is alleen aan
+   de aanraakpunten te herkennen. navigator.platform zou hier ook werken maar
+   is afgeschaft; de user-agent blijft. */
+const isIOS = () =>
+  /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+
+/* Vier standen. "weg" is het veld dicht; de andere drie zetten precies één
+   van de twee wegen neer.
+     knop  -- het toestel biedt een installatie aan
+     deel  -- iOS: het deelmenu van de browser
+     menu  -- de dialoog is weggetikt en de knop is op (zie hieronder) */
+const INSTALL_HINT = {
+  knop: "Zet de app op je beginscherm, met een eigen icoon.",
+  deel: "Dan staat ze met een eigen icoon tussen je andere apps.",
+  menu: ""
+};
+function toonInstall(stand) {
+  $("#btnInstall").hidden = stand !== "knop";
+  $("#installHand").hidden = stand !== "deel" && stand !== "menu";
+  $("#handDeel").hidden = stand !== "deel";
+  $("#handMenu").hidden = stand !== "menu";
+  const hint = INSTALL_HINT[stand] || "";
+  $("#installHint").textContent = hint;
+  $("#installHint").hidden = !hint;
+  $("#installField").hidden = stand === "weg";
+}
+
 let deferredInstall = null;
 window.addEventListener("beforeinstallprompt", e => {
   e.preventDefault();
   deferredInstall = e;
-  $("#installField").hidden = false;
+  toonInstall("knop");
 });
+
+/* De knop verdwijnt pas als er écht geïnstalleerd is, en niet al bij de tik.
+
+   Zo stond het hier wel: het veld ging dicht vóór prompt(), "want een prompt
+   is maar één keer te gebruiken". Dat laatste klopt, maar het gevolg was
+   tweeledig en allebei nagemeten. De pagina sprong 97 px omhoog op het
+   moment van de tik, dus nog voordat de dialoog van de browser er stond.
+   En wie die dialoog wegtikte, was de knop kwijt voor de rest van het
+   bezoek: beforeinstallprompt vuurt na een afwijzing niet opnieuw, en deze
+   app navigeert nooit. Er bleef dan niets achter dat vertelde waar de knop
+   gebleven was.
+
+   Nu gebeurt er bij de tik niets aan de opmaak, en beslist de uitkomst wat
+   er daarna staat. Afgewezen: dezelfde plaat met de weg via het menu van de
+   browser -- die weg wérkt namelijk nog, en is na een afwijzing de enige
+   die overblijft. */
 $("#btnInstall").addEventListener("click", async () => {
   if (!deferredInstall) return;
   const prompt = deferredInstall;
   deferredInstall = null;
-  $("#installField").hidden = true; // een prompt is maar één keer te gebruiken
-  prompt.prompt();
-  await prompt.userChoice;
+  /* prompt() geeft in nieuwe browsers een belofte terug en in oudere niets,
+     dus niet aan .then() hangen maar afwachten. Gaat de dialoog helemaal
+     niet open, dan valt hij door naar dezelfde stand als een afwijzing --
+     de weg via het menu werkt dan nog steeds. */
+  let keuze = null;
+  try {
+    await prompt.prompt();
+    keuze = await prompt.userChoice;
+  } catch (e) { /* dialoog ging niet open */ }
+  toonInstall(keuze && keuze.outcome === "accepted" ? "weg" : "menu");
 });
+
 // Ook als de installatie via de eigen UI van de browser liep in plaats van
-// deze knop (adresbalk-icoon e.d.), moet de knop hier alsnog verdwijnen.
+// deze knop (adresbalk-icoon e.d.), moet het veld hier alsnog dicht.
 window.addEventListener("appinstalled", () => {
-  $("#installField").hidden = true;
   deferredInstall = null;
+  toonInstall("weg");
 });
+
+if (!inAppModus() && isIOS()) toonInstall("deel");
 
 load();
 Snd.enabled = settings.sound !== false;
@@ -6039,6 +6247,11 @@ started = true;
 // ooit door een test gevonden -- ze komen allemaal uit kijken en meten, en
 // de standen die je moet zien (tien tellen, vijf tellen, bijna om) duren in
 // een echt potje precies één seconde.
+// toonInstall staat er om dezelfde reden bij: het installeerveld hangt aan
+// beforeinstallprompt, en dat vuurt alleen in een echte browser met een
+// echt profiel -- niet in een schone context, en niet op iOS. Zonder deze
+// ingang is de enige manier om die drie standen te fotograferen een
+// blijvend profiel plus een opstartvlag.
 if (location.search.indexOf("debug") !== -1) {
   window.__tijd = {
     get G() { return G; },
@@ -6046,7 +6259,7 @@ if (location.search.indexOf("debug") !== -1) {
     get settings() { return settings; },
     get screen() { return current; },
     DECKS, TIER_ORDER, poolFor, bakFor, canHide, MIN_BAK, shuffle, drawDeck, total,
-    stopClock, paintClock, sizeCard, Snd, Tril,
+    stopClock, paintClock, sizeCard, Snd, Tril, toonInstall,
     saveGame, loadGame, clearGame, KEY_GAME, GAME_MAX_AGE
   };
 }
