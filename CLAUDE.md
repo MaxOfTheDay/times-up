@@ -617,12 +617,132 @@ Een blob-URL heeft geen pad om relatief tegenaan te resolven, dus
 `start_url` en `scope` staan er expliciet in als de volledige map-URL
 (`location.href` met de bestandsnaam eraf), niet als `"."` of `"/"`.
 
-De pictogrammen (`favicon`, `apple-touch-icon`, en de drie manifest-iconen)
-zijn dezelfde zeefdruk-plaat als `.wordmark`: inkt-vlak, gouden zandloper,
-crème contour. Ze zijn met Pillow gegenereerd uit dezelfde coördinaten als
-het `#i-glass`-symbool en als vaste PNG's ingebakken -- geen build-stap,
-gewoon eenmalig gegenereerd. Wijzigt de zandloper in `#i-glass`, genereer
-de pictogrammen dan opnieuw met dezelfde vorm.
+Dat het werkt is gemeten en niet aangenomen: met een blijvend profiel
+(`launchPersistentContext`, want een schone context geeft altijd
+`in-incognito`) plus `--bypass-app-banner-engagement-checks` geeft
+`Page.getInstallabilityErrors` een lege lijst en vuurt
+`beforeinstallprompt` zo'n 80 ms na het laden -- ruim vóór de service
+worker, want een geldig manifest is tegenwoordig genoeg. Data-URI's als
+pictogram worden gewoon geslikt. Kopieer die opstelling als je hier ooit
+iets wijzigt; kop noch staart hiervan is in een gewone testbrowser te zien.
+
+`id` staat er expliciet in, op dezelfde map-URL die de browser er anders
+zelf van maakt. Zonder dat veld hangt de identiteit van de geïnstalleerde
+app aan `start_url`, en dan is elke wijziging daarvan een ándere app: de
+oude blijft naast de nieuwe op het beginscherm staan. Verzin er dus nooit
+een naam voor -- dat doet precies wat het moest voorkomen, in één keer voor
+iedereen die de app al heeft.
+
+### De platen
+
+De pictogrammen zijn dezelfde zeefdruk-plaat als `.wordmark`: inkt-vlak,
+gouden zandloper, crème contour. Vier stuks, als vaste PNG's ingebakken --
+geen build-stap. De 192 staat er één keer in: het manifest leest hem uit de
+`<link rel="icon">` in plaats van dezelfde base64 een tweede keer neer te
+zetten, zodat het tabblad en het beginscherm niet uit elkaar kunnen groeien.
+
+Hier stond dat ze "met Pillow gegenereerd zijn uit dezelfde coördinaten als
+`#i-glass`". Dat overtypen was precies de fout: de platen misten de ronde
+uiteinden van de balken en de ronde hoeken van de strik, dus stond op het
+beginscherm van het toestel een nét andere zandloper dan op het beginscherm
+van de app. Niemand die dat ziet zonder ze naast elkaar te leggen.
+
+Ze worden nu getekend uit de páden van `#i-glass` zelf: Chromium rendert het
+symbool op een inkt-plaat, Pillow brengt dat terug tot precies drie kleuren
+en schrijft een palet-PNG. Die tweede stap is geen afwerking maar de helft
+van de winst -- zachte randen kosten 31 kB base64 extra op een bestand van
+ruim 300, voor een overgang die op geen enkele weergavemaat te zien is (een
+pictogram wordt overal verkleind; alleen op iOS staat het 1:1, en daar is
+een trede een derde CSS-pixel). Een zeefdruk heeft trouwens ook geen
+kleurverloop aan de rand van een vlak. Met palet erbij is de hele set
+kleiner dan de oude vier.
+
+Wijzigt `#i-glass`, draai dan `npm run pictogrammen`. Dat script leest de
+paden uit `index.html`, tekent de vier platen en schrijft de base64 terug
+op hun plek -- er valt dus niets over te typen en niets te vergeten. Twee
+keer draaien geeft hetzelfde bestand.
+
+Drie maten die vastliggen:
+
+- **Volvlaks staat het teken op 80% van de tegel**, 10% marge boven en
+  onder. Het stond op 90% en drukte daarmee tegen zijn eigen randen, waar
+  elk pictogram ernaast op het beginscherm meer lucht houdt.
+- **Maskable staat op 64%, en dat is meetkunde en geen slordigheid.** Het
+  toestel legt daar zijn eigen masker overheen, dus alles moet binnen een
+  cirkel van 80% blijven; met een zandloper van 66 bij 90 eenheden komt de
+  halve diagonaal bij 64% op 39,7% en is de limiet 40. Kleiner hoeft niet,
+  groter kan niet. Het stond op 61,3% tegen 90% volvlaks -- een gezin met
+  een iPad en een Pixel keek naar twee verschillend zware versies van
+  hetzelfde merk. Nu is dat 64 tegen 80.
+- **Vierkante hoeken.** De ronding is van het toestel, niet van ons. Er zat
+  er een van 15,5% in de plaat gebakken, met doorzichtige hoeken eromheen:
+  de enige niet-ronde ronding in de hele app -- elke andere `border-radius`
+  in `index.html` is `50%`, een echte cirkel -- en elk platform rondde daar
+  vervolgens nog eens overheen.
+
+Controleer een wijziging door te tellen en niet door te kijken: leg het
+pictogram onder een ronde uitsnede en tel de tekenpixels die erbuiten
+vallen. Op het oog is dat niet te doen -- een uitvergrote weergave gaf hier
+de indruk dat de iOS-plaat werd afgesneden, en per pixel geteld was het
+nul van 8936.
+
+### Installeren, drie standen
+
+Het veld op de instellingen heeft drie standen en er staat er altijd
+hoogstens één:
+
+- **knop** -- het toestel biedt zelf een installatie aan
+  (`beforeinstallprompt`).
+- **deel** -- iOS: de weg via het deelmenu, met het deel-teken (`#i-deel`)
+  in de zin.
+- **menu** -- de dialoog is weggetikt en de knop is opgebruikt.
+
+**De knop verdwijnt pas als er écht geïnstalleerd is.** Zo stond het hier
+niet: het veld ging dicht vóór `prompt()`, "want een prompt is maar één
+keer te gebruiken". Dat laatste klopt, het gevolg deugde niet. De pagina
+sprong 97 px omhoog op het moment van de tik -- dus nog voordat de dialoog
+er stond -- en wie die dialoog wegtikte was de knop kwijt voor de rest van
+het bezoek, zonder dat er iets achterbleef dat vertelde waar hij heen was.
+`beforeinstallprompt` vuurt na een afwijzing namelijk niet opnieuw, en deze
+app navigeert nooit. Nu beslist de uitkomst wat er daarna staat, en een
+afwijzing levert de weg via het menu op -- die werkt namelijk nog.
+
+**iOS kreeg niets.** Het `apple-touch-icon` en de meta-tags stonden er en
+doen hun werk, maar niets in de app wees de ouder ooit de weg naar "Zet op
+beginscherm", en op een tablet in huis is dat de helft van de toestellen.
+Herkenning gaat op de user-agent plus `maxTouchPoints`: iPadOS meldt zich
+sinds 13 als "Macintosh", dus alleen aan de aanraakpunten te onderscheiden
+van een echte Mac. Draait de app al in app-modus, dan blijft alles dicht --
+`display-mode` dekt Android en desktop, `navigator.standalone` is de
+iOS-variant, en je hebt ze allebei nodig. Wat iOS níet vertelt, is of de app
+al op het beginscherm staat terwijl je in Safari kijkt -- `navigator.standalone`
+is daar alleen waar bínnen de geïnstalleerde app. Wie hem op iOS al heeft,
+ziet de aanwijzing dus staan. Dat is de goede kant om op te raden: een
+aanwijzing te veel kost één regel op het scherm van de volwassene, een
+aanwijzing te weinig kost de installatie. Zet er dus geen vlag in
+`localStorage` voor -- die weet niet of de app er nog staat, en dan
+verdwijnt de weg voorgoed voor wie hem van zijn beginscherm veegt.
+
+De knop draagt de plaat zelf, en dat is geen versiering: dít vlak komt na
+een tik op het beginscherm te staan. Het was de enige knop in het hele
+bestand met alleen tekst erop, op het scherm waar elk ander vlak een
+tekening draagt. De plaat krijgt géén eigen schaduw en géén contour -- ze
+ligt ín een knop die haar lift al draagt, en reliëf op reliëf leest als een
+knop op een knop.
+
+Het veld krijgt de afstand van een groepsgrens (48) en niet die van een veld
+binnen een groep (24): een eenmalige handeling is geen instelling, en met 24
+las het als de eerste regel van de regeluitleg eronder.
+
+En: `.handmatig` staat in dezelfde twee lijsten als `.hint` -- de regel die
+tekst uit de kolom van het zwevende huisje houdt, en de plakkende band die
+hem weer opheft. Op het moment van schrijven paste die zin er toevallig
+sowieso naast; dat is geen reden om hem eruit te laten.
+
+De drie standen zijn niet af te dwingen in een test -- `beforeinstallprompt`
+vuurt alleen in een echte browser met een echt profiel, en iOS al helemaal
+niet. `toonInstall` staat daarom onder `?debug` in `window.__tijd`, zodat je
+ze alle drie kunt fotograferen zonder opstartvlaggen.
 
 ## Kaarten
 
