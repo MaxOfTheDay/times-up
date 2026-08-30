@@ -3560,7 +3560,7 @@ input[type=range]::-moz-range-thumb {
 
 <!-- Pauze: de klok staat stil. Verder spelen is één tik; stoppen moet je
      vasthouden, want dat gooit het lopende spel weg. -->
-<div class="overlay" id="pauze" hidden>
+<div class="overlay" id="pauze" role="dialog" aria-modal="true" aria-label="Pauze" hidden>
   <div class="panel surface">
     <!-- Het paneel toonde alleen twee pictogrammen: niet dát het stilstond,
          niet waar de klok bleef staan, niet hoe het ervoor stond. -->
@@ -5234,9 +5234,17 @@ function nextCard(how) {
    geldige snelle beslissing -- deze kaart nog, de volgende meteen weg -- en
    geen dubbele tik; met één gedeelde klok ving dat verschil ze allebei in
    hetzelfde vangnet. */
+/* Of het pauzepaneel openstaat. acts() en de pas-knop toetsen dit allebei --
+   zonder deze toets bleef "goed" en "pas" bereikbaar met een toetsenbord
+   terwijl het paneel een bevroren klok toont: de rand om het paneel houdt
+   geen muis of veeg tegen, maar Tab liep er zo doorheen naar de knoppen
+   eronder. inert (zie openPause) sluit dat af op toestellen die het kennen;
+   deze toets is het vangnet voor toestellen die dat niet doen. */
+function paused() { return !$("#pauze").hidden; }
+
 let lastAct = { goed: 0, pas: 0 };
 function acts(key) {
-  if (current !== "play" || !G || G.card === null) return false;
+  if (current !== "play" || !G || G.card === null || paused()) return false;
   const now = performance.now();
   if (now - lastAct[key] < 280) { flash("seen"); Tril.zag(); return false; }
   lastAct[key] = now;
@@ -5454,7 +5462,7 @@ $("#btnGoed").addEventListener("click", () => {
 });
 
 $("#btnPas").addEventListener("click", () => {
-  if (current !== "play" || !G || G.card === null) return;
+  if (current !== "play" || !G || G.card === null || paused()) return;
   // Laatste kaart: er valt niets over te slaan. Antwoorden doet hij wel.
   // Eigen geluid: dit is een weigering, geen overslag, en die twee moeten
   // niet hetzelfde klinken. nudge() verzorgt de trilling.
@@ -5820,6 +5828,17 @@ $("#btnHome").addEventListener("click", () => { clearConfetti(); clearGame(); sh
    ============================================================== */
 let pauseMs = 0, pauseReturn = null;
 
+/* Het scherm áchter het paneel mag dicht: wie er met een toetsenbord of een
+   schakelaar doorheen tabt naar "goed" mag geen punt meer scoren op een
+   klok die al stilstaat, en de knop die het paneel opent mag zichzelf niet
+   opnieuw kunnen raken (zie de vroege terugkeer in openPause() hieronder --
+   een tweede tik zou remaining() opnieuw bemonsteren tegen een bevroren
+   deadline, en dan kost elke seconde in het paneel een seconde van de
+   beurt). Twee aanroepen zetten het uit: closePause() en de vasthoud-knop
+   voor stoppen, die het paneel met opzet niet via closePause() sluit --
+   dat zou de klok van een spel dat net is weggegooid weer aanzetten. */
+function screensInert(on) { $$(".screen").forEach(s => s.inert = on); }
+
 /* Dezelfde stand als op het overdrachtscherm, dus ook dezelfde twee tekens:
    de kroon boven wie voorstaat, en de opgetilde tegel onder wie aan zet is.
    Dat laatste ontbrak hier -- het paneel toonde twee getallen zonder te
@@ -5840,6 +5859,11 @@ function paintPauseScore() {
 }
 
 function openPause() {
+  // Al open: dit mag geen tweede keer gebeuren. Zie de toelichting bij
+  // screensInert() -- een herhaalde tik zou pauseMs opnieuw op remaining()
+  // zetten, en die is inmiddels de bevroren deadline min de tijd die net in
+  // het paneel verstreek.
+  if (paused()) return;
   /* De adempauze na tijd-om (zie timeUp()) heeft geen paneel nodig: er
      loopt dan al niets meer, en een paneel erover zou middenin die adem
      opengaan en het overdrachtscherm er zo weer onder wisselen. */
@@ -5869,12 +5893,14 @@ function openPause() {
   paintPauseScore();
 
   pauseReturn = document.activeElement;
+  screensInert(true);
   $("#pauze").hidden = false;
   $("#btnResume").focus({ preventScroll: true });
 }
 
 function closePause() {
   $("#pauze").hidden = true;
+  screensInert(false);
   if (pauseReturn && pauseReturn.isConnected) pauseReturn.focus({ preventScroll: true });
   pauseReturn = null;
   if (current === "play" && pauseMs > 0) {
@@ -5905,6 +5931,8 @@ holdButton($("#btnStop"), 1100, () => {
   pauseMs = 0; pauseReturn = null;
   stopClock(); releaseWake();
   $("#pauze").hidden = true;
+  screensInert(false);        // niet via closePause(): dat zou de klok van
+                               // een spel dat we net weggooien weer starten
   G = null;
   clearGame();          // met opzet weggegooid: niet stilletjes terugbrengen
   show("title");
