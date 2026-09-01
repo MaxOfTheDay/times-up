@@ -18,7 +18,7 @@
    slechte wifi" niet.
 
    De prijs hoort erbij genoemd: de woonkamer loopt nu hoogstens één
-   opstartbeurt achter op main. Punt 2 hieronder (periodicsync) koopt die
+   opstartbeurt achter op main. De periodicsync-handler onderaan koopt die
    terug waar het toestel meewerkt. Er komt met opzet géén melding over een
    nieuwe versie -- dat zou tekst zijn op een scherm dat zonder tekst moet
    kunnen, voor iets wat de eerstvolgende koude start vanzelf oplost.
