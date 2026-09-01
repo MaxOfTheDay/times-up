@@ -1541,7 +1541,7 @@ input[type=range]::-moz-range-thumb {
 .plaat { flex: 0 0 auto; display: block; background: var(--ink); padding: 2px; }
 .plaat svg { display: block; width: 100%; height: 100%; }
 .btn-plain { display: inline-flex; align-items: center; gap: var(--s-3); }
-#btnInstall .plaat { width: 32px; height: 32px; }
+#btnInstall .plaat, #btnDelen .plaat { width: 32px; height: 32px; }
 
 /* Dezelfde plaat, dezelfde belofte, zonder knop: op iOS valt er niets aan
    te tikken en na een weggetikte dialoog is de knop opgebruikt. Beeld met
@@ -3171,13 +3171,31 @@ input[type=range]::-moz-range-thumb {
         App installeren
       </button>
 
+      <!-- Delen. Staat er alleen in app-modus, en dat is geen beperking
+           maar de hele reden: in een geinstalleerde app is er geen
+           adresbalk en geen deelmenu van de browser meer, dus is dit de
+           enige weg om de app door te geven. In een tabblad bestaat die weg
+           wel, en dan hoort hier niets te staan -- de app levert alleen de
+           weg die het platform heeft weggenomen.
+
+           Daarmee wordt dit veld ook geen blijvend meubilair. Installeren is
+           eenmalig en sluit zichzelf af; delen is dat nooit, dus een losse
+           deelknop zou hier voorgoed blijven staan als de eerste regel op
+           dit scherm die niets aan het spel verandert. Nu vervangt hij de
+           installatieknop in plaats van eronder te gaan staan: hoogstens
+           een van de twee, nooit allebei. -->
+      <button class="btn-plain" id="btnDelen" hidden>
+        <span class="plaat" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
+        App delen
+      </button>
+
       <!-- De weg met de hand. Dezelfde plaat, dezelfde belofte, alleen
            zonder knop: op iOS bestaat er niets om aan te tikken, en na een
            weggetikte dialoog is de knop hierboven opgebruikt. Twee zinnen,
            altijd hoogstens één zichtbaar. -->
       <p class="handmatig" id="installHand" hidden>
         <span class="plaat" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
-        <span class="zin" id="handDeel" hidden>Tik op <svg class="teken" viewBox="0 0 100 100"
+        <span class="zin" id="handZetop" hidden>Tik op <svg class="teken" viewBox="0 0 100 100"
           role="img" aria-label="delen"><use href="#i-deel"/></svg> en kies <b>Zet op beginscherm</b>.</span>
         <span class="zin" id="handMenu" hidden>Het kan ook via het menu van de browser:
           kies daar <b>App installeren</b>.</span>
@@ -4191,7 +4209,12 @@ function show(name) {
   /* Een punt dat nog onderweg is naar de teller landt hier alsnog. Het
      hangt aan de body en niet aan het spelscherm, dus zonder dit zou het
      over het overdrachtscherm heen blijven vliegen. */
-  if (name !== "play") { stopClock(); releaseWake(); landFly(); }
+  /* De lock blijft ook op de overdracht staan -- zie wakeOverdracht(). Op
+     elk ander scherm gaat hij eraf. */
+  if (name !== "play") {
+    stopClock(); landFly();
+    if (name !== "handoff") releaseWake();
+  }
   // Een worp die nog loopt terwijl het scherm wisselt, valt hier alsnog op de
   // goede ploeg -- om dezelfde reden als landFly() hierboven.
   if (name !== "handoff") landToss();
@@ -4840,6 +4863,7 @@ function handoff(mode, freshA, freshB) {
      hier bewaard wordt is altijd een beurt die nog moet beginnen. */
   saveGame(handoffMode);
   show("handoff");
+  wakeOverdracht();
 }
 
 /* Ook starten gaat via vasthouden: het toestel wisselt van hand, en een
@@ -6090,7 +6114,30 @@ async function requestWake() {
   } catch (e) { wake = null; }
 }
 function releaseWake() {
+  clearTimeout(wakeTimer); wakeTimer = null;
   try { if (wake) { wake.release(); wake = null; } } catch (e) { wake = null; }
+}
+
+/* Het overdrachtscherm is het enige moment waarop het toestel echt van hand
+   gaat, en het was ook het enige waarop het scherm ondertussen gewoon mocht
+   uitvallen: de lock liep alleen tijdens een beurt. Dan staat er bij
+   terugkomst een pincode tussen de tafel en de volgende beurt.
+
+   Wel begrensd, want dit scherm heeft geen einde uit zichzelf -- er loopt
+   geen klok die hem afsluit. Drie minuten dekt een tafel die begint te
+   praten (een beurt duurt 30 a 60 seconden, een overdracht seconden) en
+   laat ruim los voordat het de accu iets kost. Blijft een vergeten potje
+   toch liggen, dan vergrendelt het toestel zoals elk ander scherm -- en
+   loadGame() zet het binnen twee uur terug waar het was.
+
+   De timer wordt in releaseWake() gewist, dus elke bestaande uitgang
+   (pauze, stoppen, het huisje, de start van de beurt) ruimt hem al op. */
+let WAKE_MAX = 3 * 60 * 1000;
+let wakeTimer = null;
+function wakeOverdracht() {
+  requestWake();
+  clearTimeout(wakeTimer);
+  wakeTimer = setTimeout(releaseWake, WAKE_MAX);
 }
 /* Weggeklikt of scherm vergrendeld: de klok bevriest. Anders loopt de beurt
    in stilte af terwijl niemand kijkt, en is de tijd bij terugkomst op. */
@@ -6100,6 +6147,14 @@ document.addEventListener("visibilitychange", () => {
      "play" terwijl het openstaat. Zonder deze toets zette het weer
      zichtbaar worden van het tabblad de klok stiekem weer aan -- en de
      lock weer aan -- onder een openstaand pauzepaneel. */
+  /* Op de overdracht loopt er geen klok, maar de lock wel. De browser laat
+     hem los zodra het document verborgen raakt, dus zonder deze tak komt hij
+     op dat scherm nooit meer terug -- en dan valt het scherm alsnog uit op
+     het moment dat het toestel van hand gaat. */
+  if (current === "handoff") {
+    if (document.visibilityState === "visible" && $("#pauze").hidden) wakeOverdracht();
+    return;
+  }
   if (current !== "play" || !$("#pauze").hidden) return;
   if (document.visibilityState === "hidden") {
     frozenMs = remaining();
@@ -6202,26 +6257,49 @@ const isIOS = () =>
   /iPad|iPhone|iPod/.test(navigator.userAgent) ||
   (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
 
-/* Vier standen. "weg" is het veld dicht; de andere drie zetten precies één
-   van de twee wegen neer.
+/* Vijf standen. "weg" is het veld dicht; de andere vier zetten precies één
+   ding neer.
      knop  -- het toestel biedt een installatie aan
-     deel  -- iOS: het deelmenu van de browser
-     menu  -- de dialoog is weggetikt en de knop is op (zie hieronder) */
+     zetop -- iOS: de weg naar het beginscherm via het deelmenu
+     menu  -- de dialoog is weggetikt en de knop is op (zie hieronder)
+     delen -- de app draait geinstalleerd; dan valt er niets te installeren
+              en juist wel iets door te geven
+
+   "zetop" heette eerst "deel", naar het deelmenu waar die weg doorheen
+   loopt. Dat werd onhoudbaar zodra er echt gedeeld kon worden: de ene
+   "deel" zet de app op je eigen beginscherm, de andere stuurt hem naar
+   iemand anders. */
 const INSTALL_HINT = {
-  knop: "Zet de app op je beginscherm, met een eigen icoon.",
-  deel: "Dan staat ze met een eigen icoon tussen je andere apps.",
-  menu: ""
+  knop:  "Zet de app op je beginscherm, met een eigen icoon.",
+  zetop: "Dan staat ze met een eigen icoon tussen je andere apps.",
+  menu:  "",
+  delen: "Stuur hem door aan iemand die hem ook wil."
 };
 function toonInstall(stand) {
   $("#btnInstall").hidden = stand !== "knop";
-  $("#installHand").hidden = stand !== "deel" && stand !== "menu";
-  $("#handDeel").hidden = stand !== "deel";
+  $("#btnDelen").hidden = stand !== "delen";
+  $("#installHand").hidden = stand !== "zetop" && stand !== "menu";
+  $("#handZetop").hidden = stand !== "zetop";
   $("#handMenu").hidden = stand !== "menu";
   const hint = INSTALL_HINT[stand] || "";
   $("#installHint").textContent = hint;
   $("#installHint").hidden = !hint;
   $("#installField").hidden = stand === "weg";
 }
+
+/* Weggetikt is geen fout: de knop blijft dan gewoon staan, want delen is
+   niet eenmalig zoals installeren dat is. */
+$("#btnDelen").addEventListener("click", async () => {
+  try {
+    await navigator.share({
+      title: "Tijd is Om",
+      text: "Time's Up voor kinderen die nog niet kunnen lezen.",
+      // Zonder ?debug en zonder anker: wat je doorgeeft is de app, niet
+      // het scherm waar je toevallig op staat.
+      url: location.href.replace(/[?#].*$/, "")
+    });
+  } catch (e) { /* weggetikt, of het toestel wilde niet */ }
+});
 
 let deferredInstall = null;
 window.addEventListener("beforeinstallprompt", e => {
@@ -6268,7 +6346,22 @@ window.addEventListener("appinstalled", () => {
   toonInstall("weg");
 });
 
-if (!inAppModus() && isIOS()) toonInstall("deel");
+/* Draait de app geinstalleerd, dan valt er niets te installeren -- en is de
+   deelknop juist de enige weg die er nog is. Anders: op iOS de weg met de
+   hand, en op de rest wacht het veld op beforeinstallprompt. */
+function kiesInstallStand() {
+  if (inAppModus()) toonInstall(navigator.share ? "delen" : "weg");
+  else if (isIOS()) toonInstall("zetop");
+}
+kiesInstallStand();
+
+/* inAppModus() werd precies een keer gelezen, bij het laden. Dat was
+   onschuldig zolang dit veld alleen "installeren" kon zeggen -- daarna ging
+   het toch dicht. Nu het ook "delen" zegt zodra de app geinstalleerd
+   draait, is het dat niet meer: wie installeert terwijl dit scherm
+   openstaat, houdt anders de rest van de sessie de installatieknop. */
+["(display-mode: standalone)", "(display-mode: fullscreen)"].forEach(q =>
+  matchMedia(q).addEventListener("change", kiesInstallStand));
 
 load();
 Snd.enabled = settings.sound !== false;
@@ -6306,7 +6399,10 @@ if (location.search.indexOf("debug") !== -1) {
     get screen() { return current; },
     DECKS, TIER_ORDER, poolFor, bakFor, canHide, MIN_BAK, shuffle, drawDeck, total,
     stopClock, paintClock, sizeCard, Snd, Tril, toonInstall,
-    saveGame, loadGame, clearGame, KEY_GAME, GAME_MAX_AGE
+    saveGame, loadGame, clearGame, KEY_GAME, GAME_MAX_AGE,
+    // De lock op de overdracht is anders alleen te controleren door er drie
+    // minuten voor te gaan zitten.
+    get wake() { return wake; }, zetWakeMax(ms) { WAKE_MAX = ms; }
   };
 }
 </script>
