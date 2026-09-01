@@ -490,6 +490,25 @@ rondegrens stelt en niet twaalf keer per potje; tussen twee beurten verandert
 er niets aan het antwoord. Wie luistert houdt het in beide standen, want het
 getal staat in de aria-label van de kaart.
 
+Het scherm blijft hier aan. De wake lock liep alleen tijdens een beurt --
+`show()` liet hem los op elk scherm dat geen `play` was -- en daarmee was
+de overdracht het enige moment waarop het toestel écht van hand gaat én het
+scherm ondertussen gewoon mocht uitvallen. Bij terugkomst staat er dan een
+pincode tussen de tafel en de volgende beurt.
+
+Wel begrensd (`WAKE_MAX`, drie minuten), want dit scherm heeft geen einde
+uit zichzelf: er loopt geen klok die hem afsluit. Een beurt duurt 30 à 60
+seconden en een overdracht seconden, dus drie minuten dekt een tafel die
+begint te praten en laat ruim los voordat het de accu iets kost. Blijft een
+vergeten potje toch liggen, dan vergrendelt het toestel zoals elk ander
+scherm, en `loadGame()` zet het binnen twee uur terug. De timer wordt in
+`releaseWake()` gewist, dus elke bestaande uitgang ruimt hem al op.
+
+Let op de `visibilitychange`-handler: die keerde terug tenzij `current` op
+`"play"` stond. De browser laat de lock los zodra het document verborgen
+raakt, dus zonder een eigen tak voor de overdracht komt hij daar nooit meer
+terug -- en valt het scherm alsnog uit op precies het verkeerde moment.
+
 ## Het aftellen draagt allebei de feiten
 
 Die drie tellen zijn het moment waarop het toestel fysiek van hand gaat, en
@@ -686,16 +705,123 @@ vallen. Op het oog is dat niet te doen -- een uitvergrote weergave gaf hier
 de indruk dat de iOS-plaat werd afgesneden, en per pixel geteld was het
 nul van 8936.
 
-### Installeren, drie standen
+### De screenshots
 
-Het veld op de instellingen heeft drie standen en er staat er altijd
+Chrome op Android toont de grote installatiedialoog alleen als er
+`screenshots` met `form_factor: "narrow"` in het manifest staan; zonder
+blijft het de kleine balk onderaan. Dat is dezelfde afweging als bij de
+iOS-weg hieronder: een aanwijzing te weinig kost de installatie.
+
+Ze worden gerénderd en niet nagemaakt -- de echte app, in een echte
+browser -- door `tools/schermen.js` (`npm run schermen`). De
+palet-schrijver die in `pictogrammen.js` zat is daarvoor `tools/png.js`
+geworden: hij kon vier kleuren, twee bits, vierkant, en dat is precies
+genoeg voor een zeefdruk-plaat en te weinig voor een heel scherm. De
+bitdiepte volgt nu uit het aantal kleuren, die uit `:root` gelezen worden
+zodat ze niet kunnen afdrijven (15 stuks, dus vier bits).
+
+Beide scripts zochten anders in hetzelfde bestand naar hetzelfde soort
+blok. `pictogrammen.js` pakte élk base64-blok van 500+ tekens en eiste er
+precies vier als vangrail -- en die vangrail breekt zodra er iets anders
+met een `data:`-URI bijkomt. Elk script vindt zijn eigen blokken nu op
+context: de platen aan hun `<link>` of hun `purpose`, de screenshots aan
+hun `label`.
+
+**Het spelscherm staat er niet bij, en dat is gemeten en niet gekozen.** Op
+een kaart staat een emoji, en een emoji is vol kleur mét verlopen --
+precies wat een palet-PNG niet kan. Op de 15 kleuren van de app werd een
+tros druiven modder met magenta randen. En zodra je het palet groot genoeg
+maakt om hem wél te dragen, valt de winst van een palet-PNG helemaal weg:
+11 kB bij 16 kleuren, 98 kB bij 64, 139 kB bij 256, en Chromiums eigen PNG
+232 kB. Voor één plaat, op een bestand van ruim 300 kB. De twee die
+overblijven -- titel en overdracht -- zijn puur app-palet en quantiseren
+zonder verlies, samen 32 kB.
+
+**En let op het determinisme.** `newGame()` schudt de stapel én lóót welke
+ploeg opent, dus zonder ingrijpen gaf elke draaibeurt een ander plaatje en
+stond er bij elke commit een diff waarin niets gewijzigd was. `Math.random`
+gaat daarom op een vaste reeks, en de platen worden geschoten met
+`animations: 'disabled'` -- want de zandloper valt om bij binnenkomst en de
+mascotte ademt, en wachten helpt niet tegen iets dat nooit ophoudt. Die
+stilgezette plaat wijkt 0,08% van de pixels af van wat een speler na vier
+seconden ziet. Twee keer draaien geeft hetzelfde bestand, net als bij
+`pictogrammen`.
+
+### De service worker windt niet op het netwerk
+
+`sw.js` is **cache eerst, ververs erachter**: de app start meteen uit de
+kast en haalt op de achtergrond een verse kopie voor de vólgende keer.
+
+Hier stond network-first, met "wie online is krijgt altijd de nieuwste
+versie" als reden. Dat klopt in de twee gevallen die je zelf uitprobeert --
+online, en vliegtuigstand -- maar niet in het geval ertussenin, en dat is
+op een telefoon in een woonkamer juist het gewone geval: verbonden met
+wifi, geen route. `fetch()` faalt dan niet, hij hángt, tot de time-out van
+het toestel. Nagemeten met een server die het document 20 seconden
+vasthoudt: 20.074 ms tot het titelscherm stond, tegen 59 ms erna.
+
+Twee dingen die daarbij vastzitten:
+
+- **`res.ok` vóór `cache.put`.** Dat stond er niet, en het is een fout die
+  je pas offline ziet: een 404 of de foutpagina van een deploy die nog
+  liep, ging gewoon de kast in. Nagemeten haalde de oude worker het
+  titelscherm daarna helemáál niet meer.
+- **Verversen met `cache: "no-cache"`**, niet met een kale `fetch()`. Dat
+  dwingt een gesprek met de server af maar staat een 304 toe, dus er komt
+  alleen een body over de lijn als er echt iets gewijzigd is. Het is ook
+  nodig: GitHub Pages zet `Cache-Control: max-age=600` op HTML, dus een
+  kale `fetch()` werd tien minuten lang uit de HTTP-cache van de browser
+  beantwoord en verifieerde niets -- met een verse HTTP-cache stálde zelfs
+  de oude worker niet.
+
+De prijs: de woonkamer loopt hoogstens één opstartbeurt achter op `main`.
+`periodicsync` koopt die terug waar het toestel meewerkt (alleen Chromium
+op Android, alleen geïnstalleerd, en de browser bepaalt zelf of hij wekt --
+een meevaller dus, nooit een garantie). Er komt met opzet **geen** melding
+over een nieuwe versie: dat zou tekst zijn op een scherm dat zonder tekst
+moet kunnen, voor iets wat de eerstvolgende koude start vanzelf oplost. Een
+stille `location.reload()` op de titel valt ook af -- die speelt de
+zandloper-animatie zichtbaar opnieuw af, voor geen enkele winst.
+
+### Installeren en doorgeven, vijf standen
+
+Het veld op de instellingen heeft vijf standen en er staat er altijd
 hoogstens één:
 
 - **knop** -- het toestel biedt zelf een installatie aan
   (`beforeinstallprompt`).
-- **deel** -- iOS: de weg via het deelmenu, met het deel-teken (`#i-deel`)
+- **zetop** -- iOS: de weg via het deelmenu, met het deel-teken (`#i-deel`)
   in de zin.
 - **menu** -- de dialoog is weggetikt en de knop is opgebruikt.
+- **delen** -- de app draait geïnstalleerd; dan valt er niets te
+  installeren en juist wel iets door te geven.
+- **weg** -- het veld dicht.
+
+Die stand heette eerst **deel**, naar het deelmenu waar de iOS-weg
+doorheen loopt. Dat werd onhoudbaar zodra er echt gedeeld kon worden: de
+ene "deel" zet de app op je eigen beginscherm, de andere stuurt hem naar
+iemand anders.
+
+**Delen is geen knop erbij maar een stand erbij**, en dat onderscheid is de
+hele kwestie. Installeren is eenmalig en sluit zichzelf af; delen is dat
+nooit -- volgende maand is er een andere ouder. Een losse deelknop zou hier
+dus voorgoed blijven staan, als de eerste regel op dit scherm die niets aan
+het spel verandert, op een scherm dat al onder een zwevend huisje door
+scrollt. Nu vervangt hij de installatieknop in plaats van eronder te gaan
+staan: de dichtheid van het scherm groeit niet.
+
+Waaróm hij er hoort, is scherper dan "handig": **in een geïnstalleerde app
+is er geen adresbalk en geen deelmenu van de browser meer.** Wie de app
+leuk genoeg vond om hem te installeren -- precies de ouder die hem zou
+doorgeven -- heeft daarna geen enkele weg meer. In een tabblad bestaat die
+weg wél, en dan hoort de app niets te doen. De regel is dus: **de app
+levert alleen de weg die het platform heeft weggenomen.**
+
+Let op `inAppModus()`: die werd precies één keer gelezen, bij het laden.
+Onschuldig zolang het veld alleen "installeren" kon zeggen -- daarna ging
+het toch dicht -- maar niet meer nu het ook "delen" zegt. Wie installeert
+terwijl dit scherm openstaat, hield anders de rest van de sessie de
+installatieknop. Er luistert nu een `matchMedia` op `display-mode`.
 
 **De knop verdwijnt pas als er écht geïnstalleerd is.** Zo stond het hier
 niet: het veld ging dicht vóór `prompt()`, "want een prompt is maar één
