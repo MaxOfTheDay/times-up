@@ -6140,8 +6140,26 @@ $("#btnStart").addEventListener("click", () => {
    af; dit voorkomt alleen de nutteloze poging en de foutmelding erover. */
 if ("serviceWorker" in navigator && location.protocol !== "file:") {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("sw.js").catch(() => {});
+    navigator.serviceWorker.register("sw.js").then(vraagVerversing).catch(() => {});
   });
+}
+
+/* Vragen of het toestel de app af en toe wil wekken om zijn eigen kast te
+   verversen (zie de periodicsync-handler in sw.js). Dat koopt de ene
+   opstartbeurt achterstand terug die "cache eerst" kost.
+
+   Er komt hier geen toestemmingsvraag in beeld: voor een geïnstalleerde app
+   staat deze permissie al op "granted", en waar de naam onbekend is gooit
+   permissions.query() een TypeError -- vandaar de try eromheen. Overal waar
+   het niet werkt gebeurt er dus stil niets, en dat is ook de bedoeling: er
+   mag niets aan hangen. */
+async function vraagVerversing(reg) {
+  try {
+    if (!reg || !("periodicSync" in reg)) return;
+    const st = await navigator.permissions.query({ name: "periodic-background-sync" });
+    if (st.state !== "granted") return;
+    await reg.periodicSync.register("ververs", { minInterval: 24 * 60 * 60 * 1000 });
+  } catch (e) { /* niet ondersteund, of de browser wil niet */ }
 }
 
 /* Installeren. Er zijn twee wegen naar het beginscherm en er staat er
