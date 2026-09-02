@@ -1,6 +1,6 @@
 # Tijd is Om
 
-Time's Up voor kinderen die nog niet kunnen lezen. Eén zelfstandig
+Time's Up voor kinderen — ook voor wie nog niet kan lezen. Eén zelfstandig
 HTML-bestand: open `index.html` en het speelt — geen build, geen server,
 geen internet.
 

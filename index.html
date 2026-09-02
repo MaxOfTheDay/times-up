@@ -6,7 +6,19 @@
      voor de volwassene, en dat mag je kunnen inzoomen. -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tijd is Om</title>
-<meta name="description" content="Time's Up voor kinderen die nog niet kunnen lezen.">
+<!-- De zin die zegt wat dit is. Hij staat hier één keer voluit en wordt op
+     de twee andere plekken uit deze tag gelezen: het manifest (de
+     installatiedialoog) en de deelknop. Dezelfde reden als bij het
+     pictogram hieronder -- drie overgetypte kopieën groeien uit elkaar, en
+     dan zegt de installatiedialoog iets anders dan het bericht waarmee je
+     de app doorstuurt.
+
+     "voor kinderen die nog niet kunnen lezen" stond er eerst, en dat sloot
+     precies de tafel uit waar deze app voor gemaakt is. Een stand is een
+     plafond (zie poolFor): een potje met een vijfjarige én een achtjarige
+     is het normale geval, niet de uitzondering. Niet kunnen lezen is hier
+     geen toelatingseis maar iets wat je niet in de weg zit. -->
+<meta name="description" content="Time's Up voor kinderen — ook voor wie nog niet kan lezen.">
 <meta name="theme-color" id="chromeColor" content="#F4EBDA">
 <meta name="color-scheme" content="light">
 <meta name="mobile-web-app-capable" content="yes">
@@ -63,7 +75,10 @@
     id: dir,
     name: "Tijd is Om",
     short_name: "Tijd is Om",
-    description: "Time's Up voor kinderen die nog niet kunnen lezen.",
+    /* Uit de <meta> hierboven, om dezelfde reden als het pictogram: één
+       plek waar de zin staat, zodat de installatiedialoog en de deelknop
+       niet uit elkaar kunnen groeien. */
+    description: document.querySelector('meta[name="description"]').content,
     lang: "nl",
     start_url: dir,
     scope: dir,
@@ -6371,7 +6386,15 @@ $("#btnDelen").addEventListener("click", async () => {
   try {
     await navigator.share({
       title: "Tijd is Om",
-      text: "Time's Up voor kinderen die nog niet kunnen lezen.",
+      /* Dezelfde zin als in de <meta> en het manifest, met de zandloper
+         ervoor. Die staat er alleen hier: dit is het enige van de drie dat
+         als bericht in een chat terechtkomt, en daar doet een teken werk
+         dat het in een installatiedialoog niet doet. Het is bovendien het
+         merk zelf -- dezelfde zandloper als op de plaat van de knop.
+
+         Geen ZWJ-reeks en geen huidskleur, dus dezelfde veilige soort als
+         de kaarten in DECKS: U+23F3 valt op een oud toestel niet uiteen. */
+      text: "⏳ " + $('meta[name="description"]').content,
       // Zonder ?debug en zonder anker: wat je doorgeeft is de app, niet
       // het scherm waar je toevallig op staat.
       url: location.href.replace(/[?#].*$/, "")

@@ -652,6 +652,31 @@ oude blijft naast de nieuwe op het beginscherm staan. Verzin er dus nooit
 een naam voor -- dat doet precies wat het moest voorkomen, in één keer voor
 iedereen die de app al heeft.
 
+### Eén zin, drie plekken
+
+Wat de app is, staat één keer voluit: in de `<meta name="description">`. Het
+manifest (dat is wat de installatiedialoog toont) en de deelknop lezen hem
+daaruit. Zelfde reden als bij het pictogram hieronder -- drie overgetypte
+kopieën groeien uit elkaar, en dan zegt de installatiedialoog iets anders
+dan het bericht waarmee je de app doorstuurt. De README heeft zijn eigen
+kopie, want die staat buiten het bestand; die moet je met de hand meenemen.
+
+De zin luidt "Time's Up voor kinderen -- ook voor wie nog niet kan lezen."
+Er stond "voor kinderen die nog niet kunnen lezen", en dat sloot precies de
+tafel uit waar deze app voor gemaakt is. Een stand is een plafond (zie
+`poolFor`): een potje met een vijfjarige én een achtjarige is het normale
+geval en niet de uitzondering. Niet kunnen lezen is hier geen toelatingseis
+maar iets wat je niet in de weg zit -- en dat is ook precies wat de harde
+eis zegt.
+
+De deelknop zet er een zandloper (⏳) voor, en alleen de deelknop: dat is
+het enige van de drie dat als bericht in een chat terechtkomt, en daar doet
+een teken werk dat het in een installatiedialoog niet doet. Het is bovendien
+het merk zelf. Wie er ooit een ander teken bij zet, houdt zich aan dezelfde
+regel als bij `DECKS`: geen ZWJ-reeksen en geen huidskleur-modifiers, want
+die vallen op een oud toestel uiteen in losse tekens. U+23F3 is van 2010 en
+dus veilig.
+
 ### De platen
 
 De pictogrammen zijn dezelfde zeefdruk-plaat als `.wordmark`: inkt-vlak,
