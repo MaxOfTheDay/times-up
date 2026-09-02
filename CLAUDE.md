@@ -803,12 +803,20 @@ ene "deel" zet de app op je eigen beginscherm, de andere stuurt hem naar
 iemand anders.
 
 **Delen is geen knop erbij maar een stand erbij**, en dat onderscheid is de
-hele kwestie. Installeren is eenmalig en sluit zichzelf af; delen is dat
-nooit -- volgende maand is er een andere ouder. Een losse deelknop zou hier
-dus voorgoed blijven staan, als de eerste regel op dit scherm die niets aan
-het spel verandert, op een scherm dat al onder een zwevend huisje door
-scrollt. Nu vervangt hij de installatieknop in plaats van eronder te gaan
-staan: de dichtheid van het scherm groeit niet.
+hele kwestie. Een losse deelknop zou naast de installatieknop komen te
+staan; nu vervangt hij hem, dus de dichtheid van het scherm groeit niet.
+
+Hier stond daarbij dat het veld "geen blijvend meubilair" wordt, omdat
+installeren eenmalig is en zichzelf afsluit. Dat geldt maar voor één van de
+vier zichtbare standen. `knop` sluit zichzelf inderdaad af, en `menu` blijft
+de sessie staan. Maar `zetop` staat er op iOS-in-Safari voorgoed -- de code
+kan van buiten de geïnstalleerde app niet zien of hij er al staat, en dat is
+met opzet zo geraden -- en `delen` staat er in de geïnstalleerde app
+voorgoed, want delen sluit zichzelf nooit af: volgende maand is er een
+andere ouder. Twee van de vier zijn dus wél blijvend meubilair, en het zijn
+net de twee die de gewone huishoudens dekken: de iPad in Safari, en het
+gezin dat de app leuk genoeg vond om hem te installeren. Wie de plek van dit
+veld weegt, weegt dus een blok dat er elke avond staat.
 
 Waaróm hij er hoort, is scherper dan "handig": **in een geïnstalleerde app
 is er geen adresbalk en geen deelmenu van de browser meer.** Wie de app
@@ -856,19 +864,87 @@ tekening draagt. De plaat krijgt géén eigen schaduw en géén contour -- ze
 ligt ín een knop die haar lift al draagt, en reliëf op reliëf leest als een
 knop op een knop.
 
-Het veld krijgt de afstand van een groepsgrens (48) en niet die van een veld
-binnen een groep (24): een eenmalige handeling is geen instelling, en met 24
-las het als de eerste regel van de regeluitleg eronder.
+### Het veld staat onderaan, als vierde groep
+
+Het stond bovenaan, als eerste blok onder de titel, met een eigen marge van
+48 om het van de regeluitleg los te maken -- "een eenmalige handeling is
+geen instelling". De reden om het daar te zetten was dat vooraan het moment
+is dat het er het meest toe doet: de eerste keer dat dit scherm opengaat.
+Dat klopt voor die ene keer en voor niets daarna, en de vorige alinea zegt
+waarom dat uitmaakt -- op de twee gewone huishoudens staat dit blok er élke
+avond.
+
+Wie het tandwiel aantikt komt de moeilijkheid of de tijd bijstellen, of een
+kaart wegleggen. Installeren is nooit de boodschap en delen al helemaal
+niet. Het is nu de vierde `.field-group`, met `DEZE APP` als kop, ná
+Voorkeuren. Er verhuist verder niets: de drie groepen erboven staan precies
+zoals ze stonden.
+
+Gemeten op 390x844 met de regels dichtgeklapt -- de gewone avond -- stond de
+eerste keuzeknop op 38% van het eerste scherm en staat hij nu op 22%. Met de
+regels open (het allereerste bezoek) van 66% naar 49%. Liggend op 844x390
+van 87% naar 56%. En het geval dat het ergst was: op een kleine telefoon van
+320x568 stond bij dat eerste bezoek de eerste spelinstelling op 121% --
+er stond dan geen enkele instelling in beeld zonder te scrollen. Nu 95%.
+
+Belangrijker dan al die getallen is dat ze niet meer van de stand afhangen.
+Het veld verschoof de eerste keuzeknop met 121 px zodra het er stond; nu
+staat die knop in alle vijf de standen op dezelfde plek.
+
+Drie dingen die eraan vastzitten:
+
+- **De kop hoort ín de groep, niet ernaast.** Er zijn standen waarin hier
+  niets staat, en `toonInstall()` verbergt daarom `#appGroup` en niet
+  `#installField`. Anders blijft `DEZE APP` met haar streep als lege regel
+  onder Voorkeuren hangen. (Dat `hidden` het wint van `display: flex` van
+  `.field-group` komt door de `[hidden] { display: none !important }`
+  bovenaan het bestand -- de regel die er staat omdat deze val hier al drie
+  keer eerder toesloeg.)
+- **De eigen marge van 48 moest weg.** Die verzon een groepsgrens die er
+  toen niet was; nu levert `.field-group + .field-group` dezelfde 48 al, en
+  allebei geeft 72.
+- **Verplaats het óf verzwak het, nooit allebei.** De prijs van de plek
+  onderaan is dat je ervoor moet scrollen -- op 390x844 zo'n 299 van de 332
+  px die het scherm te scrollen heeft, dus één veeg. Juist daarom blijft de
+  knop een knop en blijft de plaat staan: die plaat is met 32 bij 32 px het
+  enige volvlakse inkt-vlak op het hele instellingenscherm, en dat is wat
+  het blok aan het eind van de rol nog vindbaar maakt. Het was ook precies
+  wat het bovenaan te zwaar maakte. Eén van de twee degradaties is genoeg.
+
+Meegenomen, en gemeten: onderaan is de laatste aanraakbare rechthoek nu de
+knop op (16, 58) in plaats van twee keuzeknoppen op (16, 32), en de
+rechteronderhoek blijft helemaal leeg. Met de boog getekend op straal 60
+raakt op dit scherm niets de bocht, in geen van de standen -- op de
+plakkende titelband na, en die is met opzet een papieren band die tot de
+schermrand doorbloedt.
+
+### Wat er op de knoppen staat
+
+`Installeren` en `Delen`, niet `App installeren` en `App delen`: de kop
+erboven zegt al welke app. Dat scheelt niet alleen de herhaling -- het maakt
+ook de zin in de `menu`-stand zichtbaar een citaat van de browser
+("kies daar **App installeren**") in plaats van ons eigen woord.
+
+De hint onder de knop is voor `knop` en `zetop` één en dezelfde zin
+geworden. Er stonden er twee die hetzelfde zeiden in andere woorden, terwijl
+alleen de wég erheen verschilt -- en die staat al in de knop of in de zin
+erboven. De hint zegt wat je eraan hebt, en dat is op beide platforms
+hetzelfde.
+
+Bij `delen` stond "Stuur hem door aan iemand die hem ook wil", terwijl de
+app twee regels hoger `ze` heet. Nu staat er geen voornaamwoord meer. En
+"sturen", niet "doorgeven": doorgeven is in deze app het toestel over tafel
+aanreiken.
 
 En: `.handmatig` staat in dezelfde twee lijsten als `.hint` -- de regel die
 tekst uit de kolom van het zwevende huisje houdt, en de plakkende band die
 hem weer opheft. Op het moment van schrijven paste die zin er toevallig
 sowieso naast; dat is geen reden om hem eruit te laten.
 
-De drie standen zijn niet af te dwingen in een test -- `beforeinstallprompt`
+De standen zijn niet af te dwingen in een test -- `beforeinstallprompt`
 vuurt alleen in een echte browser met een echt profiel, en iOS al helemaal
 niet. `toonInstall` staat daarom onder `?debug` in `window.__tijd`, zodat je
-ze alle drie kunt fotograferen zonder opstartvlaggen.
+ze allemaal kunt fotograferen zonder opstartvlaggen.
 
 ## Kaarten
 
