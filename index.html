@@ -1592,12 +1592,15 @@ input[type=range]::-moz-range-thumb {
    teken mee in. */
 .handmatig .teken { width: 1.3em; height: 1.3em; vertical-align: -.3em; }
 
-/* Een eenmalige handeling is geen instelling, en krijgt dus de afstand van
-   een groepsgrens (48) en niet die van een veld binnen een groep (24).
-   .setup-scroll geeft al 24 via gap; dit legt de tweede helft erbij, net
-   zoals .field-group + .field-group dat doet. Zonder dit las het veld als
-   de eerste regel van de regeluitleg eronder. */
-#installField { margin-bottom: var(--s-5); }
+/* Hier stond een eigen marge van 48 onder het veld: "een eenmalige handeling
+   is geen instelling, en krijgt dus de afstand van een groepsgrens". Die
+   grens moest het veld toen zelf verzinnen, want het stond bovenaan als los
+   blok tussen de titel en de regeluitleg. Nu is het een echte groep --
+   #appGroup, onderaan -- en levert .field-group + .field-group diezelfde 48
+   al. Twee keer dezelfde grens zetten geeft er 72.
+
+   Geen eigen regel meer nodig dus; wat het veld aan afstand krijgt, krijgt
+   het van dezelfde regel als "Welke kaarten" en "Hoe lang". */
 
 /* ============================================================
    6. RONDE-REGEL — geen eigen scherm en geen eigen blok meer: de tekening
@@ -3177,67 +3180,6 @@ input[type=range]::-moz-range-thumb {
          hetzelfde als de aria-label van het tandwiel. -->
     <h1>Instellingen</h1>
 
-    <!-- Geen lange druk: installeren is niets onomkeerbaars, net als het
-         tandwiel.
-
-         Staat los van de twee groepen eronder, vooraan in plaats van onder
-         Geluid/Trilling: het hoort bij geen van beide (geen instelling die
-         blijft staan, maar een eenmalige actie) en de plek onderaan werd
-         nooit gezien door wie niet tot daar scrolt. Vooraan is ook het
-         moment dat het er het meest toe doet -- de eerste keer dat dit
-         scherm open gaat, vóór er ooit geïnstalleerd is. Het krijgt de
-         afstand van een groepsgrens mee (zie #installField in de stijlen),
-         want een eenmalige handeling is geen instelling.
-
-         Hier stond dat dit veld op iOS "dus dicht blijft" en dat de
-         meta-tags in de <head> daar hun werk doen via "Zet op beginscherm"
-         in Safari. Het eerste klopte, het tweede is een aanname: die tags
-         wérken, maar niets in de app wees de ouder ooit de weg erheen, en
-         op een tablet in huis is dat de helft van de toestellen. Er staat
-         nu een tweede stand met het deelmenu erin -- zie #installHand en
-         de afhandelaar onderaan. -->
-    <div class="field" id="installField" hidden>
-      <!-- De knop. Verschijnt op het signaal van het toestel zelf en
-           verdwijnt pas als er echt geïnstalleerd is -- niet al bij de tik,
-           zie de afhandelaar. -->
-      <button class="btn-plain" id="btnInstall" hidden>
-        <span class="plaat" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
-        App installeren
-      </button>
-
-      <!-- Delen. Staat er alleen in app-modus, en dat is geen beperking
-           maar de hele reden: in een geinstalleerde app is er geen
-           adresbalk en geen deelmenu van de browser meer, dus is dit de
-           enige weg om de app door te geven. In een tabblad bestaat die weg
-           wel, en dan hoort hier niets te staan -- de app levert alleen de
-           weg die het platform heeft weggenomen.
-
-           Daarmee wordt dit veld ook geen blijvend meubilair. Installeren is
-           eenmalig en sluit zichzelf af; delen is dat nooit, dus een losse
-           deelknop zou hier voorgoed blijven staan als de eerste regel op
-           dit scherm die niets aan het spel verandert. Nu vervangt hij de
-           installatieknop in plaats van eronder te gaan staan: hoogstens
-           een van de twee, nooit allebei. -->
-      <button class="btn-plain" id="btnDelen" hidden>
-        <span class="plaat" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
-        App delen
-      </button>
-
-      <!-- De weg met de hand. Dezelfde plaat, dezelfde belofte, alleen
-           zonder knop: op iOS bestaat er niets om aan te tikken, en na een
-           weggetikte dialoog is de knop hierboven opgebruikt. Twee zinnen,
-           altijd hoogstens één zichtbaar. -->
-      <p class="handmatig" id="installHand" hidden>
-        <span class="plaat" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
-        <span class="zin" id="handZetop" hidden>Tik op <svg class="teken" viewBox="0 0 100 100"
-          role="img" aria-label="delen"><use href="#i-deel"/></svg> en kies <b>Zet op beginscherm</b>.</span>
-        <span class="zin" id="handMenu" hidden>Het kan ook via het menu van de browser:
-          kies daar <b>App installeren</b>.</span>
-      </p>
-
-      <p class="hint" id="installHint"></p>
-    </div>
-
     <!-- De regels staan open tot je één keer een spel gestart hebt, en
          daarna dichtgeklapt. Ze zijn 243 van de 1286 px die dit scherm hoog
          is, en dat is elke avond opnieuw het eerste wat je ziet terwijl je
@@ -3416,6 +3358,96 @@ input[type=range]::-moz-range-thumb {
             <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
         </div>
       </fieldset>
+    </div>
+
+    <!-- De vierde groep, en de enige die niet over het spel gaat.
+
+         Ze stond bovenaan, als eerste blok onder de titel, met "vooraan is
+         het moment dat het er het meest toe doet" als reden. Dat klopte voor
+         de eerste keer dat dit scherm opengaat en voor niets daarna. Wie het
+         tandwiel aantikt komt de moeilijkheid of de tijd bijstellen, of een
+         kaart wegleggen; installeren is nooit de boodschap, en delen al
+         helemaal niet. De volgorde op dit scherm laat dat nu zien: eerst wat
+         het spel verandert, dan wat het toestel doet, en pas daarna de app
+         zelf.
+
+         Wat het kostte is gemeten, op 390x844 met de regels dichtgeklapt --
+         de gewone avond. De eerste keuzeknop stond op 38% van het eerste
+         scherm en staat nu op 22%; met de regels open (het allereerste
+         bezoek) ging dat van 66% naar 49%. Op een kleine telefoon van
+         320x568 was het bij dat eerste bezoek 121%: er stond dan géén enkele
+         spelinstelling in beeld zonder te scrollen. Nu 95%.
+
+         De prijs is dat je ervoor moet scrollen -- op 390x844 zo'n 299 van
+         de 332 px die het scherm te scrollen heeft, dus één veeg naar het
+         eind. Dat is precies waarom de plaat blijft staan en de knop een
+         knop blijft: de plek doet de degradatie al, en de enige volvlakse
+         inkt op dit scherm is wat het blok aan het eind van de rol nog
+         vindbaar maakt. Verplaats het óf verzwak het, nooit allebei.
+
+         En let op de kop: die hoort bij het veld en niet ernaast. Er zijn
+         standen waarin hier niets staat (de app draait geïnstalleerd zonder
+         deelmenu, of er is net geïnstalleerd), en dan zou een losse kop een
+         streep met niets eronder achterlaten. toonInstall() verbergt daarom
+         deze hele groep. -->
+    <div class="field-group" id="appGroup" hidden>
+      <h2 class="group-head">Deze app</h2>
+
+      <!-- Geen lange druk: installeren is niets onomkeerbaars, net als het
+           tandwiel.
+
+           Hier stond dat dit veld op iOS "dus dicht blijft" en dat de
+           meta-tags in de <head> daar hun werk doen via "Zet op beginscherm"
+           in Safari. Het eerste klopte, het tweede is een aanname: die tags
+           wérken, maar niets in de app wees de ouder ooit de weg erheen, en
+           op een tablet in huis is dat de helft van de toestellen. Er staat
+           nu een tweede stand met het deelmenu erin -- zie #installHand en
+           de afhandelaar onderaan. -->
+      <div class="field" id="installField">
+        <!-- De knop. Verschijnt op het signaal van het toestel zelf en
+             verdwijnt pas als er echt geïnstalleerd is -- niet al bij de tik,
+             zie de afhandelaar.
+
+             "Installeren" en niet "App installeren": de kop erboven zegt al
+             welke app, en zonder die herhaling is de zin in de menu-stand
+             hieronder zichtbaar een citaat van de browser in plaats van ons
+             eigen woord. -->
+        <button class="btn-plain" id="btnInstall" hidden>
+          <span class="plaat" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
+          Installeren
+        </button>
+
+        <!-- Delen. Staat er alleen in app-modus, en dat is geen beperking
+             maar de hele reden: in een geinstalleerde app is er geen
+             adresbalk en geen deelmenu van de browser meer, dus is dit de
+             enige weg om de app door te geven. In een tabblad bestaat die weg
+             wel, en dan hoort hier niets te staan -- de app levert alleen de
+             weg die het platform heeft weggenomen.
+
+             Dezelfde plaat als op de installatieknop, en dat is hier een
+             iets ander argument: bij installeren ís die plaat wat er na een
+             tik op je beginscherm komt te staan, bij delen is ze wát je
+             verstuurt. Allebei de standen vullen dezelfde plek in, dus een
+             ander teken per stand zou die plek laten flikkeren. -->
+        <button class="btn-plain" id="btnDelen" hidden>
+          <span class="plaat" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
+          Delen
+        </button>
+
+        <!-- De weg met de hand. Dezelfde plaat, dezelfde belofte, alleen
+             zonder knop: op iOS bestaat er niets om aan te tikken, en na een
+             weggetikte dialoog is de knop hierboven opgebruikt. Twee zinnen,
+             altijd hoogstens één zichtbaar. -->
+        <p class="handmatig" id="installHand" hidden>
+          <span class="plaat" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
+          <span class="zin" id="handZetop" hidden>Tik op <svg class="teken" viewBox="0 0 100 100"
+            role="img" aria-label="delen"><use href="#i-deel"/></svg> en kies <b>Zet op beginscherm</b>.</span>
+          <span class="zin" id="handMenu" hidden>Het kan ook via het menu van de browser:
+            kies daar <b>App installeren</b>.</span>
+        </p>
+
+        <p class="hint" id="installHint"></p>
+      </div>
     </div>
   </div>
 
@@ -6302,12 +6334,24 @@ const isIOS = () =>
    "zetop" heette eerst "deel", naar het deelmenu waar die weg doorheen
    loopt. Dat werd onhoudbaar zodra er echt gedeeld kon worden: de ene
    "deel" zet de app op je eigen beginscherm, de andere stuurt hem naar
-   iemand anders. */
+   iemand anders.
+
+   De hint eronder zegt niet hóé -- dat doen de knop en de zin zelf al --
+   maar wat je eraan hebt. Voor "knop" en "zetop" is dat hetzelfde: allebei
+   zetten ze de app op het beginscherm, en alleen de weg erheen verschilt.
+   Er stonden twee zinnen die dat in andere woorden zeiden; het is er nu één,
+   en als constante zodat de twee standen niet uiteen kunnen groeien.
+
+   Bij "delen" stond "Stuur hem door aan iemand die hem ook wil": hem,
+   terwijl de app in de zin ernaast ze heet. Nu staat er geen voornaamwoord
+   meer. En "sturen" en niet "doorgeven", want doorgeven is in deze app het
+   toestel over tafel aanreiken. */
+const OP_BEGINSCHERM = "Dan staat ze met een eigen icoon tussen je andere apps.";
 const INSTALL_HINT = {
-  knop:  "Zet de app op je beginscherm, met een eigen icoon.",
-  zetop: "Dan staat ze met een eigen icoon tussen je andere apps.",
+  knop:  OP_BEGINSCHERM,
+  zetop: OP_BEGINSCHERM,
   menu:  "",
-  delen: "Stuur hem door aan iemand die hem ook wil."
+  delen: "Stuur de app door aan iemand die ook wil spelen."
 };
 function toonInstall(stand) {
   $("#btnInstall").hidden = stand !== "knop";
@@ -6318,7 +6362,7 @@ function toonInstall(stand) {
   const hint = INSTALL_HINT[stand] || "";
   $("#installHint").textContent = hint;
   $("#installHint").hidden = !hint;
-  $("#installField").hidden = stand === "weg";
+  $("#appGroup").hidden = stand === "weg";
 }
 
 /* Weggetikt is geen fout: de knop blijft dan gewoon staan, want delen is
