@@ -111,10 +111,13 @@ Dat geldt net zo goed voor goud, en daar is het één keer misgegaan: op het
 overdrachtscherm stond goud tegelijk voor de kroon (staat voor), het
 "+N"-label (net verdiend), de ronde-schijf (dit is de ronde nu), de rand om
 de overgedragen tijd én de startknop. Vijf betekenissen op één scherm.
-Het label is daarom groen geworden — die punten zijn geraden kaarten, en
-geraden is `--good`, hetzelfde vlak met hetzelfde inkt-teken als de
-goed-knop. Tel bij een nieuw element altijd even hoe vaak een kleur al op
-datzelfde scherm staat.
+
+Het label groen maken haalde er één weg en liet er vier staan, en dát is de
+les die overblijft: **één instantie repareren brengt de telling niet omlaag.**
+Er staan er nu drie — de ronde-schijf, het merkteken van de ronde waar je in
+zit, en de startknop — doordat de kroon en de overgedragen tijd om hun eigen
+redenen van dit scherm verdwenen zijn. Tel bij een nieuw element dus niet of
+díe kleur al iets betekent, maar hoe vaak ze op datzelfde scherm al staat.
 
 Kleur staat ook nooit alleen: elke toestand heeft er een tweede kanaal bij
 (een vorm, een teken, een woord, een beweging).
@@ -213,16 +216,14 @@ laten.
 
 Die regel stond hier wel opgeschreven maar was nooit doorgetrokken, en dat
 is precies de fout die de stand in twee kopieën ook al eens maakte: alleen
-de kaartband kreeg zijn `<path>`. `#carryRect` en `#pauseRect` bleven een
-`<rect>` en hielden dus hun anker in de hoek linksboven, terwijl de
-kaartband en de aftelschijf (die zijn twaalf uur van `rotate(-90deg)` op
-`.cd-disc .ring` krijgt) op twaalf uur stonden. Twee tegen twee, op
-schermen die elkaar direct opvolgen. Alle vier staan nu op twaalf uur. Bij
-een vaste `viewBox` kan dat gewoon in de opmaak — `M40 6 H74 V74 H6 V6 Z`
-voor de 68×68 van de overdracht, `M40 5 H75 V75 H5 V5 Z` voor de 70×70 van
-het paneel — en de omtrek die de JS al hardcodeert blijft kloppen, want een
+de kaartband kreeg zijn `<path>`. `#pauseRect` bleef een `<rect>` en hield
+dus zijn anker in de hoek linksboven, terwijl de kaartband en de aftelschijf
+(die zijn twaalf uur van `rotate(-90deg)` op `.cd-disc .ring` krijgt) op
+twaalf uur stonden. Alle drie staan nu op twaalf uur. Bij een vaste `viewBox`
+kan dat gewoon in de opmaak — `M40 5 H75 V75 H5 V5 Z` voor de 70×70 van het
+paneel — en de omtrek die de JS al hardcodeert blijft kloppen, want een
 gesloten pad om dezelfde rechthoek is even lang. Controleer dat door te
-tékenen en niet door te rekenen: zet alle vier op 60% en kijk waar het gat
+tékenen en niet door te rekenen: zet ze alle drie op 60% en kijk waar het gat
 valt.
 
 En hou de baan in één stuk. Er hebben even inkepingen op de hele seconden in
@@ -385,9 +386,16 @@ tot je verder tikte -- terwijl "wie is er nu aan de beurt" op twee van die
 schermen apart onthuld werd. `#s-handoff` is nu het enige scherm, en het
 vult altijd dezelfde drie vakken in dezelfde volgorde:
 
-1. **stand** -- hoe staan we, wie is er aan zet, wat kwam er net bij;
-2. **opdracht** -- wat moet je doen;
+1. **stand** -- hoe staan we, wie is er aan zet;
+2. **opdracht** -- wat moet je doen, en hoe groot is wat eraan komt;
 3. **start** -- één tik, de enige handeling; het aftellen komt erna.
+
+De eerste twee zitten inmiddels op hetzelfde vlak. De stand stond ernaast, in
+een eigen omrand kaartje op de ploegkleur, en dat gaf het scherm drie vlakken
+waar twee genoeg zijn. `buildTally()` hangt haar met `prepend` in de
+opdrachtkaart; daarmee staat alle tekst op hetzelfde papier -- op ploegkleur
+haalt `--ink-2` maar 1,5:1 -- en houdt het scherm nog de kaart en de knop
+over.
 
 De twee wissels vragen het tegenovergestelde, en dát is wat het verschil
 tussen de twee standen moet dragen. Bij een **beurtwissel** gaat het toestel
@@ -403,17 +411,33 @@ niets. Een tafel die de overdracht eenmaal geleerd heeft, geeft het toestel
 bij ronde 2 dus aan de verkeerde ploeg door -- het scherm ziet er immers uit
 als "geef door".
 
-Nu hangen álle kanalen die "wie" dragen aan de beurtwissel, en aan die alleen:
-de mascotte van wie aan zet is groeit daar veel harder (66 px tegen 42), ze
-ademt, en ze komt op met dezelfde trede op de ladder die de rondewissel aan
-zijn tekening geeft. In de rondestand blijft ze op haar gewone opgetilde maat
-staan -- het reliëf zegt nog steeds wie aan zet is, maar het kondigt niets
-aan. Dat verschil ís de mededeling. `.mode-round` schakelt ertussen, en elke
-regel die eraan hangt staat als `#s-handoff:not(.mode-round)` genoteerd.
+Het verschil zat lang in de **dichtheid van vak 2**: compact bij een
+beurtwissel, uitgeklapt bij een rondewissel. Die compacte variant bestond om
+een goede reden -- de kaart overstemde het antwoord op "wie is er nu" met
+39.372 px2 tegen 4.484 -- maar het was een symptoom repareren. Twee dingen
+vochten om dezelfde blik omdat het twee vlakken wáren. Zet de stand ín de
+kaart en die strijd is voorbij: wie aan zet is, is de grote mascotte in de
+kop van de kaart zelf.
 
-De opdrachtkaart beweegt de andere kant op mee. Uitgeklapt houdt ze haar
-maat: daar ís de ronde het nieuws. Compact is ze een bijschrift geworden --
-dezelfde tegel en dezelfde woordmaat als `.roundchip` op het spelscherm.
+Daarmee heeft de kaart nog maar één maat, in allebei de standen, en zijn de
+twee wissels meetkundig gelijk: gemeten op 390 bij 844 een kaart van 343 bij
+372 en een knop op y 557, wat het ook is. Wat de twee onderscheidt is
+**beweging en één merkteken**, niet de opmaak:
+
+- **beurtwissel** -- de mascotte in de stand komt op en ademt daarna; het
+  opdrachtblok staat stil;
+- **rondewissel** -- de tekening en het woord komen op; de stand staat stil,
+  en het vakje van de ronde die net afliep loopt vol met inkt.
+
+Precies één gebied van de kaart leeft, en wélk gebied dat is, ís de
+mededeling. `.mode-round` schakelt ertussen, en elke regel die eraan hangt
+staat als `#s-handoff:not(.mode-round)` genoteerd.
+
+Dat je een marker voor "nieuwe ronde" verder niet nodig hebt, komt doordat
+het onderscheid al in het luidste element zit: `turnEnd()` draait `G.team` om
+en `endRound()` niet, dus bij een beurtwissel is de grote mascotte de ándere
+ploeg en bij een rondewissel dezélfde -- met een woord en een tekening die
+dan volledig veranderd zijn.
 
 Wat er níet meer staat, en waarom:
 
@@ -460,35 +484,59 @@ regel is juist de enige tekst in het spel die een speler moet kunnen lezen.
 
 De stand (`#hoTally`) toont geen fiche per punt. Zo'n stapel duwde tegen
 ronde 3 de startknop van het scherm af -- onzichtbaar in de test tot je 'm met
-een screenshot ziet staan. Een totaal met een groen "+N" ernaast zegt
-hetzelfde in vaste breedte, met een kroon boven wie voorstaat (hetzelfde teken
-als op het winnaarsscherm, want twee getallen vergelijken kan een vierjarige
-nog niet).
+een screenshot ziet staan. Er staat nu per ploeg een mascotte en een getal, en
+verder niets.
 
-Hier stond dat die stand kleiner blijft dan de opdrachtkaart, want ze is
-naslag. Dat geldt nog steeds bij een **rondewissel**, en daar is het ook
-gemeten (92.355 px2 kaart tegen 16.439 stand). Bij een **beurtwissel** was het
-precies verkeerd om: 39.372 px2 kaart tegen 4.484 voor de opgetilde tegel, dus
-het antwoord op de enige vraag die dat scherm stelt was negen keer kleiner dan
-een herhaling die er de vorige beurt al net zo stond en drie tellen later op
-de balk terugkomt.
+**De kroon en het "+N" zijn er allebei af gegaan**, en de reden is bij allebei
+dezelfde: ze zeiden iets over de ploeg die het toestel juist kwijtraakt, op
+het scherm dat aan de ploeg erná gericht is, en van geen van beide hangt een
+handeling af.
 
-Erger dan de maat was de richting van de blik. Wie net gespeeld heeft draagt
-de kroon én het groene "+N", dus de drie opvallendste tekens op de stand
-hoorden alle drie bij de ploeg die het toestel juist kwijtraakt. Nu wint de
-stand daar in beide assen: 23.857 tegen 13.149.
+De kroon zei wie voorstaat. Dat is twaalf keer per potje een mededeling waar
+niemand iets mee doet -- en voor het kind dat achterstaat twaalf keer dezelfde
+mededeling. Het argument dat haar hier ooit neerzette ("twee getallen
+vergelijken kan een vierjarige nog niet") klopt, maar het is een argument over
+het winnaarsscherm: dáár doet de vraag ertoe. Ze bestaat daar nog, gebouwd door
+`tallyNode()`, en is door de schaarste een prijs geworden in plaats van
+doorlopend commentaar.
 
-Reken bij een wijziging hier dus per stand, en niet één keer voor allebei.
+Het "+N" zei wat de vorige beurt opleverde. Dat is tijdens het spelen al
+verteld, en luider: het label in de balk telt per kaart op, het vliegende punt
+landt erop, en `Snd.goed()` gaat er een halve toon bij omhoog. Wie scoorde
+heeft het gezien én gehoord. Het hier nog eens stil herhalen is de zwakste van
+de twee vertoningen -- en het was ook het element dat de rij scheeftrok: het
+schoof het cijfer van de ene ploeg opzij en dat van de andere niet, zodat twee
+getallen die je moet vergelijken nooit op dezelfde plek in hun eigen blok
+stonden. Er is geen schikking die een derde element gratis in dat blok houdt:
+ernaast geeft een gat, eronder duwt het cijfer van de hartlijn van de
+mascotte. Voor wie luistert verandert er niets -- `paintHoTally()` zet allebei
+de feiten nog in de aria-label.
 
 De knop rechtsboven draagt hier een huisje en geen pauzeteken: er loopt geen
 klok, dus er valt niets te pauzeren. De enige reden om er te tikken is
 weggaan -- en dat is wat het huisje op het winnaarsscherm ook betekent.
 
-De merktekens van de hoeveelste ronde (`.rounddots`) staan alleen in de
-uitgeklapte kaart. "De hoeveelste van de drie" is een vraag die je op een
-rondegrens stelt en niet twaalf keer per potje; tussen twee beurten verandert
-er niets aan het antwoord. Wie luistert houdt het in beide standen, want het
-getal staat in de aria-label van de kaart.
+De merktekens van de hoeveelste ronde (`.rounddots`) staan onder de tekening,
+in allebei de standen. Hier stond dat ze alleen in de uitgeklapte kaart
+hoorden, want tussen twee beurten verandert er niets aan het antwoord. Dat
+klopt, maar verbergen is signaleren met een afwezigheid, en het maakte de twee
+standen verschillend op een manier die niets betekent. Ze zijn het
+paginanummer van de ronde, en een paginanummer dat verdwijnt omdat de bladzijde
+niet omsloeg is vreemder dan een dat blijft staan.
+
+Verbruikt is inkt, nu is goud, nog te komen is leeg. Dat volgelopen vakje is
+het enige teken op dit scherm dat zegt dat er een ronde afgesloten is, en het
+kost geen enkel nieuw element.
+
+Aan de voet van de kaart staan twee tellers: hoeveel kaarten er nog liggen en
+hoe lang je krijgt. Allebei altijd in beeld, ook als er niets bijzonders aan
+is -- zo betekent het teken elke keer hetzelfde, en hoeft niemand het te leren
+op het ene moment dat het afwijkt. Ze staan aan de vóét omdat ze over de beurt
+gaan die de knop eronder start; in de kop lazen ze als bijschrift bij de ronde
+erboven. Ze delen één tekenstijl (`#i-kaarten` en `#i-zand`, contour in
+`currentColor`): `#i-glass` kon dat niet doen, want dat is de merkplaat --
+gouden zandloper op crème contour, getekend om op een inkt-vlak te staan -- en
+naast een inkt-teken op papier las hij als een gouden splinter.
 
 Het scherm blijft hier aan. De wake lock liep alleen tijdens een beurt --
 `show()` liet hem los op elk scherm dat geen `play` was -- en daarmee was
@@ -530,6 +578,50 @@ plek, zodat ze bij het oplossen blijft staan waar ze staat en het spelscherm
 eronder haar daar al heeft. Nagemeten op 390 bij 844: 48 bij 48 op (32, 32),
 aan allebei de kanten van de wissel.
 
+En de gouden schijf begint op de plek van de knop die je net indrukte. Die
+twee waren al hetzelfde ding -- 177 tegen 179 px, allebei goud, allebei op
+cx 195 -- alleen lagen ze 225 px uit elkaar. Ze stijgt daarna in 340 ms naar
+haar eigen midden: de verbinding wordt in de eerste beeldjes gelegd, en
+daarna hoort het cijfer in het midden, want daar kijkt iemand die het toestel
+net aangereikt krijgt. Bij beperkte beweging blijft ze op de knop staan, en
+dat is nog steeds de goede plek.
+
+**Let op de coördinatenval, want die kostte twee pogingen.** `.cd-round` en
+`.cd-team` trekken twee punten binnen hétzelfde vervormde vlak van elkaar af
+(de tegel op de balk min de oorsprong van het aftelvlak), en dat verschil is
+transform-invariant -- ze overleven dus de binnenkomst-animatie van het
+spelscherm, ook al wordt er middenin gemeten. De rechthoek van de startknop
+komt van het vórige scherm en heeft die bescherming niet. Verschuiven op een
+mid-animatie meting klopte zolang de animatie liep en zat er zes pixels naast
+zodra ze stilviel; een tweede correctieslag corrigeerde alleen naar hetzelfde
+bewegende doel. Wat wél opgaat: het aftelvlak ligt met `inset: 0` op de
+opvulbox van `.screen`, en die begint op (0, 0) van het venster -- lokale
+coördinaten zijn hier vensters-coördinaten, dus de gemeten rechthoek kan er
+rechtstreeks in. Meten moet in de klik-handler; een tel later is het
+overdrachtscherm weg en heeft de knop geen rechthoek meer.
+
+## De worp verklapt zichzelf niet
+
+`handoff()` zette de ploegkleur op het scherm vóór `tossTeams()` liep. Dat was
+onschuldig zolang de worp een klein opgetild tegeltje in een aparte balk
+omschakelde: een achtergrond die het antwoord al wist, viel daar niet naast
+op. Sinds de stand in de kaart staat wisselt de worp de gróte mascotte, en
+toen stond er een seconde lang "vos" op de kaart terwijl het hele scherm
+"uil" zei -- het luidste kanaal in tegenspraak met het op een na luidste, op
+het ene scherm dat aankondigt wie begint.
+
+De grond blijft nu neutraal (`--paper-2`) zolang er geloot wordt, en de kleur
+stroomt binnen op het moment dat de worp landt. De kleur ís het antwoord, dus
+ze hoort met het antwoord te komen. `landToss()` zet haar goed bij een
+afgebroken worp en bij beperkte beweging, waar `tossTeams()` meteen
+terugkeert; `tossTeams()` zet daarna opzettelijk weer neutraal en zet de
+echte kleur pas in de laatste stap.
+
+Wat hier níet moet: de achtergrond mee laten flikkeren met de worp. Dat is
+veel spannender en het is de eerlijkste vertaling van "de kleur wordt
+geloot", maar het zijn zeven volledige schermwisselingen in een seconde,
+waarvan de eerste paar 50 ms uit elkaar -- dat zet je niet voor kinderen neer.
+
 ## De eindstand telt niet, ze noemt
 
 Het winnaarsscherm hield de fiches nog even -- het was "verder leeg", dus
@@ -555,15 +647,19 @@ al -- dat is de streep door de pas-knop als de stapel op is. Een tweede
 `.bar` erbij zette meteen `display: flex` en een rand op dat SVG-pad. Grep
 even voor je een korte naam pakt.
 
-## Eén label voor "wat er bij komt", op beide schermen
+## Eén label voor "wat er bij komt", en nog maar één plek
 
-Wat je tijdens een beurt verzamelt en wat er daarna op de stand bij komt, is
-dezelfde grootheid, en dus hetzelfde ding: een groen `+N` met een
-inkt-contour (`.gain`), rechts van de mascotte. Het waren twee dingen -- een
-rij ploegkleurige fiches onder de mascotte tijdens het spelen, een groen
-label ernaast op het overdrachtscherm -- en dan is er niets dat verraadt dat
-het om hetzelfde gaat. Zelfde kleur, zelfde vorm, zelfde plek, zelfde
-leesrichting.
+Wat je tijdens een beurt verzamelt is een groen `+N` met een inkt-contour
+(`.gain`), rechts van de mascotte in de balk. Het waren ooit twee dingen --
+een rij ploegkleurige fiches onder de mascotte tijdens het spelen, een groen
+label op het overdrachtscherm -- en die zijn toen tot één vorm gebracht: zelfde
+kleur, zelfde vorm, zelfde plek, zelfde leesrichting.
+
+Van die twee plekken is er nu één over. Het label op de overdracht is weg
+(zie hierboven bij de stand): daar was het een stille herhaling van iets dat
+tijdens de beurt al luider verteld is, op het scherm van de ploeg erná. Wat
+hieronder staat gaat dus over de balk tijdens het spelen -- de plek waar het
+label wél hoort, bij de ploeg die scoort, op het moment dat ze scoort.
 
 Groen en niet de ploegkleur: dit zijn geraden kaarten, en geraden is
 `--good`. De ploeg staat al in de mascotte ernaast.
@@ -610,22 +706,38 @@ en een goede ploeg haalt er twaalf.
 
 ## Eén stand, twee schermen
 
-`#hoTally` en de stand in het pauzepaneel zijn hetzelfde onderdeel met
-dezelfde twee tekens: de kroon boven wie voorstaat, de opgetilde tegel
-(`.side.up`) onder wie aan zet is. Ze waren losse kopieën, en die groeiden
-uit elkaar: de kopie in het paneel miste de `.head`-omhulling en viel
-daardoor buiten `.mini-score .head > svg`, zodat beide mascottes op 0 bij 0
-pixels stonden en er twee kale getallen overbleven zonder eigenaar --
-precies het soort tekst-zonder-beeld dat de harde eis verbiedt.
+`#hoTally` en de stand in het pauzepaneel zijn hetzelfde onderdeel: per ploeg
+een mascotte en een getal, en wie aan zet is is de grote mascotte. Ze waren
+losse kopieën, en die groeiden uit elkaar: de kopie in het paneel miste de
+`.head`-omhulling en viel daardoor buiten `.mini-score .head > svg`, zodat
+beide mascottes op 0 bij 0 pixels stonden en er twee kale getallen overbleven
+zonder eigenaar -- precies het soort tekst-zonder-beeld dat de harde eis
+verbiedt.
 
 Hier stond "wie de ene aanpast, past de andere mee aan, of voegt ze samen".
 Ze zijn nu samengevoegd: `buildTally()` bouwt de twee zijden en wordt bij het
 laden twee keer aangeroepen, voor `#hoTally` en voor `#pauseTally`. In de
-opmaak staan allebei de vakken leeg. Ze kúnnen dus niet meer verschillen, en
-de ids blijven dezelfde (`hoSideA`, `pauseScoreB`, ...) zodat
-`paintHoTally()` en `paintPauseScore()` ze gewoon blijven vinden. Het enige
-echte verschil is een vlag: het groene "+N" hoort bij een beurt die net
-afgelopen is, en in het paneel is er geen.
+opmaak staan allebei de vakken leeg. De ids blijven dezelfde (`hoSideA`,
+`pauseScoreB`, ...) zodat `paintHoTally()` en `paintPauseScore()` ze gewoon
+blijven vinden.
+
+**En die garantie dekt de opmaak, niet de stijlen.** Dat is precies waar het
+een tweede keer misging: de hele herziening van de stand stond onder
+`#hoRoundCard`, en het paneel volgde daardoor niet. Nagemeten waren de twee
+standen toen weer twee verschillende dingen -- op de overdracht een mascotte
+met een getal, in het paneel een opgetilde papieren tegel mét kroon, in een
+paneel dat zelf al een omrand vlak is. Een kader in een kader.
+
+De maten staan daarom in één selectorlijst met allebei de plekken erin
+(`#s-handoff .mini-score ..., #pauze .mini-score ...`). De ids staan er om in
+specificiteit te winnen van de bestaande `#s-handoff`-regels, niet omdat de
+twee schermen iets verschillends krijgen. Wie hier een waarde wijzigt,
+wijzigt hem op allebei -- en wie hier iets toevoegt onder alleen `#s-handoff`,
+laat het paneel weer achter.
+
+Het enige echte verschil is beweging: op de overdracht ademt de mascotte van
+wie aan zet is, in het paneel niet. Daar staat een beurt stil, en iets dat
+ademt spreekt dat tegen.
 
 ## App-pictogram en installeerbaarheid
 
