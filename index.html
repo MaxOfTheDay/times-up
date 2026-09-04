@@ -1656,6 +1656,9 @@ input[type=range]::-moz-range-thumb {
    schuift de gecentreerde groep op een kort scherm onder het huisje door. */
 #s-handoff {
   justify-content: center; align-items: center; gap: 28px;
+  /* De grond stroomt binnen als de worp landt -- geen harde knip. Alleen
+     deze eigenschap: de kaart en de knop mogen niet meebewegen. */
+  transition: background-color calc(.35s * var(--dur)) ease;
   background: var(--team);
   padding-top: calc(env(safe-area-inset-top, 0px) + var(--corner) + var(--tap));
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--corner));
@@ -4822,7 +4825,16 @@ function handoff(mode, freshA, freshB) {
   // De ploegkleur staat op het scherm zelf -- ook bij een rondewissel, want
   // dit scherm hoort dan nog steeds bij die ploeg; alleen valt er niets te
   // onthullen.
-  $("#s-handoff").style.setProperty("--team", t.color);
+  /* Bij de wórp nog niet. De ploegkleur ís het antwoord op de enige vraag
+     die dat scherm stelt, dus zolang er geloot wordt houdt het scherm een
+     neutrale grond en stroomt de kleur pas binnen als de worp landt.
+
+     Dit was onschuldig zolang de worp een klein tegeltje in een aparte balk
+     omschakelde. Nu wisselt hij de grote mascotte op de kaart, en dan stond
+     er een seconde lang "vos" op de kaart terwijl het hele scherm "uil" zei
+     -- het luidste kanaal in tegenspraak met het op een na luidste, op het
+     scherm dat aankondigt wie begint. */
+  $("#s-handoff").style.setProperty("--team", tossPending ? "var(--paper-2)" : t.color);
 
   // Vak 1: de stand, met de ploeg die aan zet is opgetild.
   paintHoTally(freshA || 0, freshB || 0);
@@ -4879,7 +4891,18 @@ function handoff(mode, freshA, freshB) {
    kind van vier. Wat de lange druk echt afdekte was een strijkende vinger
    tijdens het doorgeven, en dat vangt het aftellen nu op: een misser kost
    drie tellen in plaats van een beurt. */
-$("#btnStartTurn").addEventListener("click", () => { Snd.unlock(); startTurn(); });
+/* De maat en plek van de knop op het moment van de tik. Het aftelvlak legt
+   zijn gouden schijf daar neer, zodat de cirkel die je indrukte de cirkel is
+   die begint te tellen -- ze waren al even groot (177 tegen 179), even goud
+   en even ver van het hart; alleen lagen ze 225 px uit elkaar.
+   Meten moet hier: een tel later is het overdrachtscherm weg en heeft de
+   knop geen rechthoek meer. */
+let goRect = null;
+$("#btnStartTurn").addEventListener("click", () => {
+  const r = $("#btnStartTurn").getBoundingClientRect();
+  if (r.width > 0) goRect = { x: r.x, y: r.y, w: r.width, h: r.height };
+  Snd.unlock(); startTurn();
+});
 
 /* ---------- de klok ---------- */
 let clockRaf = null, deadline = 0, lastTickAt = 0;
@@ -5131,6 +5154,48 @@ function countdown(done) {
       $("#cdMascot").style.height = c.height + "px";
     }
   }
+  /* De schijf begint waar de knop stond en stijgt daarna naar haar eigen
+     midden: de verbinding wordt in de eerste beeldjes gelegd, en daarna
+     hoort het cijfer in het midden, want daar kijkt iemand die het toestel
+     net aangereikt krijgt.
+
+     Absoluut plaatsen met de gemeten rechthoek zélf, en niet verschuiven ten
+     opzichte van een gemeten stand: het spelscherm draait bij binnenkomst
+     zijn eigen animatie af, dus een meting vlak na show("play") staat
+     mid-animatie. Verschuiven op dat verschil klopte zolang die animatie
+     liep en zat er zes pixels naast zodra ze stilviel. De twee tegels
+     hierboven hebben daar geen last van omdat ze twee punten binnen hétzelfde
+     vervormde vlak van elkaar aftrekken -- dat verschil is transform-
+     invariant. Deze rechthoek komt van het vórige scherm, dus die truc gaat
+     hier niet op. Wat wél opgaat: dit vlak ligt met inset:0 op de opvulbox
+     van .screen, en die begint op (0, 0) van het venster. */
+  const disc = $(".cd-disc");
+  disc.style.transition = "none";
+  const natW = disc.getBoundingClientRect().width || 0;
+  if (goRect && goRect.w > 0 && natW > 0) {
+    disc.style.position = "absolute";
+    disc.style.margin = "0";
+    disc.style.left = goRect.x + "px";
+    disc.style.top = goRect.y + "px";
+    disc.style.width = goRect.w + "px";
+    disc.style.height = goRect.h + "px";
+    /* Bij beperkte beweging blijft ze staan waar de knop stond. Dat is nog
+       steeds de goede plek, alleen zonder de reis ernaartoe. */
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      disc.getBoundingClientRect();                 // forceer de beginstand
+      disc.style.transition =
+        "left .34s var(--e-pop), top .34s var(--e-pop)," +
+        "width .34s var(--e-pop), height .34s var(--e-pop)";
+      requestAnimationFrame(() => {
+        const o = el.getBoundingClientRect();
+        disc.style.left = (o.width / 2 - natW / 2) + "px";
+        disc.style.top = (o.height / 2 - natW / 2) + "px";
+        disc.style.width = natW + "px";
+        disc.style.height = natW + "px";
+      });
+    }
+  }
+
   el.focus({ preventScroll: true });
 
   /* De eerste tel klinkt vóór t0 gezet wordt, en niet andersom. Bij een koud
@@ -5646,6 +5711,10 @@ let tossPending = false, tossTimer = null;
 function landToss() {
   if (tossTimer !== null) { clearTimeout(tossTimer); tossTimer = null; }
   if (!G) return;
+  /* De kleur hoort bij de uitkomst, dus ze komt hier -- ook als de worp
+     wordt afgebroken door een schermwissel, en ook bij beperkte beweging,
+     waar tossTeams() hieronder meteen terugkeert. */
+  $("#s-handoff").style.setProperty("--team", TEAMS[G.team].color);
   $("#hoSideA").classList.toggle("up", G.team === 0);
   $("#hoSideB").classList.toggle("up", G.team === 1);
 }
@@ -5656,6 +5725,9 @@ function tossTeams() {
      gaat niets verloren -- het reliëf zegt nog steeds wie aan zet is, en wie
      begint was toch al geloot. */
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  /* Ná landToss(), die de kleur juist goed zet: hier gaat ze opzettelijk
+     weer op neutraal zolang er geloot wordt. */
+  $("#s-handoff").style.setProperty("--team", "var(--paper-2)");
   const stappen = 7;
   let i = 0;
   const stap = () => {
@@ -5665,7 +5737,12 @@ function tossTeams() {
     // Stijgt mee met het uitlopen, zoals een rad dat tot stilstand komt.
     Snd.tick(900 + i * 90, .06);
     i++;
-    if (i > stappen) { tossTimer = null; return; }
+    if (i > stappen) {
+      tossTimer = null;
+      // En hier landt hij: de kleur komt binnen met het antwoord.
+      $("#s-handoff").style.setProperty("--team", TEAMS[G.team].color);
+      return;
+    }
     tossTimer = setTimeout(stap, 50 + i * i * 5);
   };
   stap();
