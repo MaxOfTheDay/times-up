@@ -4854,7 +4854,14 @@ function paintRound(ico, size, host) {
   if (size === "kaart") ico.innerHTML = RI_ART[r];
   else ico.appendChild(svgUse(ROUND_ICON[r]));
   if (!host) return;
-  const word = host.querySelector("b"), how = host.querySelector("p");
+  /* Directe kinderen, en niet zomaar de eerste <b> in het vlak. Wie er een
+     bijschrift bovenin de kaart bij zet -- een teller bijvoorbeeld -- steelt
+     met een kale querySelector("b") het rondewoord: paintRound schrijft
+     "Eén woord" dan in dát bijschrift, en het echte woord blijft staan op
+     wat er in de opmaak stond. De tekening en de regel klopten ondertussen
+     wel, dus het ziet eruit als een half bijgewerkte kaart in plaats van als
+     een selector die de verkeerde greep. */
+  const word = host.querySelector(":scope > b"), how = host.querySelector(":scope > p");
   if (word) word.textContent = ROUND_WORD[r];
   /* De merktekens van de hoeveelste ronde staan alleen in de uitgeklapte
      kaart (zie .rounddots), maar wie luistert krijgt het getal in beide
@@ -5780,7 +5787,13 @@ function endRound() {
   Snd.leeg();
   Tril.leeg();
 
-  const freshA = G.scores[0][G.round - 1], freshB = G.scores[1][G.round - 1];
+  /* Wat de béurt opleverde, niet wat de hele ronde opleverde. Dit is
+     hetzelfde label als bij turnEnd(), op dezelfde plek, in dezelfde kleur --
+     en het stond hier voor een andere grootheid. Aan tafel las dat als één
+     monsterbeurt: "+3", "+3", dan ineens "+32". Er is geen kanaal dat het
+     verschil verraadde, dus het getal moet gewoon hetzelfde ding tellen.
+     Het rondetotaal is niet verdwenen; dat staat in de stand ernaast. */
+  const freshA = G.team === 0 ? G.gained : 0, freshB = G.team === 1 ? G.gained : 0;
 
   G.round++;
   G.pile = shuffle(G.deck.map((_, i) => i));
