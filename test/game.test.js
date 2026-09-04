@@ -76,8 +76,19 @@ const ok = (c, m) => { if (!c) fails.push(m); };
      'de stand ontbreekt bij de eerste overdracht');
   ok(await page.textContent('#hoScoreA') === '0' && await page.textContent('#hoScoreB') === '0',
      'een vers spel begint niet op 0 - 0');
-  ok(await page.getAttribute('#hoFreshA', 'hidden') !== null,
-     'er staat al iets "erbij" voor er gespeeld is');
+  // Geen "+N" meer op dit scherm: wat de vorige beurt opleverde is tijdens
+  // het spelen al geteld, geluid en al. Wat er wél staat zijn de twee
+  // tellers -- hoeveel kaarten er liggen en hoe lang je krijgt.
+  ok(await page.$('#hoTally .fresh') === null,
+     'het "+N" staat weer op het overdrachtscherm');
+  ok(await page.textContent('#hoCards span') === '16',
+     'de kaartenteller klopt niet bij de eerste overdracht');
+  ok(await page.textContent('#hoSecs span') === '60',
+     'de secondenteller klopt niet bij de eerste overdracht');
+  // De kroon zegt wie voorstaat, en dat bepaalt hier niets. Ze bestaat nog
+  // op het winnaarsscherm; zie tallyNode().
+  ok(await page.$('#hoTally .crown') === null,
+     'de kroon staat weer op het overdrachtscherm');
 
   const seenPerRound = [];
   for (let round = 1; round <= 3; round++) {
@@ -88,16 +99,22 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     // je kijkt als je het toestel aangereikt krijgt.
     const woord = ['Omschrijven', 'Eén woord', 'Uitbeelden'][round - 1];
     const icoon = ['#r-praten', '#r-eenwoord', '#r-mimen'][round - 1];
-    ok(await page.textContent('#hoRoundCard b') === woord,
+    // Direct kind, niet zomaar de eerste <b>: de stand staat ín de kaart en
+    // heeft eigen cijfers. Precies de greep die paintRound() ook maakte.
+    ok(await page.textContent('#hoRoundCard > b') === woord,
        `ronde ${round}: verkeerd woord op het overdrachtscherm`);
-    // Een rondewissel klapt de opdrachtkaart uit: de regel staat erin en het
-    // pictogramvak draagt de ronde-tekening (een eigen <svg>, geen <use>).
-    // Dat uitklappen is het enige verschil tussen de twee overdrachten, dus
-    // het is ook het enige wat hier te controleren valt.
+    // De kaart heeft nog maar één maat: het pictogramvak draagt altijd de
+    // ronde-tekening (een eigen <svg>, geen <use>) en de regel staat er
+    // altijd in. De compacte variant bestaat niet meer, dus dit hoort in
+    // allebei de standen te gelden.
     ok(await page.$('#hoRoundCard.big #hoRoundIco > svg') !== null,
-       `ronde ${round}: de opdrachtkaart staat niet uitgeklapt`);
+       `ronde ${round}: de opdrachtkaart draagt de ronde-tekening niet`);
     ok((await page.textContent('#hoRoundCard p')).trim() !== '',
-       `ronde ${round}: de regel staat niet in de uitgeklapte kaart`);
+       `ronde ${round}: de regel staat niet in de kaart`);
+    // Het verbruikte rondevakje loopt vol met inkt: het enige teken dat zegt
+    // dat er een ronde afgesloten is.
+    ok(await page.$$eval('#hoRoundDots i.done', els => els.length) === round - 1,
+       `ronde ${round}: verkeerd aantal afgesloten rondevakjes`);
 
     // Een gewone tik; het aftellen erna houdt een losse aanraking tegen.
     // Afbreken zet je terug op het overdrachtscherm, zonder begonnen beurt.
@@ -168,9 +185,14 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     ok(st === (round < 3 ? 'handoff' : 'winner'), `ronde ${round} eindigde op ${st}`);
     if (round < 3) {
       ok(await game(() => window.__tijd.G.pendingMs) > 0, 'resterende tijd wordt niet doorgegeven');
-      ok(await page.getAttribute('#hoFreshA', 'hidden') === null ||
-         await page.getAttribute('#hoFreshB', 'hidden') === null,
-         `ronde ${round}: wat er deze ronde bij kwam wordt niet getoond`);
+      // Het "+N" is weg; wat een rondewissel nu meldt zijn de twee tellers.
+      // De stapel is opnieuw geschud, dus die staat weer op de hele bak --
+      // en de secondenteller draagt de tijd die is meegegaan.
+      ok(await page.textContent('#hoCards span') === '16',
+         `ronde ${round}: de kaartenteller staat niet terug op de hele bak`);
+      const mee = Number(await page.textContent('#hoSecs span'));
+      ok(mee > 0 && mee <= 60,
+         `ronde ${round}: de secondenteller staat op ${mee}`);
     }
   }
 
@@ -197,14 +219,15 @@ const ok = (c, m) => { if (!c) fails.push(m); };
        const other = document.querySelector('#hoSide' + (t === 0 ? 'B' : 'A'));
        return up.classList.contains('up') && !other.classList.contains('up');
      }), 'de ploeg die aan zet is wordt niet opgetild in de stand');
-  // Een beurtwissel is de andere stand van hetzelfde scherm: de opdracht is
-  // niet veranderd, dus de kaart blijft compact en de regel blijft weg. Zou
-  // ze hier ook uitklappen, dan zegt het scherm bij elke beurt dat er iets
-  // nieuws te leren valt.
-  ok(await page.$('#hoRoundCard.big') === null,
-     'de opdrachtkaart klapt uit bij een gewone beurtwissel');
-  ok((await page.textContent('#hoRoundCard p')).trim() === '',
-     'de regel staat op het scherm bij een gewone beurtwissel');
+  // Een beurtwissel is dezelfde kaart als een rondewissel -- één maat, altijd
+  // de regel erin. De compacte variant bestond omdat de kaart het antwoord op
+  // "wie is er nu" overstemde; sinds de stand ín de kaart staat is er niets
+  // meer te overstemmen. Wat de twee standen onderscheidt is beweging, niet
+  // meetkunde, en dat is hier niet te meten.
+  ok(await page.$('#hoRoundCard.big') !== null,
+     'de opdrachtkaart heeft niet haar enige maat bij een beurtwissel');
+  ok((await page.textContent('#hoRoundCard p')).trim() !== '',
+     'de regel ontbreekt bij een gewone beurtwissel');
 
   // --- herladen midden in een beurt komt terug op de grens ---
   // Dit stond hier omgekeerd: een potje overleefde geen herlaadbeurt, en dat
