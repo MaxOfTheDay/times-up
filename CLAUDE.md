@@ -622,6 +622,54 @@ veel spannender en het is de eerlijkste vertaling van "de kleur wordt
 geloot", maar het zijn zeven volledige schermwisselingen in een seconde,
 waarvan de eerste paar 50 ms uit elkaar -- dat zet je niet voor kinderen neer.
 
+## De grond stroomt, het scherm vervaagt niet
+
+Die vloed was er alleen voor de worp. Ze geldt nu voor elke overdracht, en
+daarmee is `#s-handoff` het enige scherm zonder `screenIn`. Dat is geen
+vergeten regel maar de hele maatregel, en de reden staat in beeld.
+
+`screenIn` vervaagt het hele scherm -- grond én inhoud -- boven het papier
+van het scherm eronder. Op elk ander scherm is dat onschuldig, want daar is
+de grond ook papier. Hier is de grond het antwoord op "van wie is dit
+toestel nu", en die kwam dus binnen via grijs. Gefilmd op vijf keer traag en
+teruggerekend: de grond stond op 47 ms op `170,191,208` en pas op 231 ms op
+ploegkleur, en de regeltekst op de kaart haalde 1,1 : 1 op 3 ms, 2,2 op 47
+en 4,8 op 93 -- het luidste kanaal van de app en de enige tekst die een
+volwassene moet lezen, allebei een derde van de binnenkomst lang
+onleesbaar. Bij een niet-lezer aan tafel is dat precies de verkeerde helft
+om te laten wachten.
+
+Nu staat de kaart vanaf het eerste beeld op 15,8 : 1 en doet de grond het
+werk alleen: papier op 3 ms, ploegkleur op 360. Je ziet het papier waar je
+net vandaan komt vollopen met de kleur van de ploeg die hem krijgt.
+
+**De vervaging verhuist niet, ze vervalt.** Dat is de les die het proberen
+waard was: er zijn drie varianten gebouwd die de grond een eigen laag gaven
+zodat de inhoud haar `screenIn` kon houden. Met de inhoud 120 ms achter de
+grond stond er ruim een tiende seconde een leeg gekleurd scherm; met 40 ms
+achter kwam het grijs gewoon terug (1,1 - 2,2 - 4,7 : 1), want inhoud die
+vervaagt bóven een grond die zelf nog beweegt is precies waar de regel "een
+vlak in een keten vervaagt maar op één plek" over gaat. Krijgt de grond zijn
+eigen tijd, dan moet de vervaging weg.
+
+En er hoeft geen laag bij. `#s-handoff` had de `transition:
+background-color` al staan, voor de worp. `handoff()` zet `--team` op
+`var(--paper)` vóór `show()` en na twee beeldjes op de echte kleur -- twee,
+want het eerste zet `display` op flex en pas het tweede heeft een
+beginwaarde om vandaan te lopen.
+
+Bij beperkte beweging niet: daar staat `transition: none !important`, dus
+papier zou geen begin van een vloed zijn maar één beeld flikkering. Dat is
+dezelfde uitzondering die `landFly()` en `holdButton()` al maken, en om
+dezelfde reden.
+
+Bij het filmen kwam er iets anders boven dat hier los van staat:
+`#s-handoff.on > #hoTally` raakte niets meer, want `buildTally()` hangt de
+stand ín de opdrachtkaart. De golf van drie vakken was dus een golf van twee
+die op haar tweede tel begon -- niets op nul, de kaart op zeventig. Een
+selector die niets raakt zegt dat niet, en geen test kijkt ernaar. De
+vertragingen zijn een tel opgeschoven; de kaart begint weer op nul.
+
 ## De eindstand telt niet, ze noemt
 
 Het winnaarsscherm hield de fiches nog even -- het was "verder leeg", dus
