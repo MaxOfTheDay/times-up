@@ -670,6 +670,69 @@ die op haar tweede tel begon -- niets op nul, de kaart op zeventig. Een
 selector die niets raakt zegt dat niet, en geen test kijkt ernaar. De
 vertragingen zijn een tel opgeschoven; de kaart begint weer op nul.
 
+### En het spelscherm precies andersom
+
+`#s-play` heeft er ook geen, en om de spiegelbeeldige reden: **daar
+verandert de grond hélemaal niet.** Dit scherm komt altijd binnen achter
+het aftellen -- `show("play")` staat maar op één plek, in `startTurn()`, en
+die roept `countdown()` aan -- en dat aftelvlak is rand-tot-rand dezelfde
+ploegkleur als de overdracht waar je net vandaan komt. De vervaging voerde
+dus een verandering op die er niet was: op t+0 een bleke crème-roze wasem
+met een spookschijf erin, en pas na ruim 200 ms de kleur die er al stond.
+
+Erger was wat ze brak. De gouden schijf wordt op de gemeten rechthoek van
+de startknop gelegd, zodat de cirkel die je indrukte de cirkel is die
+begint te tellen. Maar die knop was dekkend en de schijf begon op nul, dus
+je zag geen "de knop wordt de schijf" maar "de knop verdween en er
+verscheen een schim". Nagemeten na de wijziging: knop op (106, 557) van
+177 px, schijf op het eerste beeld op (106, 557) van 177 px, dekking 1,00.
+Dezelfde cirkel, geen overgang nodig -- die was er al, ze was alleen niet
+te zien.
+
+Meegenomen: zonder die animatie heeft `#s-play` tijdens het aftellen geen
+transform meer, en daarmee vervalt de coördinatenval bij `.cd-round` en
+`.cd-team` (zie hierboven) helemaal. De gemeten rechthoeken kloppen nu
+zonder dat je op transform-invariantie hoeft te vertrouwen, en `sizeCard()`
+meet een kaart die stilstaat.
+
+## Vertrekken mag, als er niets achter wacht
+
+De ladder in `index.html` zegt "geen vertrekanimaties", en de reden erbij is
+scherper dan de regel: *"een uitloop houdt het volgende scherm tegen, en dat
+wachten voel je in een spel dat je doorgeeft."* Lees die reden, niet alleen
+de regel. Er zijn twee plekken waar geen volgend scherm staat te wachten, en
+daar mag het dus wel.
+
+`cdOut` was de eerste: de aftellaag lost op boven een kaart die al gedeeld
+wordt, en `done()` draait meteen. De tweede is de pauzesluier. Het
+spelscherm is nooit weggeweest -- het ligt eronder, met dezelfde kaart -- en
+`closePause()` zet de klok meteen weer aan. Alleen de pixels blijven nog
+0,18 s hangen. Zonder dat was hervatten de laatste harde knip in de app: één
+beeld paneel, het volgende beeld kaart met een lopende klok, terwijl je nog
+naar de knop keek die je net indrukte.
+
+Drie dingen die daaraan vastzitten:
+
+- **`hidden` gaat meteen aan.** `paused()` leest hem, en de klok, Escape en
+  de tik naast het paneel hangen daaraan. De uitloop is daarom een klasse
+  (`.uit`) die met een specifieker selector van
+  `[hidden] { display: none !important }` wint, plus een `@media`-regel
+  eronder die bij beperkte beweging weer `display: none` zet. Gemeten: 1,00
+  - 0,95 - 0,81 - 0,62 - 0,39 - 0,12 en weg op 210 ms; bij beperkte beweging
+  vanaf het eerste beeld weg.
+- **`inert` pas ná het verzetten van de focus**, anders belandt de focus op
+  de body in plaats van op de knop waar je vandaan kwam.
+- **Alleen bij hervatten, niet bij stoppen.** De stopknop gaat naar de
+  titel, en dáár geldt de reden van de ladder gewoon weer: die zet het
+  paneel hard uit. `openPause()` kapt een lopende uitloop af, anders gaat
+  het paneel open in een sluier die nog aan het oplossen is.
+
+Wat er níet bij komt: een aftelling bij hervatten. Die is geopperd -- de
+klok begint immers op de tik -- maar het aftellen bestaat om een strijkende
+vinger tijdens het doorgeven op te vangen, en bij hervatten gaat het toestel
+niet van hand. Je hebt het paneel zelf opengedaan en de stilstaande
+wijzerplaat staat erin; je weet waar je staat.
+
 ## De eindstand telt niet, ze noemt
 
 Het winnaarsscherm hield de fiches nog even -- het was "verder leeg", dus

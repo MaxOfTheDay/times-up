@@ -448,10 +448,31 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   display: flex;
   animation: screenIn calc(.22s / max(var(--dur), .001)) ease-out;
 }
-/* Op één scherm niet, en dat is met opzet: zie #s-handoff verderop. Daar
-   stroomt de grond van papier naar ploegkleur, en een vervaging over die
-   grond heen maakt van het hele scherm een tijdje grijs. */
-#s-handoff.on { animation: none; }
+/* Op twee schermen niet, en allebei met opzet.
+
+   #s-handoff: daar stroomt de grond van papier naar ploegkleur, en een
+   vervaging over die grond heen maakt van het hele scherm een tijdje grijs.
+   Zie de toelichting bij #s-handoff verderop.
+
+   #s-play: daar verandert de grond juist hélemaal niet. Dit scherm komt
+   altijd binnen achter het aftellen (show("play") staat maar op één plek,
+   in startTurn(), en die roept countdown() aan), en dat aftelvlak is
+   rand-tot-rand dezelfde ploegkleur als de overdracht waar je net vandaan
+   komt. De vervaging voerde dus een verandering op die er niet was: gefilmd
+   op vier keer traag stond er op t+0 een bleke crème-roze wasem met een
+   spookschijf erin, en pas na ruim 200 ms de kleur die er al stond.
+
+   En ze brak het enige dat deze rand wél te vertellen heeft. De gouden
+   schijf wordt op de gemeten rechthoek van de startknop gelegd, zodat de
+   cirkel die je indrukte de cirkel is die begint te tellen -- maar die knop
+   was dekkend en de schijf begon op nul. Wat je zag was niet "de knop wordt
+   de schijf" maar "de knop verdween en er verscheen een schim".
+
+   Meegenomen: zonder deze animatie heeft #s-play tijdens het aftellen geen
+   transform meer, en daarmee vervalt de coördinatenval bij .cd-round en
+   .cd-team helemaal -- de gemeten rechthoeken kloppen nu zonder dat je op
+   transform-invariantie hoeft te vertrouwen. */
+#s-handoff.on, #s-play.on { animation: none; }
 
 /* EEN VLAK IN EEN KETEN VERVAAGT MAAR OP ÉÉN PLEK.
    Opacity van een kind en van zijn ouder vermenigvuldigen, en het scherm
@@ -2188,6 +2209,32 @@ input[type=range]::-moz-range-thumb {
 .overlay:not([hidden]) { animation: scrimIn calc(.15s / max(var(--dur), .001)) ease-out; }
 .overlay:not([hidden]) .panel {
   animation: panelIn calc(.22s / max(var(--dur), .001)) var(--e-pop) backwards;
+}
+/* En hij lost weer op. Dat is de enige vertrekanimatie naast cdOut, en de
+   ladder verbiedt die -- maar lees de reden die daar staat: "een uitloop
+   houdt het volgende scherm tegen, en dat wachten voel je in een spel dat
+   je doorgeeft." Hier is er geen volgend scherm. Het spelscherm is nooit
+   weggeweest; het ligt er al, met dezelfde kaart, en closePause() zet de
+   klok meteen weer aan. Alleen de pixels blijven nog even hangen. Precies
+   de constructie van cdOut: de laag lost op boven iets dat al leeft.
+
+   Zonder dit was hervatten de enige harde knip die er nog was -- één beeld
+   paneel, het volgende beeld kaart met een lopende klok, terwijl je nog
+   naar de knop keek die je net indrukte.
+
+   `hidden` gaat meteen aan, want paused() leest hem en de klok, Escape en
+   de tik naast het paneel hangen daaraan. Deze regel wint van
+   `[hidden] { display: none !important }` op specificiteit, en de
+   media-regel eronder wint weer van deze: bij beperkte beweging is het
+   gewoon weg. */
+@keyframes scrimUit { from { opacity: 1; } to { opacity: 0; } }
+.overlay[hidden].uit {
+  display: grid !important;
+  pointer-events: none;
+  animation: scrimUit calc(.18s / max(var(--dur), .001)) ease-in forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .overlay[hidden].uit { display: none !important; }
 }
 /* Een gewoon stuk papier, net als de kaart en de opdracht: crème, inkt-rand,
    inktschaduw. Hier stond een gouden kleurplaat op (`--mis`), en die had ooit
@@ -5995,7 +6042,7 @@ $("#btnHome").addEventListener("click", () => { clearConfetti(); clearGame(); sh
    De klok staat stil zolang het paneel open is. Verder spelen is één tik;
    stoppen gooit het lopende spel weg en zit daarom achter een lange druk.
    ============================================================== */
-let pauseMs = 0, pauseReturn = null;
+let pauseMs = 0, pauseReturn = null, pauseUit = null;
 
 /* Het scherm áchter het paneel mag dicht: wie er met een toetsenbord of een
    schakelaar doorheen tabt naar "goed" mag geen punt meer scoren op een
@@ -6061,15 +6108,28 @@ function openPause() {
 
   pauseReturn = document.activeElement;
   screensInert(true);
+  // Een uitloop die nog liep, meteen afkappen: anders gaat het paneel open
+  // in een sluier die nog aan het oplossen is, en blijft hij inert.
+  clearTimeout(pauseUit);
+  $("#pauze").classList.remove("uit");
+  $("#pauze").inert = false;
   $("#pauze").hidden = false;
   $("#btnResume").focus({ preventScroll: true });
 }
 
 function closePause() {
-  $("#pauze").hidden = true;
+  const el = $("#pauze");
+  el.hidden = true;
   screensInert(false);
   if (pauseReturn && pauseReturn.isConnected) pauseReturn.focus({ preventScroll: true });
   pauseReturn = null;
+  /* Pas ná het verzetten van de focus: inert zou hem anders naar de body
+     gooien. Zie .overlay[hidden].uit -- de sluier hangt nog 0,18 s in beeld
+     terwijl alles eronder al weer speelt. */
+  el.inert = true;
+  el.classList.add("uit");
+  clearTimeout(pauseUit);
+  pauseUit = setTimeout(() => { el.classList.remove("uit"); el.inert = false; }, 200);
   if (current === "play" && pauseMs > 0) {
     deadline = performance.now() + pauseMs;
     pauseMs = 0;
