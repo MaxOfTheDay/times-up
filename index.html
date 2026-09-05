@@ -448,6 +448,10 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   display: flex;
   animation: screenIn calc(.22s / max(var(--dur), .001)) ease-out;
 }
+/* Op één scherm niet, en dat is met opzet: zie #s-handoff verderop. Daar
+   stroomt de grond van papier naar ploegkleur, en een vervaging over die
+   grond heen maakt van het hele scherm een tijdje grijs. */
+#s-handoff.on { animation: none; }
 
 /* EEN VLAK IN EEN KETEN VERVAAGT MAAR OP ÉÉN PLEK.
    Opacity van een kind en van zijn ouder vermenigvuldigen, en het scherm
@@ -463,19 +467,25 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    volgorde. Wie hier een vak bij zet, geeft het schuif of schaal -- geen
    opacity. Hetzelfde geldt voor panelIn onder scrimIn en voor crownIn.
 
-   De volgorde zelf blijft: stand, opdracht, start, zeventig milliseconden
-   na elkaar, en de startknop is als laatste stil -- precies het moment
-   waarop er iets te tikken valt.
+   De volgorde zelf blijft: opdracht, start, zeventig milliseconden na
+   elkaar, en de startknop is als laatste stil -- precies het moment waarop
+   er iets te tikken valt.
 
-   Reken die zeventig milliseconden niet als drie losse aankomsten. Ze
-   staan tegen een duur van 260, dus de drie overlappen voor bijna
-   driekwart: gemeten schuiven ze op +160 ms alle drie tegelijk (nog 1,4,
-   3,7 en 6,7 px te gaan). Wat je ziet is één golf van boven naar beneden
-   die op de knop eindigt, niet drie vakken die om de beurt aankomen. Dat
-   is ook de bedoeling: écht om de beurt zou vragen om een vertraging die
-   groter is dan de duur, en dan duurt deze binnenkomst 780 ms in plaats
-   van 400. Wie de stapjes groter maakt om het "duidelijker" te krijgen,
-   koopt dus vooral wachttijd.
+   Het waren er drie: stand, opdracht, start. De stand hangt sinds
+   buildTally() ín de opdrachtkaart, en `> #hoTally` raakte daarmee niets
+   meer -- de golf begon op haar tweede tel, met niets op nul en de kaart op
+   zeventig. Een selector die niets raakt zegt dat niet; dit is gevonden
+   door de rand te filmen. Wie hier een vak bij zet, kijkt dus eerst welke
+   vakken echt directe kinderen van dit scherm zijn.
+
+   Reken die zeventig milliseconden niet als twee losse aankomsten. Ze staan
+   tegen een duur van 260, dus ze overlappen voor bijna driekwart: gemeten
+   schuiven ze op +160 ms allebei tegelijk (nog 1,6 en 4,0 px te gaan). Wat
+   je ziet is één golf van boven naar beneden die op de knop eindigt, niet
+   twee vakken die om de beurt aankomen. Dat is ook de bedoeling: écht om de
+   beurt zou vragen om een vertraging die groter is dan de duur, en dan
+   duurt deze binnenkomst 520 ms in plaats van 330. Wie de stapjes groter
+   maakt om het "duidelijker" te krijgen, koopt dus vooral wachttijd.
 
    En het gaat nergens iets tegenhouden: sinds de vakken geen eigen opacity
    meer hebben staat alles vanaf het eerste beeld leesbaar in beeld, alleen
@@ -490,13 +500,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   from { transform: translateY(8px); }
   to   { transform: translateY(0); }
 }
-#s-handoff.on > #hoTally,
 #s-handoff.on > #hoRoundCard,
 #s-handoff.on > .go-wrap {
   animation: slotIn calc(.26s / max(var(--dur), .001)) ease-out backwards;
 }
-#s-handoff.on > #hoRoundCard { animation-delay: calc(.07s / max(var(--dur), .001)); }
-#s-handoff.on > .go-wrap     { animation-delay: calc(.14s / max(var(--dur), .001)); }
+#s-handoff.on > .go-wrap { animation-delay: calc(.07s / max(var(--dur), .001)); }
 
 /* ============================================================
    2. OPPERVLAK — één regel voor elk stuk papier.
@@ -1656,8 +1664,30 @@ input[type=range]::-moz-range-thumb {
    schuift de gecentreerde groep op een kort scherm onder het huisje door. */
 #s-handoff {
   justify-content: center; align-items: center; gap: 28px;
-  /* De grond stroomt binnen als de worp landt -- geen harde knip. Alleen
-     deze eigenschap: de kaart en de knop mogen niet meebewegen. */
+  /* De grond stroomt binnen -- geen harde knip. Alleen deze eigenschap: de
+     kaart en de knop mogen niet meebewegen.
+
+     Dit stond er eerst alleen voor de worp. Het geldt nu voor elke
+     overdracht, en dat is de reden dat dit scherm als enige geen screenIn
+     heeft. Gefilmd op vijf keer traag en teruggerekend: met screenIn erop
+     vervaagde het hele scherm -- grond én inhoud -- boven het papier van
+     het spelscherm, en dus kwam de ploegkleur binnen via grijs
+     (170,191,208 op 47 ms) terwijl de regeltekst op de kaart 1,1 : 1 stond
+     op 3 ms, 2,2 op 47 en 4,8 op 93. Het luidste kanaal van de app en de
+     enige tekst die een volwassene moet lezen, allebei een derde van de
+     binnenkomst lang onleesbaar.
+
+     Zonder die vervaging staat de kaart vanaf het eerste beeld op 15,8 : 1
+     en doet de grond het werk alleen: papier op 3 ms, ploegkleur op 360.
+     Wat je ziet is het papier waar je net vandaan komt dat volloopt met de
+     kleur van de ploeg die hem krijgt -- hetzelfde gebaar als de worp, op
+     dezelfde vraag.
+
+     Er is geprobeerd de grond een eigen laag te geven zodat de inhoud haar
+     vervaging kon houden. Dat kan niet: inhoud die vervaagt bóven een grond
+     die zelf nog beweegt geeft precies het grijs waar slotIn hierboven over
+     gaat (gemeten 1,1 - 2,2 - 4,7 : 1). Krijgt de grond zijn eigen tijd,
+     dan vervalt de vervaging -- ze verhuist niet. */
   transition: background-color calc(.35s * var(--dur)) ease;
   background: var(--team);
   padding-top: calc(env(safe-area-inset-top, 0px) + var(--corner) + var(--tap));
@@ -4834,7 +4864,18 @@ function handoff(mode, freshA, freshB) {
      er een seconde lang "vos" op de kaart terwijl het hele scherm "uil" zei
      -- het luidste kanaal in tegenspraak met het op een na luidste, op het
      scherm dat aankondigt wie begint. */
-  $("#s-handoff").style.setProperty("--team", tossPending ? "var(--paper-2)" : t.color);
+  /* En bij een gewone overdracht stroomt hij ook, alleen vanaf het papier
+     van het spelscherm waar je net vandaan komt. Daarom staat hier papier
+     en niet de ploegkleur: de echte kleur volgt onderaan, ná show(). Een
+     overgang loopt namelijk alleen als haar beginwaarde een beeld lang
+     gestaan heeft, en dit scherm staat tot dan op display: none.
+
+     Bij beperkte beweging niet: overgangen zijn daar uit, dus papier zou
+     geen begin van een vloed zijn maar één beeld flikkering. */
+  const vloed = current !== "handoff" && !tossPending &&
+    !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  $("#s-handoff").style.setProperty("--team",
+    tossPending ? "var(--paper-2)" : vloed ? "var(--paper)" : t.color);
 
   // Vak 1: de stand, met de ploeg die aan zet is opgetild.
   paintHoTally(freshA || 0, freshB || 0);
@@ -4881,6 +4922,14 @@ function handoff(mode, freshA, freshB) {
      hier bewaard wordt is altijd een beurt die nog moet beginnen. */
   saveGame(handoffMode);
   show("handoff");
+  /* Twee beeldjes: het eerste zet display op flex, pas het tweede heeft een
+     beginwaarde om vandaan te lopen. De getBoundingClientRect() ervoor
+     dwingt de opmaak af, zodat papier ook echt geschilderd is. */
+  if (vloed) {
+    $("#s-handoff").getBoundingClientRect();
+    requestAnimationFrame(() => requestAnimationFrame(() =>
+      $("#s-handoff").style.setProperty("--team", t.color)));
+  }
   wakeOverdracht();
 }
 
