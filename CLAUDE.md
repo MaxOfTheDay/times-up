@@ -1301,6 +1301,59 @@ Dat er in een andere stand nog iets ligt, hoeft nergens te staan: zet die
 stand terug en het staat er weer. **Zet daar geen uitleg voor terug** --
 niet als zin en niet als getal.
 
+### Die knop verschijnt, maar duwt niets
+
+Hij stond ónder de hint en kwam erbij op de eerste tik, en dat kostte 60 px
+(48 knop plus 12 marge): het hele raster zakte, en de tegel waar je vinger
+nog op lag zakte mee -- negentig procent van haar eigen hoogte van 67. Bij
+het terugleggen van de laatste kaart sprong diezelfde 60 px terug omhoog.
+Precies de fout waar `buildCards()` al voor oppast ("dan springt de kaart
+weg onder je hand"), alleen langs een andere weg.
+
+Twee dingen aan die fout zijn het onthouden waard. Chrome's **scroll
+anchoring** vangt hem op zodra de kop van de bak boven het venster uit
+staat -- daar is de verschuiving gemeten nul. Hij valt dus juist in het
+geval dat telt: je klapt de bak open en tikt je eerste kaart weg met die
+kop nog in beeld. En de knop is met zijn `.btn-plain`-huid het op één na
+zwaarste vlak van het paneel, terwijl de code er zelf al bij zei dat het
+"het zeldzaamste is wat je hier doet".
+
+De hint en de knop delen nu één rastervak (`.cb-slot`), zodat de sleuf
+altijd zo hoog is als de hoogste van de twee. Gemeten op 320, 360, 390,
+412, 844 en 768 breed, over vier overgangen (eerste kaart weg, twaalf erbij,
+alles terug): nul verschuiving, en één sleufhoogte per breedte.
+
+Dat de hint mag wijken is de kern en geen bezuiniging: **hij belóóft dat het
+terug kan, de knop dóét dat.** Wie één kaart terug wil tikt haar tegel --
+die staat bleek, doorgestreept en met "weggelegd, tik om terug te leggen"
+in haar aria-label.
+
+Wat er níet moest komen: een gereserveerde lege sleuf. Getekend is dat 60 px
+niets tussen de hint en de letterbalk, méér dan de 24 tot 48 waarmee dit
+scherm zijn velden scheidt, en het leest dus als een ontbrekend element. Een
+knop die blijft staan maar dood is, is dat ook -- die zegt niets wat de hint
+niet al zei. En in de letterbalk (waar hij zonder één pixel hoogte in past)
+draagt hij dezelfde huid als de lettertoetsen, dus las hij als nóg een
+letter, en zakte de balk van acht zichtbare letters naar vier -- weg is dan
+het teken dat er meer is.
+
+Twee dingen om niet stuk te maken:
+
+- **`visibility`, nooit `hidden` of `display: none`.** Die halen het vak uit
+  het raster, en dan zakt de sleuf terug naar de hoogte van de ander --
+  gemeten −13 px bij het terugleggen. `visibility` houdt allebei de vakken
+  staan én haalt het onzichtbare uit de tabvolgorde en de
+  toegankelijkheidsboom. Dat is de vierde keer dat de `[hidden]`-val hier
+  toeslaat, en de eerste waar `hidden` niet de oplossing maar de fout is.
+- **`#cbVol` blijft erbuiten.** Dat is de weigering bij `MIN_BAK`, en die
+  hoort zichzelf juist wél aan te kondigen -- je bereikt hem pas na een tik
+  of vijftig.
+
+De prijs, en die is gemeten: op 390 is de sleuf 48 px waar een hint van twee
+regels er 35 haalt, dus 13 px erbij als er niets weg ligt. Ligt er wél iets
+weg, dan scheelt het 47 (60 tegen 107). Op 320, waar de hint drie regels
+haalt, is het nul tegen zestig.
+
 Vier keuzes in de lijst die er anders uitzien dan ze bedoeld zijn:
 
 - **Weggelegde kaarten blijven op hun plek in het alfabet**, verbleekt en
