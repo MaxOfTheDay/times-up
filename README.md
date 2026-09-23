@@ -86,7 +86,9 @@ ook als je het toestel draait.
 Tijdens het spelen staat linksboven altijd wie aan de beurt is én wat de
 opdracht van deze ronde is — praten, één woord of uitbeelden — zodat wie het
 toestel aangereikt krijgt niet hoeft te vragen. Wordt de app weggeklikt of
-het scherm vergrendeld, dan bevriest de klok tot je terug bent.
+het scherm vergrendeld, dan gaat het pauzepaneel open: de klok staat stil tot
+iemand op verder tikt. Gebeurt het tijdens het aftellen, dan is er nog geen
+beurt begonnen en sta je terug op het overdrachtscherm.
 
 ## Kaarten aanpassen
 

@@ -5,8 +5,9 @@
  * deck, passen, de klok die afloopt, de ploegen die wisselen, de resterende
  * tijd die meegaat naar de volgende ronde, dat een herlaadbeurt midden in een
  * beurt het potje terugbrengt op de grens ervoor, dat de terugveeg het
- * pauzepaneel opent, dat stoppen het potje wél weggooit, en dat de laatste
- * kaart geraden op de bel precies één einde oplevert.
+ * pauzepaneel opent, dat stoppen het potje wél weggooit, dat de laatste
+ * kaart geraden op de bel precies één einde oplevert, en dat wegklikken het
+ * pauzepaneel opent (of het aftellen afbreekt).
  *
  * Draaien: npm run test:spel     (of npm test voor alles)
  * Duurt ruim 20 seconden: één beurt moet echt uitlopen om te zien wat er
@@ -359,6 +360,60 @@ const ok = (c, m) => { if (!c) fails.push(m); };
 
   await lastCardAtBuzzer(3);
   ok(await screen() === 'winner', 'laatste kaart op de bel in ronde 3: geen winnaarsscherm');
+
+  // --- weggeklikt of vergrendeld: het paneel gaat open ---
+  // De klok bevroor en liep bij terugkomst meteen weer, terwijl het toestel
+  // misschien nog in de hand van wie het net ontgrendelde lag. Nu wacht hij
+  // op een tik. Een headless browser raakt nooit echt verborgen, dus de
+  // toestand wordt nagebootst; delete haalt de getter van het prototype
+  // terug.
+  const zicht = s => page.evaluate(s => {
+    if (s === 'visible') { delete document.visibilityState; delete document.hidden; }
+    else {
+      Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => s });
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+    }
+    document.dispatchEvent(new Event('visibilitychange'));
+  }, s);
+  const paneelOpen = () => page.evaluate(() => !document.querySelector('#pauze').hidden);
+
+  await page.click('#btnAgain');
+  await page.waitForTimeout(200);
+  await startTurn();
+  await page.waitForTimeout(300);
+  await zicht('hidden');
+  ok(await paneelOpen(), 'wegklikken tijdens een beurt opent het pauzepaneel niet');
+  const bevroren = await page.textContent('#pauseSecs');
+  await page.waitForTimeout(400);
+  await zicht('visible');
+  await page.waitForTimeout(1200);
+  ok(await paneelOpen(), 'bij terugkomst is het pauzepaneel alweer dicht');
+  ok(await page.textContent('#pauseSecs') === bevroren,
+     'de klok loopt weer zonder dat iemand op verder tikte');
+  // Voorwaardelijk, zodat een paneel dat nooit openging hierboven een
+  // melding geeft en niet een time-out op een knop die er niet is.
+  if (await paneelOpen()) await page.click('#btnResume');
+  await page.waitForTimeout(300);
+  ok(!await paneelOpen() && await game(() => window.__tijd.G.card) !== null,
+     'verder na wegklikken hervat de beurt niet');
+
+  // Tijdens het aftellen: afbreken, zoals een tik op het vlak. Anders telde
+  // het in de achtergrond uit en begon de beurt op het eerste beeld terug.
+  await page.click('#btnPauze');
+  await page.waitForTimeout(200);
+  await hold(page, '#btnStop', 1400);
+  await page.waitForTimeout(250);
+  await page.click('#btnStart');
+  await page.waitForTimeout(200);
+  await page.click('#btnStartTurn');
+  await page.waitForTimeout(300);
+  ok(await page.getAttribute('#countdown', 'hidden') === null, 'het aftellen begon niet');
+  await zicht('hidden');
+  await page.waitForTimeout(3500);
+  await zicht('visible');
+  await page.waitForTimeout(300);
+  ok(await screen() === 'handoff', 'wegklikken tijdens het aftellen gaat niet terug naar de overdracht');
+  ok(await game(() => window.__tijd.G.card) === null, 'wegklikken tijdens het aftellen begon toch een beurt');
 
   ok(!errs.length, 'consolefouten: ' + errs.join(' | '));
 
