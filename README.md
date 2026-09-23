@@ -55,7 +55,8 @@ toe verborgen.
 Geraden kaart is een punt en meteen de volgende. Passen mag, zonder straf:
 de kaart gaat onderaan terug. Loopt de stapel leeg, dan stopt de ronde
 meteen — ook midden in een beurt — en gaat de resterende tijd mee naar de
-eerste beurt van de volgende ronde, voor dezelfde ploeg.
+eerste beurt van de volgende ronde, voor dezelfde ploeg. Minstens drie
+seconden: minder is na het aftellen geen beurt meer.
 
 De instellingen (het knopje rechtsboven) regelen de
 moeilijkheid, het aantal kaarten, de tijd per beurt en het geluid. Je ziet

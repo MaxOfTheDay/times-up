@@ -5692,8 +5692,17 @@ $("#btnGoed").addEventListener("click", () => {
        onderweg is. Zonder animatie (flyAnim staat dan al op null, zie
        flyGain) is er niets om op te wachten. */
     G.card = null;
-    if (flyAnim) flyAnim.onfinish = () => { landFly(); endRound(); };
-    else endRound();
+    /* En de klok gaat hier stil, niet pas in endRound(). Die wacht op de
+       vlucht, en liep de tijd in die 220 ms af, dan ging ook timeUp() af:
+       twee eindes voor één beurt. Het scherm sprong van de rondewissel
+       naar een beurtwissel voor de andere ploeg, en in ronde 3 viel
+       turnEnd() over een G die winner() al had opgeruimd. Wat er
+       meegaat is de tijd op het moment van de tik -- de kaart is dan
+       geraden, de vlucht is alleen nog de weergave. */
+    const rest = remaining();
+    stopClock();
+    if (flyAnim) flyAnim.onfinish = () => { landFly(); endRound(rest); };
+    else endRound(rest);
     return;
   }
   nextCard("goed");
@@ -5895,6 +5904,11 @@ function tossTeams() {
    worden. Het overdrachtscherm opent meteen -- geen tik ertussen die alleen
    maar naar het volgende scherm ging en verder niets bewaakte. */
 function turnEnd() {
+  /* Alleen vanaf het spelscherm. timeUp() zet dit 700 ms vooruit, en wat er
+     in die adem ook gebeurt -- een ronde die toch al afliep, een potje dat
+     al gewonnen is -- een beurt die al beëindigd is, beëindigt hij niet
+     nog eens. */
+  if (!G || current !== "play") return;
   const freshA = G.team === 0 ? G.gained : 0;
   const freshB = G.team === 1 ? G.gained : 0;
   /* Eén cue voor de hele buit in plaats van een tik per punt: er staat ook
@@ -5916,12 +5930,19 @@ function turnEnd() {
    ronde-intro) die geen van beide iets bewaakten. Nu vult dit meteen het
    overdrachtscherm, in de "round"-stand: geen ploegwissel, dus geen
    mascotte-onthulling, wel de nieuwe regel groot in beeld. */
-function endRound() {
+/* Onder de drie seconden is meegenomen tijd geen beurt meer: na drie
+   tellen aftellen flitst de kaart op en is de tijd al om. Wie de stapel
+   leegspeelde krijgt dan toch een echte beurt; het is een beloning, en
+   een beloning die niets oplevert leest als een fout. */
+const MIN_CARRY = 3000;
+
+function endRound(rest) {
   stopClock(); releaseWake();
   // Klassieke regel: de resterende tijd gaat mee naar de eerste
   // beurt van de volgende ronde, voor dezelfde ploeg. Daarom loont
-  // het om de stapel leeg te spelen.
-  G.pendingMs = Math.round(remaining());
+  // het om de stapel leeg te spelen. De tijd komt van de tik op de
+  // laatste kaart (zie #btnGoed), niet van nu: de klok staat al stil.
+  G.pendingMs = rest > 0 ? Math.max(MIN_CARRY, Math.round(rest)) : 0;
   G.card = null;
 
   // Laatste ronde: winner() laat zo meteen de fanfare horen, en die moet
@@ -6404,7 +6425,12 @@ document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible" && $("#pauze").hidden) wakeOverdracht();
     return;
   }
-  if (current !== "play" || !$("#pauze").hidden) return;
+  /* En alleen met een kaart in beeld: dan loopt er een klok. Tijdens het
+     aftellen, de adem na tijd-om en de vlucht van de laatste kaart staat
+     G.card op null en de klok stil -- maar deadline staat er nog, dus
+     remaining() gaf hier een tijd terug en zette terugkomen de klok van een
+     afgelopen beurt weer aan. */
+  if (current !== "play" || !$("#pauze").hidden || !G || G.card === null) return;
   if (document.visibilityState === "hidden") {
     frozenMs = remaining();
     stopClock();

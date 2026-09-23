@@ -5,7 +5,8 @@
  * deck, passen, de klok die afloopt, de ploegen die wisselen, de resterende
  * tijd die meegaat naar de volgende ronde, dat een herlaadbeurt midden in een
  * beurt het potje terugbrengt op de grens ervoor, dat de terugveeg het
- * pauzepaneel opent, en dat stoppen het potje wél weggooit.
+ * pauzepaneel opent, dat stoppen het potje wél weggooit, en dat de laatste
+ * kaart geraden op de bel precies één einde oplevert.
  *
  * Draaien: npm run test:spel     (of npm test voor alles)
  * Duurt ruim 20 seconden: één beurt moet echt uitlopen om te zien wat er
@@ -315,6 +316,49 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(await screen() === 'handoff', 'de titelknop begint geen vers spel');
   ok(await page.textContent('#hoScoreA') === '0' && await page.textContent('#hoScoreB') === '0',
      'een vers spel begint niet op 0 - 0');
+
+  // --- de laatste kaart geraden terwijl de klok afloopt ---
+  // Het punt van de laatste kaart vliegt eerst naar de teller en pas dan
+  // eindigt de ronde. Liep de klok in die vlucht af, dan ging ook timeUp()
+  // af: de rondewissel werd 700 ms later een beurtwissel voor de andere
+  // ploeg, en in ronde 3 viel turnEnd() over het opgeruimde potje. Dat
+  // venster is 220 ms en dus niet te raken met echte tikken; hier wordt de
+  // vlucht opgerekt tot ruim voorbij de klok, zodat het elke keer raak is.
+  // Zelfde reden voor de tik via click(): onder de vijf tellen klopt de
+  // kaart, en dan wacht playwright op een knop die "stabiel" moet worden.
+  async function lastCardAtBuzzer(round) {
+    await page.evaluate(r => {
+      const G = window.__tijd.G;
+      G.round = r;
+      G.pile = G.pile.slice(0, 1);    // de kaart die zo getoond wordt is de laatste
+      G.pendingMs = 1500;             // een beurt van anderhalve tel
+      document.documentElement.style.setProperty('--t-fly', '2.5s');
+    }, round);
+    const team = await game(() => window.__tijd.G.team);
+    await startTurn();
+    await page.evaluate(() => document.querySelector('#btnGoed').click());
+    await page.waitForTimeout(3500);  // vlucht voorbij, en timeUp's 700 ms ook
+    await game(() => document.documentElement.style.removeProperty('--t-fly'));
+    return team;
+  }
+
+  const team = await lastCardAtBuzzer(1);
+  ok(await screen() === 'handoff', 'laatste kaart op de bel: niet op het overdrachtscherm');
+  ok(await game(() => window.__tijd.G.round) === 2,
+     'laatste kaart op de bel: de ronde is niet (precies één keer) doorgeschoven');
+  ok(await game(() => window.__tijd.G.team) === team,
+     'laatste kaart op de bel: de beurt ging alsnog naar de andere ploeg');
+  ok(await page.$('#s-handoff.mode-round') !== null,
+     'laatste kaart op de bel: de rondewissel werd een beurtwissel');
+  // Wat er overbleef was minder dan drie tellen; dat wordt afgerond naar drie,
+  // anders volgt er op drie tellen aftellen een beurt die al om is.
+  ok(await game(() => window.__tijd.G.pendingMs) === 3000,
+     'meegenomen tijd onder de drie seconden wordt niet afgerond naar drie');
+  ok(await page.textContent('#hoSecs span') === '3',
+     'de secondenteller toont de afgeronde meegenomen tijd niet');
+
+  await lastCardAtBuzzer(3);
+  ok(await screen() === 'winner', 'laatste kaart op de bel in ronde 3: geen winnaarsscherm');
 
   ok(!errs.length, 'consolefouten: ' + errs.join(' | '));
 
