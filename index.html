@@ -6409,14 +6409,20 @@ function wakeOverdracht() {
   clearTimeout(wakeTimer);
   wakeTimer = setTimeout(releaseWake, WAKE_MAX);
 }
-/* Weggeklikt of scherm vergrendeld: de klok bevriest. Anders loopt de beurt
-   in stilte af terwijl niemand kijkt, en is de tijd bij terugkomst op. */
-let frozenMs = 0;
+/* Weggeklikt of scherm vergrendeld: het pauzepaneel gaat open. Anders loopt
+   de beurt in stilte af terwijl niemand kijkt, en is de tijd bij terugkomst
+   op.
+
+   Hier stond dat de klok bevroor en bij terugkomst vanzelf weer ging lopen.
+   Dat klopte voor de tijd maar niet voor de hand die het toestel vasthoudt:
+   een kind drukt op de aan-knop, een volwassene ontgrendelt met de pincode,
+   en de klok loopt al terwijl het toestel nog bij de volwassene is. Wie
+   terugkomt, moet zelf zeggen dat het weer begint -- en dat is precies wat
+   het paneel al vraagt, met de stilstaande wijzerplaat en de stand erin.
+   Het gaat open bij het wegklikken en niet bij de terugkomst: op dat moment
+   staat de klok stil, en zo is het paneel er al als het scherm weer aangaat
+   in plaats van dat het er een beeld later overheen springt. */
 document.addEventListener("visibilitychange", () => {
-  /* Pauze is een paneel óver het spelscherm heen, dus "current" blijft
-     "play" terwijl het openstaat. Zonder deze toets zette het weer
-     zichtbaar worden van het tabblad de klok stiekem weer aan -- en de
-     lock weer aan -- onder een openstaand pauzepaneel. */
   /* Op de overdracht loopt er geen klok, maar de lock wel. De browser laat
      hem los zodra het document verborgen raakt, dus zonder deze tak komt hij
      op dat scherm nooit meer terug -- en dan valt het scherm alsnog uit op
@@ -6425,24 +6431,16 @@ document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible" && $("#pauze").hidden) wakeOverdracht();
     return;
   }
-  /* En alleen met een kaart in beeld: dan loopt er een klok. Tijdens het
-     aftellen, de adem na tijd-om en de vlucht van de laatste kaart staat
-     G.card op null en de klok stil -- maar deadline staat er nog, dus
-     remaining() gaf hier een tijd terug en zette terugkomen de klok van een
-     afgelopen beurt weer aan. */
-  if (current !== "play" || !$("#pauze").hidden || !G || G.card === null) return;
-  if (document.visibilityState === "hidden") {
-    frozenMs = remaining();
-    stopClock();
-  } else {
-    requestWake();
-    if (frozenMs > 0) {
-      deadline = performance.now() + frozenMs;
-      lastTickAt = 0;
-      frozenMs = 0;
-      runClock(G.secs * 1000);
-    }
-  }
+  if (current !== "play" || document.visibilityState !== "hidden") return;
+  /* Het aftellen meet echte tijd, dus liep het in de achtergrond gewoon
+     door, en begon de beurt op het eerste beeld na terugkomst -- met de
+     klok al lopend. Afbreken, net als een tik op het vlak of een
+     terugveeg: er is nog geen beurt begonnen, dus terug naar de overdracht
+     en wie terugkomt tikt opnieuw. */
+  if (countRaf !== null) { stopCountdown(); releaseWake(); handoff(handoffMode); return; }
+  /* openPause() slaat zelf over wat geen lopende beurt is: een paneel dat
+     al openstaat, de adem na tijd-om en de vlucht van de laatste kaart. */
+  openPause();
 });
 
 /* ==============================================================
