@@ -111,8 +111,7 @@ het silhouet, met de stapel eronder weggehaald (`.cardslot .under` op
 gouden plaat als schaduw naar rechtsonder. Een contour die je niet wilt is
 `border: 0`, geen kleur die toevallig wegvalt.
 
-**De klok windt af.** Alle drie de meters (kaartrand, `#cdArc`,
-`#pauseRect`) rekenen met `perim * (1 - p)` en zijn verankerd
+**De klok windt af.** Beide meters (kaartrand, `#pauseRect`) rekenen met `perim * (1 - p)` en zijn verankerd
 op twaalf uur. Kies bij een nieuwe meter het ankerpunt bewust. De band blijft
 in één stuk, zonder inkepingen.
 
@@ -123,7 +122,11 @@ rest. Indrukbaar is wat bij `:active` zijn schaduw inzakt: snel in
 (`--t-press`), verend uit (`--t-los`). Een primaire knop
 krijgt nooit alleen `min()`, maar een `max()` met ondergrens. Stapel nooit
 twee knoppen van rand tot rand met verschillende lift. Een uitgang staat
-rechtsboven.
+rechtsboven. Een nieuwe knop gaat in de selectorlijst van 3. KNOPPEN, anders
+veert hij niet terug. Een cirkel op een stippengrond stuurt bij de druk een
+rimpel vanaf zijn rand (`knopRimpel()`, en `rimpelDoor()` als het scherm
+meteen wisselt); een rechthoek niet. Vervormen (rek en klets) is alleen
+voor Vos en Uil: een knop zakt in, hij knijpt nooit.
 
 **De hoek van het scherm is geen rechte hoek.** Elk blijvend rechthoekig vlak
 houdt `--corner` (32 px) van beide schermranden. Tel `env(safe-area-inset-*)`
@@ -162,7 +165,10 @@ gebruik buiten `svgUse()` meld je daar aan.
 **Het aftellen draagt allebei de feiten**: de ronde en de ploeg (`.cd-team`
 op papier). Beide tegels en de gouden schijf liggen op de gemeten plek van
 hun tegenhanger, niet in CSS nagerekend. Meet de startknop in de
-klik-handler.
+klik-handler. De schijf ís die startknop: ze houdt `--lift-2`, en elke tel
+drukt de klok haar in (`telDruk`, dezelfde in en uit als een vinger), met
+de ring door de punten bij het terugveren. Geen ring om de schijf: één
+ritme, per tel.
 
 **De worp verklapt zichzelf niet.** Zolang er geloot wordt is de grond
 `--paper-2`; de ploegkleur komt als de worp landt. Laat de achtergrond niet
@@ -176,10 +182,13 @@ dekking (16%), geen eigen kleur, op één stilstaand raster van 12 px, getekend
 op één canvas per grond (`stipveld()`). Wat beweegt is rastertoon: een punt
 groeit, hij licht niet alleen op. Ze vervagen naar de kaart, er trekt om de
 elf tellen een deining over, en een tik op de grond geeft een rimpel die de
-punten opzij duwt en terug laat veren. Ze staan alleen op de overdracht,
-het aftellen en de eindstand van wie won (in de ploegkleur, met de stralen
-als papier); op het aftellen gaat bij elke tel een ring vanuit de schijf
-(`telGolf()`). Er loopt alleen een lus zolang er iets beweegt; bij beperkte
+punten opzij duwt en terug laat veren: 12 px opzij en een punt tot ruim het
+dubbele, want minder leest op een telefoon als niets. Ze staan op de
+overdracht, het aftellen, de eindstand van wie won (in de ploegkleur, met
+de stralen als papier) en de titel, die van allebei de ploegen is en dus
+inkt op papier krijgt (7%, `inkt: true`); op het aftellen gaat bij elke tel
+een ring vanuit de schijf (`telGolf()`), op de eindstand barst het vuurwerk
+in de punten (`vuurwerk()`). Er loopt alleen een lus zolang er iets beweegt; bij beperkte
 beweging één stilstaand beeld.
 
 **Vertrekken mag, als er niets achter wacht.** Geen vertrekanimaties, behalve
@@ -197,7 +206,8 @@ adem van `BEURT_ADEM` voor de overdracht. De mascotte in de balk reageert via
 met Web Animations en overgeslagen bij beperkte beweging; bij juich, schrik en
 nee wisselt ook het gezicht (`#m-vos-blij`, `#m-uil-schrik`, `-dicht`), en
 elke mascotte in beeld knippert om de paar tellen (`knipperLus()`), en wie wint lacht op de eindstand. De eindstand telt eerst op; de kroon en het feest
-komen daarna.
+komen daarna: vier rimpels bij de hoeken op de noten van de fanfare, een
+ring uit de kaart op de slotnoot, en één val snippers.
 
 **De eindstand telt niet, ze noemt.** Wie won staat in de kroon en de
 mascotte die groeit; per ploeg het totaal, met de drie rondes klein eronder.

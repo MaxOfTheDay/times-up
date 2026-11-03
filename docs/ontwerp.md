@@ -127,9 +127,10 @@ tel je de scheve kaarten van de stapel mee en lijkt elke hoek een trap.
 
 ## De klok windt af
 
-Er zijn drie voortgangsmeters in deze app: de rand om de kaart, de
-aftelschijf (`#cdArc`) en de stilstaande wijzerplaat in het pauzepaneel
-(`#pauseRect`). Ze rekenen alle drie met `perim * (1 - p)`, en dat betekent
+Er zijn twee voortgangsmeters in deze app: de rand om de kaart en de
+stilstaande wijzerplaat in het pauzepaneel (`#pauseRect`). De aftelschijf had
+er ook een (`#cdArc`); die is weg, zie "Eén taal voor een druk". Ze rekenen
+allebei met `perim * (1 - p)`, en dat betekent
 dat de inkt aan haar beginpunt vast blijft zitten terwijl het vrije uiteinde
 zich terugtrekt. De band windt dus af, tegen de wijzers in, zoals een
 keukenwekker die je hebt opgedraaid.
@@ -763,6 +764,49 @@ De weg terug (de ploegkleur die bij tijd om uit de kaart groeit) viel af:
 die beweging kwam precies op het moment dat het toestel doorgegeven wordt.
 Bij beperkte beweging is er geen kopie, geen vloeien en geen gat; dan blijft
 het `cdOut`.
+
+### Eén taal voor een druk
+
+Max vroeg of het aftellen "nog klopte" en wilde daarna één taal voor alle
+knoppen. Wat niet klopte: de inktring om de schijf liep vloeiend af over drie
+tellen, terwijl het cijfer, de piep, de klop en de ring door de punten per
+tel sprongen. Twee ritmes tegelijk, en de ring hing los van de schijf met
+een strook ploegkleur ertussen.
+
+Getoond (live): de ring in drie stukken die per tel wegspringen, de rand van
+de schijf zelf als meter, geen ring, en zonder ring met een schijf die per
+tel knijpt (rek en klets) of springt. Knijpen viel af om een regel van
+binnen deze app: vervormen is wat Vos en Uil doen als ze juichen of
+schrikken. Een knijpende schijf leest als een dier, niet als een knop.
+
+Wat bleef is de knop zelf. De schijf begint op de gemeten plek van de
+startknop; ze ís die knop. Dus houdt ze zijn `--lift-2`, en elke tel drukt de
+klok haar in zoals een vinger dat doet: 60 ms zonder veer erin, met
+`--e-los` terug (`telDruk`, 0,22 s). De ring door de punten vertrekt 60 ms
+later, bij het terugveren. Na een tik op de knop is de eerste tel de druk van
+de vinger zelf, met zijn rimpel vanaf de knop.
+
+Bij het nalopen van alle knoppen tegen die taal:
+
+- elke cirkel heeft 8 px lift en elk vierkant 5 px, en ze zakken allemaal
+  hun volle lift in;
+- het kaartentegeltje op de overdracht en de letters A-Z in de instellingen
+  zakten wel in, maar stonden niet in de selectorlijst en sprongen dus terug
+  zonder veer; nu wel;
+- alleen de startknop van de overdracht gaf een rimpel. Spelen op de titel
+  en Nog een keer op de eindstand nu ook (`knopRimpel()`). Die wisselen
+  meteen van scherm, dus loopt hun rimpel door op de grond van de
+  overdracht vanaf de plek van de knop (`rimpelDoor()`);
+- de rimpel zelf was te zwak om als antwoord op een tik te lezen: 4,5 px
+  opzij en 1,3 px groei. Nu 12 px, een punt tot ruim het dubbele en 0,45
+  lichter, een bredere golf (32 px) die trager uitdempt (2,1 s). De deining
+  houdt haar oude, zachte maat.
+
+De titel kreeg dezelfde grond, maar niet in een ploegkleur: hij is van
+allebei de ploegen, en rood is Vos. Inkt op papier, 7%. De eindstand kreeg
+vuurwerk in de punten: vier rimpels bij de hoeken op de vier noten van de
+fanfare, 130 ms uit elkaar, en een ring uit de kaart op de slotnoot. De
+snippers vallen nu één keer in plaats van twee: het feest is de grond.
 
 ### Rastertoon op een canvas
 
