@@ -359,6 +359,17 @@ vult altijd dezelfde drie vakken in dezelfde volgorde:
 2. **opdracht** -- wat moet je doen, en hoe groot is wat eraan komt;
 3. **start** -- één tik, de enige handeling; het aftellen komt erna.
 
+Minder is meer op die kaart. Twee dingen stonden er elke beurt terwijl ze
+niets nieuws zeiden:
+
+- **De seconden** (`#hoSecs`) waren een hele avond dezelfde 30. Ze staan er
+  nu alleen als een onderbroken beurt met haar resttijd verdergaat
+  (`G.pendingMs` kleiner dan een volle beurt): dan zeggen ze iets.
+- **De regel van de ronde** (de `p` onder het rondewoord) staat er alleen
+  als de ronde nieuw is. Bij een beurtwissel in dezelfde ronde hebben beide
+  ploegen hem net gezien; hij gaat op `visibility: hidden`
+  (`.zelfde-ronde`), zodat de kaart bij beide wissels even groot blijft.
+
 De eerste twee zitten inmiddels op hetzelfde vlak. De stand stond ernaast, in
 een eigen omrand kaartje op de ploegkleur, en dat gaf het scherm drie vlakken
 waar twee genoeg zijn. `buildTally()` hangt haar met `prepend` in de
