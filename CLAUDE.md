@@ -129,7 +129,8 @@ Pixel onderaan nul. Controleer door de bogen te tekenen, niet met
 **Wat je moet vasthouden, zegt dat.** Een lange druk is alleen voor het
 onomkeerbare, en dat is precies één knop: stoppen, via `holdButton()`, als
 enige met de stippellijn. Starten is een tik; het aftellen van drie tellen
-vangt een strijkende vinger op, en tikken tijdens het aftellen breekt af.
+vangt een strijkende vinger op. Afbreken kan tijdens het aftellen alleen
+via de tegel rechtsboven (`#cdBack`), niet via het hele vlak.
 
 **Eén overdrachtscherm, drie vakken.** `#s-handoff` is het enige scherm
 tussen twee beurten: stand, opdracht, start. De stand staat ín de

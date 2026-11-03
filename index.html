@@ -410,16 +410,13 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   background: var(--team);
   border: 0; padding: 0;
 }
-/* Een tik tijdens het aftellen gaat terug (voor de strijkende vinger bij het
-   doorgeven), en dat staat er: de pas-pijl omgekeerd, in de hoek van de
-   uitgang. Een bijschrift, geen knop. */
-.cd-back {
-  position: absolute;
-  top: calc(env(safe-area-inset-top, 0px) + var(--corner));
-  right: calc(env(safe-area-inset-right, 0px) + var(--corner));
-  width: 26px; height: 26px; transform: scaleX(-1);
-  pointer-events: none;
-}
+/* Terug naar de overdracht kan alleen via deze tegel, niet via het hele
+   vlak: een kind dat enthousiast meetikt op "drie, twee, een" brak anders
+   de beurt af. Een strijkende vinger bij het doorgeven vangen de tik op
+   start en het aftellen zelf al op. Zelfde tegel en hoek als de pauzeknop
+   die er een tel later staat; de pas-pijl omgekeerd. */
+.cd-back svg { transform: scaleX(-1); }
+#s-play .countdown .cd-back { position: absolute; z-index: 2; }
 /* De ronde, tijdens het aftellen: dat zijn de drie tellen waarin het toestel
    van hand gaat. Alleen het teken, in hetzelfde tegeltje als op de balk --
    geen woord, want tekst hoort niet op ploegkleur. De hele balk optillen is
@@ -528,6 +525,9 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
 }
 .btn-icon svg { width: 22px; }
+
+/* Zie openPause(): op de overdracht maar één gouden speelteken in beeld. */
+#s-handoff.paneel .go-wrap { visibility: hidden; }
 
 /* ---- vasthouden om te stoppen ----
    Dezelfde huid als pauze, huisje en terug (papier, inkt-rand, --lift-1).
@@ -1067,10 +1067,11 @@ input[type=range]::-moz-range-thumb {
    tekening, woord of cijfer, want die staan er al. In de kaart, op papier (op
    de ploegkleur haalt goud maar 3,0:1). Vierkantjes en geen bolletjes: een
    kleine cirkel betekent in deze app "een teken dat je telt". Verbruikt is
-   inkt, nu is goud (--go), nog te komen is leeg (--paper-2). */
-.rounddots { display: flex; gap: 5px; flex: 0 0 auto; }
+   inkt, nu is goud (--go), nog te komen is leeg (--paper-2). 16 px: kleiner
+   is op armlengte nauwelijks een teken. */
+.rounddots { display: flex; gap: 6px; flex: 0 0 auto; }
 .rounddots i {
-  display: block; width: 11px; height: 11px;
+  display: block; width: 16px; height: 16px;
   background: var(--paper-2); border: 2px solid var(--ink);
 }
 .rounddots i.now { background: var(--go); }
@@ -1725,13 +1726,21 @@ input[type=range]::-moz-range-thumb {
   .cardwrap { grid-area: card; margin-bottom: 20px; }
   /* Liggend krijgt "goed" een eigen kolom rechts, precies zo breed als de
      knop; "pas" blijft linksonder hangen. */
+  /* Allebei op de hoogte van het midden van de kaart, niet in de onderste
+     hoeken: wie een telefoon dwars vasthoudt, heeft zijn duimen halverwege
+     de zijkanten. "Pas" hangt aan het scherm, dus rekent hij zijn plek zelf
+     uit: het midden van het scherm plus de halve hoogte van de balk. */
   .controls {
     grid-area: controls;
-    display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end;
-    min-height: 0; width: var(--ctrl); padding: 0;
+    display: flex; flex-direction: column; justify-content: center; align-items: flex-end;
+    min-height: 0; width: var(--ctrl); padding: 0 0 20px;
   }
   .btn-good { width: 100%; }
-  .btn-skip { width: max(64px, min(15vh, 84px)); height: max(64px, min(15vh, 84px)); }
+  .btn-skip {
+    --skip: max(64px, min(15vh, 84px));
+    width: var(--skip); height: var(--skip);
+    bottom: auto; top: calc(50% + 24px - var(--skip) / 2);
+  }
   .btn-skip svg { width: 60%; }
 }
 
@@ -1814,7 +1823,7 @@ input[type=range]::-moz-range-thumb {
      Het woord blijft op --type-label: een bijschrift groeit niet mee met het
      toestel. */
   .roundcard .ico { width: 60px; height: 60px; }
-  .rounddots i { width: 14px; height: 14px; }
+  .rounddots i { width: 20px; height: 20px; }
   /* Het cijfer en zijn vak groeien samen mee: het vak moet "30" op de grote
      maat blijven dragen, anders loopt het cijfer er in de laatste tellen
      uit. Zie --digit in :root. */
@@ -1822,6 +1831,33 @@ input[type=range]::-moz-range-thumb {
   .turn-gain { font-size: 20px; padding: 1px 9px; }
   .btn-icon { width: 56px; height: 56px; }
   .btn-icon svg { width: 26px; }
+
+  /* Overdracht en pauze groeien mee. Ze bleven op telefoonmaat (384 en 346
+     breed) terwijl de speelkaart op een tablet 632 tot 704 px wordt: van een
+     reuzenkaart naar een ansichtkaart las de overdracht als bijzaak, terwijl
+     het het scherm is waar het toestel van hand gaat. */
+  .roundcard.big { width: min(70vw, 34rem); max-width: min(70vw, 34rem);
+                   gap: 14px; padding: 22px 32px 18px; }
+  .roundcard.big .ico { width: min(19vh, 176px); height: min(19vh, 176px); }
+  .roundcard.big b { font-size: 46px; }
+  .roundcard.big p { font-size: 19px; }
+  .ho-count svg { width: 24px; height: 24px; }
+  .ho-count span { font-size: 24px; }
+  #s-handoff .mini-score .side .head { width: 92px; }
+  #s-handoff .mini-score .side .head > svg { width: 52px; height: 52px; }
+  #s-handoff .mini-score .side.up .head > svg { width: 84px; height: 84px; }
+  #s-handoff .mini-score b { font-size: 36px; }
+  .overlay .panel { min-width: 440px; gap: var(--s-5); padding: 40px 56px; }
+  .overlay .panel .btn-go { width: 148px; }
+  .overlay .panel .btn-danger { width: 88px; height: 88px; }
+  .overlay .panel .btn-danger .mark { width: 40px; }
+  .paused-clock .dial { width: 100px; height: 100px; }
+  .paused-clock .dial b { font-size: 38px; }
+  .paused-clock .bars i { width: 10px; height: 34px; }
+  #pauze .mini-score .side .head { width: 84px; }
+  #pauze .mini-score .side .head > svg { width: 48px; height: 48px; }
+  #pauze .mini-score .side.up .head > svg { width: 76px; height: 76px; }
+  #pauze .mini-score b { font-size: 34px; }
 }
 </style>
 </head>
@@ -2313,9 +2349,11 @@ input[type=range]::-moz-range-thumb {
 
   <!-- Aftellen voor de klok gaat lopen: een misser kost drie tellen, geen
        beurt, en het is de tel waarin je je klaarzet. De kaart blijft tot nul
-       leeg. Tikken breekt af en zet je terug op de overdracht. -->
-  <button class="countdown" id="countdown" hidden aria-label="Aftellen — tik om terug te gaan">
-    <svg class="cd-back" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pass"/></svg>
+       leeg. Alleen de tegel in de hoek breekt af. -->
+  <div class="countdown" id="countdown" hidden role="timer" aria-label="Aftellen">
+    <button class="btn-icon cd-back" id="cdBack" aria-label="Terug, nog niet beginnen">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pass"/></svg>
+    </button>
     <!-- Wie en wat: dezelfde twee tegels die een tel later op de balk staan,
          op dezelfde plek. Alleen het teken van de ronde; het woord staat een
          tel later op de balk en mag hier niet, want dit vlak is ploegkleur.
@@ -2328,7 +2366,7 @@ input[type=range]::-moz-range-thumb {
       </svg>
       <b id="cdNum">3</b>
     </span>
-  </button>
+  </div>
 
 </section>
 
@@ -3481,18 +3519,24 @@ let clockRaf = null, deadline = 0, lastTickAt = 0;
    toelaat. Allebei afgeleid van de gemeten kaart: één maatstelsel. */
 let framePerim = 0;
 
+const GLYPH_MAX = 300;   // zie het eind van sizeCard()
+const CARD_RATIO = 1.25;  // staand hoogstens 4:5, zie sizeCard()
 function sizeCard() {
   const wrap = $(".cardwrap"), slot = $("#cardslot");
   const card = $("#card"), svg = $("#timerFrame");
 
-  /* De kaart is het grootste vierkant in de vrije ruimte. Ook liggend: het
-     teken wordt daar door de hoogte begrensd, dus een brede kaart voegt
-     alleen leeg papier toe. */
+  /* Liggend het grootste vierkant: het teken wordt daar door de hoogte
+     begrensd, dus een brede kaart voegt alleen leeg papier toe. Staand mag
+     ze tot 4:5 hoog worden, zoals een speelkaart in de hand: op een lange
+     telefoon stond er anders ruim 100 px leeg tussen kaart en knoppen. Het
+     teken rekent met de korte zijde en wordt er dus niet groter van; het
+     woord krijgt lucht. */
   const aw = Math.floor(wrap.clientWidth), ah = Math.floor(wrap.clientHeight);
   if (aw > 0 && ah > 0) {
-    const side = Math.min(aw, ah);
-    slot.style.width = side + "px";
-    slot.style.height = side + "px";
+    const sw = Math.min(aw, ah);
+    const sh = ah > aw ? Math.min(ah, Math.round(sw * CARD_RATIO)) : sw;
+    slot.style.width = sw + "px";
+    slot.style.height = sh + "px";
   }
 
   const w = Math.round(card.clientWidth), h = Math.round(card.clientHeight);
@@ -3525,7 +3569,14 @@ function sizeCard() {
   const ink = Math.max(24, inner - wordH - Math.round(inner * .04));
   card.style.setProperty("--cardword", wordPx + "px");
   card.style.setProperty("--cardgap", Math.round(ink * .11 + side * .015) + "px");
-  card.style.setProperty("--glyph", Math.max(24, Math.floor(ink / 1.28)) + "px");
+  /* Een kleuremoji is een plaatje van zo'n 136 tot 160 px. Op een tablet
+     vroeg de kaart er 424 tot 478 CSS-pixels van, en dan wordt het teken
+     zichtbaar zacht -- het enige wazige vlak in een app van scherpe randen.
+     Begrensd op GLYPH_MAX staat er op een tablet meer papier om het teken,
+     en dat leest als een kaart; een telefoon (222 staand) merkt er niets
+     van. */
+  card.style.setProperty("--glyph",
+    Math.max(24, Math.min(GLYPH_MAX, Math.floor(ink / 1.28))) + "px");
 }
 
 /* Eén waarnemer in plaats van een resize-luisteraar: die miste de gevallen
@@ -3688,7 +3739,7 @@ function countdown(done) {
     }
   }
 
-  el.focus({ preventScroll: true });
+  $("#cdBack").focus({ preventScroll: true });
 
   /* De eerste tel klinkt vóór t0 gezet wordt: een koud audio-apparaat heeft
      een kwart seconde nodig, en anders begint het aftellen met een hink. */
@@ -3738,7 +3789,7 @@ function handOffCountdown() {
 // Afgebroken: geen beurt begonnen, dus terug naar waar het toestel vandaan
 // kwam. G is niet aangeraakt behalve G.gained, en dat is voor een nieuwe
 // beurt toch nul.
-$("#countdown").addEventListener("click", () => {
+$("#cdBack").addEventListener("click", () => {
   if (countRaf === null) return;
   stopCountdown();
   releaseWake();
@@ -3905,12 +3956,13 @@ function flyGain(from, to) {
   flyEl.hidden = false;
 
   /* Groot bij de kaart, op de maat van de teller bij aankomst. Een bescheiden
-     boog: dit gebeurt tot vijftien keer per beurt. */
+     boog, en naar onderen: een boog omhoog schoot op een smalle telefoon
+     door de balk en over het rondetegeltje heen voordat hij landde. */
   const dx = to.x - from.x, dy = to.y - from.y;
   flyEl.style.transform = `translate(${from.x}px, ${from.y}px) translate(-50%, -50%) scale(1.9)`;
   flyAnim = flyEl.animate([
     { transform: `translate(${from.x}px, ${from.y}px) translate(-50%, -50%) scale(1.9)` },
-    { transform: `translate(${from.x + dx * .5}px, ${from.y + dy * .5 - Math.abs(dx) * .1}px) `
+    { transform: `translate(${from.x + dx * .5}px, ${from.y + dy * .5 + Math.abs(dx) * .08}px) `
                + `translate(-50%, -50%) scale(1.45)`, offset: .5 },
     { transform: `translate(${to.x}px, ${to.y}px) translate(-50%, -50%) scale(1)` }
   ], { duration: vlucht(), easing: "cubic-bezier(.3,0,.2,1)", fill: "forwards" });
@@ -4339,6 +4391,13 @@ function openPause() {
   // tussenschermen loopt er niets, en dan is een wijzerplaat op nul
   // eerder een mededeling dan naslag.
   $("#pauseClock").hidden = current !== "play";
+  /* Op de overdracht staat de stand al in de kaart vlak achter het paneel,
+     en de startknop eronder is net zo'n gouden cirkel met een speelteken
+     als "verder" in het paneel. Twee keer dezelfde stand en twee keer
+     hetzelfde teken voor twee verschillende dingen: dus daar alleen de
+     twee deuren, en de startknop even weg zolang het paneel open is. */
+  $("#pauseTally").hidden = current !== "play";
+  $("#s-handoff").classList.toggle("paneel", current === "handoff");
   paintPauseScore();
 
   pauseReturn = document.activeElement;
@@ -4355,6 +4414,7 @@ function openPause() {
 function closePause() {
   const el = $("#pauze");
   el.hidden = true;
+  $("#s-handoff").classList.remove("paneel");
   screensInert(false);
   if (pauseReturn && pauseReturn.isConnected) pauseReturn.focus({ preventScroll: true });
   pauseReturn = null;
@@ -4390,6 +4450,7 @@ holdButton($("#btnStop"), 1100, () => {
   pauseMs = 0; pauseReturn = null;
   stopClock(); releaseWake();
   $("#pauze").hidden = true;
+  $("#s-handoff").classList.remove("paneel");
   screensInert(false);        // niet via closePause(): dat zou de klok van
                                // een spel dat we net weggooien weer starten
   G = null;
