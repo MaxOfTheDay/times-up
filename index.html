@@ -1482,8 +1482,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
    min() kromp hij liggend tot de maat van de stopknop, en dan wegen de
    hoofdhandeling en de onomkeerbare even zwaar. Ook 96 tegen 68 woog liggend
    nog bijna gelijk; 112 houdt staand en liggend dezelfde verhouding. Die 112
-   alleen waar de hoogte het toelaat (29vh): op een liggend scherm van 320 px
-   hoog valt het paneel anders nog verder van het scherm. */
+   alleen waar de hoogte het toelaat (29vh). */
 .overlay .panel .btn-go { width: max(96px, min(112px, 29vh), min(34vw, 20vh, 116px)); }
 /* De twee deuren op één regel, met de ruimte ertussen die ze op het
    spelscherm ook hebben: ze zijn elkaars alternatief, geen lijstje. */
@@ -1508,6 +1507,21 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
    is en zij het bijschrift. */
 .paused-clock .bars { display: flex; gap: 5px; }
 .paused-clock .bars i { width: 8px; height: 26px; background: var(--ink); }
+/* Liggend op een laag scherm staan klok en stand links en de twee deuren
+   rechts: onder elkaar is het paneel zo'n 400 px hoog, en op 568 bij 320
+   viel "verder" dan onderaan van het scherm. Naast elkaar past het, en de
+   deuren blijven op één regel, in dezelfde volgorde. Op de overdracht zijn
+   klok en stand verborgen; dan blijven alleen de deuren over. */
+@media (orientation: landscape) and (max-height: 430px) {
+  #pauze .panel {
+    display: grid; grid-template-columns: auto auto; align-items: center;
+    justify-items: center; gap: var(--s-3) var(--s-6);
+    padding: var(--s-4) var(--s-5);
+  }
+  #pauze .panel .paused-clock { grid-column: 1; grid-row: 1; }
+  #pauze .panel .mini-score { grid-column: 1; grid-row: 2; }
+  #pauze .panel .doors { grid-column: 2; grid-row: 1 / span 2; }
+}
 
 /* Klein en gedempt: de rand om de kaart is de klok, dit is het cijfer erbij.
    In de laatste tien seconden neemt het de kleur van de klok over (6,6 / 5,0

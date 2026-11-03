@@ -196,9 +196,11 @@ pauzepaneel kromp liggend mee met de schermhoogte tot 68 px — even groot als
 de stopknop ernaast — en dan wegen de hoofdhandeling en de onomkeerbare even
 zwaar. Er hoort een `max()` met een ondergrens omheen. Ook 96 tegen 68 woog
 liggend nog bijna gelijk; de ondergrens is nu 112 px waar de hoogte het
-toelaat (`min(112px, 29vh)`), met 96 als bodem. Op 568 bij 320 valt het
-paneel al van het scherm, met of zonder deze maat; dat vraagt een liggende
-opbouw van het paneel, niet een kleinere knop.
+toelaat (`min(112px, 29vh)`), met 96 als bodem. Onder elkaar was het
+pauzepaneel zo'n 400 px hoog en viel het op 568 bij 320 onderaan van het
+scherm; dat los je op met de opbouw, niet met een kleinere knop. Liggend tot
+430 px hoog staan klok en stand daarom links en de twee deuren rechts
+(192 px hoog op 568 bij 320).
 
 `--tap` (48 px) geldt ook liggend. De hulpknoppen gingen op een laag scherm
 naar 44 px om hoogte te sparen, en dat waren de pauzeknop en het huisje: de
