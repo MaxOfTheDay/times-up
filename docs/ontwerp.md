@@ -663,22 +663,26 @@ meet een kaart die stilstaat.
 
 De ploegkleur op de overdracht was één vlak, en las daardoor als een
 achtergrondkleur in plaats van als "deze kant van het bord". Nu liggen er
-rasterpunten op, zoals op gedrukt karton: `#s-handoff::before`, inkt op 10%
-dekking in een raster van 12 px. Op 20% en 14 px was het te veel: de punten
-werden een patroon om naar te kijken in plaats van een grond. Inkt en geen donkerder ploegtint, om twee
-redenen: de punten stromen dan vanzelf mee met de grond (geen eigen
-overgang, en ook bij de worp op `--paper-2` kloppen ze), en er komt geen
-nieuwe kleur bij die "rood" of "blauw" zou kunnen betekenen. Een masker laat
+rasterpunten op, zoals op gedrukt karton: `#s-handoff::before`, papier op
+16% dekking in een raster van 12 px. Op 20% en 14 px was het te veel: de
+punten werden een patroon om naar te kijken in plaats van een grond.
+
+Eerst waren ze inkt. Dat maakte de ploegkleur donker en een beetje vuil;
+papier licht hem op, zoals de witte punten op gedrukt karton, en het is
+geen nieuwe kleur: papier staat al overal op het scherm, en een
+donkerder ploegtint zou een derde "rood" of "blauw" zijn. Een masker laat
 ze naar het midden vervagen, zodat achter de kaart niets onrustigs ligt.
 
-Ze schuiven heel traag schuin naar beneden, één cel per vijf tellen: het
-scherm waarop je wacht leeft, zonder dat het oog erheen gaat. Bij beperkte
-beweging staan ze stil.
+Het raster staat stil. Het schoof eerst traag, maar dan liepen de
+opzwellende punten van de deining en de rimpel (een tweede laag op een
+eigen raster) er schuin naast, en zag je de grond dubbel. Nu delen alle
+lagen hetzelfde raster (`--stip`, `--stip-op`, gecentreerd), en zwelt een
+punt op over zijn eigen plek.
 
 Daarbovenop twee bewegingen, gekozen uit vier die naast elkaar zijn
 gezet (een golf bij binnenkomst, ademende punten, deining, een rimpel):
 
-- **Deining**: om de acht tellen trekt er een brede band schuin over de
+- **Deining**: om de negen tellen trekt er een brede band schuin over de
   grond, als wind over een veld, waarin de punten opzwellen
   (`#s-handoff::after`, een tweede laag grotere punten met een
   bandmasker, `--band` via `@property`). Sfeer vanuit de ooghoek. De
@@ -691,10 +695,16 @@ Ademende punten vielen af: als alles op het scherm tegelijk klopt, voelt
 het onrustig. Beide lagen liggen achter de kaart en de knop, en staan
 stil bij beperkte beweging.
 
-Alleen op de overdracht. Op de papieren schermen (titel, spel, eindstand)
+Ook op het aftellen, dat dezelfde ploeggrond heeft (`#countdown::before`),
+met het open midden rond de schijf. Daar gaat bij elke tel één ring vanuit
+de schijf naar buiten (`#cdGolf`, `telGolf()`), op de maat van het tikje:
+drie, twee, een, ook te zien voor wie het geluid niet hoort.
+
+Niet op de papieren schermen (titel, spel, eindstand)
 lazen ze als vuil op het papier, bovenop de korrel die daar al ligt
 (`body::after`), en het spelscherm moet rustig blijven. De punten zeggen
-"dit is de grond van een ploeg", en alleen de overdracht heeft die grond.
+"dit is de grond van een ploeg", en alleen de overdracht en het aftellen
+hebben die grond.
 
 ## Het titelscherm heeft twee dingen
 
@@ -711,6 +721,10 @@ Ze zijn kinderen van `.wordmark`, zodat ze meedraaien en meelanden, en staan
 net boven de rand: hun inktlijn op de inkt van de plaat zou verdwijnen. Ze
 zijn zo groot als een letter van de titel (`--gluur`), een beetje naar
 binnen en elk een kant op gekanteld. Aantikken laat ze nog steeds juichen.
+Bij binnenkomst komen ze één na één van achter de rand omhoog kijken
+(`gluurOp`); het stuk dat nog "achter" het merk zit is weggeknipt, zodat ze
+uit de plaat lijken te komen in plaats van eroverheen te schuiven.
+
 Het merk krijgt een marge bovenaan zo hoog als de mascottes, zodat de groep
 als geheel in het midden staat en op 320x568 niet tegen het tandwiel komt.
 

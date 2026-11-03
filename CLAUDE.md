@@ -162,10 +162,12 @@ meeflikkeren.
 **De grond stroomt, het scherm vervaagt niet.** `#s-handoff` en `#s-play`
 hebben geen `screenIn`: op de overdracht stroomt alleen de grond van papier
 naar ploegkleur, en het spelscherm verandert van grond niet. Bij beperkte
-beweging geen vloed. De rasterpunten op die grond zijn inkt op lage
-dekking (10%), geen eigen kleur, vervagen naar de kaart en schuiven traag; om de acht
-tellen trekt er een deining over, en een tik op de grond geeft een rimpel;
-ze staan alleen op de overdracht.
+beweging geen vloed. De rasterpunten op die grond zijn papier op lage
+dekking (16%), geen eigen kleur, op één stilstaand raster dat alle lagen
+delen (`--stip`, `--stip-op`); ze vervagen naar de kaart, er trekt om de
+negen tellen een deining over, en een tik op de grond geeft een rimpel. Ze
+staan alleen op de overdracht en het aftellen; daar gaat bij elke tel een
+ring vanuit de schijf (`telGolf()`).
 
 **Vertrekken mag, als er niets achter wacht.** Geen vertrekanimaties, behalve
 `cdOut`, het oplossen van de pauzesluier bij hervatten (`.uit`) en de kopie
@@ -227,8 +229,8 @@ voor de volwassene blijft de systeemletter. Opnieuw maken met
 `--track-caps`, zin-tekst geen spatiëring.
 
 **Het titelscherm heeft twee dingen**: het merk en de knop. Vos en Uil zitten
-op de bovenrand van het merk (`.gluur` in `.wordmark`), niet ernaast. Zet er
-niets bij.
+op de bovenrand van het merk (`.gluur` in `.wordmark`), niet ernaast, en
+komen bij binnenkomst van achter de rand omhoog. Zet er niets bij.
 
 **Het instellingenscherm.** Vier groepen, in de volgorde waarin je ze nodig
 hebt: Spel (moeilijkheid met de bak, kaarten per potje, tijd), Voorkeuren
