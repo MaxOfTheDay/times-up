@@ -160,8 +160,8 @@ meeflikkeren.
 hebben geen `screenIn`: op de overdracht stroomt alleen de grond van papier
 naar ploegkleur, en het spelscherm verandert van grond niet. Bij beperkte
 beweging geen vloed. De rasterpunten op die grond zijn inkt op lage
-dekking (10%), geen eigen kleur, vervagen naar de kaart, schuiven traag en golven één
-keer bij binnenkomst;
+dekking (10%), geen eigen kleur, vervagen naar de kaart en schuiven traag; om de acht
+tellen trekt er een deining over, en een tik op de grond geeft een rimpel;
 ze staan alleen op de overdracht.
 
 **Vertrekken mag, als er niets achter wacht.** Geen vertrekanimaties, behalve
