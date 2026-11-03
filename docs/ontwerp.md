@@ -695,7 +695,7 @@ indrukte sprong bovendien 80 px omlaag, en de kaart verscheen uit het niets.
 Frame voor frame gefilmd, met een live mock-up ernaast; Max koos deze
 versie.
 
-- De worp loopt op de grond van de titel: papier met inkten punten op 7%
+- De worp loopt op de grond van de titel: papier met inkten punten op 11%
   (`veldHo.inkt(true)`). Ook bij Nog een keer.
 - De knop glijdt van waar je hem indrukte naar zijn plek op de overdracht
   (`rimpelDoor()`, met `--e-los`), zoals de startknop overgaat in de schijf
@@ -721,10 +721,9 @@ gefilmd met een mock-up ernaast; Max koos deze versie.
 cirkel groeien uit de knop die je indrukte (450 ms, `--e-uit`), over het
 scherm dat je verlaat. Dat scherm blijft eronder staan (`.blijft`, zonder
 pointer-events), en bij stoppen ook de sluier met het paneel. De knop wordt
-gemeten vóór het paneel verdwijnt; daarna meet hij nul. Na de cirkel houdt
-`.stil` de `screenIn` van de titel tegen tot de volgende schermwissel: eerst
-begon de titel na de cirkel alsnog te vervagen. Vos en Uil gluren daarna
-op zoals altijd.
+gemeten vóór het paneel verdwijnt; daarna meet hij nul. De titel heeft
+geen `screenIn` (zie "Het titelscherm heeft twee dingen"), dus na de cirkel
+vervaagt er niets meer. Vos en Uil gluren daarna op zoals altijd.
 
 ### Afbreken zet de grond niet uit
 
@@ -927,7 +926,9 @@ Bij het nalopen van alle knoppen tegen die taal:
   houdt haar oude, zachte maat.
 
 De titel kreeg dezelfde grond, maar niet in een ploegkleur: hij is van
-allebei de ploegen, en rood is Vos. Inkt op papier, 7%. De eindstand kreeg
+allebei de ploegen, en rood is Vos. Inkt op papier, 11% (eerst 7%: op
+armlengte las de doos als kaal beige, en een tik op de grond gaf een rimpel
+die je nauwelijks zag). De eindstand kreeg
 vuurwerk in de punten: vier rimpels bij de hoeken op de vier noten van de
 fanfare, 130 ms uit elkaar, en een ring uit de kaart op de slotnoot. De
 snippers vallen nu één keer in plaats van twee: het feest is de grond.
@@ -961,7 +962,7 @@ de ellips van 75% bij 60%) of naar de schijf (aftellen, 110 tot 260 px).
 
 Op het spelscherm en de instellingen liggen geen punten: het spelscherm
 moet rustig blijven, en de instellingen zijn voor de volwassene. Op de
-titel staan ze wel, als inkt op 7% (zie "Eén taal voor een druk"); een
+titel staan ze wel, als inkt op 11% (zie "Eén taal voor een druk"); een
 eerdere poging met papieren punten op papier las daar als vuil.
 
 ### De grond beweegt alleen als iets hem indrukt
@@ -1026,6 +1027,32 @@ vak dat geknipt wordt, anders liep de knip schuin tegen de rand.
 
 Het merk krijgt een marge bovenaan zo hoog als de mascottes, zodat de groep
 als geheel in het midden staat en op 320x568 niet tegen het tandwiel komt.
+
+### De doos komt gedrukt binnen, en de dieren spelen
+
+Max vroeg om een beter titelscherm, en of de dieren ook een rimpel moeten
+geven. Frame voor frame gefilmd naast een prototype in de echte app; hij koos
+deze vier, binnen de regel van twee dingen.
+
+- **Geen `screenIn`.** Bij openen en terug van de instellingen vervaagde de
+  hele titel: de eerste beelden stonden de zwarte plaat en de gouden knop
+  grijs en doorschijnend. Nu staat de doos er vanaf het eerste beeld, en
+  schuiven merk en knop alleen op hun plek (`markIn`, `goIn`).
+- **De punten op 11%.** Op 7% las de titel op armlengte als kaal beige, en
+  gaf een tik op de grond een rimpel die je nauwelijks zag.
+- **Ze antwoorden elkaar.** Wie Vos aantikt, laat hem wippen; 230 ms later
+  wipt Uil kleiner terug, ook met een blij gezicht (en andersom).
+- **Een getikte wip rimpelt.** Een rimpel betekent in deze app "er drukte
+  iets op het bord". Een wip die een vinger begon, landt op de rand van het
+  merk en drukt het bord in: `wipOpRand()` stuurt op de klets (265 ms, 78%
+  van de wip) een rimpel vanaf onder de voeten, sterkte 0,7 voor de getikte
+  en 0,45 voor het antwoord, kleiner dan een knop (1,2). Wat de dieren uit
+  zichzelf doen -- opkomen, ademen, knipperen, juichen op de eindstand --
+  rimpelt niet: dan ging de grond weer deinen, en die is er met opzet uit.
+
+Niet gedaan: een derde ding (verder spelen, een ploegkeuze, tekst) en een
+knop die uit zichzelf klopt. Alleen de vinger, de klok en de dieren laten
+iets bewegen.
 
 ## Elke kaart draait om
 
