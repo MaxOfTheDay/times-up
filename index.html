@@ -744,11 +744,23 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   .cb-body .cards { margin-right: calc(var(--corner) + var(--tap) - var(--s-4) + var(--s-2)); }
 }
 .field { margin: 0; border: 0; padding: 0; min-width: 0; }
+/* Drie lagen tekst, niet vier: hoofdletters zijn voor de titel en de
+   groepskoppen. Een veldnaam is gewone zin-tekst in inkt, zodat hij niet
+   met zijn eigen groepskop wedijvert. */
 .field legend, .legend-label {
   display: block;
-  font-size: 13px; font-weight: 900; text-transform: uppercase;
-  letter-spacing: .12em; margin: 0 0 10px; padding: 0; color: var(--ink-2);
+  font-size: 16px; font-weight: 800; letter-spacing: 0;
+  margin: 0 0 10px; padding: 0; color: var(--ink);
 }
+/* Een aan/uit is één regel: de naam links, twee kleine knoppen rechts. Zo
+   weegt hij minder dan de keuzes erboven, die over het spel gaan. De legend
+   zweeft, anders tekent de browser hem als rand-onderschrift en lukt de
+   regel niet. */
+.field.rij { display: flex; align-items: center; justify-content: space-between; }
+.field.rij legend { float: left; margin: 0; }
+.field.rij .chips { flex-wrap: nowrap; }
+.field.rij .chips > .chip { flex: 0 0 auto; width: 76px; min-height: var(--tap); padding: 0; }
+.field.rij + .field.rij { margin-top: var(--s-3); }
 /* Geen flex-gap: gap telt bovenop de margin van een kind, en dan stond een
    kop verder van zijn eigen veld dan twee velden van elkaar. Expliciete
    marges: elk kind --s-6 van zijn voorganger, behalve vlak na een kop. */
@@ -758,14 +770,16 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
 /* Een groepsgrens hoort meer lucht te krijgen dan een veld binnen een groep.
    Met --s-5 erbij staat de grens op 48 en los van het ritme binnen een
    groep. */
-.field-group + .field-group { margin-top: var(--s-5); }
-/* Drie groepen, en de grens ligt op wat een knop verandert:
-     Welke kaarten -- de moeilijkheid en de bak; een grove en een fijne knop
-       op hetzelfde ding.
-     Hoe lang -- kaarten per potje en tijd per beurt.
-     Voorkeuren -- geluid en trilling, van het toestel en niet van het spel.
-   (En als vierde "Deze app", installeren en delen.) De bak een eigen groep
-   geven is gemeten: dan valt ze op een telefoon onder de vouw.
+.field-group + .field-group,
+.field-group + .rules, .rules + .field-group { margin-top: var(--s-5); }
+/* Vier groepen, in de volgorde waarin je ze nodig hebt:
+     Spel -- alles wat het volgende potje verandert: moeilijkheid (met de
+       bak eronder, de fijne knop op hetzelfde ding), kaarten per potje,
+       tijd per beurt. Eén blok, want dit is waar je voor komt.
+     Voorkeuren -- geluid en trilling, van het toestel en niet van het spel;
+       aan/uit-regels, lichter dan de keuzes erboven.
+     Zo speel je -- de regels, met de vouwregel als groepskop.
+     Deze app -- installeren en delen.
 
    Zet hier nooit een #s-setup h2 naast: die wint op zijn ID, ongeacht de
    volgorde, en dan zien de groepskoppen eruit als veldlabels. Geen goud: dat
@@ -778,8 +792,7 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
 /* Geen gouden rail: goud betekent op dit scherm "gekozen". Deze vouwregel en
    die van de kaartenbak doen hetzelfde, dus dragen ze dezelfde vorm. */
 .rules {
-  padding: 2px 0;
-  font-size: 13.5px; line-height: 1.5; color: var(--ink-2);
+  font-size: 14px; line-height: 1.5; color: var(--ink-2);
 }
 .rules p { margin: 0 0 var(--s-2); }
 .rules b { color: var(--ink); }
@@ -793,12 +806,15 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
    op elke machine anders is. list-style: none is nodig voor Safari. */
 /* min-height op --tap: niets dat je aanraakt is kleiner dan 48 px, ook deze
    regel niet. */
+/* De vouwregel ís de groepskop: zelfde maat en streep als .group-head, met
+   de plus ervoor. */
 .rules > summary {
   list-style: none; cursor: pointer;
   display: flex; align-items: center; gap: var(--s-2);
-  min-height: var(--tap);
-  font-size: 13px; font-weight: 900; text-transform: uppercase;
-  letter-spacing: .12em; color: var(--ink-2);
+  min-height: var(--tap); box-sizing: border-box;
+  font-size: 15px; font-weight: 900; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--ink);
+  border-bottom: var(--line-2) solid var(--rule);
 }
 .rules > summary::-webkit-details-marker { display: none; }
 .rules > summary::before {
@@ -809,7 +825,7 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
 .rules[open] > summary::before { content: "−"; }
 /* Lucht tussen de kop en de tekst pas als hij openstaat, net als
    .cb-body -- dichtgeklapt is er niets om lucht van te houden. */
-.rules[open] > summary { margin-bottom: var(--s-2); }
+.rules[open] > summary { margin-bottom: var(--s-3); }
 .rules ol {
   margin: 0 0 var(--s-2); padding-left: 1.4em;
 }
@@ -822,10 +838,14 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   position: relative;
   border: var(--line) solid var(--ink); background: var(--paper);
   box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
-  font-weight: 900; text-transform: uppercase; letter-spacing: .05em; font-size: 14px;
+  font-weight: 800; font-size: 16px; line-height: 1.2;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
-.chip small { display: block; font-size: 11px; letter-spacing: .04em; color: var(--ink-2); font-weight: 700; }
+/* Gelijke delen, ook op 320 px: met flex op inhoudsbreedte sprong
+   "Moeilijk" daar naar een eigen regel. Zin-tekst en niet in hoofdletters:
+   op dit scherm schreeuwde alles, en een keuze is geen kop. */
+.chips > .chip { flex: 1 1 0; min-width: 0; padding-inline: var(--s-1); }
+.chip small { display: block; font-size: 12px; color: var(--ink-2); font-weight: 700; }
 .chip[aria-checked="true"] { background: var(--go); }
 /* De keuze hangt niet aan de kleur alleen: er komt een vinkje bij staan. */
 /* Het vinkje staat in de onderhoek, naast de smalle leeftijdsregel:
@@ -862,8 +882,7 @@ input[type=range]::-moz-range-thumb {
   list-style: none; cursor: pointer;
   display: flex; align-items: center; flex-wrap: wrap; gap: 2px var(--s-2);
   min-height: var(--tap);
-  font-size: 13px; font-weight: 900; text-transform: uppercase;
-  letter-spacing: .12em; color: var(--ink-2);
+  font-size: 16px; font-weight: 800; color: var(--ink);
 }
 .cardbox > summary::-webkit-details-marker { display: none; }
 .cardbox > summary::before {
@@ -965,7 +984,7 @@ input[type=range]::-moz-range-thumb {
   font-weight: 900; text-transform: uppercase; letter-spacing: .06em; font-size: 12px;
   color: var(--ink);
 }
-.hint { font-size: 12px; color: var(--ink-2); margin: var(--s-2) 0 0; line-height: 1.45; }
+.hint { text-wrap: pretty; font-size: 13px; color: var(--ink-2); margin: var(--s-2) 0 0; line-height: 1.45; }
 
 /* ---- Installeren ------------------------------------------------------
    De plaat op de knop is de belofte zelf: dít vlak komt op het beginscherm te
@@ -2148,31 +2167,9 @@ input[type=range]::-moz-range-thumb {
          hetzelfde als de aria-label van het tandwiel. -->
     <h1>Instellingen</h1>
 
-    <!-- De regels staan open tot je één keer een spel gestart hebt, daarna
-         dichtgeklapt: wie ze nooit zag (een oppas, een opa) krijgt ze wel, de
-         rest ziet ze niet elke avond. -->
-    <details class="rules" id="rules">
-      <summary>Zo speel je</summary>
-      <!-- De enige plek waar de ploegen bij naam én dier staan: dit is het
-           scherm van de volwassene. Het dier ernaast koppelt de naam aan het
-           beeld op de stand. -->
-      <p>Twee ploegen — <b class="teamname">Vos<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-vos"/></svg></b>
-        en <b class="teamname">Uil<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-uil"/></svg></b> —
-        spelen 3 rondes met dezelfde kaarten:</p>
-      <ol>
-        <li><b>Omschrijven</b> — alles mag, behalve het woord zelf.</li>
-        <li><b>Eén woord</b> — geef precies één woord als hint.</li>
-        <li><b>Uitbeelden</b> — niet praten.</li>
-      </ol>
-      <p>Goed geraden? <b>1 punt</b> en meteen door. Passen mag.</p>
-      <p>Is de stapel leeg? Dan begint de volgende ronde met dezelfde kaarten.
-        <b>De resterende tijd gaat mee.</b></p>
-    </details>
-
-    <!-- Drie groepen; de grens ligt op wat een knop verandert. Zie
-         .group-head. -->
+    <!-- Wat je het vaakst bijstelt eerst; zie .group-head. -->
     <div class="field-group">
-      <h2 class="group-head">Welke kaarten</h2>
+      <h2 class="group-head">Spel</h2>
 
       <fieldset class="field">
         <legend>Moeilijkheid</legend>
@@ -2222,10 +2219,6 @@ input[type=range]::-moz-range-thumb {
           <div class="cards" id="cbAll"></div>
         </div>
       </details>
-    </div>
-
-    <div class="field-group">
-      <h2 class="group-head">Hoe lang</h2>
 
       <fieldset class="field">
         <!-- "Per potje", niet "Aantal kaarten": de bak erboven telt ook
@@ -2258,7 +2251,7 @@ input[type=range]::-moz-range-thumb {
     <div class="field-group">
       <h2 class="group-head">Voorkeuren</h2>
 
-      <fieldset class="field">
+      <fieldset class="field rij">
         <legend>Geluid</legend>
         <div class="chips" id="soundChips" role="radiogroup" aria-label="Geluid">
           <button class="chip" role="radio" aria-checked="false" data-sound="1">Aan
@@ -2271,7 +2264,7 @@ input[type=range]::-moz-range-thumb {
       <!-- Los van Geluid: de helft van de reden om geluid uit te zetten is een
            stil huis, en juist dan is een trilling in de hand het meest waard.
            Staat alleen op toestellen die vibrate() kennen (zie paintSetup). -->
-      <fieldset class="field" id="hapticsField" hidden>
+      <fieldset class="field rij" id="hapticsField" hidden>
         <legend>Trilling</legend>
         <div class="chips" id="hapticsChips" role="radiogroup" aria-label="Trilling">
           <button class="chip" role="radio" aria-checked="false" data-haptics="1">Aan
@@ -2281,6 +2274,28 @@ input[type=range]::-moz-range-thumb {
         </div>
       </fieldset>
     </div>
+
+    <!-- De regels zijn een groep op zich, met de vouwregel als kop. Open tot
+         je één keer een spel gestart hebt: wie ze nooit zag (een oppas, een
+         opa) krijgt ze wel, de rest ziet één regel. Onder de knoppen, want
+         wie het tandwiel aantikt komt iets bijstellen. -->
+    <details class="rules" id="rules">
+      <summary>Zo speel je</summary>
+      <!-- De enige plek waar de ploegen bij naam én dier staan: dit is het
+           scherm van de volwassene. Het dier ernaast koppelt de naam aan het
+           beeld op de stand. -->
+      <p>Twee ploegen — <b class="teamname">Vos<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-vos"/></svg></b>
+        en <b class="teamname">Uil<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-uil"/></svg></b> —
+        spelen 3 rondes met dezelfde kaarten:</p>
+      <ol>
+        <li><b>Omschrijven</b> — alles mag, behalve het woord zelf.</li>
+        <li><b>Eén woord</b> — geef precies één woord als hint.</li>
+        <li><b>Uitbeelden</b> — niet praten.</li>
+      </ol>
+      <p>Goed geraden? <b>1 punt</b> en meteen door. Passen mag.</p>
+      <p>Is de stapel leeg? Dan begint de volgende ronde met dezelfde kaarten.
+        <b>De resterende tijd gaat mee.</b></p>
+    </details>
 
     <!-- De vierde groep, de enige die niet over het spel gaat. Onderaan, want
          wie het tandwiel aantikt komt de moeilijkheid of de tijd bijstellen,

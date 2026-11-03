@@ -195,6 +195,12 @@ Het installeerveld heeft vijf standen (`knop`, `zetop`, `menu`, `delen`,
 `weg`), staat onderaan als vierde groep, en levert alleen de weg die het
 platform heeft weggenomen.
 
+**Het instellingenscherm.** Vier groepen, in de volgorde waarin je ze nodig
+hebt: Spel (moeilijkheid met de bak, kaarten per potje, tijd), Voorkeuren
+(aan/uit als één regel met twee kleine knoppen), Zo speel je (de vouwregel
+is de groepskop), Deze app. Drie lagen tekst: hoofdletters alleen voor de
+titel en de groepskoppen; veldnamen en keuzeknoppen in zin-tekst.
+
 ## Kaarten
 
 `DECKS` bovenaan `index.html`, één regel per kaart. Een stand is een
