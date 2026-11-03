@@ -586,7 +586,7 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
 #s-title.on > .wordmark {
   animation: markIn calc(.26s / max(var(--dur), .001)) ease-out backwards;
 }
-#s-title.on > #btnStart {
+#s-title.on #btnStart {
   animation: goIn calc(.26s / max(var(--dur), .001)) ease-out backwards;
   animation-delay: calc(.09s / max(var(--dur), .001));
 }
@@ -1859,6 +1859,104 @@ input[type=range]::-moz-range-thumb {
   #pauze .mini-score .side.up .head > svg { width: 76px; height: 76px; }
   #pauze .mini-score b { font-size: 34px; }
 }
+
+/* ============================================================
+   BELONING: DE MASCOTTES DOEN MEE
+   De mascottes zijn de personages van de app, en ze reageerden nergens op.
+   Nu wel, op vier momenten, altijd op een element dat er al staat:
+   - een goede kaart landt: de mascotte in de balk wipt, hoger naarmate de
+     reeks langer wordt (net als de toon van Snd.goed);
+   - de stapel is leeg: ze juicht;
+   - de tijd is om: ze schrikt, en het stempel valt op de kaart;
+   - op de titel staan ze naast de knop en kun je ze laten springen.
+   Via Web Animations (mascotte()), om dezelfde reden als landFly: bij
+   beperkte beweging slaat de code ze expliciet over.
+   ============================================================ */
+.title-row { display: flex; align-items: flex-end; gap: clamp(8px, 4vw, 28px); }
+.gluur {
+  width: clamp(52px, 15vw, 84px); aspect-ratio: 1; display: block;
+  margin-bottom: 4px; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.gluur svg { width: 100%; height: 100%; display: block; transform-origin: 50% 100%; }
+#s-title.on .gluur svg { animation: ademen calc(2.8s / max(var(--dur), .001)) ease-in-out infinite; }
+#s-title.on .gluur[data-team="1"] svg { animation-delay: -1.4s; }
+#s-title.on > .title-row .gluur {
+  animation: goIn calc(.26s / max(var(--dur), .001)) ease-out backwards;
+  animation-delay: calc(.18s / max(var(--dur), .001));
+}
+@media (max-height: 520px) { .gluur { width: min(15vh, 64px); } }
+
+.teamchip svg { transform-origin: 50% 90%; }
+
+/* Het stempel: alleen als de beurt om is. Een inkt-plaat met de gouden
+   zandloper -- dezelfde plaat als het merk, en dus dezelfde ene verschoven
+   laag: de gouden schaduw naar rechtsonder. */
+.card .stempel {
+  position: absolute; z-index: 3; display: none;
+  width: 30%; aspect-ratio: 1; left: 35%; top: 30%;
+  background: var(--ink); border: 0;
+  box-shadow: var(--lift-1) var(--lift-1) 0 0 var(--go);
+  place-items: center;
+  transform: rotate(-8deg);
+}
+.card .stempel svg { width: 62%; height: 62%; }
+.card .stempel.klaar { background: var(--good); border: var(--line-2) solid var(--ink);
+                       box-shadow: var(--lift-1) var(--lift-1) 0 0 var(--ink); }
+#s-play.leeg .card .stempel.klaar,
+#s-play.over .card .stempel.om {
+  display: grid;
+  animation: stempel calc(.3s / max(var(--dur), .001)) var(--e-pop) both;
+}
+@keyframes stempel {
+  from { transform: rotate(-20deg) scale(1.9); opacity: 0; }
+  to   { transform: rotate(-8deg) scale(1); opacity: 1; }
+}
+/* Wat de beurt opleverde, nog één keer en groter, voor de ploeg die hem
+   speelde. Op het spelscherm en niet op de overdracht: dat scherm is van de
+   ploeg erna. */
+#turnScore { transform-origin: 0% 50%; }
+#s-play.over #turnScore:not([hidden]) {
+  animation: buit calc(.5s / max(var(--dur), .001)) var(--e-pop) calc(.15s / max(var(--dur), .001)) both;
+}
+@keyframes buit {
+  0%   { transform: scale(1); }
+  55%  { transform: scale(1.7); }
+  100% { transform: scale(1.4); }
+}
+/* De stapel is leeg: er ligt niets meer onder de kaart, het groene stempel
+   valt erop, en de knoppen gaan uit zoals bij tijd-om. */
+#s-play.leeg .cardslot .under { visibility: hidden; }
+#s-play.leeg .btn-good,
+#s-play.leeg .btn-skip { opacity: .38; pointer-events: none; }
+
+/* De kaart die je net raadde of oversloeg, als losse kopie boven de nieuwe:
+   geraden krimpt ze naar de teller, overgeslagen zakt ze onder de stapel.
+   Dit is een vertrek, maar er wacht niets achter -- de nieuwe kaart ligt er
+   vanaf het eerste beeld onder (zie "Vertrekken mag" in CLAUDE.md). */
+.kaart-spook {
+  position: fixed; margin: 0; z-index: 7; pointer-events: none;
+  transform-origin: 50% 50%;
+}
+
+/* De eindstand komt op: eerst tellen de totalen op, dan valt de kroon. De
+   ploeg die verloor klapt mee in plaats van stil te staan. */
+@keyframes kroonVal {
+  0%   { transform: translateX(-50%) rotate(-8deg) translateY(-70px) scale(.6); opacity: 0; }
+  60%  { transform: translateX(-50%) rotate(-8deg) translateY(6px) scale(1.08); opacity: 1; }
+  100% { transform: translateX(-50%) rotate(-8deg) translateY(0) scale(1); opacity: 1; }
+}
+#s-winner .tally .crown.later {
+  animation: kroonVal calc(.45s / max(var(--dur), .001)) ease-out var(--kroon, 0s) both;
+}
+@keyframes klap {
+  0%, 100% { transform: rotate(0); }
+  25%      { transform: rotate(-5deg); }
+  75%      { transform: rotate(5deg); }
+}
+#s-winner .tally:not(.winner) .mascot-sm {
+  transform-origin: 50% 90%;
+  animation: klap calc(.9s / max(var(--dur), .001)) ease-in-out infinite;
+}
 </style>
 </head>
 <body>
@@ -2026,9 +2124,16 @@ input[type=range]::-moz-range-thumb {
     <h1>Tijd<br>is Om</h1>
   </div>
 
-  <button class="btn-go" id="btnStart" aria-label="Spelen">
-    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-play"/></svg>
-  </button>
+  <!-- De twee ploegen staan naast de knop: wie hier binnenkomt, ziet met wie
+       hij zo gaat spelen. Aantikken laat ze opspringen; dat doet verder
+       niets, het is speelgoed. -->
+  <div class="title-row">
+    <span class="gluur" data-team="0" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#m-vos"/></svg></span>
+    <button class="btn-go" id="btnStart" aria-label="Spelen">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-play"/></svg>
+    </button>
+    <span class="gluur" data-team="1" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#m-uil"/></svg></span>
+  </div>
 
   <button class="btn-icon" id="btnGear" aria-label="Instellingen">
     <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-gear"/></svg>
@@ -2324,6 +2429,12 @@ input[type=range]::-moz-range-thumb {
           <!-- Het woord bij de tekening: náást een beeld dat hetzelfde
                vertelt, nooit in plaats daarvan. Zie .cardword. -->
           <b class="cardword" id="cardWord">olifant</b>
+          <!-- Het stempel als de tijd om is: het merk zelf, inkt met de
+               gouden zandloper, schuin op de kaart. Zie #s-play.over. -->
+          <span class="stempel om" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
+          <!-- En als de stapel leeg is: alles geraden, het vinkje van "goed"
+               op het groen van "goed". Zie #s-play.leeg. -->
+          <span class="stempel klaar" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-check"/></svg></span>
           <!-- Lege baan en inkt op precies hetzelfde pad; sizeCard() tekent
                het, paintClock() laat het afwinden. -->
           <svg class="timerframe" id="timerFrame" aria-hidden="true">
@@ -3985,6 +4096,7 @@ function landFly() {
   if (flyEl) flyEl.hidden = true;
   paintTurnScore();
   popTurnScore();
+  if (current === "play" && G) mascotte(balkMascotte(), "wip", G.gained);
 }
 
 /* De duur uit --t-fly, zodat er maar één plek is waar hij staat. */
@@ -4028,7 +4140,9 @@ $("#btnGoed").addEventListener("click", () => {
      Meten moet wél op de nieuwe stand, dus meetTurnScore() schildert even
      vooruit en zet meteen terug. */
   const from = midden("#card");
-  flyGain(from, meetTurnScore());
+  const naar = meetTurnScore();
+  kaartSpook("goed", naar);
+  flyGain(from, naar);
   if (leeg) {
     /* De laatste kaart: G.card staat nu op null, dezelfde vlag waar acts()
        en openPause() op letten, zodat er niets tussen kan komen terwijl het
@@ -4054,12 +4168,71 @@ $("#btnPas").addEventListener("click", () => {
   if (!acts("pas")) return;
   Snd.pas();
   Tril.pas();
+  kaartSpook("pas");
   Spel.passen(G);           // onderop, zonder straf
   paintCard("pas");
   syncControls();
 });
 
+
+/* ---------- de mascottes doen mee (zie BELONING in de opmaak) ---------- */
+function stilAan() { return matchMedia("(prefers-reduced-motion: reduce)").matches; }
+function mascotte(el, soort, n) {
+  if (!el || !el.animate || stilAan()) return;
+  const h = 6 + Math.min(n || 0, 7) * 1.6;
+  const vormen = {
+    wip:    [[0, 0, 1, 0], [-h, 0, 1.1, 0], [0, 0, 1, 0]],
+    juich:  [[0, 0, 1, 0], [-14, 0, 1.15, -10], [0, 0, 1, 0], [-14, 0, 1.15, 10], [0, 0, 1, 0]],
+    schrik: [[0, 0, 1, 0], [-4, -4, 1.18, 0], [-4, 4, 1.18, 0], [-2, -3, 1.12, 0], [0, 0, 1, 0]]
+  };
+  const duur = { wip: 260, juich: 640, schrik: 420 }[soort];
+  el.animate(vormen[soort].map(([y, x, sc, r]) =>
+    ({ transform: `translate(${x}px, ${y}px) scale(${sc}) rotate(${r}deg)` })),
+    { duration: duur, easing: "ease-out" });
+}
+function balkMascotte() { return $("#plMascot"); }
+
+$$(".gluur").forEach(g => g.addEventListener("pointerdown", () => {
+  Snd.unlock();
+  Snd.goed(g.dataset.team === "0" ? 0 : 4);
+  mascotte(g.querySelector("svg"), "juich");
+}));
+
+/* De kaart als losse kopie, voor ze plaatsmaakt voor de volgende. */
+function kaartSpook(soort, naar) {
+  if (stilAan() || !document.body.animate) return;
+  const kaart = $("#card");
+  const r = kaart.getBoundingClientRect();
+  if (!r.width) return;
+  const k = kaart.cloneNode(true);
+  k.removeAttribute("id");
+  k.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
+  k.querySelectorAll(".timerframe, .stempel").forEach(e => e.remove());
+  k.classList.remove("in", "tuck");
+  k.classList.add("kaart-spook");
+  Object.assign(k.style, { left: r.left + "px", top: r.top + "px",
+                           width: r.width + "px", height: r.height + "px" });
+  document.body.appendChild(k);
+  let frames;
+  if (soort === "goed" && naar) {
+    const dx = naar.x - (r.left + r.width / 2), dy = naar.y - (r.top + r.height / 2);
+    frames = [
+      { transform: "translate(0, 0) scale(1)", opacity: 1 },
+      { transform: `translate(${dx}px, ${dy}px) scale(.08)`, opacity: .2 }
+    ];
+  } else {
+    frames = [
+      { transform: "translateY(0) scale(1)", opacity: 1 },
+      { transform: "translateY(36px) scale(.9)", opacity: 0 }
+    ];
+  }
+  const a = k.animate(frames, { duration: soort === "goed" ? vlucht() : 200,
+                                easing: "cubic-bezier(.3,0,.2,1)", fill: "forwards" });
+  a.onfinish = a.oncancel = () => k.remove();
+}
+
 /* ---------- einde beurt / ronde ---------- */
+const BEURT_ADEM = 1000;   // ms tussen tijd-om en de overdracht
 function timeUp() {
   stopClock(); releaseWake();
   Snd.timeUp();
@@ -4068,9 +4241,11 @@ function timeUp() {
   /* Het punt achter de beurt (zie #s-play.over). startTurn() haalt de klasse
      er weer af. */
   $("#s-play").classList.add("over");
-  /* Even laten staan: de tafel roept nog. Er valt niets stuk te tikken, want
-     G.card staat al op null. */
-  setTimeout(turnEnd, 700);
+  mascotte(balkMascotte(), "schrik");
+  /* Even laten staan: de tafel roept nog, en de ploeg die speelde krijgt
+     haar stempel en haar buit nog te zien (zie #s-play.over). Er valt niets
+     stuk te tikken, want G.card staat al op null. */
+  setTimeout(turnEnd, BEURT_ADEM);
 }
 
 /* Eén bouwer voor de stand op twee schermen (overdracht en pauzepaneel), twee
@@ -4204,11 +4379,17 @@ function endRound(rest) {
   /* De resterende tijd gaat mee naar dezelfde ploeg (zie Spel.rondeEinde);
      rest komt van de tik op de laatste kaart, de klok staat al stil. */
   const { uit, vers } = Spel.rondeEinde(G, rest);
-  // Laatste ronde: de fanfare van winner() moet alleen klinken.
-  if (uit) { winner(); return; }
-  Snd.leeg();
-  Tril.leeg();
-  handoff("round", vers[0], vers[1]);
+  /* Een tel voor de stapel die leeg is: de plek van de kaart is leeg, de
+     mascotte juicht. Daarna de overdracht, of bij de laatste ronde de
+     eindstand -- de fanfare van winner() moet dan alleen klinken. */
+  if (!uit) { Snd.leeg(); Tril.leeg(); }
+  $("#s-play").classList.add("leeg");
+  mascotte(balkMascotte(), "juich");
+  setTimeout(() => {
+    $("#s-play").classList.remove("leeg");
+    if (!G || current !== "play") return;
+    if (uit) winner(); else handoff("round", vers[0], vers[1]);
+  }, BEURT_ADEM);
 }
 
 
@@ -4273,14 +4454,44 @@ function winner() {
   $("#s-winner").dataset.draw = win === null ? "1" : "0";
 
   rays(win === null ? "#F2B705" : TEAMS[win].hex);
-  confetti(win === null ? ["#E8452B", "#1B6FC4", "#F2B705"] : [TEAMS[win].hex, "#F2B705"]);
-  Snd.fanfare();
-  // Het lange feestritme is versiering, geen mededeling -- net als de
-  // confetti valt het weg bij beperkte beweging.
-  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) Tril.feest();
   G = null;
   clearGame();          // uitgespeeld: er valt niets meer te hervatten
   show("winner");
+
+  /* De onthulling: de totalen tellen samen op, dan valt de kroon en pas dán
+     het feest. Bij beperkte beweging staat alles er meteen. */
+  const feest = () => {
+    confetti(win === null ? ["#E8452B", "#1B6FC4", "#F2B705"] : [TEAMS[win].hex, "#F2B705"]);
+    Snd.fanfare();
+    // Het lange feestritme is versiering, geen mededeling -- net als de
+    // confetti valt het weg bij beperkte beweging.
+    if (!stilAan()) Tril.feest();
+  };
+  if (stilAan()) { feest(); return; }
+  const OPTEL = 1100;
+  const nums = $$("#wnPiles .tally .num");
+  const doel = nums.map(n => Number(n.textContent) || 0);
+  const hoogst = Math.max(1, ...doel);
+  $$("#wnPiles .crown").forEach(c => {
+    c.classList.add("later");
+    c.style.setProperty("--kroon", OPTEL + "ms");
+  });
+  nums.forEach(n => { n.textContent = "0"; });
+  const t0 = performance.now();
+  let vorig = -1;
+  const stap = now => {
+    if (current !== "winner") return;
+    const p = Math.min(1, (now - t0) / OPTEL);
+    const e = 1 - Math.pow(1 - p, 3);
+    // Allebei met dezelfde snelheid per punt: wie meer had, telt langer door.
+    const waarde = Math.round(e * hoogst);
+    nums.forEach((n, i) => { n.textContent = Math.min(doel[i], waarde); });
+    if (waarde !== vorig && waarde % 3 === 0) Snd.tick(1500 + waarde * 6, .04);
+    vorig = waarde;
+    if (p < 1) requestAnimationFrame(stap);
+    else setTimeout(() => { if (current === "winner") feest(); }, 300);
+  };
+  requestAnimationFrame(stap);
 }
 
 function rays(hex) {

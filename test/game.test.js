@@ -183,6 +183,12 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     // Ruim boven de dubbeltik-drempel van 280 ms: sneller dan dat is geen mens.
     for (let i = 0; i < 40; i++) {
       if (await screen() !== 'play') break;
+      // Stapel leeg: het scherm blijft nog een tel staan met het stempel
+      // (zie endRound), en de knoppen doen dan niets meer.
+      if (await game(() => window.__tijd.G.card === null)) {
+        await page.waitForTimeout(1300);
+        continue;
+      }
       await noteCard();
       await page.click('#btnGoed');
       await page.waitForTimeout(320);
@@ -218,7 +224,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(await screen() === 'handoff', 'na start niet op het overdrachtscherm');
   await startTurn();
   const teamBefore = await game(() => window.__tijd.G.team);
-  await page.waitForTimeout(21000);
+  await page.waitForTimeout(21500);   // 20 s plus de adem na tijd-om (BEURT_ADEM)
   ok(await screen() === 'handoff', 'na tijd om niet op het overdrachtscherm');
   ok(await game(() => window.__tijd.G.team) !== teamBefore, 'ploeg wisselt niet na tijd om');
   ok(await game(() => {
@@ -344,7 +350,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     const team = await game(() => window.__tijd.G.team);
     await startTurn();
     await page.evaluate(() => document.querySelector('#btnGoed').click());
-    await page.waitForTimeout(3500);  // vlucht voorbij, en timeUp's 700 ms ook
+    await page.waitForTimeout(4800);  // vlucht voorbij, en de adem erna (BEURT_ADEM) ook
     await game(() => document.documentElement.style.removeProperty('--t-fly'));
     return team;
   }
