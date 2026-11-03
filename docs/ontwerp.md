@@ -550,6 +550,14 @@ daarna hoort het cijfer in het midden, want daar kijkt iemand die het toestel
 net aangereikt krijgt. Bij beperkte beweging blijft ze op de knop staan, en
 dat is nog steeds de goede plek.
 
+De schijf heeft een ondergrens (`max(120px, ...)`): liggend kromp ze op
+24vh tot 94 px, kleiner dan de knop waar ze uit kwam. Elke tel klopt ze één
+keer naar binnen (`.klop`, 0,88 naar 1 met `--e-pop`) en vertrekt de ring
+(`#cdGolf`) van haar rand in plaats van uit het midden; uit het midden liep
+hij het eerste vijfde van de tel onzichtbaar onder de schijf, en kwam hij
+pas na het tikje te voorschijn. Naar buiten kloppen raakte de inktboog
+eromheen, die 6 px vrij ligt.
+
 **Let op de coördinatenval, want die kostte twee pogingen.** `.cd-round` en
 `.cd-team` trekken twee punten binnen hétzelfde vervormde vlak van elkaar af
 (de tegel op de balk min de oorsprong van het aftelvlak), en dat verschil is
@@ -774,6 +782,21 @@ Drie dingen die daaraan vastzitten:
   titel, en dáár geldt de reden van de ladder gewoon weer: die zet het
   paneel hard uit. `openPause()` kapt een lopende uitloop af, anders gaat
   het paneel open in een sluier die nog aan het oplossen is.
+
+De derde is de kopie van de kaart (`kaartSpook()`): de volgende kaart ligt
+er vanaf het eerste beeld al onder. Die kopie blijft dekkend. Eerst vervaagde
+ze terwijl ze bewoog, en dan lagen twee tekeningen over elkaar (een appel
+door een paraplu, "APPEL" door "PARAPLU"); in slowmotion las het als vuil.
+Bij goed vliegt ze versnellend naar de teller en lost pas op het laatste
+derde op, als ze al klein is. Bij pas schuift ze ónder de stapel: ze wordt
+vóór de randen in `.cardslot` gezet, dus achter de nieuwe kaart, en piept
+nog even onder de onderrand uit. Een kopie die bóven de nieuwe kaart naar
+beneden zakt, zei het omgekeerde van wat er gebeurt.
+
+Terugnemen (`kaartTerug()`) is geraden achterstevoren: de kaart komt uit de
+teller terug naar haar plek, en de kaart die er lag schuift onder de
+stapel. Eerst werd ze opnieuw gedeeld zoals elke nieuwe kaart, en dan zag
+je niet dat dít de kaart was die je net had weggegeven.
 
 Wat er níet bij komt: een aftelling bij hervatten. Die is geopperd -- de
 klok begint immers op de tik -- maar het aftellen bestaat om een strijkende

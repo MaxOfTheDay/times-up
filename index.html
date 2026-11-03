@@ -490,16 +490,23 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   background: var(--paper); border: var(--line-2) solid var(--ink);
 }
 .cd-team svg { width: var(--tap); height: var(--tap); display: block; }
-.cd-disc { position: relative; width: min(46vw, 24vh, 190px); aspect-ratio: 1; display: block; }
+/* Met een ondergrens: liggend kromp de schijf op 24vh tot 94 px, kleiner dan
+   de knop waar ze uit komt. */
+.cd-disc { position: relative; width: max(120px, min(46vw, 30vh, 190px)); aspect-ratio: 1; display: block; }
 .cd-disc b {
   position: absolute; inset: 0; display: grid; place-items: center;
   border-radius: 50%; background: var(--go);
   border: var(--line) solid var(--ink);
   /* Geen slagschaduw: die liep door de leeglopende boog heen en maakte haar
      aan één kant dikker. */
-  font-weight: 900; font-size: min(20vw, 11vh, 84px); color: var(--ink);
+  font-weight: 900; font-size: max(52px, min(20vw, 11vh, 84px)); color: var(--ink);
   font-variant-numeric: tabular-nums; line-height: 1;
 }
+/* Elke tel klopt de schijf één keer, op de maat van het tikje en de ring die
+   eruit vertrekt (telGolf()). Naar binnen en terug: groter dan 1 raakte ze de
+   inktboog eromheen. */
+@keyframes telKlop { from { transform: scale(.88); } to { transform: scale(1); } }
+.cd-disc b.klop { animation: telKlop calc(.32s / max(var(--dur), .001)) var(--e-pop); }
 .cd-disc .ring {
   position: absolute; inset: -10px; width: calc(100% + 20px); height: calc(100% + 20px);
   transform: rotate(-90deg); pointer-events: none;
@@ -1174,7 +1181,7 @@ input[type=range]::-moz-range-thumb {
    en remt maar zacht af. Met een sterke uitloop kroop hij aan het eind en
    stond hij nog half in een hoek toen hij verdween. */
 @keyframes rimpel {
-  0%   { --rimpel: 0px;   opacity: var(--golf-op, 1); }
+  0%   { --rimpel: var(--golf-van, 0px); opacity: var(--golf-op, 1); }
   45%  {                  opacity: var(--golf-op, 1); }
   100% { --rimpel: 560px; opacity: 0; }
 }
@@ -2178,6 +2185,9 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   position: fixed; margin: 0; z-index: 7; pointer-events: none;
   transform-origin: 50% 50%;
 }
+/* Onder de stapel: achter de randen eronder (dezelfde laag, maar eerder in
+   de slot), dus ook achter de nieuwe kaart. */
+.kaart-spook.onder { position: absolute; inset: 0; z-index: -1; }
 
 /* De eindstand komt op: eerst tellen de totalen op, dan valt de kroon. De
    ploeg die verloor klapt mee in plaats van stil te staan. */
@@ -4327,11 +4337,16 @@ function countdown(done) {
   countRaf = requestAnimationFrame(step);
 }
 
-/* Eén ring per tel (zie #cdGolf), vanuit het midden van de schijf. */
+/* Eén ring per tel (zie #cdGolf), vanuit de rand van de schijf: daar ziet
+   hij er meteen op de tel uit, in plaats van een vijfde tel onder de schijf
+   te lopen. En de schijf klopt mee (zie .klop). */
 function telGolf() {
-  const g = $("#cdGolf");
+  const g = $("#cdGolf"), b = $("#cdNum");
   if (!g || stilAan()) return;
+  const r = $(".cd-disc").getBoundingClientRect().width / 2;
+  g.style.setProperty("--golf-van", Math.round(r + 14) + "px");
   g.classList.remove("speel"); void g.offsetWidth; g.classList.add("speel");
+  b.classList.remove("klop"); void b.offsetWidth; b.classList.add("klop");
 }
 
 /* Afbreken: meteen weg. Wie tijdens het aftellen tikt, wil terug, en daar
@@ -4663,12 +4678,15 @@ $("#turnScore").addEventListener("click", () => {
   if (current !== "play" || !G || G.card === null || paused()) return;
   if (performance.now() - lastAct.goed > TERUG_MS) return;
   landFly();
+  const van = midden("#turnScore");
   if (!Spel.terug(G)) return;
+  kaartSpook("pas");        // de kaart die er lag; het DOM toont haar nog
   lastAct.goed = 0;
   sluitTerug();
   Snd.pas(); Tril.pas();
   paintTurnScore();
-  paintCard("goed");
+  paintCard(null);
+  kaartTerug(van);
   syncControls();
 });
 
@@ -4764,37 +4782,65 @@ $$(".gluur").forEach(g => g.addEventListener("pointerdown", () => {
   mascotte(g.querySelector("svg"), "juich");
 }));
 
-/* De kaart als losse kopie, voor ze plaatsmaakt voor de volgende. */
+/* De kaart als losse kopie, voor ze plaatsmaakt voor de volgende. Ze blijft
+   dekkend: een kopie die doorschijnend wordt, legt twee tekeningen over
+   elkaar (een appel door een paraplu), en dat leest als vuil.
+   - goed: ze vliegt naar de teller, versnellend, en lost pas op het laatste
+     stuk op, als ze al klein is;
+   - pas (en de kaart die plaatsmaakt bij terugnemen): ze schuift ónder de
+     stapel, achter de nieuwe kaart en de randen eronder, en piept er even
+     onderuit voor ze weg is. */
 function kaartSpook(soort, naar) {
   if (stilAan() || !document.body.animate) return;
-  const kaart = $("#card");
+  const kaart = $("#card"), slot = $("#cardslot");
   const r = kaart.getBoundingClientRect();
   if (!r.width) return;
   const k = kaart.cloneNode(true);
   k.removeAttribute("id");
   k.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
   k.querySelectorAll(".timerframe, .stempel").forEach(e => e.remove());
-  k.classList.remove("in", "tuck");
+  k.classList.remove("in", "tuck", "seen", "terug");
   k.classList.add("kaart-spook");
-  Object.assign(k.style, { left: r.left + "px", top: r.top + "px",
-                           width: r.width + "px", height: r.height + "px" });
-  document.body.appendChild(k);
-  let frames;
+  let frames, opties;
   if (soort === "goed" && naar) {
+    Object.assign(k.style, { left: r.left + "px", top: r.top + "px",
+                             width: r.width + "px", height: r.height + "px" });
+    document.body.appendChild(k);
     const dx = naar.x - (r.left + r.width / 2), dy = naar.y - (r.top + r.height / 2);
     frames = [
       { transform: "translate(0, 0) scale(1)", opacity: 1 },
-      { transform: `translate(${dx}px, ${dy}px) scale(.08)`, opacity: .2 }
+      { opacity: 1, offset: .7 },
+      { transform: `translate(${dx}px, ${dy}px) scale(.1)`, opacity: 0 }
     ];
+    opties = { duration: vlucht(), easing: "cubic-bezier(.45, 0, .8, .6)" };
   } else {
+    k.classList.add("onder");
+    slot.insertBefore(k, slot.firstChild);
     frames = [
       { transform: "translateY(0) scale(1)", opacity: 1 },
-      { transform: "translateY(36px) scale(.9)", opacity: 0 }
+      { transform: "translateY(34px) scale(.94)", opacity: 1, offset: .6 },
+      { transform: "translateY(22px) scale(.92)", opacity: 0 }
     ];
+    opties = { duration: 240, easing: "ease-out" };
   }
-  const a = k.animate(frames, { duration: soort === "goed" ? vlucht() : 200,
-                                easing: "cubic-bezier(.3,0,.2,1)", fill: "forwards" });
+  const a = k.animate(frames, { ...opties, fill: "forwards" });
   a.onfinish = a.oncancel = () => k.remove();
+}
+
+/* Terugnemen is geraden achterstevoren: de kaart die net naar de teller
+   vloog, komt eruit terug naar haar plek. De kaart die er lag, gaat terug
+   onder de stapel. */
+function kaartTerug(van) {
+  const kaart = $("#card");
+  if (stilAan() || !kaart.animate || !van) return;
+  const r = kaart.getBoundingClientRect();
+  if (!r.width) return;
+  const dx = van.x - (r.left + r.width / 2), dy = van.y - (r.top + r.height / 2);
+  kaart.animate([
+    { transform: `translate(${dx}px, ${dy}px) scale(.1)`, opacity: 0 },
+    { opacity: 1, offset: .3 },
+    { transform: "translate(0, 0) scale(1)", opacity: 1 }
+  ], { duration: vlucht(), easing: "cubic-bezier(.2, .4, .3, 1)" });
 }
 
 /* ---------- einde beurt / ronde ---------- */
