@@ -739,6 +739,31 @@ remt maar zacht af, loopt door tot 560 px (verder dan de hoek van een
 staand scherm) en vervaagt vanaf de helft terwijl hij nog groeit. Op het
 aftellen duurt hij 0,95 s, zodat hij weg is vóór de volgende tel.
 
+### Eén grond, van knop tot kaart
+
+Uit drie live versies (alleen een rimpel; één grond; één grond plus de weg
+terug) koos Max de middelste. Elke schermwissel komt nu voort uit wat je net
+aanraakte:
+
+- **De druk** stuurt een rimpel vanaf de knop door het veld van het
+  aftellen (sterkte 1,2, vanaf de rand van de knop). Dat is de ring van de
+  eerste tel.
+- **De opdrachtkaart zakt in de grond**: een kopie op haar gemeten plek
+  (`.cd-kaart`, in de klik-handler gemaakt, want een tel later is de kaart
+  weg) zakt 10 px en krimpt naar 94% terwijl ze in 0,42 s verdwijnt. Het
+  veld vloeit in 0,5 s van het masker van de overdracht naar dat van de
+  schijf (`vanMasker`), zodat de punten haar plek innemen en de grond niet
+  springt.
+- **Op nul gaat de schijf open** (`.countdown.open`): een gat zo groot als
+  de schijf groeit in 0,45 s uit tot het hele scherm, met een laatste ring.
+  Door het gat ligt het spelscherm al klaar; `done()` draait meteen, dus er
+  wacht niets.
+
+De weg terug (de ploegkleur die bij tijd om uit de kaart groeit) viel af:
+die beweging kwam precies op het moment dat het toestel doorgegeven wordt.
+Bij beperkte beweging is er geen kopie, geen vloeien en geen gat; dan blijft
+het `cdOut`.
+
 ### Rastertoon op een canvas
 
 De lagen hierboven (`::before`, `::after`, `#hoRimpel`, `#cdGolf`) konden
@@ -830,7 +855,8 @@ wachten voel je in een spel dat je doorgeeft."* Lees die reden, niet alleen
 de regel. Er zijn twee plekken waar geen volgend scherm staat te wachten, en
 daar mag het dus wel.
 
-`cdOut` was de eerste: de aftellaag lost op boven een kaart die al gedeeld
+`cdOut` was de eerste (nu `.countdown.open`, de schijf die opengaat, met
+`cdOut` alleen nog bij beperkte beweging): de aftellaag lost op boven een kaart die al gedeeld
 wordt, en `done()` draait meteen. De tweede is de pauzesluier. Het
 spelscherm is nooit weggeweest -- het ligt eronder, met dezelfde kaart -- en
 `closePause()` zet de klok meteen weer aan. Alleen de pixels blijven nog

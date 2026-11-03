@@ -537,6 +537,23 @@ button.pv:active, button.btn-plain:active {
   pointer-events: none;
   animation: cdOut calc(.2s / max(var(--dur), .001)) ease-in forwards;
 }
+/* Eén grond: op nul gaat de schijf open. Er komt een gat in dit vlak, zo
+   groot als de schijf, dat uitgroeit tot het hele scherm; door het gat ligt
+   het spelscherm al klaar, dus de gouden schijf wordt een papieren cirkel
+   die de kaart is. Vanuit wat je net aanraakte, in plaats van een vlak dat
+   vervaagt. --gat-van en --gx/--gy zet handOffCountdown() op de gemeten
+   schijf. Bij beperkte beweging blijft het cdOut (dat dan meteen weg is). */
+@property --gat { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@keyframes cdOpen { from { --gat: var(--gat-van, 90px); } to { --gat: 150vmax; } }
+.countdown.open {
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), transparent var(--gat), #000 calc(var(--gat) + 1px));
+          mask-image: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), transparent var(--gat), #000 calc(var(--gat) + 1px));
+  animation: cdOpen calc(.45s / max(var(--dur), .001)) cubic-bezier(.3, .6, .4, 1) forwards;
+}
+/* De opdrachtkaart van de overdracht, als losse kopie op het aftelvlak: ze
+   zakt in de grond terwijl de punten haar plek innemen (zie countdown()). */
+.cd-kaart { position: absolute; margin: 0; pointer-events: none; transform-origin: 50% 50%; }
 
 /* ---- geraden ----
    Nooit op alleen min(): op een lage staande stand kromp deze knop anders
@@ -4079,9 +4096,24 @@ function handoff(mode, freshA, freshB) {
    zijn gouden schijf daar neer, zodat de cirkel die je indrukte de cirkel is
    die begint te tellen. Meten moet hier; een tel later is de knop weg. */
 let goRect = null;
+/* Ook de opdrachtkaart: een kopie op haar plek, die op het aftelvlak in de
+   grond zakt (zie countdown()). Nu, want een tel later is ze weg. */
+let goKaart = null;
 $("#btnStartTurn").addEventListener("click", () => {
   const r = $("#btnStartTurn").getBoundingClientRect();
   if (r.width > 0) goRect = { x: r.x, y: r.y, w: r.width, h: r.height };
+  goKaart = null;
+  const kaart = $("#hoRoundCard"), k = kaart.getBoundingClientRect();
+  if (k.width > 0 && !stilAan()) {
+    const kopie = kaart.cloneNode(true);
+    kopie.removeAttribute("id");
+    kopie.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
+    kopie.setAttribute("aria-hidden", "true");
+    kopie.classList.add("cd-kaart");
+    Object.assign(kopie.style, { left: k.left + "px", top: k.top + "px",
+                                 width: k.width + "px", height: k.height + "px" });
+    goKaart = kopie;
+  }
   Snd.unlock(); startTurn();
 });
 
@@ -4319,8 +4351,26 @@ function countdown(done) {
   let last = COUNT_FROM;
   Snd.count(0);
   Tril.tel();
-  veldCd.aan();
-  telGolf();
+  /* Eén grond. De kaart van de overdracht zakt in de punten en de punten
+     nemen haar plek in (het veld vloeit van het masker van de overdracht
+     naar dat van de schijf); de druk op de knop stuurt een rimpel vanaf de
+     knop. Die rimpel is de eerste tel. Alleen als er net op de knop
+     getikt is: na een afgebroken aftelling begint het gewoon. */
+  const kopie = goKaart;
+  goKaart = null;
+  if (kopie && kopie.animate) {
+    el.querySelector(".stipveld").after(kopie);
+    const a = kopie.animate([
+      { transform: "translateY(0) scale(1)", opacity: 1 },
+      { transform: "translateY(10px) scale(.94)", opacity: 0 }
+    ], { duration: 420, easing: "cubic-bezier(.2, .7, .3, 1)", fill: "forwards" });
+    a.onfinish = a.oncancel = () => kopie.remove();
+  }
+  veldCd.aan(!!kopie);
+  if (kopie && goRect) {
+    veldCd.rimpel(goRect.x + goRect.w / 2, goRect.y + goRect.h / 2, 1.2, goRect.w / 2);
+    telGolf(true);
+  } else telGolf();
   const t0 = performance.now();
   const step = now => {
     /* Ook aan de bovenkant afknellen. De tijdstempel van de eerste
@@ -4343,12 +4393,12 @@ function countdown(done) {
    ziet hij er meteen op de tel uit, in plaats van een vijfde tel onder de
    schijf te lopen. Zachter dan de rimpel die je zelf geeft (0,6), want hij
    komt drie keer. En de schijf klopt mee (zie .klop). */
-function telGolf() {
+function telGolf(zonderRing) {
   const b = $("#cdNum");
   if (stilAan()) return;
   const el = $("#countdown").getBoundingClientRect();
   const r = $(".cd-disc").getBoundingClientRect().width / 2;
-  veldCd.rimpel(el.width / 2, el.height / 2, .6, r + 14);
+  if (!zonderRing) veldCd.rimpel(el.width / 2, el.height / 2, .6, r + 14);
   b.classList.remove("klop"); void b.offsetWidth; b.classList.add("klop");
 }
 
@@ -4357,7 +4407,8 @@ function telGolf() {
 function stopCountdown() {
   cancelAnimationFrame(countRaf); countRaf = null;
   const el = $("#countdown");
-  el.classList.remove("out");
+  el.classList.remove("out", "open");
+  el.querySelectorAll(".cd-kaart").forEach(k => k.remove());
   el.hidden = true;
 }
 
@@ -4370,8 +4421,20 @@ function handOffCountdown() {
   Snd.go();
   Tril.go();
   const el = $("#countdown");
-  el.classList.add("out");
-  setTimeout(() => { el.classList.remove("out"); el.hidden = true; }, 200);
+  if (stilAan()) {
+    el.classList.add("out");
+    setTimeout(() => { el.classList.remove("out"); el.hidden = true; }, 200);
+    return;
+  }
+  /* De schijf gaat open (zie .countdown.open), met een laatste ring. */
+  const o = el.getBoundingClientRect(), d = $(".cd-disc").getBoundingClientRect();
+  const mx = d.left + d.width / 2 - o.left, my = d.top + d.height / 2 - o.top;
+  el.style.setProperty("--gx", mx + "px");
+  el.style.setProperty("--gy", my + "px");
+  el.style.setProperty("--gat-van", (d.width / 2) + "px");
+  veldCd.rimpel(mx, my, 1, d.width / 2 + 14);
+  el.classList.add("open");
+  setTimeout(() => { el.classList.remove("open"); el.hidden = true; }, 450);
 }
 
 // Afgebroken: geen beurt begonnen, dus terug naar waar het toestel vandaan
@@ -4794,7 +4857,8 @@ function balkMascotte() { return $("#plMascot"); }
 function stipveld(cv, opt) {
   const CEL = 12, R0 = 2, A0 = .16, PAP = "244, 235, 218";
   const cx = cv.getContext("2d");
-  let W = 0, H = 0, punten = [], rimpels = [], band = -1e9, raf = 0, bandTimer = null;
+  let W = 0, H = 0, punten = [], rimpels = [], band = -1e9, raf = 0, bandTimer = null, vloei = -1e9;
+  const VLOEI = 500;
   function maat() {
     const r = cv.getBoundingClientRect();
     if (!r.width || !r.height) return false;
@@ -4807,14 +4871,14 @@ function stipveld(cv, opt) {
       /* Op het midden uitgelijnd, zoals background-position: center. */
       const x0 = W / 2 - CEL * Math.floor(W / 2 / CEL), y0 = H / 2 - CEL * Math.floor(H / 2 / CEL);
       for (let y = y0; y < H; y += CEL) for (let x = x0; x < W; x += CEL) {
-        const m = opt.masker(x, y, W, H);
-        if (m > .01) punten.push({ x, y, m });
+        const m = opt.masker(x, y, W, H), m0 = opt.vanMasker ? opt.vanMasker(x, y, W, H) : m;
+        if (m > .01 || m0 > .01) punten.push({ x, y, m, m0 });
       }
     }
     return true;
   }
   function actief(nu) {
-    return nu - band < 4950 || rimpels.some(r => nu - r.t < 1600);
+    return nu - band < 4950 || nu - vloei < VLOEI || rimpels.some(r => nu - r.t < 1600);
   }
   function teken(nu) {
     cx.clearRect(0, 0, W, H);
@@ -4822,7 +4886,11 @@ function stipveld(cv, opt) {
     /* De band langs de lijn van 120 graden, 0 tot 1 over het scherm. */
     const bt = (nu - band) / 4950, bpos = -.4 + bt * 1.8, L = W * .866 + H * .5;
     const bandAan = bt >= 0 && bt < 1;
+    /* Vloeien: van het vorige masker naar het eigen, met een zachte uitloop. */
+    const v = 1 - Math.pow(1 - Math.min(1, Math.max(0, (nu - vloei) / VLOEI)), 3);
     for (const p of punten) {
+      const m = v >= 1 ? p.m : p.m0 + (p.m - p.m0) * v;
+      if (m < .01) continue;
       let groei = 0, ex = 0, ey = 0;
       if (bandAan) {
         const u = ((p.x - W / 2) * .866 + (p.y - H / 2) * .5) / L + .5, z = (u - bpos) / .13;
@@ -4837,7 +4905,7 @@ function stipveld(cv, opt) {
         ex += (p.x - r.x) / d * duw; ey += (p.y - r.y) / d * duw;
         groei = Math.max(groei, Math.max(0, pak) * demp * 1.1);
       }
-      cx.fillStyle = `rgba(${PAP}, ${((A0 + groei * .12) * p.m).toFixed(3)})`;
+      cx.fillStyle = `rgba(${PAP}, ${((A0 + groei * .12) * m).toFixed(3)})`;
       cx.beginPath(); cx.arc(p.x + ex, p.y + ey, R0 + groei * 1.3, 0, 6.2832); cx.fill();
     }
   }
@@ -4859,7 +4927,11 @@ function stipveld(cv, opt) {
   window.addEventListener("resize", () => { if (opt.zichtbaar()) wek(); });
   return {
     /* Het scherm komt in beeld: tekenen, en de deining na 1,2 tellen. */
-    aan() { band = -1e9; rimpels = []; wek(); planBand(1200); },
+    aan(vloeien) {
+      band = -1e9; rimpels = [];
+      vloei = vloeien && opt.vanMasker && !stilAan() ? performance.now() : -1e9;
+      wek(); planBand(1200);
+    },
     rimpel(x, y, sterk, van) {
       if (stilAan()) return;
       rimpels.push({ x, y, sterk: sterk || 1, van: van || 0, t: performance.now() });
@@ -4870,18 +4942,22 @@ function stipveld(cv, opt) {
 
 /* Overdracht: leeg naar de kaart toe, zoals de ellips van 75% bij 60% op
    (50%, 45%), van 40% tot de rand. */
+function maskerHo(x, y, W, H) {
+  const d = Math.hypot((x - W * .5) / (W * .75), (y - H * .45) / (H * .6));
+  return Math.max(0, Math.min(1, (d - .4) / .6));
+}
 const veldHo = stipveld($("#hoVeld"), {
   band: true,
   zichtbaar: () => $("#s-handoff").classList.contains("on"),
-  masker(x, y, W, H) {
-    const d = Math.hypot((x - W * .5) / (W * .75), (y - H * .45) / (H * .6));
-    return Math.max(0, Math.min(1, (d - .4) / .6));
-  }
+  masker: maskerHo
 });
 /* Aftellen: leeg rond de schijf in het midden, van 110 tot 260 px. */
 const veldCd = stipveld($("#cdVeld"), {
   band: false,
   zichtbaar: () => !$("#countdown").hidden,
+  /* Na een tik op de knop vloeit het veld vanaf het masker van de
+     overdracht, zodat de punten de plek van de kaart innemen. */
+  vanMasker: (x, y, W, H) => maskerHo(x, y, W, H),
   masker(x, y, W, H) {
     return Math.max(0, Math.min(1, (Math.hypot(x - W / 2, y - H / 2) - 110) / 150));
   }
