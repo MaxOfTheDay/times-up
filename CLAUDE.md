@@ -158,8 +158,17 @@ naar ploegkleur, en het spelscherm verandert van grond niet. Bij beperkte
 beweging geen vloed.
 
 **Vertrekken mag, als er niets achter wacht.** Geen vertrekanimaties, behalve
-`cdOut` en het oplossen van de pauzesluier bij hervatten (`.uit`). `hidden`
-gaat dan meteen aan; `inert` pas na het verzetten van de focus.
+`cdOut`, het oplossen van de pauzesluier bij hervatten (`.uit`) en de kopie
+van de kaart die naar de teller krimpt of onder de stapel zakt
+(`kaartSpook()`): de volgende kaart ligt er dan al onder. `hidden` gaat
+meteen aan; `inert` pas na het verzetten van de focus.
+
+**Beloning.** Een beurt en een ronde eindigen met een stempel op de kaart
+(tijd om: de zandloper op inkt; stapel leeg: het vinkje op groen) en een
+adem van `BEURT_ADEM` voor de overdracht. De mascotte in de balk reageert via
+`mascotte()` (wip, juich, schrik), altijd met Web Animations en overgeslagen
+bij beperkte beweging. De eindstand telt eerst op; de kroon en het feest
+komen daarna.
 
 **De eindstand telt niet, ze noemt.** Wie won staat in de kroon en de
 mascotte die groeit; per ploeg het totaal, met de drie rondes klein eronder.
