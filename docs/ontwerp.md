@@ -1062,9 +1062,8 @@ avond.
 
 Wie het tandwiel aantikt komt de moeilijkheid of de tijd bijstellen, of een
 kaart wegleggen. Installeren is nooit de boodschap en delen al helemaal
-niet. Het is nu de vierde `.field-group`, met `DEZE APP` als kop, ná
-Voorkeuren. Er verhuist verder niets: de drie groepen erboven staan precies
-zoals ze stonden.
+niet. Het is nu de laatste groep, met `DEZE APP` als kop, ná de regels (zie
+"Het instellingenscherm").
 
 Gemeten op 390x844 met de regels dichtgeklapt -- de gewone avond -- stond de
 eerste keuzeknop op 38% van het eerste scherm en staat hij nu op 22%. Met de
@@ -1131,6 +1130,39 @@ De standen zijn niet af te dwingen in een test -- `beforeinstallprompt`
 vuurt alleen in een echte browser met een echt profiel, en iOS al helemaal
 niet. `toonInstall` staat daarom onder `?debug` in `window.__tijd`, zodat je
 ze allemaal kunt fotograferen zonder opstartvlaggen.
+
+## Het instellingenscherm
+
+Wie het tandwiel aantikt komt iets bijstellen voor het volgende potje. Dus
+staat dat bovenaan, in één groep **Spel**: moeilijkheid (met de bak eronder,
+de fijne knop op hetzelfde ding), kaarten per potje, tijd per beurt. Daarna
+**Voorkeuren**, dan **Zo speel je**, dan **Deze app**.
+
+Eerder stonden de regels bovenaan, open bij het eerste bezoek, en waren de
+spelknoppen verdeeld over "Welke kaarten" en "Hoe lang". Die grens ("wat
+verandert de knop") was juist, maar las als twee keer hetzelfde: allebei
+bepalen ze hoe het volgende potje loopt. Op 390x844 met de regels open stond
+de eerste keuzeknop op 49% van het scherm; nu, open of dicht, op 22% en staan daar
+alle drie de spelknoppen in het eerste scherm.
+
+De regels blijven open tot het eerste gestarte spel: de oppas die ze nooit
+zag vindt ze onder de knoppen, met een groepskop die openklapt. De vouwregel
+ís die kop (zelfde maat en streep als `.group-head`, met de plus ervoor);
+een kop plus een vouwregel eronder zou twee keer hetzelfde zeggen.
+
+**Drie lagen tekst, niet vier.** Titel, groepskop, veldnaam en vouwregel
+stonden alle vier in vette hoofdletters met spatiëring, alleen in maat
+verschillend; het oog vond geen orde. Nu zijn alleen de titel en de
+groepskoppen in hoofdletters. Veldnamen, de vouwregel van de bak en de
+keuzeknoppen zijn zin-tekst in inkt, 16 px. Dat haalde ook een fout weg: op
+320 px sprong "MOEILIJK" naar een eigen regel; in zin-tekst en met gelijke
+delen (`flex: 1 1 0`) passen er drie naast elkaar.
+
+**Aan/uit weegt minder dan een keuze.** Geluid en trilling waren twee rijen
+volle-breedte knoppen, zwaarder dan de moeilijkheid. Nu is elk één regel
+(`.field.rij`): de naam links, twee knoppen van 76 px rechts. De `legend`
+zweeft (`float: left`), anders tekent de browser hem als randonderschrift en
+lukt de flex-regel niet.
 
 ## Kaarten
 
