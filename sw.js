@@ -17,7 +17,7 @@
    opstartbeurt achter op main. De periodicsync-handler onderaan koopt die
    terug waar het toestel meewerkt. Er komt met opzet géén melding over een
    nieuwe versie -- dat zou tekst zijn op een scherm dat zonder tekst moet
-   kunnen, voor iets wat de eerstvolgende koude start vanzelf oplost.
+   kunnen. Wel een stil seintje aan de pagina, zie meldNieuw().
 
    CACHE_NAME optellen bij een structurele wijziging aan wat hier gecachet
    wordt, niet bij elke index.html-wijziging -- dat lost de verversing al
@@ -50,9 +50,24 @@ async function ververs() {
   const res = await fetch(new Request(APP_URL, { cache: "no-cache" }));
   if (res.ok) {
     const cache = await caches.open(CACHE_NAME);
+    const oud = await cache.match(APP_URL);
+    const nieuw = res.clone();
     await cache.put(APP_URL, res.clone());
+    if (oud && (await oud.text()) !== (await nieuw.text())) meldNieuw();
   }
   return res;
+}
+
+/* Er staat een andere versie in de kast dan er net in stond. Geen melding
+   in beeld: de pagina krijgt alleen een seintje, en wisselt zelf stil van
+   versie op het enige moment waarop dat niets kost (zie index.html,
+   "stille update"). Een Android-app wordt dagenlang hervat in plaats van
+   opnieuw gestart, en zonder dit seintje komt een nieuwe versie pas na
+   het wegvegen uit de recente apps. Berichten aan een pagina die nog laadt
+   wachten tot haar script luistert. */
+async function meldNieuw() {
+  const ramen = await self.clients.matchAll({ type: "window" });
+  ramen.forEach(r => r.postMessage({ tijd: "nieuw" }));
 }
 
 self.addEventListener("install", event => {
