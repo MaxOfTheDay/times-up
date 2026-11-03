@@ -187,6 +187,14 @@ via Web Animations, en het getal plus de wip horen bij de landing
 `#hoTally` en `#pauseTally`. Ook de stijlen staan in één selectorlijst met
 allebei de plekken; iets alleen onder `#s-handoff` laat het paneel achter.
 
+**Geluid en trilling.** Eén betekenis per cue, nooit het enige kanaal.
+Alle cues lopen door `Snd` en `Tril`, naar één bus met compressor. Geen
+muziek. Elke cue moet op een telefoonluidspreker hoorbaar zijn: geen sinus
+onder 400 Hz als drager, meet met het telefoonmodel uit `docs/ontwerp.md`.
+De ploeg klinkt (`Snd.ploeg`) alleen waar de worp landt, waar een beurt of
+ronde overgaat (in `turnEnd`/`endRound`, niet in `handoff()`) en na de
+fanfare. Een trilling duurt minstens 20 ms.
+
 **App-pictogram en installeerbaarheid.** Het manifest wordt in het geheugen
 gebouwd (blob-URL) met een expliciete `id`, `start_url` en `scope`. De zin
 die zegt wat de app is staat één keer, in `<meta name="description">`.
