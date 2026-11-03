@@ -155,7 +155,8 @@ meeflikkeren.
 **De grond stroomt, het scherm vervaagt niet.** `#s-handoff` en `#s-play`
 hebben geen `screenIn`: op de overdracht stroomt alleen de grond van papier
 naar ploegkleur, en het spelscherm verandert van grond niet. Bij beperkte
-beweging geen vloed.
+beweging geen vloed. De rasterpunten op die grond zijn inkt op lage
+dekking, geen eigen kleur, en vervagen naar de kaart.
 
 **Vertrekken mag, als er niets achter wacht.** Geen vertrekanimaties, behalve
 `cdOut`, het oplossen van de pauzesluier bij hervatten (`.uit`) en de kopie
@@ -167,7 +168,8 @@ meteen aan; `inert` pas na het verzetten van de focus.
 (tijd om: de zandloper op inkt; stapel leeg: het vinkje op groen) en een
 adem van `BEURT_ADEM` voor de overdracht. De mascotte in de balk reageert via
 `mascotte()` (wip, juich, schrik), altijd met Web Animations en overgeslagen
-bij beperkte beweging. De eindstand telt eerst op; de kroon en het feest
+bij beperkte beweging; bij juich en schrik wisselt ook het gezicht
+(`#m-vos-blij`, `#m-uil-schrik`, ...), en wie wint lacht op de eindstand. De eindstand telt eerst op; de kroon en het feest
 komen daarna.
 
 **De eindstand telt niet, ze noemt.** Wie won staat in de kroon en de

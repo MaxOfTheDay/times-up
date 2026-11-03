@@ -632,6 +632,17 @@ transform meer, en daarmee vervalt de coördinatenval bij `.cd-round` en
 zonder dat je op transform-invariantie hoeft te vertrouwen, en `sizeCard()`
 meet een kaart die stilstaat.
 
+### Rasterpunten op de grond
+
+De ploegkleur op de overdracht was één vlak, en las daardoor als een
+achtergrondkleur in plaats van als "deze kant van het bord". Nu liggen er
+rasterpunten op, zoals op gedrukt karton: `#s-handoff::before`, inkt op 20%
+dekking in een raster van 14 px. Inkt en geen donkerder ploegtint, om twee
+redenen: de punten stromen dan vanzelf mee met de grond (geen eigen
+overgang, en ook bij de worp op `--paper-2` kloppen ze), en er komt geen
+nieuwe kleur bij die "rood" of "blauw" zou kunnen betekenen. Een masker laat
+ze naar het midden vervagen, zodat achter de kaart niets onrustigs ligt.
+
 ## Vertrekken mag, als er niets achter wacht
 
 De ladder in `index.html` zegt "geen vertrekanimaties", en de reden erbij is
@@ -669,6 +680,22 @@ klok begint immers op de tik -- maar het aftellen bestaat om een strijkende
 vinger tijdens het doorgeven op te vangen, en bij hervatten gaat het toestel
 niet van hand. Je hebt het paneel zelf opengedaan en de stilstaande
 wijzerplaat staat erin; je weet waar je staat.
+
+## Beloning
+
+De momenten die een kind onthoudt -- een kaart geraden, de bel, de stapel
+leeg, de winnaar -- kregen alleen geluid. Nu reageren ook de mascottes, met
+Web Animations en overgeslagen bij beperkte beweging: `mascotte(el, soort)`
+laat ze wippen (elke geraden kaart, hoger in een reeks), juichen (stapel
+leeg, aantikken op de titel) of schrikken (tijd om).
+
+Bij juichen en schrikken wisselt ook het gezicht: elk dier heeft een blije
+(ogen als boogjes) en een geschrokken versie (`#m-vos-blij`,
+`#m-uil-schrik`, ...). De kop staat één keer getekend (`#m-vos-kop`,
+`#m-uil-kop`); de varianten tekenen alleen andere ogen erop. Het gezicht
+gaat terug zodra de beweging uit is, en zonder beweging wisselt het niet:
+een gezicht zonder sprong eromheen leest als een fout. Op de eindstand lacht
+wie won, de hele tijd.
 
 ## De eindstand telt niet, ze noemt
 
