@@ -164,11 +164,14 @@ meeflikkeren.
 hebben geen `screenIn`: op de overdracht stroomt alleen de grond van papier
 naar ploegkleur, en het spelscherm verandert van grond niet. Bij beperkte
 beweging geen vloed. De rasterpunten op die grond zijn papier op lage
-dekking (16%), geen eigen kleur, op één stilstaand raster dat alle lagen
-delen (`--stip`, `--stip-op`); ze vervagen naar de kaart, er trekt om de
-elf tellen een deining over, en een tik op de grond geeft een rimpel. Ze
-staan alleen op de overdracht en het aftellen; daar gaat bij elke tel een
-ring vanuit de schijf (`telGolf()`).
+dekking (16%), geen eigen kleur, op één stilstaand raster van 12 px, getekend
+op één canvas per grond (`stipveld()`). Wat beweegt is rastertoon: een punt
+groeit, hij licht niet alleen op. Ze vervagen naar de kaart, er trekt om de
+elf tellen een deining over, en een tik op de grond geeft een rimpel die de
+punten opzij duwt en terug laat veren. Ze staan alleen op de overdracht en
+het aftellen; daar gaat bij elke tel een ring vanuit de schijf
+(`telGolf()`). Er loopt alleen een lus zolang er iets beweegt; bij beperkte
+beweging één stilstaand beeld.
 
 **Vertrekken mag, als er niets achter wacht.** Geen vertrekanimaties, behalve
 `cdOut`, het oplossen van de pauzesluier bij hervatten (`.uit`) en de kopie

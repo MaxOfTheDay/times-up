@@ -739,6 +739,36 @@ remt maar zacht af, loopt door tot 560 px (verder dan de hoek van een
 staand scherm) en vervaagt vanaf de helft terwijl hij nog groeit. Op het
 aftellen duurt hij 0,95 s, zodat hij weg is vóór de volgende tel.
 
+### Rastertoon op een canvas
+
+De lagen hierboven (`::before`, `::after`, `#hoRimpel`, `#cdGolf`) konden
+een punt alleen laten oplichten: een tweede laag grotere punten die door
+een masker zichtbaar werd. Naast elkaar gezet met twee alternatieven (een
+live mock-up, gekozen door Max): **rastertoon**, waarin de punt zelf groeit
+en krimpt zoals in drukwerk, en een tik de punten als een steentje in water
+naar buiten duwt en terug laat veren; en **wind**, een veld dat overal
+traag ademt en bij een tik uiteenspat. Wind was het speelst maar druk,
+terwijl de grond achter de kaart rustig moet blijven. Rastertoon is
+gekozen.
+
+Dat kan niet met CSS-verlopen: elke punt krijgt een eigen maat en een eigen
+verschuiving. Het is nu één canvas per grond (`.stipveld`, `stipveld()`),
+met dezelfde maten als ervoor: raster 12 px op het midden, straal 2 px op
+16%, aanzwellend tot 3,3 px op 28%; het masker naar de kaart (overdracht,
+de ellips van 75% bij 60%) of naar de schijf (aftellen, 110 tot 260 px).
+
+- **Deining**: om de elf tellen, 4,95 s op gelijke snelheid langs de lijn
+  van 120 graden, met een klokprofiel in plaats van een driehoek, zodat de
+  punten aanzwellen en slinken.
+- **Rimpel**: een golfpakket (een gaussische omhullende maal een cosinus)
+  dat met 360 px/s uitloopt en uitdempt. De positieve kant laat de punten
+  groeien; het hele pakket duwt ze tot 4,5 px opzij, dus naar buiten en
+  daarna terug. Op het aftellen sterkte 0,6, vanaf de rand van de schijf.
+- **Zuinig**: er loopt alleen een `requestAnimationFrame`-lus zolang er een
+  band of rimpel onderweg is en de grond in beeld is. Daarbuiten staat er
+  één getekend beeld. Bij beperkte beweging alleen dat beeld, zonder band en
+  zonder rimpel.
+
 Niet op de papieren schermen (titel, spel, eindstand)
 lazen ze als vuil op het papier, bovenop de korrel die daar al ligt
 (`body::after`), en het spelscherm moet rustig blijven. De punten zeggen
