@@ -201,10 +201,12 @@ ritme, per tel.
 van de titel (papier, inkten punten); de ploegkleur groeit als een cirkel uit
 de startknop als de worp landt (`veldHo.onthul()`). Laat de achtergrond niet
 meeflikkeren. Een druk die de grond verandert, laat de nieuwe grond uit die
-knop groeien; de knop zelf glijdt mee (`rimpelDoor()`).
+knop groeien; de knop zelf glijdt mee (`rimpelDoor()`). Naar huis ook: de
+titel groeit als cirkel uit de knop (`naarTitel()`). Afbreken op het
+aftellen houdt de grond (`handoff(..., zelfdeGrond)`).
 
-**De grond stroomt, het scherm vervaagt niet.** `#s-handoff` en `#s-play`
-hebben geen `screenIn`: op de overdracht stroomt alleen de grond van papier
+**De grond stroomt, het scherm vervaagt niet.** `#s-handoff`, `#s-play` en
+`#s-winner` hebben geen `screenIn`: op de overdracht stroomt alleen de grond van papier
 naar ploegkleur, en het spelscherm verandert van grond niet. Bij beperkte
 beweging geen vloed. De rasterpunten op die grond zijn papier op lage
 dekking (16%), geen eigen kleur, op één stilstaand raster van 12 px, getekend
@@ -223,14 +225,18 @@ beweging één stilstaand beeld.
 **Vertrekken mag, als er niets achter wacht.** Geen vertrekanimaties, behalve
 de schijf die op nul opengaat (`.countdown.open`; `cdOut` bij beperkte
 beweging), de opdrachtkaart die op het aftellen in de grond zakt
-(`.cd-kaart`), het oplossen van de pauzesluier bij hervatten (`.uit`) en de kopie
+(`.cd-kaart`), het oplossen van de pauzesluier bij hervatten (`.uit`; alleen
+de sluier, `.overlay::before`, het paneel vervaagt nooit), de eerste helft
+van het omdraaien (`draaiOm()`), het scherm onder de titelcirkel
+(`naarTitel()`) en de kopie
 van de kaart die naar de teller krimpt of onder de stapel zakt
 (`kaartSpook()`): de volgende kaart ligt er dan al onder. `hidden` gaat
 meteen aan; `inert` pas na het verzetten van de focus.
 
 **Beloning.** Een beurt en een ronde eindigen met een stempel op de kaart
 (tijd om: de zandloper op inkt; stapel leeg: het vinkje op groen) en een
-adem van `BEURT_ADEM` voor de overdracht. De mascotte in de balk reageert via
+adem van `BEURT_ADEM`; dan draait de kaart om (`draaiOm()`, `landOm()`) en
+is haar achterkant de opdracht, de volgende ronde of de eindstand. De mascotte in de balk reageert via
 `mascotte()` (wip, juich, schrik, nee bij overslaan), met rek en klets, altijd
 met Web Animations en overgeslagen bij beperkte beweging; bij juich, schrik en
 nee wisselt ook het gezicht (`#m-vos-blij`, `#m-uil-schrik`, `-dicht`), en

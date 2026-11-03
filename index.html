@@ -328,7 +328,9 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    - een omhullend vlak gebruikt trap 1 of 2 en schiet nooit door;
    - vervagen doet in een keten maar één vlak (zie slotIn);
    - geen vertrekanimaties: een uitloop houdt het volgende scherm tegen.
-     Uitzondering waar niets achter wacht: cdOut en de pauzesluier;
+     Uitzondering waar niets achter wacht: cdOut, de pauzesluier, de
+     eerste helft van het omdraaien (draaiOm) en het scherm onder de
+     titelcirkel (naarTitel);
    - geen richting: de app heeft geen ruimtelijk model.
 
    De knop is meteen raak: niets zet pointer-events uit, en de animatie
@@ -346,7 +348,14 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    tijdje grijs. #s-play: daar verandert de grond helemaal niet -- het komt
    altijd binnen achter het aftellen, in dezelfde ploegkleur -- en de gouden
    schijf moet precies op de knop liggen die je net indrukte. */
-#s-handoff.on, #s-play.on { animation: none; }
+#s-handoff.on, #s-play.on, #s-winner.on { animation: none; }
+/* Naar huis (zie naarTitel()): de titel groeit als cirkel over het scherm
+   dat je verlaat. Dat blijft eronder staan, zonder te reageren, tot de
+   cirkel rond is; de titel vervaagt dan niet, ze heeft haar papier mee. */
+.screen.blijft { display: flex; z-index: 0; pointer-events: none; }
+.overlay[hidden].blijft { display: grid !important; pointer-events: none; }
+#s-title.groei { animation: none; z-index: 9; background: var(--paper); }
+#s-title.stil { animation: none; }
 
 /* EEN VLAK IN EEN KETEN VERVAAGT MAAR OP ÉÉN PLEK.
    Opacity van ouder en kind vermenigvuldigen; een kind dat ook vervaagt komt
@@ -1465,16 +1474,21 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 .overlay {
   position: fixed; inset: 0; z-index: 8;
   display: grid; place-items: center;
-  background: rgba(20, 17, 15, .82);
   padding: var(--s-4);
+}
+/* De sluier is een eigen laag, zodat hij alleen vervaagt: met de achtergrond
+   op het overlay zelf vervaagde het paneel mee en schemerde de kaart erdoor. */
+.overlay::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: rgba(20, 17, 15, .82);
 }
 /* Het waas komt op in --t-los, het paneel schaalt in --t-kom van 96% met
    --e-los. Wegklikken lost kort op (zie .uit hieronder), maar de klok loopt
    dan al. */
-/* Het paneel schaalt alleen; de sluier vervaagt voor allebei (zie slotIn). */
+/* Het paneel schaalt alleen; alleen de sluier vervaagt (zie slotIn). */
 @keyframes scrimIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes panelIn { from { transform: scale(.96); } to { transform: scale(1); } }
-.overlay:not([hidden]) { animation: scrimIn calc(var(--t-los) / max(var(--dur), .001)) var(--e-uit); }
+.overlay:not([hidden])::before { animation: scrimIn calc(var(--t-los) / max(var(--dur), .001)) var(--e-uit); }
 .overlay:not([hidden]) .panel {
   animation: panelIn calc(var(--t-kom) / max(var(--dur), .001)) var(--e-los) backwards;
 }
@@ -1488,6 +1502,10 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 .overlay[hidden].uit {
   display: grid !important;
   pointer-events: none;
+}
+/* Het paneel is meteen weg; alleen de sluier lost op. */
+.overlay[hidden].uit > * { visibility: hidden; }
+.overlay[hidden].uit::before {
   animation: scrimUit calc(var(--t-los) / max(var(--dur), .001)) var(--e-weg) forwards;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1881,6 +1899,9 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 #s-winner {
   justify-content: center; align-items: center; gap: 2vh; overflow: hidden;
   background: var(--wn-grond, var(--paper));
+  /* Net als op de overdracht: de grond stroomt van papier naar de winnaar,
+     de kaart staat vanaf het eerste beeld (zie landOm()). */
+  transition: background-color calc(var(--t-kom) * var(--dur)) var(--e-uit);
 }
 .rays {
   position: absolute; inset: -30%; z-index: -1;
@@ -3551,6 +3572,7 @@ function paintChrome(kleur) {
 
 function show(name) {
   current = name;
+  $("#s-title").classList.remove("stil");
   $$(".screen").forEach(s => s.classList.toggle("on", s.id === "s-" + name));
   /* Het overdrachtscherm is het enige dat van rand tot rand ploegkleur is.
      Het spelscherm staat op papier, ook tijdens het aftellen: dat gekleurde
@@ -4045,7 +4067,7 @@ function paintRound(ico, size, host) {
    een rondewissel, niets bij de eerste overdracht. */
 let handoffMode = "round";      // waar een afgebroken aftelling naar terugkeert
 
-function handoff(mode, freshA, freshB) {
+function handoff(mode, freshA, freshB, zelfdeGrond) {
   const round = mode === "round";
   handoffMode = round ? "round" : "turn";
   const t = TEAMS[G.team], r = G.round - 1;
@@ -4064,7 +4086,9 @@ function handoff(mode, freshA, freshB) {
      volgt onderaan, ná show(), want een overgang loopt pas als de beginwaarde
      een beeld gestaan heeft. Bij beperkte beweging niet: dan zou het één
      beeld flikkering zijn. */
-  const vloed = current !== "handoff" && !tossPending &&
+  /* Na een afgebroken aftelling niet: de grond was al die ploegkleur, en
+     vanaf papier stromen zou haar even uit- en weer aanzetten. */
+  const vloed = current !== "handoff" && !tossPending && !zelfdeGrond &&
     !matchMedia("(prefers-reduced-motion: reduce)").matches;
   $("#s-handoff").style.setProperty("--team",
     tossPending || vloed ? "var(--paper)" : t.color);
@@ -4478,9 +4502,13 @@ function handOffCountdown() {
 // beurt toch nul.
 $("#cdBack").addEventListener("click", () => {
   if (countRaf === null) return;
+  /* De schijf gaat terug in de startknop, zoals ze eruit kwam: gemeten vóór
+     het aftelvlak verdwijnt. */
+  const schijf = $(".cd-disc").getBoundingClientRect();
   stopCountdown();
   releaseWake();
-  handoff(handoffMode);
+  handoff(handoffMode, 0, 0, true);
+  rimpelDoor(schijf);
 });
 
 function beginTurn() {
@@ -5158,6 +5186,33 @@ function kaartTerug(van) {
 
 /* ---------- einde beurt / ronde ---------- */
 const BEURT_ADEM = 1000;   // ms tussen tijd-om en de overdracht
+
+/* Elk einde draait de kaart om. De gestempelde kaart wordt smal tot een
+   rand (draaiOm), en wat er op de achterkant staat, wordt op dezelfde plek
+   weer breed (landOm): de opdracht voor de volgende ploeg, de volgende
+   ronde, of de eindstand. Plat, zonder diepte, zoals een kaart op tafel
+   omgaan eruitziet als je erboven hangt. Het spel zelf wacht die eerste
+   helft af; bij beperkte beweging gebeurt alles meteen. */
+const OMDRAAI = 140;
+function draaiOm(verder) {
+  const kaart = $("#card");
+  const p = kaart.getBoundingClientRect();
+  if (stilAan() || !kaart.animate || !p.width) { verder(null); return; }
+  const a = kaart.animate([{ transform: "scaleX(1)" }, { transform: "scaleX(0)" }],
+    { duration: OMDRAAI, easing: curve("weg"), fill: "forwards" });
+  a.onfinish = () => { verder(p); a.cancel(); };
+}
+function landOm(doel, p) {
+  if (!p || !doel || stilAan() || !doel.animate) return;
+  const h = doel.getBoundingClientRect();
+  if (!h.width || !h.height) return;
+  const dx = (p.left + p.width / 2) - (h.left + h.width / 2);
+  const dy = (p.top + p.height / 2) - (h.top + h.height / 2);
+  doel.animate([
+    { transform: `translate(${dx}px, ${dy}px) scale(0, ${p.height / h.height})` },
+    { transform: "none" }
+  ], { duration: 180, easing: curve("uit") });
+}
 function timeUp() {
   stopClock(); releaseWake();
   Snd.timeUp();
@@ -5311,17 +5366,21 @@ function turnEnd() {
   /* Alleen vanaf het spelscherm. timeUp() zet dit BEURT_ADEM vooruit, en wat er
      in die adem ook gebeurt -- een ronde die toch al afliep, een potje dat
      al gewonnen is -- een beurt die al beëindigd is, beëindigt hij niet
-     nog eens. */
+     nog eens. Na het omdraaien (OMDRAAI) kijkt hij nog een keer. */
   if (!G || current !== "play") return;
-  /* Eén cue voor de hele buit, samen met het scherm dat hem toont. Daarna
-     wie er nu aan zet is, met de mascotte die opkomt (70 ms, zie upPop);
-     na een buit wacht de ploeg tot die uitgeklonken is. Hier en niet in
-     handoff(): die opent ook na een afgebroken aftelling en na herladen,
-     en dan is er niets nieuws te melden. */
-  if (G.gained) Snd.haul(G.gained);
-  const [freshA, freshB] = Spel.beurtWissel(G);
-  Snd.ploeg(G.team, G.gained ? .35 : .07);
-  handoff("turn", freshA, freshB);
+  draaiOm(p => {
+    if (!G || current !== "play") return;
+    /* Eén cue voor de hele buit, samen met het scherm dat hem toont. Daarna
+       wie er nu aan zet is, met de mascotte die opkomt (70 ms, zie upPop);
+       na een buit wacht de ploeg tot die uitgeklonken is. Hier en niet in
+       handoff(): die opent ook na een afgebroken aftelling en na herladen,
+       en dan is er niets nieuws te melden. */
+    if (G.gained) Snd.haul(G.gained);
+    const [freshA, freshB] = Spel.beurtWissel(G);
+    Snd.ploeg(G.team, G.gained ? .35 : .07);
+    handoff("turn", freshA, freshB);
+    landOm($("#hoRoundCard"), p);
+  });
 }
 
 function endRound() {
@@ -5338,13 +5397,17 @@ function endRound() {
   $("#s-play").classList.add("leeg");
   mascotte(balkMascotte(), "juich");
   setTimeout(() => {
-    $("#s-play").classList.remove("leeg");
-    if (!G || current !== "play") return;
-    if (uit) { winner(); return; }
-    /* Klokjes voor de nieuwe ronde, met de tekening die opkomt (70 ms, zie
-       roundPop), en dan de ploeg die haar opent. */
-    Snd.ploeg(G.team, Snd.ronde(G.round, .07));
-    handoff("round", vers[0], vers[1]);
+    if (!G || current !== "play") { $("#s-play").classList.remove("leeg"); return; }
+    draaiOm(p => {
+      $("#s-play").classList.remove("leeg");
+      if (!G || current !== "play") return;
+      if (uit) { winner(); landOm($("#wnPiles"), p); return; }
+      /* Klokjes voor de nieuwe ronde, met de tekening die opkomt (70 ms, zie
+         roundPop), en dan de ploeg die haar opent. */
+      Snd.ploeg(G.team, Snd.ronde(G.round, .07));
+      handoff("round", vers[0], vers[1]);
+      landOm($("#hoRoundCard"), p);
+    });
   }, BEURT_ADEM);
 }
 
@@ -5450,8 +5513,9 @@ function winner() {
   $("#s-winner").dataset.draw = win === null ? "1" : "0";
 
   const scherm = $("#s-winner");
+  const vloed = win !== null && current !== "winner" && !stilAan();
   if (win === null) scherm.style.removeProperty("--wn-grond");
-  else scherm.style.setProperty("--wn-grond", TEAMS[win].color);
+  else scherm.style.setProperty("--wn-grond", vloed ? "var(--paper)" : TEAMS[win].color);
   rays(win === null ? "#F2B705" : "#F4EBDA");
   /* Uitgespeeld, maar de eindstand blijft bewaard tot je het scherm verlaat:
      een herlaadbeurt of een toestel dat de app opruimt toont haar opnieuw,
@@ -5461,6 +5525,11 @@ function winner() {
   G = null;
   show("winner");
   veldWn.aan();
+  if (vloed) {
+    scherm.getBoundingClientRect();
+    requestAnimationFrame(() => requestAnimationFrame(() =>
+      scherm.style.setProperty("--wn-grond", TEAMS[win].color)));
+  }
 
   /* De onthulling: de totalen tellen samen op, dan valt de kroon en pas dán
      het feest. Bij beperkte beweging staat alles er meteen. */
@@ -5552,7 +5621,42 @@ $("#btnAgain").addEventListener("click", () => {
   const k = $("#btnAgain").getBoundingClientRect();
   clearConfetti(); Snd.unlock(); newGame(); rimpelDoor(k);
 });
-$("#btnHome").addEventListener("click", () => { clearConfetti(); clearGame(); show("title"); });
+$("#btnHome").addEventListener("click", () => {
+  const k = $("#btnHome").getBoundingClientRect();
+  clearConfetti(); clearGame(); naarTitel(k);
+});
+
+/* Naar huis: de titel groeit als een cirkel uit de knop die je indrukte,
+   over het scherm waar je was, zoals de ploegkleur uit de startknop groeit.
+   Het oude scherm (en bij stoppen de sluier) blijft eronder staan tot de
+   cirkel rond is. k is de knop, gemeten voor hij verdween. Zonder knop, of
+   bij beperkte beweging: meteen. */
+function naarTitel(k, sluier) {
+  const van = $(".screen.on");
+  show("title");
+  /* Op de overdracht houdt .paneel de startknop weg zolang de sluier er nog
+     ligt; pas als de titel rond is, mag hij terug. */
+  const klaar = () => $("#s-handoff").classList.remove("paneel");
+  if (stilAan() || !k || !k.width || !van || van.id === "s-title" || !document.body.animate) { klaar(); return; }
+  const ti = $("#s-title");
+  van.classList.add("blijft");
+  if (sluier) sluier.classList.add("blijft");
+  ti.classList.add("groei");
+  const x = k.left + k.width / 2, y = k.top + k.height / 2;
+  const R = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  const a = ti.animate([
+    { clipPath: `circle(${k.width / 2}px at ${x}px ${y}px)` },
+    { clipPath: `circle(${R}px at ${x}px ${y}px)` }
+  ], { duration: 450, easing: curve("uit") });
+  a.onfinish = a.oncancel = () => {
+    van.classList.remove("blijft");
+    klaar();
+    if (sluier) sluier.classList.remove("blijft");
+    /* .stil houdt screenIn tegen tot de volgende schermwissel: zonder
+       begon de titel na de cirkel alsnog te vervagen. */
+    ti.classList.replace("groei", "stil");
+  };
+}
 
 /* ==============================================================
    PAUZE EN STOPPEN
@@ -5699,15 +5803,15 @@ document.addEventListener("keydown", e => {
 });
 
 holdButton($("#btnStop"), 1100, () => {
+  const k = $("#btnStop").getBoundingClientRect();   // vóór het paneel verdwijnt
   pauseMs = 0; pauseReturn = null;
   stopClock(); releaseWake();
   $("#pauze").hidden = true;
-  $("#s-handoff").classList.remove("paneel");
   screensInert(false);        // niet via closePause(): dat zou de klok van
                                // een spel dat we net weggooien weer starten
   G = null;
   clearGame();          // met opzet weggegooid: niet stilletjes terugbrengen
-  show("title");
+  naarTitel(k, $("#pauze"));
 }, fillY($("#btnStop i"), $("#btnStop")));
 
 /* ==============================================================
