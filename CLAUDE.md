@@ -148,6 +148,13 @@ mascotte, bij een rondewissel komt de tekening op. Geen kroon, geen "+N", geen
 fiche per punt op dit scherm. De wake lock blijft hier aan, begrensd op
 `WAKE_MAX`.
 
+**Eén pen voor tekening en mascotte.** Het teken op de kaart (en in
+`#kijk`) krijgt de inktlijn van Vos en Uil: vier `drop-shadow`s zonder
+vervaging, 4 px (2 px op de kleine plaatjes). Niet vlakker maken met een
+filter. De mascottes tekenen hun lijn op `--m-lijn`, die `mascotteLijn()`
+per plek zet: nooit dunner dan 2,3 px op het scherm. Een nieuwe mascotte
+buiten `svgUse()` meld je daar aan.
+
 **De ronde in drie maten** komt altijd uit `paintRound(ico, size, host)`
 (`"teken"`, `"chip"`, `"kaart"`), nooit los bijgewerkt.
 
