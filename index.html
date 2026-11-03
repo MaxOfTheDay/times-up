@@ -2698,6 +2698,9 @@ const Spel = (() => {
   /* Een potje duurt een avond; na twee uur hoort het niet meer terug
      te komen. */
   const GAME_MAX_AGE = 2 * 60 * 60 * 1000;
+  /* Een onderbroken beurt komt terug met minstens zoveel tijd: na drie
+     tellen aftellen is een beurt van een halve seconde geen beurt. */
+  const MIN_REST = 5000;
 
   function shuffle(a, rnd) {
     const r = a.slice(), rand = rnd || Math.random;
@@ -2825,6 +2828,19 @@ const Spel = (() => {
     return { uit: false, vers: vers };
   }
 
+  /* De app gaat midden in een beurt weg (weggeveegd, vergrendeld, gesloten,
+     herladen). Wat er bewaard wordt is de beurt zoals ze dan verder moet: de
+     punten blijven staan, de kaart in beeld gaat bóvenop de stapel zodat ze
+     als eerste terugkomt, en de beurt krijgt de resttijd mee. Zo begint ze
+     na het herstel op de overdracht van dezelfde ploeg, met het aftellen. */
+  function onderbreek(G, restMs) {
+    if (G.card !== null) G.pile.unshift(G.card);
+    G.card = null;
+    G.vorige = null;
+    G.gained = 0;
+    G.pendingMs = Math.max(MIN_REST, Math.round(restMs));
+  }
+
   /* Wie won: 0, 1, of null bij gelijkspel. */
   function winnaar(G) {
     const a = total(G, 0), b = total(G, 1);
@@ -2869,10 +2885,10 @@ const Spel = (() => {
   }
 
   return {
-    ROUNDS, TIER_ORDER, MIN_BAK, GAME_MAX_AGE,
+    ROUNDS, TIER_ORDER, MIN_BAK, GAME_MAX_AGE, MIN_REST,
     shuffle, poolFor, bakFor, canHide, drawDeck,
     nieuw, total, over, beurtKlaar, beurtMs, trek,
-    geraden, terug, passen, tijdOm, beurtWissel, rondeEinde,
+    geraden, terug, passen, tijdOm, beurtWissel, rondeEinde, onderbreek,
     winnaar, gespeeld, herstel
   };
 })();
@@ -3169,13 +3185,29 @@ function saveSettings() {
 
 const GAME_MAX_AGE = Spel.GAME_MAX_AGE;
 
-/* Bewaren gebeurt alleen vanuit handoff(): daar is de stand rond -- de
-   vorige beurt is verwerkt, de volgende nog niet begonnen, G.card staat op
-   null. Er is dus nooit een halve beurt om te bewaren. */
-function saveGame(mode) {
+/* Bewaren gebeurt op twee plekken. handoff() bewaart de stand op de grens:
+   de vorige beurt is verwerkt, de volgende nog niet begonnen. En
+   bewaarBeurt() bewaart een beurt die onderbroken wordt, al afgerond tot
+   zo'n grens (Spel.onderbreek). Wat er in de opslag staat heeft dus nooit
+   een kaart in beeld. */
+function saveGame(mode, g) {
   try {
-    localStorage.setItem(KEY_GAME, JSON.stringify({ t: Date.now(), mode: mode, G: G }));
+    localStorage.setItem(KEY_GAME, JSON.stringify({ t: Date.now(), mode: mode, G: g || G }));
   } catch (e) { /* vol of geweigerd: dan speelt het gewoon zonder vangnet */ }
+}
+
+/* De app gaat weg midden in een beurt: weggeklikt, vergrendeld, twee keer
+   teruggeveegd, herladen, of door het toestel opgeruimd. Bewaar de beurt
+   zoals ze verder moet, op een kopie: komt de app gewoon terug, dan speelt
+   het lopende potje door alsof er niets gebeurd is. Niet tijdens het
+   aftellen (dan is er nog geen beurt) en niet in de adem na tijd-om of na
+   de laatste kaart (G.card staat dan al op null); daar geldt de bewaarde
+   grens ervoor. */
+function bewaarBeurt() {
+  if (current !== "play" || !G || G.card === null || countRaf !== null) return;
+  const kopie = JSON.parse(JSON.stringify(G));
+  Spel.onderbreek(kopie, paused() ? pauseMs : remaining());
+  saveGame("turn", kopie);
 }
 function clearGame() {
   try { localStorage.removeItem(KEY_GAME); } catch (e) {}
@@ -3720,8 +3752,9 @@ function handoff(mode, freshA, freshB) {
 
   /* Wat je meekrijgt: kaarten op de stapel en seconden, altijd in beeld,
      zodat het teken elke keer hetzelfde betekent. Bij een rondewissel staat
-     er de hele bak; tussen twee beurten telt hij af. Elke beurt is vol. */
-  const secs = G.secs;
+     er de hele bak; tussen twee beurten telt hij af. Elke beurt is vol,
+     behalve een die onderbroken werd: die gaat verder met haar resttijd. */
+  const secs = Math.ceil(Spel.beurtMs(G) / 1000);
   $("#hoSecs").querySelector("span").textContent = secs;
   $("#hoCards").querySelector("span").textContent = G.pile.length;
   $("#hoCards").disabled = G.round < 2;
@@ -3730,8 +3763,9 @@ function handoff(mode, freshA, freshB) {
     $("#hoRoundCard").getAttribute("aria-label") +
     " " + G.pile.length + " kaarten, je begint met " + secs + " seconden.");
 
-  /* Hier en nergens anders. Dit is de grens waar de stand rond is, dus wat
-     hier bewaard wordt is altijd een beurt die nog moet beginnen. */
+  /* Dit is de grens waar de stand rond is, dus wat hier bewaard wordt is
+     altijd een beurt die nog moet beginnen. De enige andere plek is
+     bewaarBeurt(), en die rondt eerst af tot zo'n grens. */
   saveGame(handoffMode);
   show("handoff");
   /* Twee beeldjes: het eerste zet display op flex, pas het tweede heeft een
@@ -4996,7 +5030,11 @@ document.addEventListener("visibilitychange", () => {
   /* openPause() slaat zelf over wat geen lopende beurt is: een paneel dat
      al openstaat, de adem na tijd-om en de vlucht van de laatste kaart. */
   openPause();
+  bewaarBeurt();
 });
+/* Herladen en sluiten melden zich hier, ook als de pagina nooit verborgen
+   raakte. Dubbel met de tak hierboven is onschuldig: dezelfde kopie. */
+addEventListener("pagehide", bewaarBeurt);
 
 /* ==============================================================
    8. START
@@ -5020,7 +5058,23 @@ if ("serviceWorker" in navigator && location.protocol !== "file:") {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("sw.js").then(vraagVerversing).catch(() => {});
   });
+  /* Stille update. De worker meldt dat er een andere versie in de kast
+     staat; de pagina herlaadt pas als ze verborgen raakt terwijl ze op de
+     titel staat zonder bewaard potje. Er gaat dan niets verloren, en het
+     opnieuw opbouwen gebeurt uit beeld, dus ook de zandloper speelt niet
+     zichtbaar opnieuw. Is er een potje bezig, dan wacht de nieuwe versie
+     tot het volgende moment waarop dat wél zo is. */
+  navigator.serviceWorker.addEventListener("message", e => {
+    if (e.data && e.data.tijd === "nieuw") nieuweVersie = true;
+  });
 }
+let nieuweVersie = false;
+document.addEventListener("visibilitychange", () => {
+  if (!nieuweVersie || document.visibilityState !== "hidden") return;
+  if (current !== "title" || loadGame()) return;
+  nieuweVersie = false;
+  location.reload();
+});
 
 /* Vragen of het toestel de app af en toe wil wekken om de kast te verversen
    (periodicsync in sw.js). Geen toestemmingsvraag in beeld; waar het niet
@@ -5156,6 +5210,12 @@ paintSetup();
 /* Terugkomen waar we waren, zonder vraag: een potje van minder dan twee uur
    oud opent op zijn overdrachtscherm, anders de titel. Vóór started op true
    staat, zodat de focus met rust blijft. */
+/* Een invoer van ons van vóór het herladen ligt er nog: de geschiedenis
+   overleeft een herlaadbeurt, backGuard niet. Zonder dit legt guardBack()
+   er een tweede bij, en eet releaseBack() op de titel er maar één op: dan
+   doet de eerste terugveeg daar niets. */
+backGuard = !!(history.state && history.state.tijd);
+
 const hervat = loadGame();
 if (hervat) { G = hervat.G; handoff(hervat.mode); }
 else show("title");

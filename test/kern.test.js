@@ -243,6 +243,47 @@ test('herstel: een bewaard potje komt terug, met verse vluchtige velden', () => 
   assert.equal(Spel.herstel({ ...opslag, mode: 'iets' }, t).mode, 'turn');
 });
 
+test('onderbreken: punten blijven, de kaart in beeld komt als eerste terug', () => {
+  const G = potje(6);
+  const team = G.team;
+  Spel.trek(G);
+  Spel.geraden(G);
+  Spel.geraden(G);
+  const inBeeld = G.card;
+  const kaarten = inSpel(G);
+  Spel.onderbreek(G, 12345.6);
+  assert.equal(G.card, null);
+  assert.equal(G.pile[0], inBeeld, 'de kaart in beeld ligt bovenop');
+  assert.deepEqual(inSpel(G), kaarten, 'geen kaart kwijt of dubbel');
+  assert.equal(G.scores[team][0], 2, 'de punten van de halve beurt blijven');
+  assert.equal(G.gained, 0);
+  assert.equal(G.vorige, null);
+  assert.equal(G.team, team, 'dezelfde ploeg speelt verder');
+  assert.equal(G.pendingMs, 12346);
+  assert.equal(Spel.beurtMs(G), 12346, 'de volgende beurt krijgt de resttijd');
+});
+
+test('onderbreken: een bijna lege klok krijgt de ondergrens', () => {
+  const G = potje(6);
+  Spel.trek(G);
+  Spel.onderbreek(G, 400);
+  assert.equal(G.pendingMs, Spel.MIN_REST);
+});
+
+test('onderbreken: komt via de opslag heel terug', () => {
+  const G = potje(6);
+  Spel.trek(G);
+  Spel.geraden(G);
+  Spel.onderbreek(G, 20000);
+  const terug = Spel.herstel(JSON.parse(JSON.stringify({ t: 1000, mode: 'turn', G })), 2000);
+  assert.ok(terug);
+  assert.equal(terug.mode, 'turn');
+  assert.deepEqual(terug.G.pile, G.pile);
+  assert.deepEqual(terug.G.scores, G.scores);
+  assert.equal(terug.G.pendingMs, 20000);
+  assert.equal(terug.G.team, G.team);
+});
+
 test('herstel: bij de minste twijfel geen spel', () => {
   const G = potje(4);
   const t = 1_000_000;

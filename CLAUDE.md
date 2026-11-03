@@ -74,6 +74,10 @@ Regels voor die grens:
   ook in `localStorage` (`tijdisom.game`, hoogstens twee uur oud). Wie een
   veld toevoegt, past `Spel.herstel()` aan, anders verdwijnt elk bewaard
   potje bij de volgende update.
+- **Weggaan kost niets.** Bewaard wordt op de overdracht én bij
+  `visibilitychange`/`pagehide` midden in een beurt (`bewaarBeurt()`, via
+  `Spel.onderbreek()`). Twee terugvegen zonder tik ertussen sluiten de app
+  op Android, wat je ook in de geschiedenis zet; reken daar niet omheen.
 
 ## De harde eis
 
@@ -193,7 +197,8 @@ die zegt wat de app is staat één keer, in `<meta name="description">`.
 Pictogrammen en manifest-screenshots worden gegenereerd, nooit overgetypt
 (`npm run pictogrammen`, `npm run schermen`, beide deterministisch). `sw.js`
 is cache eerst, ververs erachter, met `res.ok` vóór `cache.put` en
-`cache: "no-cache"` bij het verversen. Geen melding over een nieuwe versie.
+`cache: "no-cache"` bij het verversen. Geen melding over een nieuwe versie; wel een stille herlaadbeurt als de
+pagina verborgen raakt op de titel zonder bewaard potje (`meldNieuw()`).
 Het installeerveld heeft vijf standen (`knop`, `zetop`, `menu`, `delen`,
 `weg`), staat onderaan als vierde groep, en levert alleen de weg die het
 platform heeft weggenomen.

@@ -267,23 +267,18 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok((await page.textContent('#hoRoundCard p')).trim() !== '',
      'de regel ontbreekt bij een gewone beurtwissel');
 
-  // --- herladen midden in een beurt komt terug op de grens ---
-  // Dit stond hier omgekeerd: een potje overleefde geen herlaadbeurt, en dat
-  // was zo bedoeld. De reden daarvoor ging over de knoppen -- geen "verder
-  // spelen" naast "nieuw spel" om tussen te kiezen -- en die reden staat nog
-  // steeds. Er is ook geen keuze bijgekomen: de app komt gewoon terug waar ze
-  // was. Wat verdween is dat een terugveeg of een telefoontje de hele avond
-  // stand wiste zonder dat er iets gezegd werd.
-  //
-  // Bewaard wordt er op het overdrachtscherm, niet tijdens een beurt. Een
-  // onderbroken beurt wordt dus overgespeeld: de kaarten komen terug, en de
-  // punten die er half in stonden niet.
+  // --- herladen midden in een beurt komt terug, met de punten ---
+  // Er is nog steeds geen "verder spelen"-knop: de app komt gewoon terug
+  // waar ze was. Een onderbroken beurt wordt bewaard zoals ze verder moet
+  // (Spel.onderbreek): de punten blijven, dezelfde ploeg speelt verder op
+  // de overdracht, met de resttijd.
   const stand = () => game(() => ({
     scores: JSON.parse(JSON.stringify(window.__tijd.G.scores)),
     team: window.__tijd.G.team,
     round: window.__tijd.G.round
   }));
   const voor = await stand();
+  const invoerVoor = await page.evaluate(() => history.length);
   await startTurn();
   await page.click('#btnGoed');
   await page.waitForTimeout(400);
@@ -294,8 +289,17 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(await screen() === 'handoff',
      'na een herlaadbeurt komt het potje niet terug op het overdrachtscherm');
   ok(await game(() => !!window.__tijd.G), 'het lopende potje overleeft een herlaadbeurt niet');
-  ok(JSON.stringify(await stand()) === JSON.stringify(voor),
-     'de stand na een herlaadbeurt is niet die van de grens ervoor');
+  const na = await stand();
+  ok(na.team === voor.team && na.round === voor.round,
+     'na een herlaadbeurt speelt niet dezelfde ploeg verder');
+  ok(na.scores[voor.team][voor.round - 1] === voor.scores[voor.team][voor.round - 1] + 1,
+     'het punt van de onderbroken beurt is na een herlaadbeurt weg');
+  const rest = await game(() => window.__tijd.G.pendingMs);
+  ok(rest > 0 && rest < 60000, 'de onderbroken beurt krijgt niet de resttijd mee: ' + rest);
+  // De geschiedenis overleeft een herlaadbeurt; er mag geen tweede invoer
+  // van ons bij komen, anders doet de eerste terugveeg op de titel niets.
+  ok(await page.evaluate(() => history.length) === invoerVoor,
+     'herladen legt een extra invoer in de geschiedenis');
 
   // --- de terugveeg opent het pauzepaneel in plaats van de app te verlaten ---
   await page.goBack();
@@ -344,6 +348,8 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   await hold(page, '#btnStop', 1400);
   await page.waitForTimeout(250);
   ok(await screen() === 'title', 'stoppen komt niet op de titel uit');
+  ok(await page.evaluate(() => history.state === null),
+     'op de titel ligt nog een invoer van ons: de terugveeg verlaat de app niet');
   await page.reload();
   await page.waitForTimeout(400);
   ok(await screen() === 'title', 'een gestopt potje komt na een herlaadbeurt terug');

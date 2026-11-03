@@ -999,9 +999,19 @@ De prijs: de woonkamer loopt hoogstens één opstartbeurt achter op `main`.
 op Android, alleen geïnstalleerd, en de browser bepaalt zelf of hij wekt --
 een meevaller dus, nooit een garantie). Er komt met opzet **geen** melding
 over een nieuwe versie: dat zou tekst zijn op een scherm dat zonder tekst
-moet kunnen, voor iets wat de eerstvolgende koude start vanzelf oplost. Een
-stille `location.reload()` op de titel valt ook af -- die speelt de
-zandloper-animatie zichtbaar opnieuw af, voor geen enkele winst.
+moet kunnen, voor iets wat de eerstvolgende koude start vanzelf oplost.
+
+"Eén opstartbeurt" bleek op Android lang te duren: een geïnstalleerde app
+wordt uit de recente apps hervat, niet opnieuw gestart, soms dagen achter
+elkaar. Een gemergede fix kwam dan pas aan na het wegvegen van de app. Daarom
+stuurt de worker een stil seintje (`meldNieuw()`) als hij een andere versie
+in de kast zet dan er stond, en herlaadt de pagina zichzelf op het enige
+moment dat niets kost: ze raakt verborgen, staat op de titel, en er is geen
+bewaard potje. Een herlaadbeurt in beeld blijft afvallen, want die speelt de
+zandloper zichtbaar opnieuw af; uit beeld ziet niemand hem. Nagemeten in
+Chromium met een tweede versie op de server: de verborgen titel herlaadt naar
+de nieuwe versie, een pagina met een lopend potje niet. Op een echt toestel
+nog niet bekeken.
 
 ### Installeren en doorgeven, vijf standen
 
@@ -1440,3 +1450,29 @@ stond eerst rechts uitgelijnd, en dat is precies de kolom waar het zwevende
 huisje hangt. "89 in het spel · 1 weggelegd" verdween er half achter zodra
 je dat veld in beeld scrollde. Alles op dit scherm lijnt links uit, en dat
 is niet toevallig: rechtsboven is van de uitgang.
+
+## Weggaan kost niets
+
+Android sluit de app bij de tweede terugveeg als er tussen de twee vegen
+niet getikt is, wat de app ook in de geschiedenis zet. Dat is Chrome's
+[history manipulation intervention](https://chromium.googlesource.com/chromium/src/+/127.0.6533.99/docs/history_manipulation_intervention.md):
+een document dat zonder tik een invoer toevoegt, wordt bij de terugknop en
+het terug-gebaar in zijn geheel overgeslagen. Een veeg is geen tik, dus de
+invoer die na de eerste veeg terugkomt, telt niet. Alle invoeren van één
+document delen die vlag, dus een voorraad invoeren (PR #85) helpt niet, en
+`history.back()` uit een test valt er buiten -- daarom zag Playwright het nooit.
+`CloseWatcher` heeft dezelfde regel.
+
+Het vangnet blijft (één invoer, de eerste veeg opent het pauzepaneel, en na
+een tik vangt het weer). Wat veranderde is dat weggaan niets meer kost:
+`bewaarBeurt()` bewaart bij `visibilitychange` en `pagehide` de lopende beurt,
+afgerond via `Spel.onderbreek()`. De punten blijven, de kaart in beeld komt
+bovenop de stapel, en dezelfde ploeg gaat op de overdracht verder met haar
+resttijd (minstens `MIN_REST`, vijf tellen; de zandloper op de opdrachtkaart
+toont die resttijd). Dat dekt ook herladen, vergrendelen en een toestel dat
+de app opruimt. Voorheen werd een onderbroken beurt overgespeeld, met
+kaarten die de ploeg al gezien had.
+
+Na een herlaadbeurt ligt onze invoer nog in de geschiedenis; `backGuard`
+wordt bij de start uit `history.state` gelezen, anders kwam er een tweede
+bij en deed de eerste veeg op de titel niets.
