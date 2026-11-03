@@ -93,6 +93,31 @@ hetzelfde vertelt, nooit in plaats daarvan.
   later verschijnt, een woord dat de kaart makkelijker of moeilijker maakt.
 - Alle tekst staat op papier, nooit rechtstreeks op de ploegkleur.
 
+## Het speelbord
+
+De app is een bordspel, gedrukt in een paar vlakke inkten, waarop alleen Vos
+en Uil leven. Luid bij de beloning, stil bij het wachten, nooit een woord
+voor de spelers. Vier regels dragen dat; elke ontwerpregel hieronder hoort
+bij één ervan. Toets een nieuw onderdeel eerst aan deze vier.
+
+1. **Materiaal: papier, inkt en een paar vlakke inkten.** Geen verloop,
+   geen glas, geen vervaging. Toon komt uit rasterpunten op één stilstaand
+   raster van 12 px. (Kleur, Papier, Eén pen, Eén letter, Hoek van het
+   scherm)
+2. **Stukken: één fiche, tegels en kaarten.** Een ronde fiche per scherm
+   voor wat je nu doet (`--lift-2`), vierkante tegels voor de rest
+   (`--lift-1`), kaarten dragen het spel. Harde inktschaduw, rechte hoeken.
+   (Vorm en diepte, Overdracht, Eén stand, Eindstand, Titel, Instellingen)
+3. **Krachten: alleen de vinger, de klok, en Vos en Uil laten iets
+   bewegen.** Stukken zakken in en veren terug als je drukt; de klok drukt
+   ook (het aftellen, de zandloper). Alleen de dieren bewegen uit zichzelf:
+   knipperen, ademen, juichen, rek en klets. Elke beweging pakt een lengte
+   en een curve uit `:root` (`--t-press/los/kom/groot`, `--e-uit/los/weg/vloei`).
+   (De klok, Vasthouden, Aftellen, Worp, Grond, Vertrekken, Beloning, Eén label)
+4. **Stem: één betekenis per kleur, klank en trilling, nooit één kanaal.**
+   Rood is Vos, blauw is Uil, goud is "dit, nu", groen is geraden. Geen
+   woorden voor de spelers. (De harde eis, Kleur, Geluid en trilling)
+
 ## Ontwerpregels
 
 Elk punt heeft een hoofdstuk met dezelfde naam in `docs/ontwerp.md`.

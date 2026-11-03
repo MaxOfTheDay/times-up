@@ -218,14 +218,23 @@
   --gluur: clamp(48px, 17vw, 100px);   /* Vos en Uil op het merk */
 
   /* ---- beweging ----
-     Niets in de speellus duurt langer dan --t-card: een beurt is
-     twintig seconden en een snelle ploeg scoort om de twee. */
+     Vier lengtes en vier curves; elke animatie kiest daaruit. Alleen wat
+     leeft (Vos en Uil) en de lussen die een gevoel dragen (de zandloper, de
+     stralen, de snippers) hebben eigen, lange tijden.
+     Niets in de speellus duurt langer dan --t-card en --t-fly: een beurt is
+     twintig seconden en een snelle ploeg scoort om de twee. Die twee en de
+     druk van de klok op de schijf (telDruk) zijn daarvoor gemeten en blijven
+     buiten de trap. */
   --t-press: .06s;   /* een knop zakt in: meteen, ook bij een vluchtige tik */
-  --t-los:   .16s;   /* en veert terug, iets voorbij zijn rust */
-  --e-los: cubic-bezier(.3, 1.6, .5, 1);
+  --t-los:   .16s;   /* en veert terug, iets voorbij zijn rust; kleine wissels */
+  --t-kom:   .28s;   /* iets komt binnen: een scherm, een vak, een paneel */
+  --t-groot: .45s;   /* een groot moment: de schijf gaat open, de kroon valt */
   --t-card:  .18s;
   --t-fly:   .22s;   /* het "+1" van de kaart naar de teller (zie flyGain) */
-  --e-pop: cubic-bezier(.2, 1.5, .4, 1);
+  --e-uit:   cubic-bezier(.2, .6, .3, 1);    /* indrukken, binnenkomen en tot rust komen */
+  --e-los:   cubic-bezier(.3, 1.6, .5, 1);   /* veren: loslaten en ploppen */
+  --e-weg:   cubic-bezier(.45, 0, .8, .6);   /* vertrekken: versnelt weg */
+  --e-vloei: cubic-bezier(.3, 0, .2, 1);     /* heen en weer: vliegen, ademen */
   --dur: 1;        /* animatieschaal, 0 bij prefers-reduced-motion */
 
   font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -302,17 +311,17 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    of het wel moet bewegen.
 
    0. NIETS.       Meteen op zijn plek.
-   1. AANKOMEN.    Vervagen + 6 px omhoog, .22s ease-out. Elk scherm.
+   1. AANKOMEN.    Vervagen + 6 px omhoog, --t-kom met --e-uit. Elk scherm.
                    (screenIn)
-   2. OP VOLGORDE. 8 px omhoog per vak, .26s ease-out, 70 tot 90 ms uit
-                   elkaar, hoogstens drie stappen. (slotIn, markIn/goIn)
-   3. OPKOMEN.     Schaal naar 1 in .22 tot .4s met --e-pop. Alleen voor
+   2. OP VOLGORDE. 8 px omhoog per vak, --t-kom met --e-uit, 70 tot 90 ms
+                   uit elkaar, hoogstens drie stappen. (slotIn, markIn/goIn)
+   3. OPKOMEN.     Schaal naar 1 in --t-kom of --t-groot met --e-los. Alleen voor
                    iets dat net ontstaat of verdiend is. (panelIn, crownIn,
                    freshIn, gainPop, roundPop)
    4. FEEST.       Alleen het winnaarsscherm: 1 en 3 plus de lussen.
 
    Los daarvan, omdat hij honderd keer per potje speelt: EEN KAART KOMT
-   AAN, 180 ms ease-out, hoogstens 14 px (--t-card). Trekt nooit de
+   AAN, 180 ms --e-uit, hoogstens 14 px (--t-card). Trekt nooit de
    aandacht.
 
    Vier regels eromheen:
@@ -330,7 +339,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 }
 .screen.on {
   display: flex;
-  animation: screenIn calc(.22s / max(var(--dur), .001)) ease-out;
+  animation: screenIn calc(var(--t-kom) / max(var(--dur), .001)) var(--e-uit);
 }
 /* Op twee schermen niet, allebei met opzet. #s-handoff: daar stroomt de grond
    van papier naar ploegkleur, en een vervaging erover maakt het scherm een
@@ -357,7 +366,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 }
 #s-handoff.on > #hoRoundCard,
 #s-handoff.on > .go-wrap {
-  animation: slotIn calc(.26s / max(var(--dur), .001)) ease-out backwards;
+  animation: slotIn calc(var(--t-kom) / max(var(--dur), .001)) var(--e-uit) backwards;
 }
 #s-handoff.on > .go-wrap { animation-delay: calc(.07s / max(var(--dur), .001)); }
 
@@ -399,7 +408,7 @@ button.btn-icon:active, button.btn-danger:active, button.chip:active,
 button.pv:active, button.btn-plain:active, button.ho-count:active,
 .cb-index button:active {
   transition-duration: calc(var(--t-press) * var(--dur));
-  transition-timing-function: ease-out;
+  transition-timing-function: var(--e-uit);
 }
 .btn-go:active, .btn-good:active {
   transform: translate(var(--lift-2), var(--lift-2));
@@ -428,7 +437,7 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   50% { transform: translateX(9px) rotate(3deg); }
   80% { transform: translateX(-5px) rotate(-2deg); }
 }
-.nudge { animation: nudge calc(.42s / max(var(--dur), .001)) ease-in-out; }
+.nudge { animation: nudge calc(var(--t-groot) / max(var(--dur), .001)) var(--e-vloei); }
 .refuse { outline: var(--line-2) solid var(--ink); outline-offset: 4px; }
 
 /* Wat je vast moet houden draagt een stippellijn, en dat is nog precies één
@@ -541,7 +550,7 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 }
 .countdown.out {
   pointer-events: none;
-  animation: cdOut calc(.2s / max(var(--dur), .001)) ease-in forwards;
+  animation: cdOut calc(var(--t-los) / max(var(--dur), .001)) var(--e-weg) forwards;
 }
 /* Eén grond: op nul gaat de schijf open. Er komt een gat in dit vlak, zo
    groot als de schijf, dat uitgroeit tot het hele scherm; door het gat ligt
@@ -555,7 +564,7 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   pointer-events: none;
   -webkit-mask-image: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), transparent var(--gat), #000 calc(var(--gat) + 1px));
           mask-image: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), transparent var(--gat), #000 calc(var(--gat) + 1px));
-  animation: cdOpen calc(.45s / max(var(--dur), .001)) cubic-bezier(.3, .6, .4, 1) forwards;
+  animation: cdOpen calc(var(--t-groot) / max(var(--dur), .001)) var(--e-uit) forwards;
 }
 /* De opdrachtkaart van de overdracht, als losse kopie op het aftelvlak: ze
    zakt in de grond terwijl de punten haar plek innemen (zie countdown()). */
@@ -676,10 +685,10 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   to   { transform: translateY(0); }
 }
 #s-title.on > .wordmark {
-  animation: markIn calc(.26s / max(var(--dur), .001)) ease-out backwards;
+  animation: markIn calc(var(--t-kom) / max(var(--dur), .001)) var(--e-uit) backwards;
 }
 #s-title.on #btnStart {
-  animation: goIn calc(.26s / max(var(--dur), .001)) ease-out backwards;
+  animation: goIn calc(var(--t-kom) / max(var(--dur), .001)) var(--e-uit) backwards;
   animation-delay: calc(.09s / max(var(--dur), .001));
 }
 
@@ -727,7 +736,7 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
    elke binnenkomst. Het merk reageert niet op aanraking -- in deze app zegt
    een vlak dat beweegt onder je vinger "ik ben een knop". */
 #s-title.on > .wordmark > svg {
-  animation: glasturn calc(9s / max(var(--dur), .001)) ease-in-out infinite;
+  animation: glasturn calc(9s / max(var(--dur), .001)) var(--e-vloei) infinite;
   animation-delay: calc(-7.4s / max(var(--dur), .001));
 }
 
@@ -888,7 +897,7 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 /* Geen gouden rail: goud betekent op dit scherm "gekozen". Deze vouwregel en
    die van de kaartenbak doen hetzelfde, dus dragen ze dezelfde vorm. */
 .rules {
-  font-size: 14px; line-height: 1.5; color: var(--ink-2);
+  font-size: var(--fs-2); line-height: 1.5; color: var(--ink-2);
 }
 .rules p { margin: 0 0 var(--s-2); }
 .rules b { color: var(--ink); }
@@ -1118,17 +1127,17 @@ input[type=range]::-moz-range-thumb {
    bewegen uit zichzelf.
    ronde 1: de drie woorden ratelen achter elkaar door */
 @keyframes say { 0%, 60%, 100% { transform: translateY(0); } 25% { transform: translateY(-9px); } }
-.ri-d1, .ri-d2, .ri-d3 { animation: say calc(1.05s / max(var(--dur), .001)) ease-in-out 2; }
+.ri-d1, .ri-d2, .ri-d3 { animation: say calc(1.05s / max(var(--dur), .001)) var(--e-vloei) 2; }
 .ri-d2 { animation-delay: calc(.12s / max(var(--dur), .001)); }
 .ri-d3 { animation-delay: calc(.24s / max(var(--dur), .001)); }
 /* ronde 2: dat ene woord klopt als een hart */
 @keyframes beat { 0%, 100% { transform: scale(1); } 45% { transform: scale(1.22); } }
 .ri-one { transform-origin: 50px 42px; transform-box: view-box;
-          animation: beat calc(1.1s / max(var(--dur), .001)) ease-in-out 2; }
+          animation: beat calc(1.1s / max(var(--dur), .001)) var(--e-vloei) 2; }
 /* ronde 3: de streep wordt er twee keer opnieuw doorheen gezet */
 @keyframes strike { 0%, 100% { opacity: 1; transform: scale(1); } 40% { opacity: .55; transform: scale(.9); } }
 .ri-cross { transform-origin: 50px 41px; transform-box: view-box;
-            animation: strike calc(1.2s / max(var(--dur), .001)) ease-in-out 2; }
+            animation: strike calc(1.2s / max(var(--dur), .001)) var(--e-vloei) 2; }
 
 /* ============================================================
    7. OVERDRACHT — wie is er aan de beurt
@@ -1149,7 +1158,7 @@ input[type=range]::-moz-range-thumb {
      : 1 en loopt het papier vol met de kleur van de ploeg die het toestel
      krijgt. Een eigen laag voor de grond lost het niet op: inhoud die
      vervaagt boven een bewegende grond geeft hetzelfde grijs. */
-  transition: background-color calc(.35s * var(--dur)) ease;
+  transition: background-color calc(var(--t-kom) * var(--dur)) var(--e-uit);
   background: var(--team);
   padding-top: calc(env(safe-area-inset-top, 0px) + var(--corner) + var(--tap));
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--corner));
@@ -1255,7 +1264,7 @@ input[type=range]::-moz-range-thumb {
    als laatste tot stilstand. */
 @keyframes roundPop { from { transform: scale(.82); } to { transform: scale(1); } }
 #s-handoff.on .roundcard.big .ico {
-  animation: roundPop calc(.28s / max(var(--dur), .001)) var(--e-pop) backwards;
+  animation: roundPop calc(var(--t-kom) / max(var(--dur), .001)) var(--e-los) backwards;
   animation-delay: calc(.07s / max(var(--dur), .001));
 }
 .roundcard.big .ico svg { width: 100%; height: 100%; overflow: visible; }
@@ -1363,7 +1372,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 /* Op de overdracht ademt ze, en alleen daar: in het paneel staat een beurt
    stil, en iets dat ademt spreekt dat tegen. */
 #s-handoff .mini-score .side.up .head > svg {
-  animation: ademen calc(2.8s / max(var(--dur), .001)) ease-in-out infinite;
+  animation: ademen calc(2.8s / max(var(--dur), .001)) var(--e-vloei) infinite;
 }
 @keyframes ademen {
   0%, 100% { transform: scale(1); }
@@ -1374,7 +1383,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
    één gebied van de kaart leeft, en welk gebied dat is, ís de mededeling. */
 @keyframes upPop { from { transform: scale(.8); } to { transform: scale(1); } }
 #s-handoff:not(.mode-round).on .mini-score .side.up .head {
-  animation: upPop calc(.28s / max(var(--dur), .001)) var(--e-pop) backwards;
+  animation: upPop calc(var(--t-kom) / max(var(--dur), .001)) var(--e-los) backwards;
   animation-delay: calc(.07s / max(var(--dur), .001));
 }
 /* Vaste cijferbreedte en tabulaire cijfers: anders springt de rij opzij
@@ -1459,15 +1468,15 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   background: rgba(20, 17, 15, .82);
   padding: var(--s-4);
 }
-/* Het waas komt op in 0,15 s, het paneel schaalt in 0,22 s van 96% met
-   --e-pop. Wegklikken lost kort op (zie .uit hieronder), maar de klok loopt
+/* Het waas komt op in --t-los, het paneel schaalt in --t-kom van 96% met
+   --e-los. Wegklikken lost kort op (zie .uit hieronder), maar de klok loopt
    dan al. */
 /* Het paneel schaalt alleen; de sluier vervaagt voor allebei (zie slotIn). */
 @keyframes scrimIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes panelIn { from { transform: scale(.96); } to { transform: scale(1); } }
-.overlay:not([hidden]) { animation: scrimIn calc(.15s / max(var(--dur), .001)) ease-out; }
+.overlay:not([hidden]) { animation: scrimIn calc(var(--t-los) / max(var(--dur), .001)) var(--e-uit); }
 .overlay:not([hidden]) .panel {
-  animation: panelIn calc(.22s / max(var(--dur), .001)) var(--e-pop) backwards;
+  animation: panelIn calc(var(--t-kom) / max(var(--dur), .001)) var(--e-los) backwards;
 }
 /* Bij hervatten lost de sluier op: naast cdOut de enige vertrekanimatie, en
    om dezelfde reden toegestaan -- er wacht geen volgend scherm, het
@@ -1479,7 +1488,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 .overlay[hidden].uit {
   display: grid !important;
   pointer-events: none;
-  animation: scrimUit calc(.18s / max(var(--dur), .001)) ease-in forwards;
+  animation: scrimUit calc(var(--t-los) / max(var(--dur), .001)) var(--e-weg) forwards;
 }
 @media (prefers-reduced-motion: reduce) {
   .overlay[hidden].uit { display: none !important; }
@@ -1556,7 +1565,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   35%  { transform: scale(1.14); }
   100% { transform: scale(1); }
 }
-.secs-left.pulse { animation: digitPulse calc(.24s / max(var(--dur), .001)) var(--e-pop); }
+.secs-left.pulse { animation: digitPulse calc(var(--t-kom) / max(var(--dur), .001)) var(--e-los); }
 /* Onder vijf seconden blijft het cijfer groter staan: van 20 naar 34 px, in
    de lettergrootte, want het vaste vak van .secs-left vangt dat op zonder
    iets te verschuiven. Naast het papier van de kaart is dit wat groeit
@@ -1578,7 +1587,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
    regel met twee mascottes en twee totalen, hier staat het alleen. */
 .turn-gain { font-size: var(--fs-3); line-height: 1.3; padding: 0 7px; }
 @keyframes gainPop { from { transform: scale(.62); } to { transform: scale(1); } }
-.turn-gain.pop { animation: gainPop calc(.24s / max(var(--dur), .001)) var(--e-pop); }
+.turn-gain.pop { animation: gainPop calc(var(--t-kom) / max(var(--dur), .001)) var(--e-los); }
 
 /* Het punt dat van de kaart naar de teller vliegt, zodat die kaart en die
    teller zichtbaar verbonden zijn. Het draagt exact de huid van zijn
@@ -1604,7 +1613,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   aspect-ratio: 1; max-width: 100%; max-height: 100%;
   /* Alleen voor het inzakken als de beurt om is (zie #s-play.over). De klop
      van .hurry is een animatie en gaat hier dus voor. */
-  transition: transform calc(.18s * var(--dur)) ease-out;
+  transition: transform calc(var(--t-los) * var(--dur)) var(--e-uit);
 }
 /* Geen ploegkleur op de kaart: de rand is de klok en verkleurt van goud naar
    pruim, en rood op rood maakt die onleesbaar. De kaart is het neutrale
@@ -1623,7 +1632,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   box-shadow: var(--lift-1) var(--lift-1) 0 0 var(--ink);
   /* Dezelfde 0,3 s als de band hieronder: het opwarmen en het verkleuren
      van de rand horen bij hetzelfde moment en moeten dus samen aankomen. */
-  transition: background-color calc(.3s * var(--dur)) linear;
+  transition: background-color calc(var(--t-kom) * var(--dur)) linear;
 }
 
 /* De klok loopt om de kaart heen in plaats van in een wijzerplaat ernaast.
@@ -1633,7 +1642,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 /* De laatste seconden is er van de rand haast niets meer over, juist op het
    moment dat de haast het hoogst is. Daarom klopt de kaart zelf mee. */
 @keyframes hurry { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02) rotate(-.4deg); } }
-.cardslot.hurry { animation: hurry calc(.5s / max(var(--dur), .001)) ease-in-out infinite; }
+.cardslot.hurry { animation: hurry calc(.5s / max(var(--dur), .001)) var(--e-vloei) infinite; }
 /* Twee lagen op precies hetzelfde pad: één ring in twee toestanden, geen twee
    ringen. Wijkt er één een pixel af of krijgt er één een contour, dan heeft
    de kaart een rand erbij.
@@ -1648,11 +1657,11 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
    met dezelfde 0,3 s als de band en het papier. */
 .timerframe .track {
   stroke: var(--paper-2);
-  transition: stroke calc(.3s * var(--dur)) linear;
+  transition: stroke calc(var(--t-kom) * var(--dur)) linear;
 }
 .timerframe .band  {
-  transition: stroke calc(.3s * var(--dur)) linear,
-              stroke-width calc(.3s * var(--dur)) linear;
+  transition: stroke calc(var(--t-kom) * var(--dur)) linear,
+              stroke-width calc(var(--t-kom) * var(--dur)) linear;
 }
 .card[data-time="ok"]   .timerframe .band { stroke: var(--time-3); }
 .card[data-time="warn"] .timerframe .band { stroke: var(--time-2); }
@@ -1700,13 +1709,13 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   0%   { transform: translateY(14px) scale(.98); }
   100% { transform: translateY(0) scale(1); }
 }
-.card.in   { animation: deal calc(var(--t-card) / max(var(--dur), .001)) ease-out; }
-.card.tuck { animation: tuck calc(var(--t-card) / max(var(--dur), .001)) ease-out; }
+.card.in   { animation: deal calc(var(--t-card) / max(var(--dur), .001)) var(--e-uit); }
+.card.tuck { animation: tuck calc(var(--t-card) / max(var(--dur), .001)) var(--e-uit); }
 /* Een tik die niet meetelt (twee vingers op dezelfde kaart binnen 280 ms)
    werd stilletjes weggegooid. Nu knippert de rand één keer, zodat je ziet
    dát hij binnenkwam. */
 @keyframes seen { 0%, 100% { border-color: var(--ink); } 40% { border-color: var(--go); } }
-.card.seen { animation: seen calc(.24s / max(var(--dur), .001)) ease-out; }
+.card.seen { animation: seen calc(var(--t-kom) / max(var(--dur), .001)) var(--e-uit); }
 
 /* Eén kaart, één teken, zo groot als de kaart toelaat. --glyph wordt
    door sizeCard() van de gemeten kaart afgeleid. */
@@ -1750,7 +1759,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 .cardslot .under {
   position: absolute; inset: 0; z-index: -1;
   background: var(--paper); border: var(--line) solid var(--ink);
-  transition: opacity calc(.2s * var(--dur)) ease;
+  transition: opacity calc(var(--t-los) * var(--dur)) var(--e-uit);
 }
 .cardslot .u1 { transform: rotate(1.6deg) translate(3px, 4px); }
 .cardslot .u2 { transform: rotate(-2.2deg) translate(-2px, 7px); }
@@ -1829,7 +1838,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   from { transform: translateX(-50%) rotate(-8deg) translateY(-14px) scale(.5); }
   to   { transform: translateX(-50%) rotate(-8deg) translateY(0) scale(1); }
 }
-.tally .crown { animation: crownIn calc(.4s / max(var(--dur), .001)) var(--e-pop) backwards; }
+.tally .crown { animation: crownIn calc(var(--t-groot) / max(var(--dur), .001)) var(--e-los) backwards; }
 /* De uitsplitsing per ronde: pictogram + aantal, klein en rustig. Staat
    onder het totaal, dus met een streep erboven die zegt "hier komt de
    herkomst" in plaats van "hier komt de som". */
@@ -1885,7 +1894,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
    winnaar in de stand zelf, met de kroon erop -- één dier. */
 .tally.winner .mascot-sm {
   width: min(44vw, 15vh, 170px);
-  animation: cheer calc(.9s / max(var(--dur), .001)) ease-in-out infinite;
+  animation: cheer calc(.9s / max(var(--dur), .001)) var(--e-vloei) infinite;
 }
 .tally.winner .crown { width: 64px; top: -34px; }
 /* Dezelfde breedte als de opdrachtkaart op de overdracht. Bovenaan ruimte
@@ -2023,7 +2032,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   .tally .crown { width: 58px; top: -34px; }
   .tally .num { font-size: min(11vw, 7vh, 88px); }
   .tally .sr svg { width: 26px; height: 26px; }
-  .tally .sr b { font-size: 18px; }
+  .tally .sr b { font-size: var(--fs-4); }
   .side-by-side { max-width: 560px; gap: var(--s-3) var(--s-5); }
   .teamchip, .roundchip .ico { width: 60px; height: 60px; }
   .roundchip .ico svg { width: 46px; height: 46px; }
@@ -2057,25 +2066,25 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   .roundcard.big { width: min(70vw, 34rem); max-width: min(70vw, 34rem);
                    gap: 14px; padding: 22px 32px 18px; }
   .roundcard.big .ico { width: min(19vh, 176px); height: min(19vh, 176px); }
-  .roundcard.big b { font-size: 46px; }
-  .roundcard.big p { font-size: 19px; }
+  .roundcard.big b { font-size: var(--fs-6); }
+  .roundcard.big p { font-size: var(--fs-4); }
   .ho-count svg { width: 24px; height: 24px; }
-  .ho-count span { font-size: 24px; }
+  .ho-count span { font-size: var(--fs-5); }
   #s-handoff .mini-score .side .head { width: 92px; }
   #s-handoff .mini-score .side .head > svg { width: 52px; height: 52px; }
   #s-handoff .mini-score .side.up .head > svg { width: 84px; height: 84px; }
-  #s-handoff .mini-score b { font-size: 36px; }
+  #s-handoff .mini-score b { font-size: var(--fs-6); }
   .overlay .panel { min-width: 440px; gap: var(--s-5); padding: 40px 56px; }
   .overlay .panel .btn-go { width: 148px; }
   .overlay .panel .btn-danger { width: 88px; height: 88px; }
   .overlay .panel .btn-danger .mark { width: 40px; }
   .paused-clock .dial { width: 100px; height: 100px; }
-  .paused-clock .dial b { font-size: 38px; }
+  .paused-clock .dial b { font-size: var(--fs-6); }
   .paused-clock .bars i { width: 10px; height: 34px; }
   #pauze .mini-score .side .head { width: 84px; }
   #pauze .mini-score .side .head > svg { width: 48px; height: 48px; }
   #pauze .mini-score .side.up .head > svg { width: 76px; height: 76px; }
-  #pauze .mini-score b { font-size: 34px; }
+  #pauze .mini-score b { font-size: var(--fs-6); }
 }
 
 /* ============================================================
@@ -2129,8 +2138,8 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 @keyframes gluurOp { from { translate: 0 100%; } to { translate: 0 0; } }
 @keyframes gluurAdem { 0%, 100% { scale: 1; } 50% { scale: 1.05; } }
 #s-title.on .gluur svg {
-  animation: gluurOp calc(.42s / max(var(--dur), .001)) var(--e-pop) backwards,
-             gluurAdem calc(2.8s / max(var(--dur), .001)) ease-in-out infinite;
+  animation: gluurOp calc(var(--t-groot) / max(var(--dur), .001)) var(--e-los) backwards,
+             gluurAdem calc(2.8s / max(var(--dur), .001)) var(--e-vloei) infinite;
   animation-delay: calc(.32s / max(var(--dur), .001)), 0s;
 }
 #s-title.on .gluur[data-team="1"] svg {
@@ -2156,7 +2165,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 #s-play.leeg .card .stempel.klaar,
 #s-play.over .card .stempel.om {
   display: grid;
-  animation: stempel calc(.3s / max(var(--dur), .001)) var(--e-pop) both;
+  animation: stempel calc(var(--t-kom) / max(var(--dur), .001)) var(--e-los) both;
 }
 @keyframes stempel {
   from { transform: rotate(-20deg) scale(1.9); opacity: 0; }
@@ -2186,7 +2195,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   background: var(--good-ink); transform-origin: 0 50%;
 }
 #s-play.over #turnScore:not([hidden]) {
-  animation: buit calc(.5s / max(var(--dur), .001)) var(--e-pop) calc(.15s / max(var(--dur), .001)) both;
+  animation: buit calc(var(--t-groot) / max(var(--dur), .001)) var(--e-los) calc(.15s / max(var(--dur), .001)) both;
 }
 @keyframes buit {
   0%   { transform: scale(1); }
@@ -2219,7 +2228,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   100% { transform: translateX(-50%) rotate(-8deg) translateY(0) scale(1); opacity: 1; }
 }
 #s-winner .tally .crown.later {
-  animation: kroonVal calc(.45s / max(var(--dur), .001)) ease-out var(--kroon, 0s) both;
+  animation: kroonVal calc(var(--t-groot) / max(var(--dur), .001)) var(--e-uit) var(--kroon, 0s) both;
 }
 @keyframes klap {
   0%, 100% { transform: rotate(0); }
@@ -2228,7 +2237,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 }
 #s-winner .tally:not(.winner) .mascot-sm {
   transform-origin: 50% 90%;
-  animation: klap calc(.9s / max(var(--dur), .001)) ease-in-out infinite;
+  animation: klap calc(.9s / max(var(--dur), .001)) var(--e-vloei) infinite;
 }
 </style>
 </head>
@@ -3855,7 +3864,7 @@ function holdButton(el, ms, run, paint) {
              { opacity: 1, transform: "translate(0, 0) scale(.9)", offset: .45 },
              { opacity: 1, transform: "translate(0, 0) scale(.9)", offset: .8 },
              { opacity: 0, transform: "translate(0, 0) scale(.9)" }],
-          { duration: 1100, easing: "ease-out" });
+          { duration: 1100, easing: curve("uit") });
       }
     } else loop(0, 300);
   }
@@ -4354,8 +4363,8 @@ function countdown(done) {
     if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
       disc.getBoundingClientRect();                 // forceer de beginstand
       disc.style.transition =
-        "left .34s var(--e-pop), top .34s var(--e-pop)," +
-        "width .34s var(--e-pop), height .34s var(--e-pop)";
+        "left .34s var(--e-los), top .34s var(--e-los)," +
+        "width .34s var(--e-los), height .34s var(--e-los)";
       requestAnimationFrame(() => {
         const o = el.getBoundingClientRect();
         disc.style.left = (o.width / 2 - natW / 2) + "px";
@@ -4385,7 +4394,7 @@ function countdown(done) {
     const a = kopie.animate([
       { transform: "translateY(0) scale(1)", opacity: 1 },
       { transform: "translateY(10px) scale(.94)", opacity: 0 }
-    ], { duration: 420, easing: "cubic-bezier(.2, .7, .3, 1)", fill: "forwards" });
+    ], { duration: 450, easing: curve("uit"), fill: "forwards" });
     a.onfinish = a.oncancel = () => kopie.remove();
   }
   veldCd.aan(!!kopie);
@@ -4659,7 +4668,7 @@ function flyGain(from, to) {
     { transform: `translate(${from.x + dx * .5}px, ${from.y + dy * .5 + Math.abs(dx) * .08}px) `
                + `translate(-50%, -50%) scale(1.45)`, offset: .5 },
     { transform: `translate(${to.x}px, ${to.y}px) translate(-50%, -50%) scale(1)` }
-  ], { duration: vlucht(), easing: "cubic-bezier(.3,0,.2,1)", fill: "forwards" });
+  ], { duration: vlucht(), easing: curve("vloei"), fill: "forwards" });
 
   flyAnim.onfinish = landFly;
 }
@@ -4683,6 +4692,10 @@ function landFly() {
 }
 
 /* De duur uit --t-fly, zodat er maar één plek is waar hij staat. */
+/* Een curve uit :root, voor Web Animations (die lezen geen var()). */
+function curve(naam) {
+  return getComputedStyle(document.documentElement).getPropertyValue("--e-" + naam).trim() || "ease";
+}
 function vlucht() {
   const v = getComputedStyle(document.documentElement).getPropertyValue("--t-fly");
   const n = parseFloat(v);
@@ -4811,7 +4824,7 @@ function mascotte(el, soort, n) {
     ({ transform: `translate(${x}px, ${y + voet * (1 - sy)}px) rotate(${r}deg) scale(${sx}, ${sy})`, offset,
        /* De draai in de lucht om het midden, niet om de voeten. */
        ...(soort === "juich" ? { transformOrigin: "50% 50%" } : {}) })),
-    { duration: duur, easing: "ease-in-out" });
+    { duration: duur, easing: curve("vloei") });
   /* Het gezicht hoort bij de beweging: blij bij juichen, ogen wijd bij
      schrikken, even dicht bij nee, daarna weer het gewone. Bij beperkte
      beweging ook geen ander gezicht: dan is er geen beweging om het aan te
@@ -5063,7 +5076,7 @@ function kaartSpook(soort, naar) {
       { opacity: 1, offset: .7 },
       { transform: `translate(${dx}px, ${dy}px) scale(.1)`, opacity: 0 }
     ];
-    opties = { duration: vlucht(), easing: "cubic-bezier(.45, 0, .8, .6)" };
+    opties = { duration: vlucht(), easing: curve("weg") };
   } else {
     k.classList.add("onder");
     slot.insertBefore(k, slot.firstChild);
@@ -5072,7 +5085,7 @@ function kaartSpook(soort, naar) {
       { transform: "translateY(34px) scale(.94)", opacity: 1, offset: .6 },
       { transform: "translateY(22px) scale(.92)", opacity: 0 }
     ];
-    opties = { duration: 240, easing: "ease-out" };
+    opties = { duration: 280, easing: curve("uit") };
   }
   const a = k.animate(frames, { ...opties, fill: "forwards" });
   a.onfinish = a.oncancel = () => k.remove();
@@ -5091,7 +5104,7 @@ function kaartTerug(van) {
     { transform: `translate(${dx}px, ${dy}px) scale(.1)`, opacity: 0 },
     { opacity: 1, offset: .3 },
     { transform: "translate(0, 0) scale(1)", opacity: 1 }
-  ], { duration: vlucht(), easing: "cubic-bezier(.2, .4, .3, 1)" });
+  ], { duration: vlucht(), easing: curve("uit") });
 }
 
 /* ---------- einde beurt / ronde ---------- */
