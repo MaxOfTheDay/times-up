@@ -929,12 +929,23 @@ kaarten tekenen is het meest consequent en kost een veelvoud aan bytes.
 **De lijn van de mascotte.** Die stond als 5 van de 100 in het symbool,
 dus hij schaalde mee: 4 px op de titel, 2,4 px in de balk, 1,3 px voor de
 kleine Vos in de stand op de overdracht, een haarlijn op een kaart met een
-rand van 4 px. Nu leest elke inktlijn in de mascottes `--m-lijn` (5 als
-niemand hem zet), en `mascotteLijn()` zet hem per svg met een
-`ResizeObserver`: minstens 2,3 px op het scherm, hoogstens 10 eenheden. Een
-waarnemer omdat de maat aan schermstand en scherm hangt, en een verborgen
-scherm nul meet. Vaste svg's in de opmaak worden bij het opstarten
-aangemeld, de rest via `svgUse()`.
+rand van 4 px. De kleine tekens hadden hetzelfde: de rondetekens op de
+eindstand (16 px, 1,1 px lijn) en het kaartenteken op de overdracht (18 px,
+1,6 px) lazen als grijs potlood naast gedrukte inkt.
+
+Nu zet `penLijn()` met een `ResizeObserver` op elke svg `--pen`: hoeveel
+eenheden 2,3 px op het scherm zijn. Elke lijn in die symbolen neemt het
+grootste van haar eigen dikte en `--pen`, met een plafond zodat een kleine
+kop niet dichtloopt: `max(5px, min(var(--pen, 0px), 10px))` voor de
+mascottes, 7 en 12 voor de rondetekens, 9 en 14 voor `#i-kaarten`. Op de
+titel en de grote schijf verandert er dus niets. Een waarnemer omdat de
+maat aan schermstand en scherm hangt, en een verborgen scherm nul meet.
+Vaste svg's in de opmaak worden bij het opstarten aangemeld, de rest via
+`svgUse()`.
+
+Op de eindstand stonden de drie rondes bovendien op 55%: dat vervagen zegt
+"dit is niet de ronde van nu", en na het laatste potje is geen ronde meer
+nu. Daar staan ze in volle inkt.
 
 ## Beloning
 
@@ -1003,6 +1014,16 @@ stralen, met de cijfers rechtstreeks op de ploegkleur -- tegen de harde eis.
 Nu staat ze op `.wn-kaart`, even breed als de opdrachtkaart, met bovenaan
 ruimte voor de kroon zodat die binnen de rand valt. De stralen en de confetti
 blijven de grond.
+
+**De grond is de ploegkleur van wie won.** De stralen waren een tint van 16%
+van die kleur op papier: roze voor Vos, grijsblauw voor Uil. Dat waren de
+enige kleuren in de app buiten het palet, en de winst las als een vale
+kleur in plaats van als de ploeg. Nu krijgt het scherm dezelfde grond als de
+overdracht van die ploeg: de volle ploegkleur met het stipveld (`#wnVeld`),
+en de stralen als papier op 16% erover, net als de punten. De stand blijft
+op papier, dus er komt geen tekst op de ploegkleur. De confetti is papier en
+goud, want snippers in de ploegkleur verdwijnen in de grond. Bij gelijkspel
+is er geen ploeg: papier met gouden stralen, zoals het was.
 
 Let op de klassenaam als je hier ooit tóch iets bijtekent: `.bar` bestond
 al -- dat is de streep door de pas-knop als de stapel op is. Een tweede
