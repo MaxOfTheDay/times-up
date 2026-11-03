@@ -172,8 +172,9 @@ komen daarna.
 
 **De eindstand telt niet, ze noemt.** Wie won staat in de kroon en de
 mascotte die groeit; per ploeg het totaal, met de drie rondes klein eronder.
-Twee totalen even groot. Grep voor je een korte klassenaam pakt (`.bar`
-bestond al).
+Twee totalen even groot, op een papieren kaart zo breed als de opdrachtkaart
+(`.wn-kaart`), met de kroon binnen de rand. Grep voor je een korte
+klassenaam pakt (`.bar` bestond al).
 
 **Eén label voor "wat er bij komt".** Het groene `+N` (`.gain`) staat alleen
 in de balk tijdens het spelen. Het vliegende punt draagt dezelfde huid, gaat
