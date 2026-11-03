@@ -763,8 +763,8 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
 
    De band kost 93 px, en geeft de 72 px terug die tekst anders inlevert om de
    knop te mijden. Hij reikt tot onder de slagschaduw van de knop en bloedt
-   door tot de schermrand; de streep eronder blijft, anders leest een half
-   afgesneden tegel als een fout. De titel staat links op --s-4 en wordt
+   door tot de schermrand; zodra er iets onder schuift krijgt hij een streep,
+   anders leest een half afgesneden tegel als een fout. De titel staat links op --s-4 en wordt
    verticaal uit de hoek gehaald (begint op 42 px); rechts houdt hij de kolom
    van de knop vrij, precies genoeg voor "INSTELLINGEN" op 320 px. */
 @media (max-width: 592px) and (min-height: 560px) {
@@ -788,8 +788,12 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
     padding: calc(env(safe-area-inset-top, 0px) + var(--corner))
              calc(var(--corner) + var(--tap) + var(--s-2)) var(--s-2) var(--s-4);
     background: var(--paper);
-    border-bottom: var(--line-2) solid var(--rule);
   }
+  /* De streep onder de band alleen zodra er iets onder schuift: in rust
+     scheidt hij niets, en met de groepskoppen eronder stonden er dan twee
+     strepen vlak boven elkaar. Een schaduw en geen rand, zodat er niets
+     verspringt als hij komt. */
+  #s-setup .setup-scroll.geschoven > h1 { box-shadow: 0 var(--line-2) 0 var(--rule); }
 }
 
 /* Waar de band niet past (onder 592 breed én onder 560 hoog), levert de
@@ -842,7 +846,6 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
 .group-head {
   font-size: var(--fs-3); font-weight: 900; text-transform: uppercase;
   letter-spacing: var(--track-caps); margin: 0; color: var(--ink);
-  padding-bottom: var(--s-2); border-bottom: var(--line-2) solid var(--rule);
 }
 /* Geen gouden rail: goud betekent op dit scherm "gekozen". Deze vouwregel en
    die van de kaartenbak doen hetzelfde, dus dragen ze dezelfde vorm. */
@@ -869,7 +872,6 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   min-height: var(--tap); box-sizing: border-box;
   font-size: var(--fs-3); font-weight: 900; text-transform: uppercase;
   letter-spacing: var(--track-caps); color: var(--ink);
-  border-bottom: var(--line-2) solid var(--rule);
 }
 .rules > summary::-webkit-details-marker { display: none; }
 .rules > summary::before {
@@ -3760,6 +3762,10 @@ $("#hapticsChips").addEventListener("click", e => {
   if (settings.haptics) Tril.tik();   // even laten voelen
 });
 $("#btnBack").addEventListener("click", () => show("title"));
+/* De streep onder de plakkende titel, alleen als er iets onder ligt. */
+$(".setup-scroll").addEventListener("scroll", e =>
+  e.currentTarget.classList.toggle("geschoven", e.currentTarget.scrollTop > 0),
+  { passive: true });
 
 /* ==============================================================
    5b. LANG DRUKKEN — één mechanisme, nu nog voor één knop: stoppen.

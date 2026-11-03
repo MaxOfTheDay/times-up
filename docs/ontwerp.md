@@ -1324,7 +1324,7 @@ Drie dingen die eraan vastzitten:
 
 - **De kop hoort ín de groep, niet ernaast.** Er zijn standen waarin hier
   niets staat, en `toonInstall()` verbergt daarom `#appGroup` en niet
-  `#installField`. Anders blijft `DEZE APP` met haar streep als lege regel
+  `#installField`. Anders blijft `DEZE APP` als lege regel
   onder Voorkeuren hangen. (Dat `hidden` het wint van `display: flex` van
   `.field-group` komt door de `[hidden] { display: none !important }`
   bovenaan het bestand -- de regel die er staat omdat deze val hier al drie
@@ -1441,7 +1441,7 @@ alle drie de spelknoppen in het eerste scherm.
 
 De regels blijven open tot het eerste gestarte spel: de oppas die ze nooit
 zag vindt ze onder de knoppen, met een groepskop die openklapt. De vouwregel
-ís die kop (zelfde maat en streep als `.group-head`, met de plus ervoor);
+ís die kop (zelfde maat als `.group-head`, met de plus ervoor);
 een kop plus een vouwregel eronder zou twee keer hetzelfde zeggen.
 
 **Drie lagen tekst, niet vier.** Titel, groepskop, veldnaam en vouwregel
@@ -1466,7 +1466,15 @@ groepen"). Ze zijn weg, net als "Kort/Normaal/Lang" onder 16, 24 en 32: het
 getal zegt het al, en de telling van de bak loopt zichtbaar op als je een
 stand hoger kiest. Wat bleef: de leeftijd onder de moeilijkheid (die zegt
 iets wat het woord niet zegt) en de zin in de bak over wegleggen (die zie je
-pas als je hem openklapt). De regels zijn drie zinnen korter. Het scherm werd
+pas als je hem openklapt). De regels zijn drie zinnen korter.
+
+**Geen strepen onder de koppen.** Onder de titel, onder elke groepskop en
+onder de vouwregel van de regels stond een streep: vier strepen voor vier
+groepen, waarvan de eerste twee vlak boven elkaar ("INSTELLINGEN", dan
+"SPEL"). Een kop in hoofdletters met lucht erboven scheidt al; de streep
+zei het een tweede keer. De plakkende titelband houdt zijn streep alleen
+zodra er iets onder schuift (`.geschoven`, een schaduw zodat er niets
+verspringt): dan scheidt hij wel iets. Het scherm werd
 op 390x844 151 px korter (1228 naar 1077).
 
 ## Eén letter voor cijfers en koppen
