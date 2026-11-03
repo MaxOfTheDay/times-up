@@ -875,6 +875,41 @@ vinger tijdens het doorgeven op te vangen, en bij hervatten gaat het toestel
 niet van hand. Je hebt het paneel zelf opengedaan en de stilstaande
 wijzerplaat staat erin; je weet waar je staat.
 
+## Eén pen voor tekening en mascotte
+
+Vos en Uil zijn vlakke kleur in een dikke inktlijn, zoals een sticker of een
+zeefdruk, en de rest van de app is met dezelfde pen getekend: de kaartrand,
+de tegels, de knoppen. Het teken op de kaart kwam van ergens anders: de
+emoji van het toestel, met verloop, glans en schaduw en zonder lijn. Op het
+spelscherm is dat het grootste ding in beeld, dus het zette de toon.
+
+Daarom krijgt het teken de inktlijn, als contour om zijn silhouet. Vier
+schaduwen zonder vervaging, elk één kant op, na elkaar: samen een gesloten
+lijn. 4 px, de dikte van de kaartrand; op de kleine plaatjes van `#kijk`
+2 px. Over alle 275 kaarten bekeken op Noto: de tekening blijft zichzelf,
+alleen zachte gloed (de kaarsjes op de taart, de straal van de douche) wordt
+een donkere vlek, en losse sterretjes krijgen elk een eigen randje. Dat is
+klein genoeg om te laten.
+
+Een SVG-filter met `feMorphology` gaf hetzelfde beeld, maar `filter: url()`
+op HTML is in Safari niet te vertrouwen; de schaduwen werken overal.
+
+**Niet vlakker maken.** Een filter dat de emoji tot een paar tinten
+terugbrengt, maakt ze echt vlak als de mascottes, maar gezichten worden
+modder en elke emoji-set breekt anders. Dezelfde les als bij de
+manifest-screenshots (zie "App-pictogram en installeerbaarheid"). Zelf 275
+kaarten tekenen is het meest consequent en kost een veelvoud aan bytes.
+
+**De lijn van de mascotte.** Die stond als 5 van de 100 in het symbool,
+dus hij schaalde mee: 4 px op de titel, 2,4 px in de balk, 1,3 px voor de
+kleine Vos in de stand op de overdracht, een haarlijn op een kaart met een
+rand van 4 px. Nu leest elke inktlijn in de mascottes `--m-lijn` (5 als
+niemand hem zet), en `mascotteLijn()` zet hem per svg met een
+`ResizeObserver`: minstens 2,3 px op het scherm, hoogstens 10 eenheden. Een
+waarnemer omdat de maat aan schermstand en scherm hangt, en een verborgen
+scherm nul meet. Vaste svg's in de opmaak worden bij het opstarten
+aangemeld, de rest via `svgUse()`.
+
 ## Beloning
 
 De momenten die een kind onthoudt -- een kaart geraden, de bel, de stapel
