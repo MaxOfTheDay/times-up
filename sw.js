@@ -8,14 +8,10 @@
    Cache eerst, ververs erachter. De app start meteen uit de kast en haalt
    op de achtergrond een verse kopie op, voor de vólgende keer.
 
-   Hier stond network-first, met "wie online is krijgt altijd de nieuwste
-   versie" als reden. Dat klopt in de twee gevallen die je zelf uitprobeert
-   -- online, en vliegtuigstand -- maar niet in het geval ertussenin, en dat
-   is op een telefoon in een woonkamer juist het gewone geval: verbonden met
-   wifi, geen route. `fetch()` faalt dan niet, hij hángt, tot de time-out van
-   het toestel. Tientallen seconden op precies het scherm waar een
-   vierjarige staat te wachten. "Werkt met de wifi uit" was waar; "werkt met
-   slechte wifi" niet.
+   Niet network-first: op een telefoon in een woonkamer is "verbonden met
+   wifi, geen route" het gewone geval, en dan faalt fetch() niet maar
+   hángt hij, tot de time-out van het toestel. Tientallen seconden op het
+   scherm waar een vierjarige staat te wachten.
 
    De prijs hoort erbij genoemd: de woonkamer loopt nu hoogstens één
    opstartbeurt achter op main. De periodicsync-handler onderaan koopt die
@@ -47,9 +43,9 @@ const APP_URL = new URL(".", self.registration.scope).href;
    (GitHub Pages zet `Cache-Control: max-age=600` op HTML) en verifieert de
    "verversing" niets.
 
-   `res.ok` stond er niet, en dat was een fout die je pas offline ziet: een
-   404, of de foutpagina van een deploy die nog liep, ging gewoon de kast in
-   en werd daarna geserveerd tot er weer netwerk was. */
+   `res.ok` vóór de put: anders gaat een 404, of de foutpagina van een
+   deploy die nog loopt, de kast in en wordt die geserveerd tot er weer
+   netwerk is. Die fout zie je pas offline. */
 async function ververs() {
   const res = await fetch(new Request(APP_URL, { cache: "no-cache" }));
   if (res.ok) {

@@ -2,9 +2,10 @@
   "name": "tijd-is-om",
   "version": "1.0.0",
   "private": true,
-  "description": "Tijd is Om — Time's Up voor kinderen die nog niet kunnen lezen (één zelfstandig HTML-bestand). Deze package.json is alleen voor de tests en het pictogram-script; de app zelf heeft geen build-stap en laadt niets uit node_modules.",
+  "description": "Tijd is Om — Time's Up voor kinderen, ook voor wie nog niet kan lezen (één zelfstandig HTML-bestand). Deze package.json is alleen voor de tests en de beeld-scripts; de app zelf heeft geen build-stap en laadt niets uit node_modules.",
   "scripts": {
-    "test": "node test/deck.test.js && node test/game.test.js",
+    "test": "node test/kern.test.js && node test/deck.test.js && node test/game.test.js",
+    "test:kern": "node test/kern.test.js",
     "test:kaarten": "node test/deck.test.js",
     "test:spel": "node test/game.test.js",
     "pictogrammen": "node tools/pictogrammen.js",
