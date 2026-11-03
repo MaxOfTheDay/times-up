@@ -160,7 +160,9 @@ meeflikkeren.
 hebben geen `screenIn`: op de overdracht stroomt alleen de grond van papier
 naar ploegkleur, en het spelscherm verandert van grond niet. Bij beperkte
 beweging geen vloed. De rasterpunten op die grond zijn inkt op lage
-dekking, geen eigen kleur, en vervagen naar de kaart.
+dekking (10%), geen eigen kleur, vervagen naar de kaart, schuiven traag en golven één
+keer bij binnenkomst;
+ze staan alleen op de overdracht.
 
 **Vertrekken mag, als er niets achter wacht.** Geen vertrekanimaties, behalve
 `cdOut`, het oplossen van de pauzesluier bij hervatten (`.uit`) en de kopie
@@ -219,6 +221,10 @@ voor de volwassene blijft de systeemletter. Opnieuw maken met
 `tools/letter.py`, nooit met de hand. Vaste maten komen van de trap
 `--fs-1` tot `--fs-6` (12, 14, 16, 20, 28, 40); hoofdletters krijgen
 `--track-caps`, zin-tekst geen spatiëring.
+
+**Het titelscherm heeft twee dingen**: het merk en de knop. Vos en Uil zitten
+op de bovenrand van het merk (`.gluur` in `.wordmark`), niet ernaast. Zet er
+niets bij.
 
 **Het instellingenscherm.** Vier groepen, in de volgorde waarin je ze nodig
 hebt: Spel (moeilijkheid met de bak, kaarten per potje, tijd), Voorkeuren

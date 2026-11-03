@@ -636,12 +636,47 @@ meet een kaart die stilstaat.
 
 De ploegkleur op de overdracht was één vlak, en las daardoor als een
 achtergrondkleur in plaats van als "deze kant van het bord". Nu liggen er
-rasterpunten op, zoals op gedrukt karton: `#s-handoff::before`, inkt op 20%
-dekking in een raster van 14 px. Inkt en geen donkerder ploegtint, om twee
+rasterpunten op, zoals op gedrukt karton: `#s-handoff::before`, inkt op 10%
+dekking in een raster van 12 px. Op 20% en 14 px was het te veel: de punten
+werden een patroon om naar te kijken in plaats van een grond. Inkt en geen donkerder ploegtint, om twee
 redenen: de punten stromen dan vanzelf mee met de grond (geen eigen
 overgang, en ook bij de worp op `--paper-2` kloppen ze), en er komt geen
 nieuwe kleur bij die "rood" of "blauw" zou kunnen betekenen. Een masker laat
 ze naar het midden vervagen, zodat achter de kaart niets onrustigs ligt.
+
+Ze schuiven heel traag schuin naar beneden, één cel per vijf tellen: het
+scherm waarop je wacht leeft, zonder dat het oog erheen gaat. Bij beperkte
+beweging staan ze stil.
+
+Bij binnenkomst loopt er één golf door: een ring vanuit de kaart naar
+buiten waarin de punten opzwellen (`#s-handoff::after`, een tweede laag
+grotere punten met een ringmasker, de straal `--golf` via `@property`
+geanimeerd). Eén keer en niet steeds: een golf die blijft lopen vecht met
+de startknop en de ademende mascotte om het oog van een kind. Zonder
+animatie staat de ring buiten beeld.
+
+Alleen op de overdracht. Op de papieren schermen (titel, spel, eindstand)
+lazen ze als vuil op het papier, bovenop de korrel die daar al ligt
+(`body::after`), en het spelscherm moet rustig blijven. De punten zeggen
+"dit is de grond van een ploeg", en alleen de overdracht heeft die grond.
+
+## Het titelscherm heeft twee dingen
+
+Het merk en de knop. Vos en Uil stonden eerst klein naast de knop, op de
+hoogte van zijn onderkant: drie losse dingen op een rij, met veel lege ruimte
+boven en onder. Vergeleken zijn vier versies: zo, een waaier van drie
+speelkaarten achter het merk, de mascottes bovenop het merk, en een rode en
+een blauwe strook onderaan. De waaier vertelde het meest (plaatjes raden),
+maar maakte het scherm vol; de stroken zetten de ploegkleur neer voor er
+geloot is. Gekozen is de eenvoudigste: Vos en Uil zitten op de bovenrand van
+het merk, als één logo, en daaronder alleen de knop.
+
+Ze zijn kinderen van `.wordmark`, zodat ze meedraaien en meelanden, en staan
+net boven de rand: hun inktlijn op de inkt van de plaat zou verdwijnen. Ze
+zijn zo groot als een letter van de titel (`--gluur`), een beetje naar
+binnen en elk een kant op gekanteld. Aantikken laat ze nog steeds juichen.
+Het merk krijgt een marge bovenaan zo hoog als de mascottes, zodat de groep
+als geheel in het midden staat en op 320x568 niet tegen het tandwiel komt.
 
 ## Vertrekken mag, als er niets achter wacht
 
