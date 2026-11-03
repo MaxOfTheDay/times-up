@@ -1300,6 +1300,51 @@ volle-breedte knoppen, zwaarder dan de moeilijkheid. Nu is elk één regel
 zweeft (`float: left`), anders tekent de browser hem als randonderschrift en
 lukt de flex-regel niet.
 
+## Eén letter voor cijfers en koppen
+
+De app tekende alles in de systeemletter: SF Pro op een iPhone, Roboto op
+Android. Net de grootste dingen op het scherm, de klok en de totalen, zagen
+er daardoor op elk toestel anders uit, en nergens leek het op de ronde,
+dikke lijn van de mascottes. Vijf kandidaten zijn naast elkaar gezet op
+dezelfde stukjes app (woordmerk, stand, aftelschijf, rondenaam, labels,
+kaartwoord): de systeemletter, Fredoka, Rubik, Baloo 2 en Lilita One.
+Fredoka won: de 1 en de 7 verschillen ook voor een kleuter duidelijk, de
+ronde vormen passen bij de uil en de inktranden, en hij blijft rustig in
+lange woorden zoals OMSCHRIJVEN. Baloo 2 had een te hoge regel voor
+cijfers in een vak, Lilita One maar één dikte.
+
+**Waar hij staat.** Op wat je in één blik ziet: cijfers, koppen, het woord
+op de kaart, de rondenaam en knoppen in hoofdletters. Eén selectorlijst
+direct na `:root`, zodat je ziet wat erin zit. Niet op zin-tekst voor de
+volwassene (veldnamen, keuzeknoppen, uitleg): die leest beter in de letter
+van het toestel, en zou anders met de koppen wedijveren.
+
+**Hoe hij erin zit.** Als base64 in een `@font-face`, net als de
+pictogrammen: geen extern bestand, werkt met de wifi uit. `tools/letter.py`
+maakt hem uit `@fontsource-variable/fredoka`:
+
+- vast op 700, één stand van 14 KB; de variabele as zou het dubbele zijn
+  en de app gebruikt één dikte. De `@font-face` meldt `600 900`, zodat een
+  regel met `font-weight: 900` hem pakt zonder namaak-vet;
+- alleen Latijn (ASCII, Latin-1, een paar leestekens);
+- cijfers allemaal even breed, het glyph gecentreerd in het bredere vak.
+  Fredoka heeft geen `tnum`, dus `font-variant-numeric: tabular-nums` deed
+  niets: de klok sprong bij elke tel en de eindstand bij het optellen. De
+  1 is van zichzelf twee derde zo breed als de 0;
+- deterministisch: de tijdstempel van de bron blijft staan.
+
+`font-display: block`: de letter zit in de pagina zelf, er valt niets te
+wachten, en zo knippert er bij het openen geen systeemletter voorbij.
+
+**De trap.** Er stonden twintig verschillende vaste maten in de stijlen,
+van 12 tot 30 px, vaak een pixel uit elkaar (15, 16, 17; 19, 20, 22). Nu
+zes stappen, `--fs-1` tot `--fs-6`: 12, 14, 16, 20, 28, 40. Wat met het
+scherm meeschaalt (klok, totalen, woordmerk, aftelcijfer) houdt zijn eigen
+`min()`/`max()`, maar neemt zijn ondergrens van de trap. `--type-label` en
+`--type-note` blijven de bodems voor tekst die meeschaalt. Letterspatiëring
+was er in vijf maten (.01 tot .1em); nu twee: 0 voor zin-tekst en
+`--track-caps` (.06em) voor hoofdletters.
+
 ## Kaarten
 
 `DECKS` bovenaan `index.html`, één regel per kaart. Drie tiers, en ze spelen
