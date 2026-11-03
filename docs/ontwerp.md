@@ -748,6 +748,14 @@ Bij binnenkomst komen ze één na één van achter de rand omhoog kijken
 (`gluurOp`); het stuk dat nog "achter" het merk zit is weggeknipt, zodat ze
 uit de plaat lijken te komen in plaats van eroverheen te schuiven.
 
+Ze zakken een kwart achter de rand (`--zak`) en blijven daar. Eerst stonden
+ze er in rust bovenop, met hun onderkant net boven de plaat: dan gluurde er
+niemand, en balanceerde de vos op de punt van zijn snuit, wat kleiner en
+wankeler oogde dan de uil die op zijn ronde onderkant stond. Nu is de rand
+van de plaat hun onderkant. De knip moet recht lopen, evenwijdig aan de
+plaat; daarom kantelt alleen de tekening (`rotate` op de svg) en niet het
+vak dat geknipt wordt, anders liep de knip schuin tegen de rand.
+
 Het merk krijgt een marge bovenaan zo hoog als de mascottes, zodat de groep
 als geheel in het midden staat en op 320x568 niet tegen het tandwiel komt.
 
