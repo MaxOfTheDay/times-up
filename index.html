@@ -826,11 +826,12 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
 .field-group { display: flex; flex-direction: column; }
 .field-group > * + * { margin-top: var(--s-5); }
 .group-head + * { margin-top: var(--s-3); }
-/* Een groepsgrens hoort meer lucht te krijgen dan een veld binnen een groep.
-   Met --s-5 erbij staat de grens op 48 en los van het ritme binnen een
-   groep. */
+/* Een groepsgrens hoort meer lucht te krijgen dan een veld binnen een groep:
+   met de gap van .setup-scroll erbij staat hij op 40, tegen 24 tussen twee
+   velden. Meer lucht hoeft niet: de schuif onderaan Spel heeft al ruim een
+   halve tikhoogte wit onder zijn baan. */
 .field-group + .field-group,
-.field-group + .rules, .rules + .field-group { margin-top: var(--s-5); }
+.field-group + .rules, .rules + .field-group { margin-top: var(--s-4); }
 /* Vier groepen, in de volgorde waarin je ze nodig hebt:
      Spel -- alles wat het volgende potje verandert: moeilijkheid (met de
        bak eronder, de fijne knop op hetzelfde ding), kaarten per potje,
@@ -844,8 +845,8 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
    volgorde, en dan zien de groepskoppen eruit als veldlabels. Geen goud: dat
    betekent op dit scherm "gekozen". */
 .group-head {
-  font-size: var(--fs-3); font-weight: 900; text-transform: uppercase;
-  letter-spacing: var(--track-caps); margin: 0; color: var(--ink);
+  font-size: var(--fs-2); font-weight: 900; text-transform: uppercase;
+  letter-spacing: var(--track-caps); margin: 0; color: var(--ink-2);
 }
 /* Geen gouden rail: goud betekent op dit scherm "gekozen". Deze vouwregel en
    die van de kaartenbak doen hetzelfde, dus dragen ze dezelfde vorm. */
@@ -870,8 +871,8 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
   list-style: none; cursor: pointer;
   display: flex; align-items: center; gap: var(--s-2);
   min-height: var(--tap); box-sizing: border-box;
-  font-size: var(--fs-3); font-weight: 900; text-transform: uppercase;
-  letter-spacing: var(--track-caps); color: var(--ink);
+  font-size: var(--fs-2); font-weight: 900; text-transform: uppercase;
+  letter-spacing: var(--track-caps); color: var(--ink-2);
 }
 .rules > summary::-webkit-details-marker { display: none; }
 .rules > summary::before {
@@ -891,9 +892,9 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
 
 .chips { display: flex; flex-wrap: wrap; gap: 10px; }
 .chip {
-  flex: 1 1 auto; min-height: 56px; padding: var(--s-2) 14px;
+  flex: 1 1 auto; min-height: 52px; padding: var(--s-2) 14px;
   position: relative;
-  border: var(--line) solid var(--ink); background: var(--paper);
+  border: var(--line-2) solid var(--ink); background: var(--paper);
   box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
   font-weight: 800; font-size: var(--fs-3); line-height: 1.2;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -911,9 +912,10 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
 .chip .tick { display: none; position: absolute; bottom: var(--s-1); right: var(--s-1); width: 12px; height: 12px; }
 .chip[aria-checked="true"] .tick { display: block; }
 
-.slider-row { display: flex; align-items: center; gap: 14px; }
+.veldkop { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3); }
+.veldkop .legend-label { margin-bottom: 0; }
 input[type=range] {
-  flex: 1; height: var(--tap); -webkit-appearance: none; appearance: none; background: none;
+  display: block; width: 100%; margin: 0; height: var(--tap); -webkit-appearance: none; appearance: none; background: none;
 }
 input[type=range]::-webkit-slider-runnable-track { height: 10px; background: var(--paper-2); border: var(--line-2) solid var(--ink); }
 input[type=range]::-moz-range-track { height: 10px; background: var(--paper-2); border: var(--line-2) solid var(--ink); }
@@ -925,7 +927,7 @@ input[type=range]::-moz-range-thumb {
   width: 34px; height: 34px; background: var(--go);
   border: var(--line) solid var(--ink); border-radius: 50%;
 }
-.secs { font-weight: 900; font-size: var(--fs-4); min-width: 62px; text-align: right; font-variant-numeric: tabular-nums; }
+.secs { font-weight: 900; font-size: var(--fs-4); text-align: right; font-variant-numeric: tabular-nums; }
 
 /* ============================================================
    DE KAARTENBAK — alle kaarten waar een potje uit getrokken kan worden.
@@ -938,11 +940,12 @@ input[type=range]::-moz-range-thumb {
 /* De bak hoort bij de moeilijkheid erboven: hij zit er dicht onder, en de
    tikhoogte van zijn vouwregel geeft de lucht naar het volgende veld. */
 .field-group > .cardbox { margin-top: var(--s-2); }
+.field-group > .cardbox + * { margin-top: var(--s-3); }
 .cardbox > summary {
   list-style: none; cursor: pointer;
   display: flex; align-items: center; flex-wrap: wrap; gap: 2px var(--s-2);
   min-height: var(--tap);
-  font-size: var(--fs-3); font-weight: 800; color: var(--ink);
+  font-size: var(--fs-2); font-weight: 800; color: var(--ink);
 }
 .cardbox > summary::-webkit-details-marker { display: none; }
 .cardbox > summary::before {
@@ -2532,12 +2535,14 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
         </div>
       </fieldset>
 
+      <!-- De waarde staat op de regel van de naam, zoals een keuze: de schuif
+           eronder krijgt de volle breedte. -->
       <div class="field">
-        <label class="legend-label" for="secs">Tijd per beurt</label>
-        <div class="slider-row">
-          <input type="range" id="secs" min="20" max="60" step="5" value="30">
+        <div class="veldkop">
+          <label class="legend-label" for="secs">Tijd per beurt</label>
           <span class="secs" id="secsOut" aria-live="polite">30s</span>
         </div>
+        <input type="range" id="secs" min="20" max="60" step="5" value="30">
       </div>
     </div>
 

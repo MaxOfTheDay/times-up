@@ -1474,7 +1474,24 @@ groepen, waarvan de eerste twee vlak boven elkaar ("INSTELLINGEN", dan
 "SPEL"). Een kop in hoofdletters met lucht erboven scheidt al; de streep
 zei het een tweede keer. De plakkende titelband houdt zijn streep alleen
 zodra er iets onder schuift (`.geschoven`, een schaduw zodat er niets
-verspringt): dan scheidt hij wel iets. Het scherm werd
+verspringt): dan scheidt hij wel iets.
+
+**Hiërarchie door maat en kleur, niet door strepen.** Groepskop, veldnaam
+en de vouwregel van de bak stonden alle drie op 16 px in inkt; alleen de
+hoofdletters scheidden een kop van een veld. Nu:
+
+- groepskoppen (en de vouwregel van de regels) zijn klein, 14 px, in
+  hoofdletters en in `--ink-2`: een etiket boven de groep, niet een regel die
+  met de velden wedijvert;
+- veldnamen blijven 16 px in inkt, het luidste na de titel;
+- "Alle kaarten" zakt naar 14 px: het is de fijne knop ónder de
+  moeilijkheid, geen eigen veld;
+- keuzeknoppen dragen `--line-2` (3 px) in plaats van de primaire contour,
+  en zijn 52 px hoog: op dit scherm is geen enkele knop de hoofdhandeling;
+- de tijd staat als getal op de regel van de veldnaam, de schuif krijgt de
+  volle breedte eronder;
+- ritme: 24 px tussen velden, 40 tussen groepen, 8 tussen de bak en de
+  moeilijkheid. Op 390x844 is het scherm 1013 px hoog (was 1228 vanochtend). Het scherm werd
 op 390x844 151 px korter (1228 naar 1077).
 
 ## Eén letter voor cijfers en koppen
