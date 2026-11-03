@@ -4067,11 +4067,11 @@ function handoff(mode, freshA, freshB) {
   const vloed = current !== "handoff" && !tossPending &&
     !matchMedia("(prefers-reduced-motion: reduce)").matches;
   $("#s-handoff").style.setProperty("--team",
-    tossPending ? "var(--paper-2)" : vloed ? "var(--paper)" : t.color);
+    tossPending || vloed ? "var(--paper)" : t.color);
 
   // Vak 1: de stand, met de ploeg die aan zet is opgetild.
   paintHoTally(freshA || 0, freshB || 0);
-  if (tossPending) { tossPending = false; tossTeams(); }
+  if (tossPending) { tossPending = false; tossTeams(); } else veldHo.inkt(false);
 
   // Vak 2: de opdracht. Zelfde schilder als de balk op het spelscherm.
   paintRound($("#hoRoundIco"), "kaart", $("#hoRoundCard"));
@@ -4296,6 +4296,10 @@ function startTurn() {
   $("#s-play").classList.remove("over");
   show("play");
   sizeCard();                  // pas ná show(): daarvoor heeft de kaart geen maat
+  /* De klok van deze beurt staat er al onder het aftellen. Anders ligt er de
+     klok van de vorige beurt, op nul: de warme kaart met de pruimen rand,
+     die bij het opengaan van de schijf nog een tel afkoelt. */
+  paintClock(Spel.beurtMs(G), G.secs * 1000);
   paintTurnScore();
   requestWake();
   countdown(beginTurn);
@@ -4889,12 +4893,14 @@ function balkMascotte() { return $("#plMascot"); }
    beeld is; in rust staat er één getekend beeld. Bij beperkte beweging
    alleen dat beeld. */
 function stipveld(cv, opt) {
-  /* Op ploegkleur papier op 16%; op papier (de titel) inkt op 7%. */
-  const CEL = 12, R0 = 2, A0 = opt.inkt ? .07 : .16, PAP = opt.inkt ? "20, 17, 15" : "244, 235, 218";
-  /* Hoeveel lichter een punt wordt in de rimpel. */
-  const LICHT_R = opt.inkt ? .16 : .45, LEEF = 2100;
+  /* Op ploegkleur papier op 16%; op papier (de titel, de worp) inkt op 7%.
+     Per punt, want tijdens het onthullen ligt de grens midden in het veld.
+     De laatste waarde is hoeveel lichter een punt wordt in de rimpel. */
+  const INKT = [.07, "20, 17, 15", .16], PAPIER = [.16, "244, 235, 218", .45];
+  const CEL = 12, R0 = 2, LEEF = 2100;
   const cx = cv.getContext("2d");
   let W = 0, H = 0, punten = [], rimpels = [], raf = 0, vloei = -1e9;
+  let inkt = !!opt.inkt, onthul = null;
   const VLOEI = 500;
   function maat() {
     const r = cv.getBoundingClientRect();
@@ -4915,11 +4921,27 @@ function stipveld(cv, opt) {
     return true;
   }
   function actief(nu) {
-    return nu - vloei < VLOEI || rimpels.some(r => nu - r.t < LEEF);
+    return nu - vloei < VLOEI || rimpels.some(r => nu - r.t < LEEF) || !!onthul;
+  }
+  /* Onthullen: de ploegkleur groeit als een cirkel uit de knop, en binnen die
+     cirkel worden de punten papier. Klaar: de kleur staat op het scherm zelf,
+     en het veld tekent weer alleen punten. */
+  function eindOnthul() {
+    if (!onthul) return;
+    const klaar = onthul.klaar;
+    onthul = null; inkt = false;
+    if (klaar) klaar();
   }
   function teken(nu) {
     cx.clearRect(0, 0, W, H);
     rimpels = rimpels.filter(r => nu - r.t < LEEF);
+    let straal = -1;
+    if (onthul) {
+      const t = Math.min(1, (nu - onthul.t) / onthul.ms), e = 1 - Math.pow(1 - t, 3);
+      straal = onthul.van + (onthul.tot - onthul.van) * e;
+      cx.fillStyle = onthul.kleur;
+      cx.beginPath(); cx.arc(onthul.x, onthul.y, straal, 0, 6.2832); cx.fill();
+    }
     /* Vloeien: van het vorige masker naar het eigen, met een zachte uitloop. */
     const v = 1 - Math.pow(1 - Math.min(1, Math.max(0, (nu - vloei) / VLOEI)), 3);
     for (const p of punten) {
@@ -4937,8 +4959,10 @@ function stipveld(cv, opt) {
         ex += (p.x - r.x) / d * duw; ey += (p.y - r.y) / d * duw;
         golf = Math.max(golf, Math.min(1.6, Math.max(0, pak) * demp));
       }
+      const papier = !inkt || (straal >= 0 && Math.hypot(p.x - onthul.x, p.y - onthul.y) < straal);
+      const [A0, KLEUR, LICHT_R] = papier ? PAPIER : INKT;
       const a = Math.min(1, (A0 + golf * LICHT_R) * m);
-      cx.fillStyle = `rgba(${PAP}, ${a.toFixed(3)})`;
+      cx.fillStyle = `rgba(${KLEUR}, ${a.toFixed(3)})`;
       cx.beginPath(); cx.arc(p.x + ex, p.y + ey, R0 + golf * 3, 0, 6.2832); cx.fill();
     }
   }
@@ -4946,6 +4970,7 @@ function stipveld(cv, opt) {
     raf = 0;
     if (!opt.zichtbaar() || !maat()) return;
     teken(nu);
+    if (onthul && nu - onthul.t >= onthul.ms) { eindOnthul(); teken(nu); }
     if (actief(nu) && !stilAan()) raf = requestAnimationFrame(stap);
   }
   function wek() { if (!raf) raf = requestAnimationFrame(stap); }
@@ -4961,7 +4986,19 @@ function stipveld(cv, opt) {
       if (stilAan()) return;
       rimpels.push({ x, y, sterk: sterk || 1, van: van || 0, t: performance.now() });
       wek();
-    }
+    },
+    /* Inkt op papier (de titel, de worp) of papier op ploegkleur. */
+    inkt(aan) { eindOnthul(); inkt = !!aan; wek(); },
+    /* De ploegkleur groeit vanaf (x, y), vanaf straal van, tot over de
+       verste hoek; daarna roept hij klaar(). */
+    onthul(x, y, van, kleur, ms, klaar) {
+      eindOnthul();
+      if (!maat()) { inkt = false; klaar(); return; }
+      const tot = Math.max(Math.hypot(x, y), Math.hypot(W - x, y), Math.hypot(x, H - y), Math.hypot(W - x, H - y));
+      onthul = { x, y, van, tot, kleur, ms, klaar, t: performance.now() };
+      wek();
+    },
+    eindOnthul
   };
 }
 
@@ -5030,6 +5067,18 @@ function rimpelDoor(k) {
   if (current !== "handoff" || !k) return;
   const s = $("#s-handoff").getBoundingClientRect();
   veldHo.rimpel(k.left + k.width / 2 - s.left, k.top + k.height / 2 - s.top, 1.2, k.width / 2);
+  /* De knop die je indrukte is de startknop van de overdracht: hij glijdt
+     van waar hij stond naar zijn plek, zoals de startknop in de schijf van
+     het aftellen overgaat. De kaart komt eronder vandaan omhoog, in plaats
+     van uit het niets te verschijnen. */
+  if (stilAan()) return;
+  const knop = $("#btnStartTurn"), n = knop.getBoundingClientRect();
+  if (!n.width) return;
+  const dx = (k.left + k.width / 2) - (n.left + n.width / 2), dy = (k.top + k.height / 2) - (n.top + n.height / 2);
+  knop.animate([{ transform: `translate(${dx}px, ${dy}px) scale(${k.width / n.width})` }, { transform: "none" }],
+    { duration: 340, easing: curve("los") });
+  $("#hoRoundCard").animate([{ transform: "translateY(24px)", opacity: 0 }, { transform: "none", opacity: 1 }],
+    { duration: 280, easing: curve("uit") });
 }
 
 /* Safari zet :active op een aanraking alleen als er ergens naar touchstart
@@ -5201,6 +5250,7 @@ function landToss() {
   /* De kleur hoort bij de uitkomst, dus ze komt hier -- ook als de worp
      wordt afgebroken door een schermwissel, en ook bij beperkte beweging,
      waar tossTeams() hieronder meteen terugkeert. */
+  veldHo.inkt(false);
   $("#s-handoff").style.setProperty("--team", TEAMS[G.team].color);
   $("#hoSideA").classList.toggle("up", G.team === 0);
   $("#hoSideB").classList.toggle("up", G.team === 1);
@@ -5214,8 +5264,11 @@ function tossTeams() {
   /* Waar de worp landt, klinkt de ploeg die begint (zie Snd.ploeg). */
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) { Snd.ploeg(G.team, .07); return; }
   /* Ná landToss(), die de kleur juist goed zet: hier gaat ze opzettelijk
-     weer op neutraal zolang er geloot wordt. */
-  $("#s-handoff").style.setProperty("--team", "var(--paper-2)");
+     weer op neutraal zolang er geloot wordt. Neutraal is de grond van de
+     titel, papier met inkten punten: tussen de knop en de worp gaat de grond
+     niet uit. */
+  $("#s-handoff").style.setProperty("--team", "var(--paper)");
+  veldHo.inkt(true);
   const stappen = 7;
   let i = 0;
   const stap = () => {
@@ -5227,8 +5280,21 @@ function tossTeams() {
     i++;
     if (i > stappen) {
       tossTimer = null;
-      // En hier landt hij: de kleur komt binnen met het antwoord, en het geluid.
-      $("#s-handoff").style.setProperty("--team", TEAMS[G.team].color);
+      /* En hier landt hij: de kleur komt binnen met het antwoord, en het
+         geluid. Ze groeit uit de startknop, zoals de schijf van het aftellen
+         opengaat op de kaart: de grond verandert vanaf wat je net indrukte. */
+      const k = $("#btnStartTurn").getBoundingClientRect(), v = $("#hoVeld").getBoundingClientRect();
+      const team = G.team;
+      veldHo.onthul(k.left + k.width / 2 - v.left, k.top + k.height / 2 - v.top, k.width / 2,
+        TEAMS[team].hex, 450, () => {
+          /* Zonder overgang: de cirkel heeft de kleur al neergezet, en de
+             overgang van het scherm zou weer vanaf papier beginnen. */
+          const ho = $("#s-handoff");
+          ho.style.transition = "none";
+          ho.style.setProperty("--team", TEAMS[team].color);
+          ho.getBoundingClientRect();
+          ho.style.transition = "";
+        });
       Snd.ploeg(G.team);
       return;
     }
