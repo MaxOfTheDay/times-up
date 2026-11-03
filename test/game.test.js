@@ -400,6 +400,16 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   await lastCardAtBuzzer(3);
   ok(await screen() === 'winner', 'laatste kaart op de bel in ronde 3: geen winnaarsscherm');
 
+  // --- de eindstand overleeft een herlaadbeurt ---
+  // Tot je het scherm verlaat: dan pas is ze weg.
+  const eind = () => page.$$eval('#wnPiles .tally .num', n => n.map(x => x.textContent).join('-'));
+  await page.waitForTimeout(1800);           // optellen voorbij
+  const eindVoor = await eind();
+  await page.reload();
+  await page.waitForTimeout(2200);
+  ok(await screen() === 'winner', 'na een herlaadbeurt op de eindstand is die weg');
+  ok(await eind() === eindVoor, `de eindstand na een herlaadbeurt is ${await eind()}, niet ${eindVoor}`);
+
   // --- weggeklikt of vergrendeld: het paneel gaat open ---
   // De klok bevroor en liep bij terugkomst meteen weer, terwijl het toestel
   // misschien nog in de hand van wie het net ontgrendelde lag. Nu wacht hij

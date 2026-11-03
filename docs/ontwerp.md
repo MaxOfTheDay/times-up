@@ -1642,3 +1642,9 @@ kaarten die de ploeg al gezien had.
 Na een herlaadbeurt ligt onze invoer nog in de geschiedenis; `backGuard`
 wordt bij de start uit `history.state` gelezen, anders kwam er een tweede
 bij en deed de eerste veeg op de titel niets.
+
+Ook de eindstand overleeft het: `winner()` bewaart het uitgespeelde potje
+als `"uit"`, en de app opent daarop weer op de eindstand tot je dat scherm
+verlaat (huisje, terug of "nog een keer"). Trillen wacht dan op een eerste
+tik, want zonder tik weigert de browser `navigator.vibrate` met een
+waarschuwing.
