@@ -1406,6 +1406,17 @@ volle-breedte knoppen, zwaarder dan de moeilijkheid. Nu is elk één regel
 zweeft (`float: left`), anders tekent de browser hem als randonderschrift en
 lukt de flex-regel niet.
 
+**Minder is meer: geen uitleg onder een knop die zichzelf uitlegt.** Onder
+moeilijkheid, kaarten per potje en tijd stond elk een zin ("Elke stand bevat
+ook alle kaarten van de standen eronder", "Elk potje trekt pas bij de start
+24 nieuwe kaarten uit die 90", "30 seconden werkt goed voor de meeste
+groepen"). Ze zijn weg, net als "Kort/Normaal/Lang" onder 16, 24 en 32: het
+getal zegt het al, en de telling van de bak loopt zichtbaar op als je een
+stand hoger kiest. Wat bleef: de leeftijd onder de moeilijkheid (die zegt
+iets wat het woord niet zegt) en de zin in de bak over wegleggen (die zie je
+pas als je hem openklapt). De regels zijn drie zinnen korter. Het scherm werd
+op 390x844 151 px korter (1228 naar 1077).
+
 ## Eén letter voor cijfers en koppen
 
 De app tekende alles in de systeemletter: SF Pro op een iPhone, Roboto op
