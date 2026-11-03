@@ -795,6 +795,62 @@ Het enige echte verschil is beweging: op de overdracht ademt de mascotte van
 wie aan zet is, in het paneel niet. Daar staat een beurt stil, en iets dat
 ademt spreekt dat tegen.
 
+## Geluid en trilling
+
+**Gemeten, niet gehoord.** Elke cue is weergegeven uit het echte `Snd`-blok in
+Chromium met een `OfflineAudioContext`, na de opwarmtoon van `unlock()`, met
+de piek en het luidste RMS-venster van 20 ms. Een telefoonluidspreker is
+nagebootst met een hoogdoorlaat van 600 Hz, 24 dB per octaaf. Dat is een
+model, geen luidspreker: de getallen zeggen hoe cues zich tot elkaar
+verhouden, niet hoe luid het in de kamer is.
+
+**Overslaan en weigeren vielen weg op een telefoon.** Het waren sinussen van
+200 en 220 Hz. Over het volle bereik even luid als "goed", in het
+telefoonmodel 32 en 25 dB zachter: op een telefoon was overslaan stil. Nu
+zijn het triangles rond 500 Hz, nog steeds lager en doffer dan `goed()`, en
+in het model 7 en 9 dB eronder.
+
+**Luider.** Met de bus op .9 piekte de luidste cue (fanfare, timeUp) op
+-11,7 dBFS en zat "goed" rond -22 dBFS RMS. Op 1.6 piekt het zwaarste
+stapelen (fanfare met de optel-tikken eronder) op -4,7 dBFS.
+
+**De stilteschakelaar van een iPhone.** Web Audio volgt hem standaard, en
+`navigator.vibrate` bestaat op iOS niet: met de schakelaar op stil eindigde
+een beurt alleen op het scherm. `navigator.audioSession.type = "playback"`
+(Safari 16.4 en later) laat het geluid door; de app heeft zelf een aan/uit.
+De prijs: muziek die op hetzelfde toestel speelt, stopt. Safari zet de
+context ook op `"interrupted"` na een telefoongesprek; `ac()` hervat bij
+elke stand behalve `"running"` en `"closed"`.
+
+**De ploeg klinkt.** Kleur en vorm zeiden al wie er aan zet is, het geluid
+niet, en de worp landde stil. Vos is helder en vlug (twee korte noten
+omhoog), Uil rond en laag (een kleine terts omlaag). Drie plekken: de worp
+landt, de overdracht opent (na de buit, met de mascotte die opkomt), en na de
+fanfare voor wie won, bij gelijkspel allebei. Niet in `handoff()`: dat opent
+ook na een afgebroken aftelling en na herladen, waar niets nieuws te melden
+is, en bij herladen is er nog geen aanraking geweest die geluid toelaat.
+
+**De ronde klinkt.** Een rondewissel verandert de regels, maar opende stil na
+`leeg()`. Nu zoveel klokjes als het rondenummer, samen met de tekening die
+opkomt, en daarna de ploeg die de ronde opent.
+
+**Hervatten en stoppen.** Hervatten met meer dan tien seconden over was stil:
+de tik op `lastTickAt = 0` valt pas in de laatste tien. Nu `verder()`, het
+startsein 6 dB zachter, met `Tril.go()`. Stoppen voltooid had alleen een
+trilling, en op iOS dus niets; nu `dicht()`, één lage noot die valt.
+
+**Trilling.** Pulsen van 8 tot 12 ms voelde je op een oudere trilmotor niet:
+die heeft zo'n 20 ms nodig om aan te lopen. Twintig is de ondergrens; `pas`
+is 40, zodat hij naast `tik` een eigen gewicht houdt, en de dubbele tik is
+trager dan de weigering (`[20, 110, 20]` tegen `[20, 40, 20]`). De trilling
+voor een lege stapel komt ook in de laatste ronde: wie het toestel
+vasthoudt, voelt het, en de fanfare heeft er geen last van. Het feestritme
+valt niet meer weg bij beperkte beweging: trillen is geen beweging op het
+scherm, en er is een eigen aan/uit voor.
+
+**Geen muziek.** De raders moeten de uitbeelder horen, en de klok bouwt de
+spanning al op in de laatste tien seconden.
+
 ## App-pictogram en installeerbaarheid
 
 Het manifest staat niet als los bestand naast `index.html` -- dat zou de

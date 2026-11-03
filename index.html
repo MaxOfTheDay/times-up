@@ -1535,7 +1535,8 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 .card[data-time="crit"] { background: var(--paper-hot); }
 
 /* ---- de beurt is om ----
-   timeUp() houdt het spelscherm 700 ms vast, zodat de tafel nog kan roepen.
+   timeUp() houdt het spelscherm een adem lang vast (BEURT_ADEM, 1 s),
+   zodat de tafel nog kan roepen.
    Er staat een punt achter de beurt, in drie dingen tegelijk:
    - de baan sluit: ze draagt de hele omtrek, in --ink-2. Niet in --ink: dan
      versmelt ze met de contour en geeft de schaduw een derde rechthoek;
@@ -2937,8 +2938,19 @@ const Snd = (() => {
   let bus = null;                // één uitgang, zodat gestapelde cues niet klippen
   let on = true;                 // te wisselen in de instellingen
   function ac() {
-    if (!ctx) { const C = window.AudioContext || window.webkitAudioContext; if (C) ctx = new C(); }
-    if (ctx && ctx.state === "suspended") ctx.resume();
+    if (!ctx) {
+      /* Op een iPhone volgt Web Audio standaard de stilteschakelaar, en
+         trillen bestaat daar niet: met de schakelaar op stil eindigde een
+         beurt zonder geluid en zonder trilling. Geluid staat in deze app
+         zelf aan of uit, dus dat telt. Vóór de context gemaakt wordt, anders
+         neemt Safari het niet over (Safari 16.4 en later; elders bestaat
+         audioSession niet). */
+      try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
+      const C = window.AudioContext || window.webkitAudioContext; if (C) ctx = new C();
+    }
+    /* Niet alleen "suspended": Safari zet de context op "interrupted" na
+       een telefoongesprek of Siri, en dan bleef hij stil tot herladen. */
+    if (ctx && ctx.state !== "running" && ctx.state !== "closed") ctx.resume();
     return ctx;
   }
   /* Alle noten monden hier samen uit voordat ze de luidspreker raken. Zonder
@@ -2947,8 +2959,11 @@ const Snd = (() => {
   function out() {
     const c = ac(); if (!c) return null;
     if (!bus) {
+      /* 1.6: met .9 piekte de luidste cue op -11,7 dBFS en zat "goed" rond
+         -22 dBFS, te zacht voor een kamer vol roepende kinderen. De
+         compressor vangt het stapelen op (zie docs/ontwerp.md, Geluid). */
       bus = c.createGain();
-      bus.gain.value = .9;
+      bus.gain.value = 1.6;
       const comp = c.createDynamicsCompressor();
       bus.connect(comp).connect(c.destination);
     }
@@ -2988,15 +3003,16 @@ const Snd = (() => {
       const s = Math.pow(2, Math.min(i || 0, 7) / 12);
       tone(660 * s, .07, "triangle", .2, 0); tone(990 * s, .10, "triangle", .2, .07);
     },
-    /* Overslaan: neutraal en kort. Volume .17 en niet .2: een sinus draagt
-       meer energie dan de triangle van goed(), en het signaal zonder
-       betekenis hoort niet luider te zijn dan "goed geraden". */
-    pas()   { tone(200, .08, "sine", .17, 0, 150); },
+    /* Overslaan: neutraal, kort en lager dan goed(), met een veeg omlaag.
+       Triangle rond 500 Hz: een sinus van 200 Hz speelt een
+       telefoonluidspreker niet af, en dan viel overslaan ruim 30 dB weg
+       onder "goed geraden". Zachter dan goed(), nooit luider. */
+    pas()   { tone(520, .09, "triangle", .17, 0, 390); },
     /* Geweigerd: de laatste kaart kun je niet overslaan. Twee gelijke lage
        noten, vlak en zonder veeg -- alles in deze app glijdt of stijgt, dus
        vlak is hier vrij en betekent precies één ding: dit kan niet. Nooit
        hetzelfde geluid als pas(), want dat is een ander bericht. */
-    nee()   { tone(220, .05, "sine", .2, 0); tone(220, .05, "sine", .2, .11); },
+    nee()   { tone(466, .06, "triangle", .2, 0); tone(466, .06, "triangle", .2, .12); },
     tick(f, v) { tone(f || 1600, .022, "square", v || .08, 0); },
     /* Halverwege de lange druk op stoppen: een zachte klik naast Tril.ijk(),
        want op iOS bestaat trillen niet. Square, als een grendel die
@@ -3012,10 +3028,35 @@ const Snd = (() => {
        helderheid komt uit het golftype, dus korter maakt hem minder fel
        zonder hem minder duidelijk te maken. */
     go()    { tone(1175, .12, "square", .16, 0, 1560); },
+    /* Hervatten na de pauze: hetzelfde startsein, 6 dB zachter. De klok
+       loopt weer, maar er begint niets nieuws. */
+    verder(){ tone(1175, .12, "square", .08, 0, 1560); },
+    /* Stoppen voltooid: één lage noot die omlaag valt, een deur die dichtgaat.
+       Het enige onomkeerbare in de app krijgt het enige vallende geluid
+       naast timeUp(), en klinkt nergens anders. */
+    dicht() { tone(330, .2, "square", .1, 0, 110); },
+    /* Wie aan de beurt is, zonder lezen: Vos helder en vlug (twee korte
+       noten omhoog), Uil rond en laag (een kleine terts omlaag, een
+       oehoe). Alleen op drie plekken: als de worp landt, als de overdracht
+       opent, en aan het eind van de fanfare. Niet in het aftellen, dat is
+       één opbouw. */
+    ploeg(t, at) {
+      const a = at || 0;
+      if (t === 0) { tone(880, .07, "triangle", .18, a); tone(1319, .11, "triangle", .18, a + .08); }
+      else { tone(587, .16, "triangle", .2, a, 560); tone(494, .24, "triangle", .2, a + .2, 470); }
+    },
+    /* Een nieuwe ronde: zoveel klokjes als het rondenummer, hoog en
+       zacht, samen met de tekening die opkomt. Geeft terug hoe lang ze
+       duren, zodat ploeg() erachter kan. */
+    ronde(n, at) {
+      const a = at || 0, k = Math.max(1, Math.min(n || 1, 3));
+      for (let i = 0; i < k; i++) tone(1568, .3, "triangle", .14, a + i * .2);
+      return a + (k - 1) * .2 + .34;
+    },
     timeUp(){ tone(420, .55, "sawtooth", .22, 0, 90); tone(210, .6, "square", .12, .05, 60); },
     /* De buit van de hele beurt in één cue; de omvang zit in het interval
        (twee kaarten een kleine terts, een dozijn een octaaf). Alleen via
-       turnEnd(), 700 ms na timeUp(); bij een lege stapel speelt leeg(). */
+       turnEnd(), BEURT_ADEM na timeUp(); bij een lege stapel speelt leeg(). */
     haul(n) {
       if (!n) return;
       const top = 523 * Math.pow(2, Math.min(n, 12) / 12);
@@ -3026,7 +3067,13 @@ const Snd = (() => {
        de stapel leeg te spelen. Drie stijgende noten, de grote broer van
        goed() en het spiegelbeeld van timeUp(). */
     leeg() { [523, 784, 1047].forEach((f, i) => tone(f, .12, "triangle", .2, i * .08)); },
-    fanfare(){ [523,659,784,1047].forEach((f,i)=>tone(f,.26,"square",.2,i*.13)); tone(1568,.5,"square",.16,.55); }
+    /* De fanfare is van iedereen; wie won hoor je erachter, aan zijn eigen
+       twee noten. Gelijkspel: allebei. */
+    fanfare(win){
+      [523,659,784,1047].forEach((f,i)=>tone(f,.26,"square",.2,i*.13)); tone(1568,.5,"square",.16,.55);
+      if (win === 0 || win === null) this.ploeg(0, 1.15);
+      if (win === 1 || win === null) this.ploeg(1, win === null ? 1.45 : 1.15);
+    }
   };
 })();
 
@@ -3044,16 +3091,18 @@ const Tril = (() => {
     supported: kan,
     set enabled(v) { on = !!v; },
     get enabled() { return on; },
-    tik()   { buzz(12); },                    // geraden -- kort en scherp
-    pas()   { buzz(28); },                    // overgeslagen -- langer en dof,
+    /* Twintig ms is de ondergrens: een oudere trilmotor heeft zo lang nodig
+       om aan te lopen, en korter voelde je op zo'n toestel niets. */
+    tik()   { buzz(20); },                    // geraden -- kort en scherp
+    pas()   { buzz(40); },                    // overgeslagen -- langer en dof,
                                                // dof genoeg om naast tik() een
                                                // eigen ritme te zijn en niet
                                                // een paar milliseconden ervan
     nee()   { buzz([20, 40, 20]); },          // geweigerd -- de enige "nee" in de app
-    zag()   { buzz([8, 60, 8]); },            // dubbele tik, niet geteld
-    tel()   { buzz(10); },                    // 3 - 2 - 1
+    zag()   { buzz([20, 110, 20]); },         // dubbele tik, niet geteld: trager dan nee()
+    tel()   { buzz(20); },                    // 3 - 2 - 1
     go()    { buzz(35); },                    // de klok loopt
-    ijk()   { buzz(15); },                    // lange druk, halverwege
+    ijk()   { buzz(20); },                    // lange druk, halverwege
     doe()   { buzz(50); },                    // lange druk voltooid
     om()    { buzz([60, 70, 60]); },          // tijd om
     leeg()  { buzz([20, 50, 20, 50, 40]); },  // stapel leeg
@@ -3449,7 +3498,7 @@ function holdButton(el, ms, run, paint) {
   function step(now) {
     const p = Math.min(1, (now - t0) / ms);
     draw(p);
-    if (p >= 1) { cancel(false); Tril.doe(); run(); }
+    if (p >= 1) { cancel(false); Snd.dicht(); Tril.doe(); run(); }
     else raf = requestAnimationFrame(step);
   }
   function cancel(complain) {
@@ -3855,7 +3904,7 @@ function startTurn() {
   $("#glyph").textContent = "";   // leeg tot nul: niemand leest de kaart vooraf
   // Het punt achter de vórige beurt weer weghalen (zie timeUp en
   // #s-play.over). Hier en niet in turnEnd(): daar staat het scherm nog in
-  // beeld, en dan zou de kaart midden in die 700 ms weer aanspringen.
+  // beeld, en dan zou de kaart midden in die adem weer aanspringen.
   $("#s-play").classList.remove("over");
   show("play");
   sizeCard();                  // pas ná show(): daarvoor heeft de kaart geen maat
@@ -4438,7 +4487,8 @@ function tossTeams() {
   /* Bij beperkte beweging helemaal niet: de stand staat dan meteen goed. Er
      gaat niets verloren -- het reliëf zegt nog steeds wie aan zet is, en wie
      begint was toch al geloot. */
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  /* Waar de worp landt, klinkt de ploeg die begint (zie Snd.ploeg). */
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { Snd.ploeg(G.team, .07); return; }
   /* Ná landToss(), die de kleur juist goed zet: hier gaat ze opzettelijk
      weer op neutraal zolang er geloot wordt. */
   $("#s-handoff").style.setProperty("--team", "var(--paper-2)");
@@ -4453,8 +4503,9 @@ function tossTeams() {
     i++;
     if (i > stappen) {
       tossTimer = null;
-      // En hier landt hij: de kleur komt binnen met het antwoord.
+      // En hier landt hij: de kleur komt binnen met het antwoord, en het geluid.
       $("#s-handoff").style.setProperty("--team", TEAMS[G.team].color);
+      Snd.ploeg(G.team);
       return;
     }
     tossTimer = setTimeout(stap, 50 + i * i * 5);
@@ -4467,14 +4518,19 @@ function tossTeams() {
    worden. Het overdrachtscherm opent meteen -- geen tik ertussen die alleen
    maar naar het volgende scherm ging en verder niets bewaakte. */
 function turnEnd() {
-  /* Alleen vanaf het spelscherm. timeUp() zet dit 700 ms vooruit, en wat er
+  /* Alleen vanaf het spelscherm. timeUp() zet dit BEURT_ADEM vooruit, en wat er
      in die adem ook gebeurt -- een ronde die toch al afliep, een potje dat
      al gewonnen is -- een beurt die al beëindigd is, beëindigt hij niet
      nog eens. */
   if (!G || current !== "play") return;
-  /* Eén cue voor de hele buit, samen met het scherm dat hem toont. */
+  /* Eén cue voor de hele buit, samen met het scherm dat hem toont. Daarna
+     wie er nu aan zet is, met de mascotte die opkomt (70 ms, zie upPop);
+     na een buit wacht de ploeg tot die uitgeklonken is. Hier en niet in
+     handoff(): die opent ook na een afgebroken aftelling en na herladen,
+     en dan is er niets nieuws te melden. */
   if (G.gained) Snd.haul(G.gained);
   const [freshA, freshB] = Spel.beurtWissel(G);
+  Snd.ploeg(G.team, G.gained ? .35 : .07);
   handoff("turn", freshA, freshB);
 }
 
@@ -4485,13 +4541,20 @@ function endRound() {
   /* Een tel voor de stapel die leeg is: de plek van de kaart is leeg, de
      mascotte juicht. Daarna de overdracht, of bij de laatste ronde de
      eindstand -- de fanfare van winner() moet dan alleen klinken. */
-  if (!uit) { Snd.leeg(); Tril.leeg(); }
+  /* De trilling ook in de laatste ronde: wie het toestel vasthoudt, voelt
+     dat de laatste stapel leeg is, en ze zit de fanfare niet in de weg. */
+  if (!uit) Snd.leeg();
+  Tril.leeg();
   $("#s-play").classList.add("leeg");
   mascotte(balkMascotte(), "juich");
   setTimeout(() => {
     $("#s-play").classList.remove("leeg");
     if (!G || current !== "play") return;
-    if (uit) winner(); else handoff("round", vers[0], vers[1]);
+    if (uit) { winner(); return; }
+    /* Klokjes voor de nieuwe ronde, met de tekening die opkomt (70 ms, zie
+       roundPop), en dan de ploeg die haar opent. */
+    Snd.ploeg(G.team, Snd.ronde(G.round, .07));
+    handoff("round", vers[0], vers[1]);
   }, BEURT_ADEM);
 }
 
@@ -4565,10 +4628,10 @@ function winner() {
      het feest. Bij beperkte beweging staat alles er meteen. */
   const feest = () => {
     confetti(win === null ? ["#E8452B", "#1B6FC4", "#F2B705"] : [TEAMS[win].hex, "#F2B705"]);
-    Snd.fanfare();
-    // Het lange feestritme is versiering, geen mededeling -- net als de
-    // confetti valt het weg bij beperkte beweging.
-    if (!stilAan()) Tril.feest();
+    Snd.fanfare(win);
+    // Trillen is geen beweging op het scherm: wie het niet wil, zet het
+    // uit in de instellingen.
+    Tril.feest();
   };
   if (stilAan()) { feest(); return; }
   const OPTEL = 1100;
@@ -4744,6 +4807,9 @@ function closePause() {
     pauseMs = 0;
     lastTickAt = 0;
     requestWake();
+    /* Het teken dat de klok weer loopt; de tik op lastTickAt = 0 valt pas in
+       de laatste tien seconden. */
+    Snd.verder(); Tril.go();
     runClock(G.secs * 1000);
   }
 }
@@ -4872,7 +4938,7 @@ addEventListener("popstate", () => {
 });
 
 /* Wat terug betekent, per scherm: hetzelfde als de knop rechtsboven. Ligt het
-   paneel erover, dan haalt terug dát weg. In de 700 ms na tijd-om doet een
+   paneel erover, dan haalt terug dát weg. In de adem na tijd-om doet een
    veeg niets (openPause() keert daar om); beter dan de app verlaten op de
    laatste tel. */
 function terug() {
