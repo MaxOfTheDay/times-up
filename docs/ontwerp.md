@@ -36,8 +36,8 @@ het teken is de mededeling, het woord is het bijschrift.
 ## Kleur betekent één ding
 
 Rood is Vos en blauw is Uil, en verder niets. Wie een kleur nodig heeft voor
-een toestand pakt er een uit `:root`: `--go` (goud) voor verdergaan,
-`--good` voor geraden, `--danger` voor stoppen, `--time-3/2/1` voor de klok.
+een toestand pakt er een uit `:root`: `--go` (goud) voor "dit, nu",
+`--good` voor geraden, `--time-3/2/1` voor de hitte van de klok.
 Nooit een ploegkleur lenen — dan betekent rood op het ene scherm "de vossen"
 en op het volgende "haast je", en daarmee niets meer.
 
@@ -55,6 +55,26 @@ díe kleur al iets betekent, maar hoe vaak ze op datzelfde scherm al staat.
 
 Kleur staat ook nooit alleen: elke toestand heeft er een tweede kanaal bij
 (een vorm, een teken, een woord, een beweging).
+
+### Goud is "dit, nu"
+
+De regel zei eerst dat goud "verdergaan" betekent, maar goud stond ook op de
+gekozen keuzeknop, de duim van de schuif, de ronde waarin je zit, de kroon en
+de plaat onder het merk. Bij de audit van de hele vormtaal bleek dat geen
+verwarring maar één betekenis: goud is wat nu geldt, het ene uit een rij.
+De regel is herschreven naar wat er al stond; er is geen pixel veranderd.
+
+### Stoppen heeft geen eigen kleur
+
+Wijnrood (`--danger`) stond op de vloed van de stopknop, zijn stippellijn,
+de streep door de ballon van ronde 3 en de rand bij een weigering. Op een
+telefoon las het naast vermiljoen als een vuile Vos: een derde rood. De
+stopknop zei al drie keer wat hij is (huisje, stippellijn, vloed), dus
+vloeit hij nu in inkt met het huisje in papier (15,9:1), is de streep door de
+ballon inkt, en krijgt een geweigerde knop heel even een tweede inktring
+(het stilstaande signaal naast de schud, voor beperkte beweging). Het palet
+is daarmee: papier, inkt, Vos, Uil, goud, groen voor geraden, en de hitte
+van de klok.
 
 ## Papier heeft twee randen, geen drie
 
@@ -294,10 +314,11 @@ bovendien "uitgeschakeld" of "sleep hier iets heen", niet "pas op".
 
 De knop draagt nu dezelfde huid als pauze, huisje en terug (papier,
 inkt-rand, `--lift-1`), en houdt drie eigen tekens: de gestippelde regel in
-rust, het rood dat van onder naar boven volloopt tijdens het houden, en het
+rust, de inkt die van onder naar boven volloopt tijdens het houden, en het
 teken dat halverwege omkeert naar papier zodra die vloed het inhaalt. Dat
 omslagpunt is het enige ijkpunt onderweg. Wat de eerste poging mankeerde was
-contrast en maat — volle dekking, volle breedte, `--danger` — niet de plek.
+contrast en maat — volle dekking, volle breedte — niet de plek (de kleur is
+later inkt geworden, zie "Stoppen heeft geen eigen kleur").
 
 Starten hoorde daar ooit ook bij, maar dat was het niet waard. De klok
 starten is niet onomkeerbaar — pauze zet 'm zo weer stil — en de rekening
@@ -826,23 +847,35 @@ met dezelfde maten als ervoor: raster 12 px op het midden, straal 2 px op
 16%, aanzwellend tot 3,3 px op 28%; het masker naar de kaart (overdracht,
 de ellips van 75% bij 60%) of naar de schijf (aftellen, 110 tot 260 px).
 
-- **Deining**: om de elf tellen, 4,95 s op gelijke snelheid langs de lijn
-  van 120 graden, met een klokprofiel in plaats van een driehoek, zodat de
-  punten aanzwellen en slinken.
 - **Rimpel**: een golfpakket (een gaussische omhullende maal een cosinus)
   dat met 360 px/s uitloopt en uitdempt. De positieve kant laat de punten
   groeien; het hele pakket duwt ze tot 4,5 px opzij, dus naar buiten en
   daarna terug. Op het aftellen sterkte 0,6, vanaf de rand van de schijf.
 - **Zuinig**: er loopt alleen een `requestAnimationFrame`-lus zolang er een
-  band of rimpel onderweg is en de grond in beeld is. Daarbuiten staat er
-  één getekend beeld. Bij beperkte beweging alleen dat beeld, zonder band en
-  zonder rimpel.
+  rimpel onderweg is (of het veld van het aftellen vloeit) en de grond in
+  beeld is. Daarbuiten staat er één getekend beeld. Bij beperkte beweging
+  alleen dat beeld, zonder rimpel.
 
-Niet op de papieren schermen (titel, spel, eindstand)
-lazen ze als vuil op het papier, bovenop de korrel die daar al ligt
-(`body::after`), en het spelscherm moet rustig blijven. De punten zeggen
-"dit is de grond van een ploeg", en alleen de overdracht en het aftellen
-hebben die grond.
+Op het spelscherm en de instellingen liggen geen punten: het spelscherm
+moet rustig blijven, en de instellingen zijn voor de volwassene. Op de
+titel staan ze wel, als inkt op 7% (zie "Eén taal voor een druk"); een
+eerdere poging met papieren punten op papier las daar als vuil.
+
+### De grond beweegt alleen als iets hem indrukt
+
+Bij de audit van de hele vormtaal bewogen er op de overdracht vier dingen
+uit zichzelf tegelijk: de deining, de ademende mascotte, het rondeteken dat
+eindeloos zijn regel voordeed, en het knipperen. Het thema van de app is
+een gedrukt bordspel waarop alleen Vos en Uil leven, dus mag alleen wat
+leeft uit zichzelf bewegen. De rest beweegt als er gedrukt wordt: door een
+vinger, door de klok (het aftellen, de zandloper op de titel) of door de
+fanfare.
+
+Daarom is de deining weg, op alle gronden. Een rimpel heeft nu altijd een
+oorzaak die je net zag of voelde. Het rondeteken op de overdracht speelt
+zijn regel twee keer voor als het scherm binnenkomt (`paintRound()` zet het
+opnieuw neer) en staat daarna stil. Vergeleken in een live mock-up naast de
+oude versie; Max koos deze.
 
 ## Het titelscherm heeft twee dingen
 

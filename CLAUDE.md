@@ -98,8 +98,10 @@ hetzelfde vertelt, nooit in plaats daarvan.
 Elk punt heeft een hoofdstuk met dezelfde naam in `docs/ontwerp.md`.
 
 **Kleur betekent één ding.** Rood is Vos, blauw is Uil, en verder niets.
-Toestanden pakken een kleur uit `:root`: `--go` (goud, verdergaan), `--good`
-(geraden), `--danger` (stoppen), `--time-3/2/1` (de klok). Tel bij een nieuw
+Toestanden pakken een kleur uit `:root`: `--go` (goud: "dit, nu", de knop om
+nu in te drukken, de keuze die geldt, de ronde van nu, de kroon), `--good`
+(geraden), `--time-3/2/1` (de hitte van de klok). Stoppen en "mag niet"
+hebben geen eigen kleur: inkt, met een vorm. Tel bij een nieuw
 element hoe vaak die kleur al op datzelfde scherm staat. Kleur staat nooit
 alleen: elke toestand heeft een tweede kanaal (vorm, teken, woord,
 beweging).
@@ -180,8 +182,8 @@ naar ploegkleur, en het spelscherm verandert van grond niet. Bij beperkte
 beweging geen vloed. De rasterpunten op die grond zijn papier op lage
 dekking (16%), geen eigen kleur, op één stilstaand raster van 12 px, getekend
 op één canvas per grond (`stipveld()`). Wat beweegt is rastertoon: een punt
-groeit, hij licht niet alleen op. Ze vervagen naar de kaart, er trekt om de
-elf tellen een deining over, en een tik op de grond geeft een rimpel die de
+groeit, hij licht niet alleen op. Ze vervagen naar de kaart en bewegen
+alleen als iets ze indrukt (geen deining): een tik op de grond geeft een rimpel die de
 punten opzij duwt en terug laat veren: 12 px opzij en een punt tot ruim het
 dubbele, want minder leest op een telefoon als niets. Ze staan op de
 overdracht, het aftellen, de eindstand van wie won (in de ploegkleur, met
