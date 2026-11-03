@@ -127,7 +127,13 @@ const ok = (c, m) => { if (!c) fails.push(m); };
        `ronde ${round}: er wordt niet afgeteld`);
     ok(await page.textContent('#glyph') === '',
        `ronde ${round}: de kaart is al zichtbaar tijdens het aftellen`);
-    await page.click('#countdown');
+    // Een tik op het vlak zelf breekt niet af: dat is het kind dat
+    // enthousiast meetikt. Alleen de tegel in de hoek gaat terug.
+    await page.mouse.click(195, 600);
+    await page.waitForTimeout(120);
+    ok(await screen() === 'play' && await page.getAttribute('#countdown', 'hidden') === null,
+       `ronde ${round}: een tik op het aftelvlak breekt het aftellen af`);
+    await page.click('#cdBack');
     await page.waitForTimeout(120);
     ok(await screen() === 'handoff', `ronde ${round}: aftellen afbreken werkt niet`);
 

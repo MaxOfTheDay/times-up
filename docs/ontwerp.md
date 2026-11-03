@@ -290,8 +290,17 @@ wie 700 ms volhouden het lastigste gebaar in de app is. Wat de lange druk
 écht afdekte was een strijkende vinger tijdens het doorgeven, en dat vangt
 het **aftellen** nu op: tikken, drie tellen, dan pas de kaart en de klok. Een
 misser kost drie tellen in plaats van een beurt, en er is meteen een tel om
-je klaar te zetten. Tikken tijdens het aftellen breekt af — zonder die
+je klaar te zetten. Afbreken kan, via de tegel rechtsboven — zonder die
 uitweg zou een losse aanraking alsnog een beurt starten, alleen later.
+
+Dat afbreken ging eerst via het hele vlak, en daar brak precies het kind af
+dat op "drie, twee, een" enthousiast op het scherm tikt: het meest
+natuurlijke wat je bij een aftellend cijfer doet. Een strijkende vinger
+tijdens het doorgeven is met de tik op start en de drie tellen al twee keer
+opgevangen, dus het vlak hoeft dat niet ook nog te doen. Het teken stond er
+al als bijschrift in de hoek (de pas-pijl omgekeerd); het is nu een echte
+`.btn-icon`, dezelfde tegel op dezelfde plek als de pauzeknop die er een
+tel later staat.
 
 Daarmee is de speelknop op de titel en die op het overdrachtscherm ook
 dezelfde knop geworden: zelfde maat, zelfde vlak, zelfde rand. Ze betekenen
