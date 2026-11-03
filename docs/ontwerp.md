@@ -706,6 +706,15 @@ kwam drie keer op volle sterkte voorbij. Nu zwellen de punten minder op
 (27% tegen 16%), komt de deining om de elf tellen, en staat de ring van het
 aftellen op 60% van de rimpel die je zelf met een tik maakt.
 
+Het einde van beide bewegingen bleef hangen. De deining liep op
+`ease-in-out`, dus remde ze af vlak voor ze uit beeld ging; de ring liep
+op een sterke uitloop en stopte op 460 px, zodat hij aan het eind kroop en
+nog half in een hoek stond toen hij verdween. Nu loopt de deining op
+gelijke snelheid, als wind, van buiten beeld naar buiten beeld. De ring
+remt maar zacht af, loopt door tot 560 px (verder dan de hoek van een
+staand scherm) en vervaagt vanaf de helft terwijl hij nog groeit. Op het
+aftellen duurt hij 0,95 s, zodat hij weg is vóór de volgende tel.
+
 Niet op de papieren schermen (titel, spel, eindstand)
 lazen ze als vuil op het papier, bovenop de korrel die daar al ligt
 (`body::after`), en het spelscherm moet rustig blijven. De punten zeggen
