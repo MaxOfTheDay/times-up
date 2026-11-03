@@ -1148,8 +1148,11 @@ input[type=range]::-moz-range-thumb {
     radial-gradient(ellipse 75% 60% at 50% 45%, transparent 40%, #000 100%);
   -webkit-mask-composite: source-in; mask-composite: intersect;
 }
+/* Op gelijke snelheid, als wind: een band die afremt, lijkt aan het eind
+   te blijven hangen. Hij begint en eindigt buiten beeld (±40% voorbij de
+   rand, breder dan de halve band), zodat in- en uitrijden niet te zien is. */
 @keyframes deining { 0% { --band: -40%; } 45%, 100% { --band: 140%; } }
-#s-handoff.on::after { animation: deining 11s cubic-bezier(.45, 0, .55, 1) 1.2s infinite; }
+#s-handoff.on::after { animation: deining 11s linear 1.2s infinite; }
 
 /* Op het aftellen gaat er bij elke tel één ring vanuit de schijf naar buiten,
    op de maat van het tikje: drie, twee, een, zichtbaar voor wie het geluid
@@ -1167,11 +1170,19 @@ input[type=range]::-moz-range-thumb {
   -webkit-mask-image: radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), transparent calc(var(--rimpel) - 60px), #000 var(--rimpel), transparent calc(var(--rimpel) + 34px));
           mask-image: radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), transparent calc(var(--rimpel) - 60px), #000 var(--rimpel), transparent calc(var(--rimpel) + 34px));
 }
-@keyframes rimpel { from { --rimpel: 0px; } to { --rimpel: 460px; } }
+/* De ring blijft lopen tot hij weg is: hij vervaagt terwijl hij nog groeit,
+   en remt maar zacht af. Met een sterke uitloop kroop hij aan het eind en
+   stond hij nog half in een hoek toen hij verdween. */
+@keyframes rimpel {
+  0%   { --rimpel: 0px;   opacity: var(--golf-op, 1); }
+  45%  {                  opacity: var(--golf-op, 1); }
+  100% { --rimpel: 560px; opacity: 0; }
+}
 /* Op het aftellen komt de ring elke tel terug; daarom zachter dan de rimpel
-   die je zelf geeft. */
-#cdGolf { opacity: .6; }
-#hoRimpel.speel, #cdGolf.speel { animation: rimpel calc(1.1s / max(var(--dur), .001)) cubic-bezier(.2, .7, .4, 1) backwards; }
+   die je zelf geeft, en klaar vóór de volgende tel. */
+#cdGolf { --golf-op: .6; }
+#hoRimpel.speel { animation: rimpel calc(1.1s / max(var(--dur), .001)) cubic-bezier(.3, .55, .55, 1) backwards; }
+#cdGolf.speel   { animation: rimpel calc(.95s / max(var(--dur), .001)) cubic-bezier(.3, .55, .55, 1) backwards; }
 
 /* Beide wissels (beurt en ronde) gebruiken dit scherm, met dezelfde vakken en
    dezelfde maat. Wat ze onderscheidt is beweging: bij een beurtwissel ademt
