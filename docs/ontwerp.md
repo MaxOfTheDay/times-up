@@ -648,12 +648,21 @@ Ze schuiven heel traag schuin naar beneden, één cel per vijf tellen: het
 scherm waarop je wacht leeft, zonder dat het oog erheen gaat. Bij beperkte
 beweging staan ze stil.
 
-Bij binnenkomst loopt er één golf door: een ring vanuit de kaart naar
-buiten waarin de punten opzwellen (`#s-handoff::after`, een tweede laag
-grotere punten met een ringmasker, de straal `--golf` via `@property`
-geanimeerd). Eén keer en niet steeds: een golf die blijft lopen vecht met
-de startknop en de ademende mascotte om het oog van een kind. Zonder
-animatie staat de ring buiten beeld.
+Daarbovenop twee bewegingen, gekozen uit vier die naast elkaar zijn
+gezet (een golf bij binnenkomst, ademende punten, deining, een rimpel):
+
+- **Deining**: om de acht tellen trekt er een brede band schuin over de
+  grond, als wind over een veld, waarin de punten opzwellen
+  (`#s-handoff::after`, een tweede laag grotere punten met een
+  bandmasker, `--band` via `@property`). Sfeer vanuit de ooghoek. De
+  golf bij binnenkomst deed hetzelfde werk één keer en is vervallen.
+- **Rimpel**: een tik op de grond (niet op de kaart of de knoppen) stuurt
+  een ring vanaf de vinger (`#hoRimpel`). Speelgoed, zoals Vos en Uil op
+  de titel; het doet verder niets.
+
+Ademende punten vielen af: als alles op het scherm tegelijk klopt, voelt
+het onrustig. Beide lagen liggen achter de kaart en de knop, en staan
+stil bij beperkte beweging.
 
 Alleen op de overdracht. Op de papieren schermen (titel, spel, eindstand)
 lazen ze als vuil op het papier, bovenop de korrel die daar al ligt

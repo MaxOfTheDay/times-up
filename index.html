@@ -1110,25 +1110,41 @@ input[type=range]::-moz-range-thumb {
 
 @keyframes puntenSchuif { to { background-position: 12px 12px; } }
 
-/* De golf: één keer bij binnenkomst zwellen de punten op in een ring die
-   vanuit de kaart naar buiten loopt, daarna is de grond weer rustig. Een
-   tweede laag met grotere, donkerdere punten, alleen zichtbaar in de ring
-   (--golf is de straal). Eén keer en niet steeds: een golf die blijft lopen
-   vecht met de startknop en de ademende mascotte om het oog. Zonder
-   animatie staat de ring buiten beeld, dus bij beperkte beweging is er niets. */
-@property --golf { syntax: "<length>"; inherits: false; initial-value: -200px; }
+/* Deining: om de acht tellen trekt er een brede band schuin over de grond,
+   als wind over een veld, waarin de punten opzwellen. Je ziet het vanuit je
+   ooghoek, het trekt niet aan je oog. Een tweede laag grotere punten, alleen
+   zichtbaar in de band (--band) en, net als de grond, niet rond de kaart. */
+@property --band { syntax: "<percentage>"; inherits: false; initial-value: -40%; }
 #s-handoff::after {
   content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: radial-gradient(rgba(20, 17, 15, .24) 40%, transparent 43%);
+  background-size: 12px 12px;
+  --band: -40%;
+  -webkit-mask-image:
+    linear-gradient(120deg, transparent calc(var(--band) - 22%), #000 var(--band), transparent calc(var(--band) + 22%)),
+    radial-gradient(ellipse 75% 60% at 50% 45%, transparent 40%, #000 100%);
+          mask-image:
+    linear-gradient(120deg, transparent calc(var(--band) - 22%), #000 var(--band), transparent calc(var(--band) + 22%)),
+    radial-gradient(ellipse 75% 60% at 50% 45%, transparent 40%, #000 100%);
+  -webkit-mask-composite: source-in; mask-composite: intersect;
+}
+@keyframes deining { 0% { --band: -40%; } 45%, 100% { --band: 140%; } }
+#s-handoff.on::after { animation: deining 8s ease-in-out 1.2s infinite; }
+
+/* Rimpel: wie op de grond tikt, krijgt een ring vanaf zijn vinger. Speelgoed,
+   zoals Vos en Uil op de titel; het doet verder niets. rimpel() zet de plek
+   en start de animatie opnieuw. */
+@property --rimpel { syntax: "<length>"; inherits: false; initial-value: -200px; }
+#hoRimpel {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background-image: radial-gradient(rgba(20, 17, 15, .3) 40%, transparent 43%);
   background-size: 12px 12px;
-  --golf: -200px;
-  -webkit-mask-image: radial-gradient(circle at 50% 45%, transparent calc(var(--golf) - 90px), #000 var(--golf), transparent calc(var(--golf) + 50px));
-          mask-image: radial-gradient(circle at 50% 45%, transparent calc(var(--golf) - 90px), #000 var(--golf), transparent calc(var(--golf) + 50px));
+  --rimpel: -200px;
+  -webkit-mask-image: radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), transparent calc(var(--rimpel) - 60px), #000 var(--rimpel), transparent calc(var(--rimpel) + 34px));
+          mask-image: radial-gradient(circle at var(--rx, 50%) var(--ry, 50%), transparent calc(var(--rimpel) - 60px), #000 var(--rimpel), transparent calc(var(--rimpel) + 34px));
 }
-@keyframes puntenGolf { from { --golf: 0px; } to { --golf: 80vmax; } }
-#s-handoff.on::after {
-  animation: puntenGolf calc(1.6s / max(var(--dur), .001)) cubic-bezier(.3, .6, .5, 1) calc(.25s / max(var(--dur), .001)) backwards;
-}
+@keyframes rimpel { from { --rimpel: 0px; } to { --rimpel: 460px; } }
+#hoRimpel.speel { animation: rimpel calc(1.1s / max(var(--dur), .001)) cubic-bezier(.2, .7, .4, 1) backwards; }
 
 /* Beide wissels (beurt en ronde) gebruiken dit scherm, met dezelfde vakken en
    dezelfde maat. Wat ze onderscheidt is beweging: bij een beurtwissel ademt
@@ -2541,6 +2557,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
      is beweging -- de mascotte ademt bij een beurtwissel, de tekening komt op
      bij een rondewissel. -->
 <section class="screen" id="s-handoff">
+  <i id="hoRimpel" aria-hidden="true"></i>
   <!-- 1. STAND. Per ploeg een mascotte en een getal, geen fiche per punt (een
        stapel duwde tegen ronde 3 de startknop van het scherm). Ook op 0 - 0,
        zodat elke overdracht dezelfde vakken heeft. -->
@@ -4570,6 +4587,16 @@ function knipper(svg) {
 knipperLus();
 
 function balkMascotte() { return $("#plMascot"); }
+
+/* De rimpel op de grond van de overdracht (zie #hoRimpel). Alleen een tik op
+   de grond zelf, niet op de kaart of de knoppen. */
+$("#s-handoff").addEventListener("pointerdown", e => {
+  if (e.target !== e.currentTarget || stilAan()) return;
+  const r = e.currentTarget.getBoundingClientRect(), el = $("#hoRimpel");
+  el.style.setProperty("--rx", (e.clientX - r.left) + "px");
+  el.style.setProperty("--ry", (e.clientY - r.top) + "px");
+  el.classList.remove("speel"); void el.offsetWidth; el.classList.add("speel");
+});
 
 $$(".gluur").forEach(g => g.addEventListener("pointerdown", () => {
   Snd.unlock();
