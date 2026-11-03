@@ -234,7 +234,8 @@ niets bij.
 hebt: Spel (moeilijkheid met de bak, kaarten per potje, tijd), Voorkeuren
 (aan/uit als één regel met twee kleine knoppen), Zo speel je (de vouwregel
 is de groepskop), Deze app. Drie lagen tekst: hoofdletters alleen voor de
-titel en de groepskoppen; veldnamen en keuzeknoppen in zin-tekst.
+titel en de groepskoppen; veldnamen en keuzeknoppen in zin-tekst. Geen
+uitlegzin onder een knop die zichzelf uitlegt: minder is meer.
 
 ## Kaarten
 

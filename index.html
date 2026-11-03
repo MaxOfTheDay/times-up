@@ -926,6 +926,9 @@ input[type=range]::-moz-range-thumb {
    dit ís een veld, tussen Moeilijkheid en Kaarten per potje.
    ============================================================ */
 .cardbox { margin: 0; }
+/* De bak hoort bij de moeilijkheid erboven: hij zit er dicht onder, en de
+   tikhoogte van zijn vouwregel geeft de lucht naar het volgende veld. */
+.field-group > .cardbox { margin-top: var(--s-2); }
 .cardbox > summary {
   list-style: none; cursor: pointer;
   display: flex; align-items: center; flex-wrap: wrap; gap: 2px var(--s-2);
@@ -2432,11 +2435,6 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
           <button class="chip" role="radio" aria-checked="false" data-tier="groot">Moeilijk<small>9+ jaar</small>
             <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
         </div>
-        <!-- De enige zin die zegt hoe deze knop werkt: elke stand is een
-             plafond (zie poolFor). "3+ / 6+ / 9+ jaar" alleen leest als een
-             band. De telling ernaast doet de rest: een stap hoger en het
-             getal loopt op. -->
-        <p class="hint">Elke stand bevat ook alle kaarten van de standen eronder.</p>
       </fieldset>
 
       <!-- De bak zelf: alle kaarten waar uit getrokken kan worden, met de
@@ -2473,17 +2471,13 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
              kaarten (90 tot 275), en dit is de greep (16, 24 of 32). -->
         <legend>Kaarten per potje</legend>
         <div class="chips" id="sizeChips" role="radiogroup" aria-label="Kaarten per potje">
-          <button class="chip" role="radio" aria-checked="false" data-size="16">16<small>Kort</small>
+          <button class="chip" role="radio" aria-checked="false" data-size="16">16
             <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-          <button class="chip" role="radio" aria-checked="false" data-size="24">24<small>Normaal</small>
+          <button class="chip" role="radio" aria-checked="false" data-size="24">24
             <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-          <button class="chip" role="radio" aria-checked="false" data-size="32">32<small>Lang</small>
+          <button class="chip" role="radio" aria-checked="false" data-size="32">32
             <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
         </div>
-        <!-- De enige plek waar staat wannéér er getrokken wordt. Die zin is
-             het antwoord op de vraag waar dit hele blok voor gemaakt is,
-             dus hij staat er voluit en met de echte getallen erin. -->
-        <p class="hint" id="drawHint"></p>
       </fieldset>
 
       <div class="field">
@@ -2492,7 +2486,6 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
           <input type="range" id="secs" min="20" max="60" step="5" value="30">
           <span class="secs" id="secsOut" aria-live="polite">30s</span>
         </div>
-        <p class="hint">30 seconden werkt goed voor de meeste groepen.</p>
       </div>
     </div>
 
@@ -2540,11 +2533,9 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
         <li><b>Eén woord</b> — geef precies één woord als hint.</li>
         <li><b>Uitbeelden</b> — niet praten.</li>
       </ol>
-      <p>Goed geraden? <b>1 punt</b> en meteen door. Passen mag.</p>
-      <p>Is de stapel leeg? Dan begint de andere ploeg de volgende ronde, met
-        dezelfde kaarten.</p>
-      <p>Te vroeg op goed getikt? Tik meteen op het groene <b>+</b>-getal bovenaan:
-        het punt gaat eraf en de kaart komt terug.</p>
+      <p>Goed geraden: <b>1 punt</b>. Passen mag. Is de stapel leeg, dan
+        begint de andere ploeg de volgende ronde.</p>
+      <p>Te vroeg op goed getikt? Tik op het groene <b>+</b>-getal bovenaan.</p>
     </details>
 
     <!-- De vierde groep, de enige die niet over het spel gaat. Onderaan, want
@@ -3648,14 +3639,6 @@ function paintCardCounts() {
     poolFor(t).filter(c => !weg.has(c[1])).length <= MIN_BAK);
   vol.textContent = "De bak blijft op minstens " + MIN_BAK +
     " kaarten staan — leg er eerst een terug.";
-
-  /* De enige plek die zegt wannéér er getrokken wordt: "pas bij de start".
-     "Die N" wijst terug naar de telling van de bak erboven. Geen afbeelding
-     van de speelknop in de zin: die betekent alleen iets als gouden cirkel op
-     tapmaat. */
-  $("#drawHint").textContent =
-    "Elk potje trekt pas bij de start " + settings.size +
-    " nieuwe kaarten uit die " + bak + ".";
 }
 
 /* Eén tik heen, één tik terug. Geen lange druk: die is in deze app
