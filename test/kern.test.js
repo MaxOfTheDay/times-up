@@ -241,6 +241,7 @@ test('herstel: een bewaard potje komt terug, met verse vluchtige velden', () => 
   assert.equal(h.G.pendingMs, 4000);
   assert.deepEqual(h.G.scores, [[3, 1, 0], [2, 0, 0]]);
   assert.equal(Spel.herstel({ ...opslag, mode: 'iets' }, t).mode, 'turn');
+  assert.equal(Spel.herstel({ ...opslag, mode: 'uit' }, t).mode, 'uit', 'de eindstand komt terug als eindstand');
 });
 
 test('onderbreken: punten blijven, de kaart in beeld komt als eerste terug', () => {

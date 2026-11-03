@@ -2962,7 +2962,8 @@ const Spel = (() => {
       typeof g.pendingMs === "number" && g.pendingMs >= 0;
     if (!(pileOk && scoresOk && restOk)) return null;
     return {
-      mode: s.mode === "round" ? "round" : "turn",
+      /* "uit": het potje is uitgespeeld en de eindstand stond in beeld. */
+      mode: s.mode === "round" || s.mode === "uit" ? s.mode : "turn",
       G: {
         deck: g.deck, pile: g.pile, card: null,
         round: g.round, team: g.team, scores: g.scores,
@@ -3235,7 +3236,11 @@ const Snd = (() => {
 const Tril = (() => {
   let on = true;
   const kan = typeof navigator !== "undefined" && !!navigator.vibrate;
-  const buzz = p => { if (on && kan) { try { navigator.vibrate(p); } catch (e) {} } };
+  /* Zonder een tik op de pagina weigert de browser het trillen, met een
+     waarschuwing in de console. Dat gebeurt als de eindstand na een
+     herlaadbeurt terugkomt: dan is er nog niet getikt. */
+  const getikt = () => !navigator.userActivation || navigator.userActivation.hasBeenActive;
+  const buzz = p => { if (on && kan && getikt()) { try { navigator.vibrate(p); } catch (e) {} } };
   return {
     supported: kan,
     set enabled(v) { on = !!v; },
@@ -4849,8 +4854,12 @@ function winner() {
   $("#s-winner").dataset.draw = win === null ? "1" : "0";
 
   rays(win === null ? "#F2B705" : TEAMS[win].hex);
+  /* Uitgespeeld, maar de eindstand blijft bewaard tot je het scherm verlaat:
+     een herlaadbeurt of een toestel dat de app opruimt toont haar opnieuw,
+     in plaats van de uitslag van de avond te wissen. Huisje, terug en
+     "nog een keer" ruimen hem op. */
+  saveGame("uit");
   G = null;
-  clearGame();          // uitgespeeld: er valt niets meer te hervatten
   show("winner");
 
   /* De onthulling: de totalen tellen samen op, dan valt de kroon en pas dán
@@ -5417,7 +5426,8 @@ paintSetup();
 backGuard = !!(history.state && history.state.tijd);
 
 const hervat = loadGame();
-if (hervat) { G = hervat.G; handoff(hervat.mode); }
+if (hervat && hervat.mode === "uit") { G = hervat.G; winner(); }
+else if (hervat) { G = hervat.G; handoff(hervat.mode); }
 else show("title");
 started = true;
 
