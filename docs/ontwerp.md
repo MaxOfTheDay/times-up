@@ -709,6 +709,32 @@ De regel daaronder: een druk die de grond verandert, laat de nieuwe grond
 uit de ingedrukte knop groeien. Waar de klok de grond verandert (tijd om,
 ronde om) stroomt de kleur, zoals hieronder bij "De grond stroomt".
 
+### Naar huis groeit uit de knop
+
+Stoppen (het huisje vasthouden in de pauze) en naar huis vanaf de eindstand
+deden allebei hetzelfde: het gekleurde scherm weg, één beeld kaal papier,
+dan kwam de titel binnen via grijs (`screenIn` op een leeg scherm). Het was
+de enige druk in de app die niet vanuit je vinger begon. Frame voor frame
+gefilmd met een mock-up ernaast; Max koos deze versie.
+
+`naarTitel(k, sluier)` laat de titel, met haar papier en inkten punten, als
+cirkel groeien uit de knop die je indrukte (450 ms, `--e-uit`), over het
+scherm dat je verlaat. Dat scherm blijft eronder staan (`.blijft`, zonder
+pointer-events), en bij stoppen ook de sluier met het paneel. De knop wordt
+gemeten vóór het paneel verdwijnt; daarna meet hij nul. Na de cirkel houdt
+`.stil` de `screenIn` van de titel tegen tot de volgende schermwissel: eerst
+begon de titel na de cirkel alsnog te vervagen. Vos en Uil gluren daarna
+op zoals altijd.
+
+### Afbreken zet de grond niet uit
+
+Wie tijdens het aftellen op de tegel in de hoek tikt, ging van de
+ploegkleur naar kaal papier en daarna weer naar dezelfde ploegkleur:
+`handoff()` dacht dat het van een ander scherm kwam (`current` is dan
+`"play"`) en liet de kleur vanaf papier stromen. Nu krijgt het
+`zelfdeGrond` mee, en glijdt de schijf terug in de startknop
+(`rimpelDoor()` met de gemeten schijf), zoals ze eruit kwam.
+
 ## De grond stroomt, het scherm vervaagt niet
 
 Die vloed was er alleen voor de worp. Ze geldt nu voor elke overdracht, en
@@ -1001,6 +1027,32 @@ vak dat geknipt wordt, anders liep de knip schuin tegen de rand.
 Het merk krijgt een marge bovenaan zo hoog als de mascottes, zodat de groep
 als geheel in het midden staat en op 320x568 niet tegen het tandwiel komt.
 
+## Elke kaart draait om
+
+Tussen twee beurten stond een harde knip: de gestempelde kaart bleef een
+adem staan, en dan werd in één beeld het hele scherm verwisseld voor de
+opdrachtkaart, die bijna op dezelfde plek ligt. Bij een rondewissel net zo,
+en de eindstand kwam zelfs binnen via `screenIn` op leeg papier, zodat
+alles even verbleekt stond. Frame voor frame gefilmd; Max koos deze versie.
+
+Nu draait de kaart om. `draaiOm()` maakt de gestempelde kaart smal tot een
+rand (`OMDRAAI`, 140 ms, `--e-weg`); `landOm()` laat op dezelfde plek de
+achterkant breed worden (180 ms, `--e-uit`), vanaf de maat van de
+speelkaart: de opdracht voor de volgende ploeg, de volgende ronde, of de
+eindstand. Plat, zonder perspectief, zoals een kaart op tafel omgaan
+eruitziet als je erboven hangt. De kleur stroomt intussen zoals ze deed.
+Eén beweging voor alle drie de eindes, en de kaart waar het kind naar keek,
+is de kaart die zegt wat er nu komt.
+
+- Het spel wacht die eerste helft af: `turnEnd()` en `endRound()` doen hun
+  werk in de terugroep van `draaiOm()`, en kijken daar opnieuw of het
+  spelscherm er nog is. De staat verandert pas daarna, dus wie in die
+  140 ms wegveegt, wordt bewaard zoals tijdens de adem.
+- `#s-winner` heeft daarom geen `screenIn` meer en laat zijn grond stromen
+  zoals de overdracht (`--wn-grond` eerst papier, twee beelden later de
+  winnaar). Bij gelijkspel blijft het papier.
+- Bij beperkte beweging gebeurt alles meteen.
+
 ## Vertrekken mag, als er niets achter wacht
 
 De ladder in `index.html` zegt "geen vertrekanimaties", en de reden erbij is
@@ -1030,9 +1082,14 @@ Drie dingen die daaraan vastzitten:
 - **`inert` pas ná het verzetten van de focus**, anders belandt de focus op
   de body in plaats van op de knop waar je vandaan kwam.
 - **Alleen bij hervatten, niet bij stoppen.** De stopknop gaat naar de
-  titel, en dáár geldt de reden van de ladder gewoon weer: die zet het
-  paneel hard uit. `openPause()` kapt een lopende uitloop af, anders gaat
-  het paneel open in een sluier die nog aan het oplossen is.
+  titel, die als cirkel over de sluier groeit (zie "Naar huis groeit uit de
+  knop"). `openPause()` kapt een lopende uitloop af, anders gaat het paneel
+  open in een sluier die nog aan het oplossen is.
+- **Alleen de sluier vervaagt, het paneel niet.** De achtergrond stond op
+  het overlay zelf, dus het paneel vervaagde mee en de kaart schemerde
+  erdoor: de laatste doorkijk in de app. Nu is de sluier een eigen laag
+  (`.overlay::before`); het paneel staat er bij openen meteen dekkend (en
+  schaalt in), en is bij hervatten meteen weg.
 
 De derde is de kopie van de kaart (`kaartSpook()`): de volgende kaart ligt
 er vanaf het eerste beeld al onder. Die kopie blijft dekkend. Eerst vervaagde
@@ -1048,6 +1105,12 @@ Terugnemen (`kaartTerug()`) is geraden achterstevoren: de kaart komt uit de
 teller terug naar haar plek, en de kaart die er lag schuift onder de
 stapel. Eerst werd ze opnieuw gedeeld zoals elke nieuwe kaart, en dan zag
 je niet dat dít de kaart was die je net had weggegeven.
+
+Twee meer, om dezelfde reden. De eerste helft van het omdraaien
+(`draaiOm()`): het spel wacht die 140 ms af, maar er staat geen scherm te
+wachten, alleen de achterkant van dezelfde kaart. En het scherm dat je
+verlaat als je naar huis gaat (`naarTitel()`): het blijft liggen terwijl de
+titel eroverheen groeit, en is weg als de cirkel rond is.
 
 Wat er níet bij komt: een aftelling bij hervatten. Die is geopperd -- de
 klok begint immers op de tik -- maar het aftellen bestaat om een strijkende
