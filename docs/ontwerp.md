@@ -673,8 +673,8 @@ toen stond er een seconde lang "vos" op de kaart terwijl het hele scherm
 "uil" zei -- het luidste kanaal in tegenspraak met het op een na luidste, op
 het ene scherm dat aankondigt wie begint.
 
-De grond blijft nu neutraal (`--paper-2`) zolang er geloot wordt, en de kleur
-stroomt binnen op het moment dat de worp landt. De kleur ís het antwoord, dus
+De grond blijft nu neutraal zolang er geloot wordt, en de kleur komt binnen
+op het moment dat de worp landt. De kleur ís het antwoord, dus
 ze hoort met het antwoord te komen. `landToss()` zet haar goed bij een
 afgebroken worp en bij beperkte beweging, waar `tossTeams()` meteen
 terugkeert; `tossTeams()` zet daarna opzettelijk weer neutraal en zet de
@@ -684,6 +684,30 @@ Wat hier níet moet: de achtergrond mee laten flikkeren met de worp. Dat is
 veel spannender en het is de eerlijkste vertaling van "de kleur wordt
 geloot", maar het zijn zeven volledige schermwisselingen in een seconde,
 waarvan de eerste paar 50 ms uit elkaar -- dat zet je niet voor kinderen neer.
+
+### Tussen de knop en de worp gaat de grond niet uit
+
+Neutraal was eerst `--paper-2`, met de papieren punten van de ploeggrond
+erop. Die punten zie je op beige niet, dus het begin van een potje las als
+aan, uit, aan: de inkten punten van de titel, een seconde een kale beige
+grond met de worp, dan de ploegkleur met punten. De knop die je net
+indrukte sprong bovendien 80 px omlaag, en de kaart verscheen uit het niets.
+Frame voor frame gefilmd, met een live mock-up ernaast; Max koos deze
+versie.
+
+- De worp loopt op de grond van de titel: papier met inkten punten op 7%
+  (`veldHo.inkt(true)`). Ook bij Nog een keer.
+- De knop glijdt van waar je hem indrukte naar zijn plek op de overdracht
+  (`rimpelDoor()`, met `--e-los`), zoals de startknop overgaat in de schijf
+  van het aftellen. De kaart komt eronder vandaan 24 px omhoog.
+- Als de worp landt, groeit de ploegkleur als een cirkel uit de startknop
+  (`veldHo.onthul()`, 450 ms), en worden de punten papier waar de cirkel
+  langskomt. Daarna staat de kleur op het scherm zelf, zonder overgang, anders
+  begint die weer vanaf papier.
+
+De regel daaronder: een druk die de grond verandert, laat de nieuwe grond
+uit de ingedrukte knop groeien. Waar de klok de grond verandert (tijd om,
+ronde om) stroomt de kleur, zoals hieronder bij "De grond stroomt".
 
 ## De grond stroomt, het scherm vervaagt niet
 

@@ -197,9 +197,11 @@ drukt de klok haar in (`telDruk`, dezelfde in en uit als een vinger), met
 de ring door de punten bij het terugveren. Geen ring om de schijf: één
 ritme, per tel.
 
-**De worp verklapt zichzelf niet.** Zolang er geloot wordt is de grond
-`--paper-2`; de ploegkleur komt als de worp landt. Laat de achtergrond niet
-meeflikkeren.
+**De worp verklapt zichzelf niet.** Zolang er geloot wordt is de grond die
+van de titel (papier, inkten punten); de ploegkleur groeit als een cirkel uit
+de startknop als de worp landt (`veldHo.onthul()`). Laat de achtergrond niet
+meeflikkeren. Een druk die de grond verandert, laat de nieuwe grond uit die
+knop groeien; de knop zelf glijdt mee (`rimpelDoor()`).
 
 **De grond stroomt, het scherm vervaagt niet.** `#s-handoff` en `#s-play`
 hebben geen `screenIn`: op de overdracht stroomt alleen de grond van papier
