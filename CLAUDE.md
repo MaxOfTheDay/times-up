@@ -211,6 +211,15 @@ Het installeerveld heeft vijf standen (`knop`, `zetop`, `menu`, `delen`,
 `weg`), staat onderaan als vierde groep, en levert alleen de weg die het
 platform heeft weggenomen.
 
+**Eén letter voor cijfers en koppen.** Fredoka, ingebakken als base64 in de
+`@font-face`, vast op 700, met cijfers die even breed zijn. Hij staat op wat
+je in één blik ziet (cijfers, koppen, het woord op de kaart, knoppen in
+hoofdletters), via één selectorlijst met `var(--font-display)`; zin-tekst
+voor de volwassene blijft de systeemletter. Opnieuw maken met
+`tools/letter.py`, nooit met de hand. Vaste maten komen van de trap
+`--fs-1` tot `--fs-6` (12, 14, 16, 20, 28, 40); hoofdletters krijgen
+`--track-caps`, zin-tekst geen spatiëring.
+
 **Het instellingenscherm.** Vier groepen, in de volgorde waarin je ze nodig
 hebt: Spel (moeilijkheid met de bak, kaarten per potje, tijd), Voorkeuren
 (aan/uit als één regel met twee kleine knoppen), Zo speel je (de vouwregel
