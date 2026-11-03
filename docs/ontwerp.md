@@ -1167,6 +1167,23 @@ zodat een ploeg aan het eind van haar beurt geen buit kan terugdraaien; hoe
 lang beslist het hoofdscript, niet de spelkern. Uitgelegd staat het alleen
 in de regels op het instellingenscherm, voor de volwassene.
 
+## Terugkijken naar de kaarten
+
+Ronde 2 en 3 werken alleen als je de kaarten van ronde 1 nog weet, en kleine
+kinderen vergeten de helft. Vanaf ronde 2 is de kaartenteller op de
+overdracht (`#hoCards`) daarom een knop: een tegeltje met lift, dat de
+kaarten die nog liggen als plaatjes toont (`#kijk`), met het woord eronder
+zoals op de kaart. Een tik waar dan ook sluit het weer, net als Escape en de
+terugveeg.
+
+- **Op alfabet, niet in stapelvolgorde.** De stapel is geschud; zijn
+  volgorde tonen zou verklappen wat er komt.
+- **Niet in ronde 1.** Dan heeft niemand de kaarten nog gezien, en is
+  kijken spieken. De knop staat er dan uit (`disabled`) en ziet eruit als
+  het gewone getal.
+- **Geen kaders om de plaatjes.** Het zijn geen knoppen; met een rand om
+  elk plaatje kwamen er tientallen rechthoeken op één paneel.
+
 ## Het instellingenscherm
 
 Wie het tandwiel aantikt komt iets bijstellen voor het volgende potje. Dus

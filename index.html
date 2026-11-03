@@ -1171,6 +1171,35 @@ input[type=range]::-moz-range-thumb {
 /* Bijna op: hetzelfde bijschrift, alleen zwaarder. Geen kleur erbij -- op dit
    scherm staan er al genoeg. */
 .ho-count.kort { color: var(--ink); }
+button.ho-count { font: inherit; color: var(--ink-2); background: none; border: 0; padding: 0; }
+/* Vanaf ronde 2 indrukbaar: een tegeltje met lift, dat bij :active inzakt.
+   De tikzone reikt verder dan het tegeltje. */
+button.ho-count:enabled {
+  position: relative; cursor: pointer; color: var(--ink);
+  padding: 4px 10px; background: var(--paper);
+  border: var(--line-2) solid var(--ink);
+  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
+}
+button.ho-count:enabled::after { content: ""; position: absolute; inset: -8px; }
+button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-1)); box-shadow: none; }
+
+/* Terugkijken: de plaatjes met hun woord eronder, zonder kader -- het zijn
+   geen knoppen. */
+#kijk .panel {
+  width: min(92vw, 560px); max-height: 84vh; overflow-y: auto;
+  padding: var(--s-4); cursor: pointer;
+}
+.kijk-grid {
+  width: 100%; display: grid; gap: var(--s-3) var(--s-1);
+  grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+}
+.kijk-grid div { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.kijk-grid span { font-size: 36px; line-height: 1.1; }
+.kijk-grid small {
+  font-size: var(--type-label); font-weight: 800; color: var(--ink-2);
+  text-transform: uppercase; letter-spacing: .03em;
+  text-align: center; overflow-wrap: anywhere; hyphens: auto;
+}
 .roundcard.big b { font-size: max(20px, min(8vw, 4vh, 34px)); line-height: 1; }
 .roundcard.big p {
   display: block; margin: 0;
@@ -2392,9 +2421,11 @@ input[type=range]::-moz-range-thumb {
     <!-- Hoeveel kaarten er nog liggen en hoe lang je krijgt: aan de voet, het
          dichtst bij de knop waar ze over gaan. -->
     <div class="ho-meta">
-      <div class="ho-count" id="hoCards">
+      <!-- Vanaf ronde 2 een knop: de kaarten die nog liggen, als plaatjes
+           (zie #kijk). In ronde 1 zou dat de stapel verklappen. -->
+      <button class="ho-count" id="hoCards" aria-label="Bekijk de kaarten die nog liggen" disabled>
         <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-kaarten"/></svg><span>16</span>
-      </div>
+      </button>
       <div class="ho-count" id="hoSecs">
         <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-zand"/></svg><span>30</span>
       </div>
@@ -2540,6 +2571,14 @@ input[type=range]::-moz-range-thumb {
 
 <!-- Pauze: de klok staat stil. Verder spelen is één tik; stoppen moet je
      vasthouden, want dat gooit het lopende spel weg. -->
+<!-- De kaarten die nog liggen, als plaatjes op alfabet (niet in de volgorde
+     van de stapel: die zou verklappen wat er komt). Kleine spelers onthouden
+     de kaarten van ronde 1 niet allemaal; hier kijken ze even terug. Een tik
+     waar dan ook sluit. -->
+<div class="overlay" id="kijk" role="dialog" aria-modal="true" aria-label="De kaarten die nog liggen" tabindex="-1" hidden>
+  <div class="panel surface"><div class="kijk-grid" id="kijkGrid"></div></div>
+</div>
+
 <div class="overlay" id="pauze" role="dialog" aria-modal="true" aria-label="Pauze" hidden>
   <div class="panel surface">
     <!-- Het paneel toonde alleen twee pictogrammen: niet dát het stilstond,
@@ -3639,6 +3678,7 @@ function handoff(mode, freshA, freshB) {
   const secs = G.secs;
   $("#hoSecs").querySelector("span").textContent = secs;
   $("#hoCards").querySelector("span").textContent = G.pile.length;
+  $("#hoCards").disabled = G.round < 2;
   $("#hoCards").classList.toggle("kort", G.pile.length <= 5);
   $("#hoRoundCard").setAttribute("aria-label",
     $("#hoRoundCard").getAttribute("aria-label") +
@@ -4714,9 +4754,40 @@ function closePause() {
   .forEach(sel => $(sel).addEventListener("click", () => { Snd.unlock(); openPause(); }));
 
 $("#btnResume").addEventListener("click", closePause);
+
+/* ---------- terugkijken naar de kaarten (vanaf ronde 2) ---------- */
+let kijkReturn = null;
+$("#hoCards").addEventListener("click", () => {
+  if (!G || G.round < 2 || current !== "handoff") return;
+  const frag = document.createDocumentFragment();
+  G.pile.map(i => G.deck[i])
+    .sort((a, b) => a[1].localeCompare(b[1], "nl"))
+    .forEach(([e, w]) => {
+      const d = document.createElement("div");
+      d.innerHTML = "<span></span><small></small>";
+      d.querySelector("span").textContent = e;
+      d.querySelector("small").textContent = w;
+      frag.appendChild(d);
+    });
+  const grid = $("#kijkGrid");
+  grid.textContent = "";
+  grid.appendChild(frag);
+  kijkReturn = document.activeElement;
+  screensInert(true);
+  $("#kijk").hidden = false;
+  $("#kijk").focus({ preventScroll: true });
+});
+function sluitKijk() {
+  $("#kijk").hidden = true;
+  screensInert(false);
+  if (kijkReturn && kijkReturn.isConnected) kijkReturn.focus({ preventScroll: true });
+  kijkReturn = null;
+}
+$("#kijk").addEventListener("click", sluitKijk);
 // Naast het paneel tikken is de veilige uitweg: verder spelen, nooit stoppen.
 $("#pauze").addEventListener("click", e => { if (e.target === $("#pauze")) closePause(); });
 document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && !$("#kijk").hidden) { e.preventDefault(); sluitKijk(); return; }
   if (e.key === "Escape" && !$("#pauze").hidden) { e.preventDefault(); closePause(); }
 });
 
@@ -4805,6 +4876,7 @@ addEventListener("popstate", () => {
    veeg niets (openPause() keert daar om); beter dan de app verlaten op de
    laatste tel. */
 function terug() {
+  if (!$("#kijk").hidden) { sluitKijk(); return; }
   if (!$("#pauze").hidden) { closePause(); return; }
   if (current === "setup")  { show("title"); return; }
   if (current === "winner") { clearConfetti(); clearGame(); show("title"); return; }

@@ -85,6 +85,8 @@ const ok = (c, m) => { if (!c) fails.push(m); };
      'het "+N" staat weer op het overdrachtscherm');
   ok(await page.textContent('#hoCards span') === '16',
      'de kaartenteller klopt niet bij de eerste overdracht');
+  ok(await page.isDisabled('#hoCards'),
+     'in ronde 1 kun je de stapel bekijken, en dat verklapt de kaarten');
   ok(await page.textContent('#hoSecs span') === '60',
      'de secondenteller klopt niet bij de eerste overdracht');
   // De kroon zegt wie voorstaat, en dat bepaalt hier niets. Ze bestaat nog
@@ -217,6 +219,15 @@ const ok = (c, m) => { if (!c) fails.push(m); };
       // De stapel is opnieuw geschud, dus die staat weer op de hele bak.
       ok(await page.textContent('#hoCards span') === '16',
          `ronde ${round}: de kaartenteller staat niet terug op de hele bak`);
+      // Vanaf ronde 2 kun je terugkijken: alle kaarten als plaatjes.
+      await page.click('#hoCards');
+      await page.waitForTimeout(300);
+      ok(await page.isVisible('#kijk'), `ronde ${round + 1}: de kaartenteller opent het overzicht niet`);
+      ok(await page.$$eval('#kijkGrid > div', d => d.length) === 16,
+         `ronde ${round + 1}: het overzicht toont niet alle kaarten`);
+      await page.mouse.click(10, 10);
+      await page.waitForTimeout(300);
+      ok(await page.isHidden('#kijk'), 'het overzicht gaat niet dicht met een tik');
       const mee = Number(await page.textContent('#hoSecs span'));
       ok(mee > 0 && mee <= 60,
          `ronde ${round}: de secondenteller staat op ${mee}`);
