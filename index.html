@@ -3746,6 +3746,202 @@ input[type=range]::-moz-range-thumb {
   </div>
 </div>
 
+<script id="spelkern">
+"use strict";
+/* ==============================================================
+   DE SPELKERN
+   De spelregels, en verder niets: geen DOM, geen geluid, geen klok,
+   geen opslag. Alles hieronder krijgt de spelstand G mee en past die
+   aan, of rekent er iets uit. Het script eronder roept dit aan en
+   tekent de gevolgen.
+
+   Waarom apart: zo zijn de regels te toetsen zonder browser.
+   test/kern.test.js knipt dit blok uit index.html en draait het in
+   Node, in milliseconden. Daarom blijft het een eigen <script> met
+   dit id, zonder verwijzingen naar iets buiten dit blok -- DECKS en
+   de weggelegde kaarten komen als argument binnen.
+
+   De vorm van G (zo staat hij ook in localStorage):
+     deck      [[emoji, woord], ...]  de greep van dit potje
+     pile      [index in deck, ...]   wat er nog ligt, bovenste eerst
+     card      index | null           de kaart in beeld
+     round     1..ROUNDS
+     team      0 (Vos) | 1 (Uil)       wie er aan zet is
+     scores    [ploeg][ronde]
+     gained    geraden in deze beurt
+     pendingMs tijd die de volgende beurt meekrijgt (0 = een volle beurt)
+     secs      seconden per beurt
+   ============================================================== */
+const Spel = (() => {
+  const ROUNDS = 3;
+  const TIER_ORDER = ["klein", "midden", "groot"];
+  /* Onder de veertig trekt elk potje ongeveer dezelfde kaarten:
+     32 (het langste potje) plus lucht. */
+  const MIN_BAK = 40;
+  /* Een rest van minder is na het aftellen geen beurt meer. */
+  const MIN_CARRY = 3000;
+  /* Een potje duurt een avond; na twee uur hoort het niet meer terug
+     te komen. */
+  const GAME_MAX_AGE = 2 * 60 * 60 * 1000;
+
+  function shuffle(a, rnd) {
+    const r = a.slice(), rand = rnd || Math.random;
+    for (let i = r.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [r[i], r[j]] = [r[j], r[i]];
+    }
+    return r;
+  }
+
+  /* Een stand is een plafond: alle kaarten tot en met zijn eigen
+     moeilijkheid. Een onbekende stand valt terug op de makkelijkste. */
+  function poolFor(decks, tier) {
+    const i = TIER_ORDER.indexOf(tier);
+    const tot = i < 0 ? 1 : i + 1;
+    return TIER_ORDER.slice(0, tot).reduce((a, t) => a.concat(decks[t]), []);
+  }
+  /* Waar écht uit getrokken wordt: de stand min wat er weggelegd is. */
+  function bakFor(decks, tier, hidden) {
+    const weg = new Set(hidden);
+    return poolFor(decks, tier).filter(c => !weg.has(c[1]));
+  }
+  /* Over álle standen, ook die waar je niet in zit. */
+  function canHide(decks, hidden, word) {
+    const weg = new Set(hidden); weg.add(word);
+    return TIER_ORDER.every(t =>
+      poolFor(decks, t).filter(c => !weg.has(c[1])).length >= MIN_BAK);
+  }
+  /* De greep bestaat pas bij de start van een potje, nergens eerder. */
+  function drawDeck(decks, tier, size, hidden, rnd) {
+    return shuffle(bakFor(decks, tier, hidden), rnd).slice(0, size);
+  }
+
+  function nieuw(deck, secs, rnd) {
+    const rand = rnd || Math.random;
+    return {
+      deck: deck,
+      pile: shuffle(deck.map((_, i) => i), rand),
+      card: null,
+      round: 1,
+      team: rand() < .5 ? 0 : 1,
+      scores: [[0, 0, 0], [0, 0, 0]],
+      gained: 0,
+      pendingMs: secs * 1000,
+      secs: secs
+    };
+  }
+
+  function total(G, t) { return G.scores[t].reduce((a, b) => a + b, 0); }
+  function over(G) { return G.pile.length + (G.card === null ? 0 : 1); }
+
+  /* Een beurt die nog moet beginnen: geen kaart in beeld, niets verdiend. */
+  function beurtKlaar(G) { G.gained = 0; G.card = null; }
+  /* Hoe lang de beurt duurt die nu begint. */
+  function beurtMs(G) { return G.pendingMs > 0 ? G.pendingMs : G.secs * 1000; }
+
+  function trek(G) {
+    G.card = G.pile.length ? G.pile.shift() : null;
+    return G.card;
+  }
+
+  /* Geraden: een punt, en de volgende kaart. Was dit de laatste, dan is
+     de ronde om -- de aanroeper beslist met de resterende tijd. */
+  function geraden(G) {
+    G.scores[G.team][G.round - 1]++;
+    G.gained++;
+    if (!G.pile.length) { G.card = null; return { leeg: true }; }
+    trek(G);
+    return { leeg: false };
+  }
+
+  /* Passen: onderop, zonder straf. De laatste kaart kun je niet passen. */
+  function passen(G) {
+    if (G.card === null || !G.pile.length) return false;
+    G.pile.push(G.card);
+    trek(G);
+    return true;
+  }
+
+  /* De klok is om: de onafgemaakte kaart gaat terug op de stapel. */
+  function tijdOm(G) {
+    if (G.card !== null) G.pile.push(G.card);
+    G.card = null;
+    G.pendingMs = 0;
+  }
+
+  /* Beurtwissel: het toestel gaat naar de andere ploeg, met een volle
+     beurt. Geeft terug wat er net verdiend is, per ploeg. */
+  function beurtWissel(G) {
+    const vers = [G.team === 0 ? G.gained : 0, G.team === 1 ? G.gained : 0];
+    G.team = 1 - G.team;
+    G.pendingMs = 0;
+    return vers;
+  }
+
+  /* De stapel is leeg. De resterende tijd gaat mee naar dezelfde ploeg,
+     minstens MIN_CARRY. Na de laatste ronde is het potje uit. */
+  function rondeEinde(G, rest, rnd) {
+    const vers = [G.team === 0 ? G.gained : 0, G.team === 1 ? G.gained : 0];
+    G.pendingMs = rest > 0 ? Math.max(MIN_CARRY, Math.round(rest)) : 0;
+    G.card = null;
+    if (G.round >= ROUNDS) return { uit: true, vers: vers };
+    G.round++;
+    G.pile = shuffle(G.deck.map((_, i) => i), rnd);
+    return { uit: false, vers: vers };
+  }
+
+  /* Wie won: 0, 1, of null bij gelijkspel. */
+  function winnaar(G) {
+    const a = total(G, 0), b = total(G, 1);
+    return a === b ? null : (a > b ? 0 : 1);
+  }
+  /* Een ronde telt mee op het winnaarsscherm als ze gespeeld is. */
+  function gespeeld(G, r) {
+    return r < G.round || G.scores[0][r - 1] > 0 || G.scores[1][r - 1] > 0;
+  }
+
+  /* Een bewaard potje terug, alleen als alles klopt. Opslag kan van een
+     oudere versie komen, half geschreven zijn of overschreven: bij de minste
+     twijfel null, en dan begint de app gewoon op de titel. Vluchtige velden
+     worden opnieuw gezet in plaats van overgenomen. */
+  function herstel(s, nu) {
+    if (!s || typeof s !== "object" || typeof s.t !== "number") return null;
+    if (nu - s.t > GAME_MAX_AGE) return null;
+    const g = s.G;
+    if (!g || typeof g !== "object") return null;
+    const heel = n => Number.isInteger(n);
+    const deckOk = Array.isArray(g.deck) && g.deck.length > 0 && g.deck.every(
+      c => Array.isArray(c) && typeof c[0] === "string" && typeof c[1] === "string");
+    if (!deckOk) return null;
+    const pileOk = Array.isArray(g.pile) &&
+      g.pile.every(i => heel(i) && i >= 0 && i < g.deck.length);
+    const scoresOk = Array.isArray(g.scores) && g.scores.length === 2 && g.scores.every(
+      r => Array.isArray(r) && r.length === ROUNDS && r.every(n => heel(n) && n >= 0));
+    const restOk = heel(g.round) && g.round >= 1 && g.round <= ROUNDS &&
+      (g.team === 0 || g.team === 1) &&
+      typeof g.secs === "number" && g.secs > 0 &&
+      typeof g.pendingMs === "number" && g.pendingMs >= 0;
+    if (!(pileOk && scoresOk && restOk)) return null;
+    return {
+      mode: s.mode === "round" ? "round" : "turn",
+      G: {
+        deck: g.deck, pile: g.pile, card: null,
+        round: g.round, team: g.team, scores: g.scores,
+        gained: 0,
+        pendingMs: g.pendingMs, secs: g.secs
+      }
+    };
+  }
+
+  return {
+    ROUNDS, TIER_ORDER, MIN_BAK, MIN_CARRY, GAME_MAX_AGE,
+    shuffle, poolFor, bakFor, canHide, drawDeck,
+    nieuw, total, over, beurtKlaar, beurtMs, trek,
+    geraden, passen, tijdOm, beurtWissel, rondeEinde,
+    winnaar, gespeeld, herstel
+  };
+})();
+</script>
 <script>
 "use strict";
 
@@ -4066,7 +4262,7 @@ const TEAMS = [
   { mascot: "#m-vos", naam: "Vos", color: "var(--team-vos)", hex: "#E8452B" },
   { mascot: "#m-uil", naam: "Uil", color: "var(--team-uil)", hex: "#1B6FC4" }
 ];
-const ROUNDS = 3;
+const ROUNDS = Spel.ROUNDS;
 const KEY_SET  = "tijdisom.settings";
 const KEY_GAME = "tijdisom.game";
 
@@ -4132,19 +4328,11 @@ function saveSettings() {
   try { localStorage.setItem(KEY_SET, JSON.stringify(settings)); } catch (e) {}
 }
 
-/* Twee uur. Een potje duurt een avond; ben je twee uur weg, dan is die avond
-   verder gegaan zonder dit toestel en wil je geen half spel terugkrijgen dat
-   niemand nog herkent. Korter zou een pauze voor het eten niet overleven,
-   langer laat het spel van gisteren opduiken. En vergissen is goedkoop: het
-   huisje rechtsboven staat er, en dat is dezelfde uitweg als altijd. */
-const GAME_MAX_AGE = 2 * 60 * 60 * 1000;
+const GAME_MAX_AGE = Spel.GAME_MAX_AGE;
 
-/* Bewaren gebeurt alleen vanuit handoff(), en dat is met opzet de enige
-   plek: daar is de stand rond -- de vorige beurt is verwerkt, de volgende is
-   nog niet begonnen, en G.card staat op null. Elke andere plek zou een halve
-   beurt vastleggen, en dan moet er bij terugkomst besloten worden wat er met
-   de punten van die halve beurt gebeurt. Nu is dat besluit er niet: er is
-   niets halfs om te bewaren. */
+/* Bewaren gebeurt alleen vanuit handoff(): daar is de stand rond -- de
+   vorige beurt is verwerkt, de volgende nog niet begonnen, G.card staat op
+   null. Er is dus nooit een halve beurt om te bewaren. */
 function saveGame(mode) {
   try {
     localStorage.setItem(KEY_GAME, JSON.stringify({ t: Date.now(), mode: mode, G: G }));
@@ -4153,139 +4341,23 @@ function saveGame(mode) {
 function clearGame() {
   try { localStorage.removeItem(KEY_GAME); } catch (e) {}
 }
-
-/* Alles nakijken voordat het spel wordt. Dit is opslag van het toestel: ze
-   kan van een oudere versie komen, half geschreven zijn, of door iets anders
-   overschreven. Eén veld dat niet klopt en de app draait vast op een scherm
-   waar een kind niet uit komt, dus bij de minste twijfel: geen spel, gewoon
-   de titel. Dezelfde houding als bij load() hierboven. */
+/* De controle zelf staat in de spelkern (Spel.herstel). */
 function loadGame() {
   let s = null;
   try { s = JSON.parse(localStorage.getItem(KEY_GAME) || "null"); } catch (e) { return null; }
-  if (!s || typeof s !== "object" || typeof s.t !== "number") return null;
-  if (Date.now() - s.t > GAME_MAX_AGE) return null;
-  const g = s.G;
-  if (!g || typeof g !== "object") return null;
-
-  const heel = n => Number.isInteger(n);
-  const deckOk = Array.isArray(g.deck) && g.deck.length > 0 && g.deck.every(
-    c => Array.isArray(c) && typeof c[0] === "string" && typeof c[1] === "string");
-  if (!deckOk) return null;
-  const pileOk = Array.isArray(g.pile) &&
-    g.pile.every(i => heel(i) && i >= 0 && i < g.deck.length);
-  const scoresOk = Array.isArray(g.scores) && g.scores.length === 2 && g.scores.every(
-    r => Array.isArray(r) && r.length === ROUNDS && r.every(n => heel(n) && n >= 0));
-  const restOk = heel(g.round) && g.round >= 1 && g.round <= ROUNDS &&
-    (g.team === 0 || g.team === 1) &&
-    typeof g.secs === "number" && g.secs > 0 &&
-    typeof g.pendingMs === "number" && g.pendingMs >= 0;
-  if (!(pileOk && scoresOk && restOk)) return null;
-
-  /* Opnieuw opgebouwd in plaats van doorgegeven: zo staan de vluchtige
-     velden gegarandeerd op hun beginwaarde, ook als er in de opslag iets
-     anders stond. card is op een grens altijd null, en gained hoort bij de
-     beurt die nog moet komen. */
-  return {
-    mode: s.mode === "round" ? "round" : "turn",
-    G: {
-      deck: g.deck, pile: g.pile, card: null,
-      round: g.round, team: g.team, scores: g.scores,
-      gained: 0,
-      pendingMs: g.pendingMs, secs: g.secs
-    }
-  };
+  return Spel.herstel(s, Date.now());
 }
 
-function shuffle(a) {
-  const r = a.slice();
-  for (let i = r.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [r[i], r[j]] = [r[j], r[i]];
-  }
-  return r;
-}
-
-/* Een stand is een plafond en geen band: hij bevat alle kaarten tot en met
-   zijn eigen moeilijkheid. Makkelijk speelt met 90, Medium met 183,
-   Moeilijk met alle 275.
-
-   Waarom een stand überhaupt kaarten van eronder meeneemt: de moeilijkheid
-   van een avond komt niet alleen uit de kaart, ze komt net zo goed uit de
-   ronde -- omschrijven, één woord, en dan zwijgend uitbeelden. Een
-   makkelijke kaart is in ronde 3 nog steeds werk. Een moeilijke kaart is
-   voor de jongste aan tafel in élke ronde muurvast. De drie stapels stonden
-   daarom ooit al niet meer los van elkaar.
-
-   Waarom het nu álles eronder is en niet één stap. Er stond een schuivend
-   venster van twee banden, en de reden daarvoor klopte: zonder venster
-   trekt een tafel van negenjarigen ook peuterkaarten. Van een greep van 24
-   komen er nu zo'n acht uit de makkelijkste band waar dat er nul waren, en
-   de stap van Medium naar Moeilijk is daarmee kleiner. Dat is de prijs en
-   die is echt.
-
-   Wat er tegenover staat weegt zwaarder: het venster zei iets anders dan de
-   knoppen. "Makkelijk / Medium / Moeilijk" met "3+ / 6+ / 9+ jaar" is de
-   taal van een plafond -- hoe moeilijk wordt het hier. De code deed een
-   band, en bij Moeilijk vielen de negentig makkelijkste kaarten er juist
-   uit. Op het scherm was dat alleen te zien aan een telling die van 183
-   naar 185 sprong: twee kaarten erbij, terwijl de halve bak omwisselde. Wie
-   voor een gemengde tafel een stap hoger deed, haalde ongemerkt precies de
-   kaarten weg die de jongste aankon.
-
-   De faalvormen zijn ook niet gelijk. Te veel makkelijke kaarten is saai;
-   geen enkele makkelijke kaart betekent dat een kind een derde van de avond
-   vaststaat. Saai is goedkoper dan uitgesloten.
-
-   Wil je die kleinere stap later bijsturen, doe dat met kaarten en niet met
-   code: een grotere moeilijke band trekt het gemiddelde vanzelf omhoog. Ga
-   niet scheef trekken uit een volle bak -- dan staat er "275 in het spel"
-   boven een greep die dat niet is, en dat is precies het verschil tussen
-   wat je ziet en wat je krijgt dat de kaartenbak eruit gehaald heeft.
-
-   Let op bij het toevoegen van kaarten: alle standen delen nu één stapel,
-   dus een emoji of woord dat in twee tiers staat komt twee keer in hetzelfde
-   potje. test/deck.test.js toetst de samengestelde pool -- en omdat de pool
-   van groot inmiddels de hele verzameling is, dekt die controle in één keer
-   alle 275. Diezelfde test bewaakt ook het plafond zelf. */
-const TIER_ORDER = ["klein", "midden", "groot"];
-function poolFor(tier) {
-  const i = TIER_ORDER.indexOf(tier);
-  /* Een onbekende stand -- opslag van een oude versie, of stuk -- valt terug
-     op de makkelijkste. Hier stond DECKS[tier] zonder controle, en dat wierp
-     bij zo'n waarde een fout op tijdens het opbouwen van het scherm. */
-  const tot = i < 0 ? 1 : i + 1;
-  return TIER_ORDER.slice(0, tot).reduce((a, t) => a.concat(DECKS[t]), []);
-}
-
-/* poolFor() zegt wat er in een stand zit; bakFor() zegt waar écht uit
-   getrokken wordt -- dat is die stand minus wat de volwassene weggelegd
-   heeft. Alles wat een potje aanraakt loopt via bakFor(); poolFor() blijft
-   zuiver, want test/deck.test.js gebruikt hem om de kaarten zelf te keuren
-   en die keuring hoort niet af te hangen van wat er thuis weggelegd is. */
-function bakFor(tier) {
-  const weg = new Set(settings.hidden);
-  return poolFor(tier).filter(c => !weg.has(c[1]));
-}
-
-/* De bak mag nooit onder deze grens zakken. Niet omdat het spel dan stukgaat
-   -- 32 kaarten zijn er genoeg voor een potje -- maar omdat elk potje dan
-   ongeveer dezelfde kaarten trekt, en dat merk je pas de derde avond.
-   Veertig is 32 (het langste potje) plus lucht. */
-const MIN_BAK = 40;
-
-/* De controle gaat over álle drie de standen, ook de stand waar je nu niet
-   in zit. Anders leg je op Medium -- 183 kaarten, ruim zat -- vijftig
-   makkelijke kaarten weg en sta je later op Makkelijk voor een lege bak,
-   zonder dat er ooit iets gewaarschuwd heeft. */
-function canHide(word) {
-  const weg = new Set(settings.hidden); weg.add(word);
-  return TIER_ORDER.every(t =>
-    poolFor(t).filter(c => !weg.has(c[1])).length >= MIN_BAK);
-}
-
-function drawDeck(tier, size) {
-  return shuffle(bakFor(tier)).slice(0, size);
-}
+/* De kaartregels staan in de spelkern; deze vier binden er DECKS en de
+   weggelegde kaarten aan. poolFor() blijft zuiver -- test/deck.test.js keurt
+   er de kaarten zelf mee, los van wat er thuis weggelegd is. */
+const TIER_ORDER = Spel.TIER_ORDER;
+const MIN_BAK = Spel.MIN_BAK;
+const shuffle = a => Spel.shuffle(a);
+const poolFor = tier => Spel.poolFor(DECKS, tier);
+const bakFor = tier => Spel.bakFor(DECKS, tier, settings.hidden);
+const canHide = word => Spel.canHide(DECKS, settings.hidden, word);
+const drawDeck = (tier, size) => Spel.drawDeck(DECKS, tier, size, settings.hidden);
 
 /* ==============================================================
    4. SCHERMEN
@@ -4775,28 +4847,11 @@ function newGame() {
      Door pas hier te trekken bestaat er geen greep meer die alvast getoond
      kan worden en dus ook niet meer verouderen kan. Wat er te kiezen valt,
      staat in de bak (zie bakFor) en dat is een keuze die blijft staan. */
-  const deck = drawDeck(settings.tier, settings.size);
-  G = {
-    deck: deck,
-    pile: shuffle(deck.map((_, i) => i)),
-    card: null,
-    round: 1,
-    /* Geloot, en dat was het niet. Dit stond op 0, dus Vos opende elk potje
-       van elke avond -- en na een herlaadbeurt weer. Aan een tafel waar twee
-       kinderen elk hun mascotte gekozen hebben is dat het eerste
-       meningsverschil van de avond, en het enige oneerlijke in de app: al het
-       andere is hooguit moeilijk.
-
-       De uitkomst valt hier, vóór er iets te zien is. De worp op het
-       overdrachtscherm (zie tossTeams) is alleen de weergave ervan: gaat die
-       niet af -- beperkte beweging, een tik ertussendoor, een ander scherm --
-       dan verandert dat niets aan wie begint. */
-    team: Math.random() < .5 ? 0 : 1,
-    scores: [[0, 0, 0], [0, 0, 0]],   // [ploeg][ronde]
-    gained: 0,
-    pendingMs: settings.secs * 1000,  // wat de volgende beurt meekrijgt
-    secs: settings.secs
-  };
+  /* Hier, en nergens anders, worden de kaarten van dit potje getrokken:
+     een greep die eerder klaarligt, kan verouderen. Wie begint wordt hier
+     geloot; de worp op het overdrachtscherm (tossTeams) toont alleen de
+     uitkomst. */
+  G = Spel.nieuw(drawDeck(settings.tier, settings.size), settings.secs);
   // Alleen de allereerste overdracht van een potje toont de worp; bij een
   // rondewissel is allang bekend wie er speelt.
   tossPending = true;
@@ -4805,7 +4860,7 @@ function newGame() {
   handoff("round");
 }
 
-function total(t) { return G.scores[t].reduce((a, b) => a + b, 0); }
+function total(t) { return Spel.total(G, t); }
 
 /* Dezelfde tekstballon in het groot, met het aantal woorden erin dat
    terugloopt naar nul. De ballon uit de balk tijdens het spelen is
@@ -5225,12 +5280,11 @@ let countRaf = null;
 function startTurn() {
   // De worp kan nog lopen als er meteen op start getikt wordt.
   landToss();
-  G.gained = 0;
+  Spel.beurtKlaar(G);
   const t = TEAMS[G.team];
   $("#plMascot").firstElementChild.setAttribute("href", t.mascot);
   paintRound($("#plRoundChip .ico"), "chip", $("#plRoundChip"));
   $("#s-play").style.setProperty("--team", t.color);
-  G.card = null;
   $("#glyph").textContent = "";   // leeg tot nul: niemand leest de kaart vooraf
   // Het punt achter de vórige beurt weer weghalen (zie timeUp en
   // #s-play.over). Hier en niet in turnEnd(): daar staat het scherm nog in
@@ -5406,7 +5460,7 @@ function beginTurn() {
   nextCard(null);
   syncControls();
   const totalMs = G.secs * 1000;
-  const ms = G.pendingMs > 0 ? G.pendingMs : totalMs;
+  const ms = Spel.beurtMs(G);
   deadline = performance.now() + ms;
   /* Niet op 0: dan is de eerste tik meteen raak en valt hij boven op het
      startsein, en die tik markeert dan geen verstreken seconde maar niets.
@@ -5451,8 +5505,11 @@ function remaining() { return Math.max(0, deadline - performance.now()); }
 
 /* ---------- kaarten ---------- */
 function nextCard(how) {
-  if (!G.pile.length) { G.card = null; return; }
-  G.card = G.pile.shift();
+  Spel.trek(G);
+  paintCard(how);
+}
+function paintCard(how) {
+  if (G.card === null) return;
   $("#glyph").textContent = G.deck[G.card][0];
   $("#cardWord").textContent = G.deck[G.card][1];
   if (how) {
@@ -5523,7 +5580,7 @@ function syncControls() {
    laatste kaart blijft er niets over -- die ligt plat op tafel, en dat is
    precies de boodschap. */
 function paintStack() {
-  const left = G ? G.pile.length + (G.card === null ? 0 : 1) : 0;
+  const left = G ? Spel.over(G) : 0;
   const total = G ? Math.max(1, G.deck.length) : 1;
   // 3 kaarten eronder bij een volle stapel, geen enkele bij de laatste.
   const layers = Math.min(3, Math.max(0, Math.round(((left - 1) / total) * 3)));
@@ -5671,41 +5728,25 @@ $("#btnGoed").addEventListener("click", () => {
   // eerste kaart de grondtoon krijgt.
   Snd.goed(G.gained);
   Tril.tik();
-  G.scores[G.team][G.round - 1]++;
-  G.gained++;
+  const { leeg } = Spel.geraden(G);
   /* Het getal zelf gaat pas omhoog als het punt aankomt (zie landFly).
-     Meten moet wél op de nieuwe stand -- het label verschijnt bij de
-     eerste kaart en wordt breder bij de tiende, en het punt moet landen
-     waar het straks écht staat -- dus dat gebeurt op een label dat even
-     vooruit geschilderd en meteen weer teruggezet wordt. */
+     Meten moet wél op de nieuwe stand, dus meetTurnScore() schildert even
+     vooruit en zet meteen terug. */
   const from = midden("#card");
-  const klaar = !G.pile.length;
   flyGain(from, meetTurnScore());
-  if (klaar) {
-    /* De beste uitkomst van een beurt was de enige zonder eigen adempauze:
-       endRound() liep hier synchroon door in dezelfde tik, en show() (diep
-       in handoff()) snijdt een nog lopende vlucht af -- zie landFly() in
-       show(). Het punt van de laatste kaart landde dus nooit zichtbaar,
-       terwijl elke andere kaart die wip wel krijgt. G.card gaat net als bij
-       timeUp() vast op null: dezelfde vlag waar acts() en openPause() al op
-       controleren, zodat er niets tussen kan komen terwijl het punt
-       onderweg is. Zonder animatie (flyAnim staat dan al op null, zie
-       flyGain) is er niets om op te wachten. */
-    G.card = null;
-    /* En de klok gaat hier stil, niet pas in endRound(). Die wacht op de
-       vlucht, en liep de tijd in die 220 ms af, dan ging ook timeUp() af:
-       twee eindes voor één beurt. Het scherm sprong van de rondewissel
-       naar een beurtwissel voor de andere ploeg, en in ronde 3 viel
-       turnEnd() over een G die winner() al had opgeruimd. Wat er
-       meegaat is de tijd op het moment van de tik -- de kaart is dan
-       geraden, de vlucht is alleen nog de weergave. */
+  if (leeg) {
+    /* De laatste kaart: G.card staat nu op null, dezelfde vlag waar acts()
+       en openPause() op letten, zodat er niets tussen kan komen terwijl het
+       punt onderweg is. De klok gaat hier al stil, en de rest telt vanaf
+       de tik: liep de tijd tijdens de vlucht af, dan kwamen er anders twee
+       eindes voor één beurt. */
     const rest = remaining();
     stopClock();
     if (flyAnim) flyAnim.onfinish = () => { landFly(); endRound(rest); };
     else endRound(rest);
     return;
   }
-  nextCard("goed");
+  paintCard("goed");
   syncControls();
 });
 
@@ -5718,8 +5759,8 @@ $("#btnPas").addEventListener("click", () => {
   if (!acts("pas")) return;
   Snd.pas();
   Tril.pas();
-  G.pile.push(G.card);      // onderop, zonder straf
-  nextCard("pas");
+  Spel.passen(G);           // onderop, zonder straf
+  paintCard("pas");
   syncControls();
 });
 
@@ -5728,9 +5769,7 @@ function timeUp() {
   stopClock(); releaseWake();
   Snd.timeUp();
   Tril.om();
-  if (G.card !== null) G.pile.push(G.card);   // onafgemaakte kaart terug
-  G.card = null;
-  G.pendingMs = 0;
+  Spel.tijdOm(G);           // onafgemaakte kaart terug op de stapel
   /* Het punt achter de beurt: de baan sluit, het papier koelt af, de kaart
      zakt in en de twee knoppen gaan uit. Zie
      #s-play.over voor het waarom -- kort: deze 700 ms zag er tot nu toe
@@ -5909,19 +5948,9 @@ function turnEnd() {
      al gewonnen is -- een beurt die al beëindigd is, beëindigt hij niet
      nog eens. */
   if (!G || current !== "play") return;
-  const freshA = G.team === 0 ? G.gained : 0;
-  const freshB = G.team === 1 ? G.gained : 0;
-  /* Eén cue voor de hele buit in plaats van een tik per punt: er staat ook
-     maar één "+N" op het scherm. turnEnd() loopt zelf al 700 ms na Snd.timeUp()
-     (zie de setTimeout in timeUp()) -- de horen is dan al uitgeklonken, dus
-     hoeft haul() niet nog eens apart te wachten. Hier stond een eigen
-     vertraging van 450 ms uit de tijd dat turnEnd() nog synchroon liep; met
-     die 700 ms erbovenop kwam het geluid drie kwart seconde ná het label dat
-     het moest bevestigen. Nu speelt hij samen met het scherm dat 'm toont. */
+  /* Eén cue voor de hele buit, samen met het scherm dat hem toont. */
   if (G.gained) Snd.haul(G.gained);
-  G.team = 1 - G.team;
-  G.pendingMs = 0;
-
+  const [freshA, freshB] = Spel.beurtWissel(G);
   handoff("turn", freshA, freshB);
 }
 
@@ -5930,39 +5959,16 @@ function turnEnd() {
    ronde-intro) die geen van beide iets bewaakten. Nu vult dit meteen het
    overdrachtscherm, in de "round"-stand: geen ploegwissel, dus geen
    mascotte-onthulling, wel de nieuwe regel groot in beeld. */
-/* Onder de drie seconden is meegenomen tijd geen beurt meer: na drie
-   tellen aftellen flitst de kaart op en is de tijd al om. Wie de stapel
-   leegspeelde krijgt dan toch een echte beurt; het is een beloning, en
-   een beloning die niets oplevert leest als een fout. */
-const MIN_CARRY = 3000;
-
 function endRound(rest) {
   stopClock(); releaseWake();
-  // Klassieke regel: de resterende tijd gaat mee naar de eerste
-  // beurt van de volgende ronde, voor dezelfde ploeg. Daarom loont
-  // het om de stapel leeg te spelen. De tijd komt van de tik op de
-  // laatste kaart (zie #btnGoed), niet van nu: de klok staat al stil.
-  G.pendingMs = rest > 0 ? Math.max(MIN_CARRY, Math.round(rest)) : 0;
-  G.card = null;
-
-  // Laatste ronde: winner() laat zo meteen de fanfare horen, en die moet
-  // alleen klinken. Elders is leeggespeeld zelf al de beste uitkomst van
-  // een beurt en verdient een eigen cue.
-  if (G.round >= ROUNDS) { winner(); return; }
+  /* De resterende tijd gaat mee naar dezelfde ploeg (zie Spel.rondeEinde);
+     rest komt van de tik op de laatste kaart, de klok staat al stil. */
+  const { uit, vers } = Spel.rondeEinde(G, rest);
+  // Laatste ronde: de fanfare van winner() moet alleen klinken.
+  if (uit) { winner(); return; }
   Snd.leeg();
   Tril.leeg();
-
-  /* Wat de béurt opleverde, niet wat de hele ronde opleverde. Dit is
-     hetzelfde label als bij turnEnd(), op dezelfde plek, in dezelfde kleur --
-     en het stond hier voor een andere grootheid. Aan tafel las dat als één
-     monsterbeurt: "+3", "+3", dan ineens "+32". Er is geen kanaal dat het
-     verschil verraadde, dus het getal moet gewoon hetzelfde ding tellen.
-     Het rondetotaal is niet verdwenen; dat staat in de stand ernaast. */
-  const freshA = G.team === 0 ? G.gained : 0, freshB = G.team === 1 ? G.gained : 0;
-
-  G.round++;
-  G.pile = shuffle(G.deck.map((_, i) => i));
-  handoff("round", freshA, freshB);
+  handoff("round", vers[0], vers[1]);
 }
 
 
@@ -6018,9 +6024,7 @@ function tallyNode(t) {
 }
 
 // Een ronde telt mee zodra er in gespeeld is (of iemand er punten haalde).
-function playedRound(r) {
-  return r < G.round || G.scores[0][r - 1] > 0 || G.scores[1][r - 1] > 0;
-}
+function playedRound(r) { return Spel.gespeeld(G, r); }
 
 /* ---------- winnaar ----------
    Er stonden twee dezelfde dieren op dit scherm: een grote juichende
@@ -6029,8 +6033,7 @@ function playedRound(r) {
    even hard -- dat leest als "samen", waar de zandloper-met-confetti
    eerder als "niemand" las. */
 function winner() {
-  const a = total(0), b = total(1);
-  const win = a === b ? null : (a > b ? 0 : 1);
+  const win = Spel.winnaar(G);
   const box = $("#wnPiles");
   box.textContent = "";
   const nodes = [0, 1].map(t => tallyNode(t));
