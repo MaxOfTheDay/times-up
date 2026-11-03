@@ -1941,7 +1941,10 @@ input[type=range]::-moz-range-thumb {
 /* Wat de beurt opleverde, nog één keer en groter, voor de ploeg die hem
    speelde. Op het spelscherm en niet op de overdracht: dat scherm is van de
    ploeg erna. */
-#turnScore { transform-origin: 0% 50%; }
+/* Ook de knop om een geraden kaart terug te nemen (zie TERUG_MS): het
+   label blijft klein, de tikzone niet. */
+#turnScore { transform-origin: 0% 50%; position: relative; cursor: pointer; }
+#turnScore::after { content: ""; position: absolute; inset: -14px -12px; }
 #s-play.over #turnScore:not([hidden]) {
   animation: buit calc(.5s / max(var(--dur), .001)) var(--e-pop) calc(.15s / max(var(--dur), .001)) both;
 }
@@ -2301,8 +2304,10 @@ input[type=range]::-moz-range-thumb {
         <li><b>Uitbeelden</b> — niet praten.</li>
       </ol>
       <p>Goed geraden? <b>1 punt</b> en meteen door. Passen mag.</p>
-      <p>Is de stapel leeg? Dan begint de volgende ronde met dezelfde kaarten.
-        <b>De resterende tijd gaat mee.</b></p>
+      <p>Is de stapel leeg? Dan begint de andere ploeg de volgende ronde, met
+        dezelfde kaarten.</p>
+      <p>Te vroeg op goed getikt? Tik meteen op het groene <b>+</b>-getal bovenaan:
+        het punt gaat eraf en de kaart komt terug.</p>
     </details>
 
     <!-- De vierde groep, de enige die niet over het spel gaat. Onderaan, want
@@ -2594,6 +2599,8 @@ input[type=range]::-moz-range-thumb {
      team      0 (Vos) | 1 (Uil)       wie er aan zet is
      scores    [ploeg][ronde]
      gained    geraden in deze beurt
+     vorige    index | null           de laatst geraden kaart, zolang je
+                                      die nog terug kunt nemen
      pendingMs tijd die de volgende beurt meekrijgt (0 = een volle beurt)
      secs      seconden per beurt
    ============================================================== */
@@ -2603,8 +2610,6 @@ const Spel = (() => {
   /* Onder de veertig trekt elk potje ongeveer dezelfde kaarten:
      32 (het langste potje) plus lucht. */
   const MIN_BAK = 40;
-  /* Een rest van minder is na het aftellen geen beurt meer. */
-  const MIN_CARRY = 3000;
   /* Een potje duurt een avond; na twee uur hoort het niet meer terug
      te komen. */
   const GAME_MAX_AGE = 2 * 60 * 60 * 1000;
@@ -2651,6 +2656,7 @@ const Spel = (() => {
       team: rand() < .5 ? 0 : 1,
       scores: [[0, 0, 0], [0, 0, 0]],
       gained: 0,
+      vorige: null,
       pendingMs: secs * 1000,
       secs: secs
     };
@@ -2660,7 +2666,7 @@ const Spel = (() => {
   function over(G) { return G.pile.length + (G.card === null ? 0 : 1); }
 
   /* Een beurt die nog moet beginnen: geen kaart in beeld, niets verdiend. */
-  function beurtKlaar(G) { G.gained = 0; G.card = null; }
+  function beurtKlaar(G) { G.gained = 0; G.card = null; G.vorige = null; }
   /* Hoe lang de beurt duurt die nu begint. */
   function beurtMs(G) { return G.pendingMs > 0 ? G.pendingMs : G.secs * 1000; }
 
@@ -2670,13 +2676,27 @@ const Spel = (() => {
   }
 
   /* Geraden: een punt, en de volgende kaart. Was dit de laatste, dan is
-     de ronde om -- de aanroeper beslist met de resterende tijd. */
+     de ronde om. */
   function geraden(G) {
     G.scores[G.team][G.round - 1]++;
     G.gained++;
-    if (!G.pile.length) { G.card = null; return { leeg: true }; }
+    if (!G.pile.length) { G.card = null; G.vorige = null; return { leeg: true }; }
+    G.vorige = G.card;
     trek(G);
     return { leeg: false };
+  }
+
+  /* Te vroeg op goed getikt: het punt eraf en de kaart terug in beeld. De
+     kaart die er nu lag gaat bovenop de stapel, zodat ze meteen weer komt.
+     Eén stap terug, niet meer; hoe lang dat mag beslist de aanroeper. */
+  function terug(G) {
+    if (G.vorige === null || G.card === null) return false;
+    G.scores[G.team][G.round - 1]--;
+    G.gained--;
+    G.pile.unshift(G.card);
+    G.card = G.vorige;
+    G.vorige = null;
+    return true;
   }
 
   /* Passen: onderop, zonder straf. De laatste kaart kun je niet passen. */
@@ -2691,6 +2711,7 @@ const Spel = (() => {
   function tijdOm(G) {
     if (G.card !== null) G.pile.push(G.card);
     G.card = null;
+    G.vorige = null;
     G.pendingMs = 0;
   }
 
@@ -2703,14 +2724,18 @@ const Spel = (() => {
     return vers;
   }
 
-  /* De stapel is leeg. De resterende tijd gaat mee naar dezelfde ploeg,
-     minstens MIN_CARRY. Na de laatste ronde is het potje uit. */
-  function rondeEinde(G, rest, rnd) {
+  /* De stapel is leeg. De andere ploeg opent de volgende ronde, met een
+     volle beurt: wie de stapel leeg speelde, mocht niet ook nog de volgende
+     ronde beginnen, anders zat één ploeg soms drie rondes te kijken. Na de
+     laatste ronde is het potje uit. */
+  function rondeEinde(G, rnd) {
     const vers = [G.team === 0 ? G.gained : 0, G.team === 1 ? G.gained : 0];
-    G.pendingMs = rest > 0 ? Math.max(MIN_CARRY, Math.round(rest)) : 0;
+    G.pendingMs = 0;
     G.card = null;
+    G.vorige = null;
     if (G.round >= ROUNDS) return { uit: true, vers: vers };
     G.round++;
+    G.team = 1 - G.team;
     G.pile = shuffle(G.deck.map((_, i) => i), rnd);
     return { uit: false, vers: vers };
   }
@@ -2752,17 +2777,17 @@ const Spel = (() => {
       G: {
         deck: g.deck, pile: g.pile, card: null,
         round: g.round, team: g.team, scores: g.scores,
-        gained: 0,
+        gained: 0, vorige: null,
         pendingMs: g.pendingMs, secs: g.secs
       }
     };
   }
 
   return {
-    ROUNDS, TIER_ORDER, MIN_BAK, MIN_CARRY, GAME_MAX_AGE,
+    ROUNDS, TIER_ORDER, MIN_BAK, GAME_MAX_AGE,
     shuffle, poolFor, bakFor, canHide, drawDeck,
     nieuw, total, over, beurtKlaar, beurtMs, trek,
-    geraden, passen, tijdOm, beurtWissel, rondeEinde,
+    geraden, terug, passen, tijdOm, beurtWissel, rondeEinde,
     winnaar, gespeeld, herstel
   };
 })();
@@ -3610,11 +3635,9 @@ function handoff(mode, freshA, freshB) {
 
   /* Wat je meekrijgt: kaarten op de stapel en seconden, altijd in beeld,
      zodat het teken elke keer hetzelfde betekent. Bij een rondewissel staat
-     er de hele bak; tussen twee beurten telt hij af. */
-  const carried = G.pendingMs > 0 && G.pendingMs <= G.secs * 1000 - 1000;
-  const secs = carried ? Math.ceil(G.pendingMs / 1000) : G.secs;
+     er de hele bak; tussen twee beurten telt hij af. Elke beurt is vol. */
+  const secs = G.secs;
   $("#hoSecs").querySelector("span").textContent = secs;
-  $("#hoSecs").classList.toggle("kort", carried);
   $("#hoCards").querySelector("span").textContent = G.pile.length;
   $("#hoCards").classList.toggle("kort", G.pile.length <= 5);
   $("#hoRoundCard").setAttribute("aria-label",
@@ -4172,13 +4195,11 @@ $("#btnGoed").addEventListener("click", () => {
   if (leeg) {
     /* De laatste kaart: G.card staat nu op null, dezelfde vlag waar acts()
        en openPause() op letten, zodat er niets tussen kan komen terwijl het
-       punt onderweg is. De klok gaat hier al stil, en de rest telt vanaf
-       de tik: liep de tijd tijdens de vlucht af, dan kwamen er anders twee
-       eindes voor één beurt. */
-    const rest = remaining();
+       punt onderweg is. De klok gaat hier al stil: liep de tijd tijdens de
+       vlucht af, dan kwamen er anders twee eindes voor één beurt. */
     stopClock();
-    if (flyAnim) flyAnim.onfinish = () => { landFly(); endRound(rest); };
-    else endRound(rest);
+    if (flyAnim) flyAnim.onfinish = () => { landFly(); endRound(); };
+    else endRound();
     return;
   }
   paintCard("goed");
@@ -4197,6 +4218,23 @@ $("#btnPas").addEventListener("click", () => {
   kaartSpook("pas");
   Spel.passen(G);           // onderop, zonder straf
   paintCard("pas");
+  syncControls();
+});
+
+/* Te vroeg op goed getikt: tik binnen TERUG_MS op het groene +N en het punt
+   gaat eraf, de kaart komt terug. Geen eigen knop en geen tekst: het label
+   dat het punt kreeg, neemt het ook weer af. Het venster is kort, zodat een
+   ploeg aan het eind van de beurt niet zijn hele buit kan terugdraaien. */
+const TERUG_MS = 3000;
+$("#turnScore").addEventListener("click", () => {
+  if (current !== "play" || !G || G.card === null || paused()) return;
+  if (performance.now() - lastAct.goed > TERUG_MS) return;
+  landFly();
+  if (!Spel.terug(G)) return;
+  lastAct.goed = 0;
+  Snd.pas(); Tril.pas();
+  paintTurnScore();
+  paintCard("goed");
   syncControls();
 });
 
@@ -4400,11 +4438,10 @@ function turnEnd() {
   handoff("turn", freshA, freshB);
 }
 
-function endRound(rest) {
+function endRound() {
   stopClock(); releaseWake();
-  /* De resterende tijd gaat mee naar dezelfde ploeg (zie Spel.rondeEinde);
-     rest komt van de tik op de laatste kaart, de klok staat al stil. */
-  const { uit, vers } = Spel.rondeEinde(G, rest);
+  /* De andere ploeg opent de volgende ronde (zie Spel.rondeEinde). */
+  const { uit, vers } = Spel.rondeEinde(G);
   /* Een tel voor de stapel die leeg is: de plek van de kaart is leeg, de
      mascotte juicht. Daarna de overdracht, of bij de laatste ronde de
      eindstand -- de fanfare van winner() moet dan alleen klinken. */

@@ -172,6 +172,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
 
     // Twee tikken vlak na elkaar zijn één vinger, geen twee kaarten.
     await noteCard();
+    const geraden = await game(() => window.__tijd.G.card);
     const scoreBefore = await game(() => window.__tijd.G.scores[window.__tijd.G.team][window.__tijd.G.round - 1]);
     await page.click('#btnGoed');
     await page.click('#btnGoed');
@@ -179,6 +180,19 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     const scoreAfter = await game(() => window.__tijd.G.scores[window.__tijd.G.team][window.__tijd.G.round - 1]);
     ok(scoreAfter - scoreBefore === 1,
        `dubbele tik telde ${scoreAfter - scoreBefore} punten in plaats van 1`);
+
+    // Een tik op het groene +N neemt die kaart terug, één keer.
+    if (round === 1) {
+      await page.click('#turnScore');
+      await page.waitForTimeout(320);
+      ok(await game(() => window.__tijd.G.scores[window.__tijd.G.team][0]) === scoreBefore,
+         'terugnemen haalde het punt er niet af');
+      ok(await game(() => window.__tijd.G.card) === geraden,
+         'terugnemen legde de geraden kaart niet terug in beeld');
+      ok(await page.isHidden('#turnScore'), 'het +N blijft staan op nul');
+      await page.click('#btnGoed');
+      await page.waitForTimeout(320);
+    }
 
     // Ruim boven de dubbeltik-drempel van 280 ms: sneller dan dat is geen mens.
     for (let i = 0; i < 40; i++) {
@@ -198,10 +212,9 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     const st = await screen();
     ok(st === (round < 3 ? 'handoff' : 'winner'), `ronde ${round} eindigde op ${st}`);
     if (round < 3) {
-      ok(await game(() => window.__tijd.G.pendingMs) > 0, 'resterende tijd wordt niet doorgegeven');
+      ok(await game(() => window.__tijd.G.pendingMs) === 0, 'een nieuwe ronde begint niet met een volle beurt');
       // Het "+N" is weg; wat een rondewissel nu meldt zijn de twee tellers.
-      // De stapel is opnieuw geschud, dus die staat weer op de hele bak --
-      // en de secondenteller draagt de tijd die is meegegaan.
+      // De stapel is opnieuw geschud, dus die staat weer op de hele bak.
       ok(await page.textContent('#hoCards span') === '16',
          `ronde ${round}: de kaartenteller staat niet terug op de hele bak`);
       const mee = Number(await page.textContent('#hoSecs span'));
@@ -359,16 +372,13 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(await screen() === 'handoff', 'laatste kaart op de bel: niet op het overdrachtscherm');
   ok(await game(() => window.__tijd.G.round) === 2,
      'laatste kaart op de bel: de ronde is niet (precies één keer) doorgeschoven');
-  ok(await game(() => window.__tijd.G.team) === team,
-     'laatste kaart op de bel: de beurt ging alsnog naar de andere ploeg');
+  ok(await game(() => window.__tijd.G.team) === 1 - team,
+     'laatste kaart op de bel: de andere ploeg opent de volgende ronde niet');
   ok(await page.$('#s-handoff.mode-round') !== null,
      'laatste kaart op de bel: de rondewissel werd een beurtwissel');
-  // Wat er overbleef was minder dan drie tellen; dat wordt afgerond naar drie,
-  // anders volgt er op drie tellen aftellen een beurt die al om is.
-  ok(await game(() => window.__tijd.G.pendingMs) === 3000,
-     'meegenomen tijd onder de drie seconden wordt niet afgerond naar drie');
-  ok(await page.textContent('#hoSecs span') === '3',
-     'de secondenteller toont de afgeronde meegenomen tijd niet');
+  // Er gaat geen tijd mee: de andere ploeg krijgt een volle beurt.
+  ok(await page.textContent('#hoSecs span') === String(await game(() => window.__tijd.G.secs)),
+     'de secondenteller toont geen volle beurt na een rondewissel');
 
   await lastCardAtBuzzer(3);
   ok(await screen() === 'winner', 'laatste kaart op de bel in ronde 3: geen winnaarsscherm');

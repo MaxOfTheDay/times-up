@@ -51,14 +51,14 @@ iedereen ze half uit het hoofd, en beginnen de jongsten te winnen.
 Tussen twee beurten krijg je het toestel aangereikt op één scherm: de stand,
 de opdracht en één knop. Een tik telt af van drie — genoeg om je klaar te
 zetten, en genoeg om een strijkende vinger tijdens het doorgeven op te
-vangen. Tik tijdens het aftellen om terug te gaan. De kaart blijft tot nul
+vangen. Terug kan tijdens het aftellen met de tegel rechtsboven. De kaart blijft tot nul
 toe verborgen.
 
 Geraden kaart is een punt en meteen de volgende. Passen mag, zonder straf:
 de kaart gaat onderaan terug. Loopt de stapel leeg, dan stopt de ronde
-meteen — ook midden in een beurt — en gaat de resterende tijd mee naar de
-eerste beurt van de volgende ronde, voor dezelfde ploeg. Minstens drie
-seconden: minder is na het aftellen geen beurt meer.
+meteen — ook midden in een beurt — en opent de andere ploeg de volgende
+ronde, met een volle beurt. Te vroeg op goed getikt? Tik binnen drie tellen
+op het groene +-getal bovenaan: het punt gaat eraf en de kaart komt terug.
 
 De instellingen (het knopje rechtsboven op de titel) regelen de
 moeilijkheid, het aantal kaarten per potje, de tijd per beurt, het geluid en
@@ -139,13 +139,13 @@ npm test
 ```
 
 `test/kern.test.js` toetst de spelregels zelf, zonder browser en in
-milliseconden: trekken, raden, passen, de beurt- en rondewissel met de
-overgedragen tijd, de winnaar en het terugzetten van een bewaard potje
+milliseconden: trekken, raden, passen, de beurt- en rondewissel, een
+geraden kaart terugnemen, de winnaar en het terugzetten van een bewaard potje
 (`npm run test:kern`).
 `test/deck.test.js` bewaakt de kaartregels: het aantal, dubbels over alle
 standen heen, dat elke stand alles eronder bevat, en of elke emoji tekent.
 `test/game.test.js` speelt een volledig potje in een echte browser: de drie
-rondes, passen, de klok die afloopt, de ploegwissel, de overgedragen tijd, dat
+rondes, passen, de klok die afloopt, de ploegwissel, de rondewissel naar de andere ploeg, dat
 een herlaadbeurt midden in een beurt terugkomt op de overdracht ervoor, de
 terugveeg, pauzeren en stoppen, de laatste kaart op de bel, en wegklikken
 tijdens een beurt of het aftellen. Die duurt anderhalve tot twee minuten,

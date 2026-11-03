@@ -55,7 +55,7 @@ deze repo.
 
 - **`<script id="spelkern">`** definieert `Spel`: de spelregels, zonder DOM,
   geluid, klok of opslag. Trekken, raden, passen, beurtwissel, rondewissel
-  met overgedragen tijd, de winnaar, en `herstel()` voor een bewaard potje.
+  (de andere ploeg opent), een geraden kaart terugnemen, de winnaar, en `herstel()` voor een bewaard potje.
   De kaartregels (`poolFor`, `bakFor`, `canHide`, `drawDeck`) staan er ook,
   met `DECKS` en de weggelegde kaarten als argument.
 - **het hoofdscript** doet de rest: schermen, klok, geluid, trilling,

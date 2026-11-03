@@ -342,10 +342,9 @@ over.
 De twee wissels vragen het tegenovergestelde, en dát is wat het verschil
 tussen de twee standen moet dragen. Bij een **beurtwissel** gaat het toestel
 écht van hand: `turnEnd()` draait `G.team` om, en "wie krijgt hem" is dan het
-enige waar het scherm voor bestaat. Bij een **rondewissel** blijft het toestel
-in dezelfde handen -- `endRound()` raakt `G.team` niet aan, want de
-resterende tijd gaat mee naar dezelfde ploeg -- en is de nieuwe regel het
-nieuws.
+enige waar het scherm voor bestaat. Bij een **rondewissel** gaat het toestel
+ook van hand -- de andere ploeg opent de nieuwe ronde (zie "Een nieuwe ronde
+opent de andere ploeg") -- maar is de nieuwe regel het grootste nieuws.
 
 Het verschil zat lang in de **dichtheid van vak 2**: compact bij een
 beurtwissel, uitgeklapt bij een rondewissel. Dat kanaal zegt over de handeling
@@ -1138,6 +1137,35 @@ De standen zijn niet af te dwingen in een test -- `beforeinstallprompt`
 vuurt alleen in een echte browser met een echt profiel, en iOS al helemaal
 niet. `toonInstall` staat daarom onder `?debug` in `window.__tijd`, zodat je
 ze allemaal kunt fotograferen zonder opstartvlaggen.
+
+## Een nieuwe ronde opent de andere ploeg
+
+De resterende tijd ging bij een lege stapel mee naar dezelfde ploeg, zoals in
+het bordspel. Aan een tafel met kleine kinderen pakte dat slecht uit: wie de
+stapel leeg speelde, opende ook de volgende ronde, en in een gespeeld potje op
+de telefoon begon Vos alle drie de rondes en won met 43 tegen 5, terwijl Uil
+één korte beurt had. Stilzitten is voor een kind van vijf de snelste manier
+om af te haken.
+
+Nu draait `Spel.rondeEinde()` de ploeg om en geeft een volle beurt; de rest
+van de tijd vervalt. Dat haalt ook `MIN_CARRY` weg, de ondergrens van drie
+tellen voor een beurt die anders na het aftellen al om was. De overdracht
+toont bij elke wissel dezelfde volle seconden.
+
+## Een geraden kaart kun je terugnemen
+
+Met een kleuter aan het toestel is een te vroege tik op "goed" de meest
+gemaakte fout, en de volwassene kon hem alleen wegwuiven. `Spel.terug()`
+haalt het laatste punt eraf en legt de kaart weer in beeld; de kaart die er
+lag gaat bovenop de stapel. Eén stap, niet meer (`G.vorige`), en niet na tijd
+om, een lege stapel of een nieuwe beurt.
+
+Geen eigen knop en geen tekst: je tikt op het groene `+N` in de balk, het
+label dat het punt kreeg neemt het ook weer af. De tikzone is groter dan het
+label (`::after`). Het venster is `TERUG_MS` (3 s) na de laatste tik op goed,
+zodat een ploeg aan het eind van haar beurt geen buit kan terugdraaien; hoe
+lang beslist het hoofdscript, niet de spelkern. Uitgelegd staat het alleen
+in de regels op het instellingenscherm, voor de volwassene.
 
 ## Het instellingenscherm
 
