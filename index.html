@@ -1698,6 +1698,13 @@ input[type=range]::-moz-range-thumb {
   animation: cheer calc(.9s / max(var(--dur), .001)) ease-in-out infinite;
 }
 .tally.winner .crown { width: 64px; top: -34px; }
+/* Dezelfde breedte als de opdrachtkaart op de overdracht. Bovenaan ruimte
+   voor de kroon: die valt ín de kaart, niet door haar rand. */
+#wnPiles.wn-kaart {
+  box-sizing: border-box; width: min(88vw, 24rem);
+  padding: max(40px, min(6vh, 52px)) min(5vw, 22px) var(--s-4);
+  justify-content: space-around;
+}
 /* Bij gelijkspel juichen ze allebei, even groot. */
 #s-winner[data-draw="1"] .tally .mascot-sm { width: min(34vw, 12vh, 130px); }
 
@@ -1774,6 +1781,7 @@ input[type=range]::-moz-range-thumb {
      knop naar een tweede regel en viel het scherm in losse eilanden uiteen
      met een lege band ertussen. */
   .side-by-side { width: min(38vw, 300px); gap: var(--s-1) var(--s-2); }
+  #wnPiles.wn-kaart { width: min(46vw, 340px); padding: 30px var(--s-3) var(--s-2); }
   .tally { width: min(17vw, 132px); }
   .tally .crown { width: 32px; top: -20px; }
   .tally .mascot-sm { width: min(52px, 13vh); }
@@ -2510,7 +2518,10 @@ input[type=range]::-moz-range-thumb {
   <!-- Geen losse juichende mascotte meer bovenaan: die stond als tweede
        exemplaar van hetzelfde dier boven de gekroonde in de stand. De
        winnaar groeit nu in de stand zelf. -->
-  <div class="side-by-side" id="wnPiles"></div>
+  <!-- Op papier, zoals de stand op de overdracht en in de pauze: elk
+       scherm tussen twee beurten is een kaart met de gouden knop eronder.
+       Rechtstreeks op de stralen stonden de cijfers op ploegkleur. -->
+  <div class="side-by-side surface wn-kaart" id="wnPiles"></div>
   <button class="btn-go" id="btnAgain" aria-label="Nog een keer">
     <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-play"/></svg>
   </button>
@@ -4998,7 +5009,7 @@ if (location.search.indexOf("debug") !== -1) {
     get settings() { return settings; },
     get screen() { return current; },
     Spel, DECKS, TIER_ORDER, poolFor, bakFor, canHide, MIN_BAK, shuffle, drawDeck, total,
-    stopClock, paintClock, sizeCard, Snd, Tril, toonInstall,
+    stopClock, paintClock, sizeCard, winner, Snd, Tril, toonInstall,
     saveGame, loadGame, clearGame, KEY_GAME, GAME_MAX_AGE,
     // De lock op de overdracht is anders alleen te controleren door er drie
     // minuten voor te gaan zitten.

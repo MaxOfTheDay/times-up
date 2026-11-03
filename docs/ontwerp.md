@@ -691,6 +691,14 @@ daar te laten groeien, maar dan zeggen kroon, mascotte én cijfergrootte
 alle drie hetzelfde, terwijl twee cijfers van verschillend formaat juist
 lastiger naast elkaar te leggen zijn.
 
+**De stand ligt op papier.** Elk scherm tussen twee beurten is nu
+hetzelfde: een papieren kaart op de grond, de gouden knop eronder. De
+overdracht had dat al, de pauze ook; de eindstand stond als enige los op de
+stralen, met de cijfers rechtstreeks op de ploegkleur -- tegen de harde eis.
+Nu staat ze op `.wn-kaart`, even breed als de opdrachtkaart, met bovenaan
+ruimte voor de kroon zodat die binnen de rand valt. De stralen en de confetti
+blijven de grond.
+
 Let op de klassenaam als je hier ooit tóch iets bijtekent: `.bar` bestond
 al -- dat is de streep door de pas-knop als de stapel op is. Een tweede
 `.bar` erbij zette meteen `display: flex` en een rand op dat SVG-pad. Grep
