@@ -732,6 +732,27 @@ gaat terug zodra de beweging uit is, en zonder beweging wisselt het niet:
 een gezicht zonder sprong eromheen leest als een fout. Op de eindstand lacht
 wie won, de hele tijd.
 
+**Rek en klets.** De sprongen waren een stijve verschuiving met een gelijke
+schaal. Nu rekt de mascotte uit bij het opspringen en wordt ze plat bij de
+landing, zoals een stuiterbal, en draait ze bij juichen één keer rond in de
+lucht (om haar midden, niet om haar voeten). Dat is het verschil tussen een
+plaatje dat beweegt en een dier dat springt.
+
+**Knipperen en glans.** Elke mascotte in beeld met het gewone gezicht doet om
+de drie à zes tellen even haar ogen dicht (`#m-vos-dicht`, `#m-uil-dicht`),
+elk op een eigen moment en soms twee keer kort. De ogen kregen een klein
+papieren glansje. Allebei kosten ze bijna niets en maken ze van een teken een
+figuurtje dat kijkt. Een blij of geschrokken gezicht laat het knipperen met
+rust.
+
+**Nee bij overslaan.** Overslaan deed niets met de mascotte. Nu schudt ze kort
+nee met de ogen dicht: klein, want overslaan is geen fout. Een sip gezicht
+voor wie verliest is bekeken en weggelaten: aan het eind van een potje met
+kleuters juicht iedereen mee.
+
+De oorpluimen van de uil liggen achter de kop, niet erop: getekend over de
+cirkel liep er een zwarte lijn door zijn hoofd waar elke pluim begon.
+
 ## De eindstand telt niet, ze noemt
 
 Het winnaarsscherm hield de fiches nog even -- het was "verder leeg", dus

@@ -173,9 +173,10 @@ meteen aan; `inert` pas na het verzetten van de focus.
 **Beloning.** Een beurt en een ronde eindigen met een stempel op de kaart
 (tijd om: de zandloper op inkt; stapel leeg: het vinkje op groen) en een
 adem van `BEURT_ADEM` voor de overdracht. De mascotte in de balk reageert via
-`mascotte()` (wip, juich, schrik), altijd met Web Animations en overgeslagen
-bij beperkte beweging; bij juich en schrik wisselt ook het gezicht
-(`#m-vos-blij`, `#m-uil-schrik`, ...), en wie wint lacht op de eindstand. De eindstand telt eerst op; de kroon en het feest
+`mascotte()` (wip, juich, schrik, nee bij overslaan), met rek en klets, altijd
+met Web Animations en overgeslagen bij beperkte beweging; bij juich, schrik en
+nee wisselt ook het gezicht (`#m-vos-blij`, `#m-uil-schrik`, `-dicht`), en
+elke mascotte in beeld knippert om de paar tellen (`knipperLus()`), en wie wint lacht op de eindstand. De eindstand telt eerst op; de kroon en het feest
 komen daarna.
 
 **De eindstand telt niet, ze noemt.** Wie won staat in de kroon en de
