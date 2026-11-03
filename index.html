@@ -453,9 +453,10 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
 /* Terug naar de overdracht kan alleen via deze tegel, niet via het hele
    vlak: een kind dat enthousiast meetikt op "drie, twee, een" brak anders
    de beurt af. Een strijkende vinger bij het doorgeven vangen de tik op
-   start en het aftellen zelf al op. Zelfde tegel en hoek als de pauzeknop
-   die er een tel later staat; de pas-pijl omgekeerd. */
-.cd-back svg { transform: scaleX(-1); }
+   start en het aftellen zelf al op. Zelfde tegel, hoek én teken als de
+   pauzeknop die er een tel later staat: die hoek betekent de hele beurt
+   "wacht even". De omgekeerde pas-pijl las als terugspoelen, en als familie
+   van de pasknop eronder. */
 #s-play .countdown .cd-back { position: absolute; z-index: 2; }
 /* De ronde, tijdens het aftellen: dat zijn de drie tellen waarin het toestel
    van hand gaat. Alleen het teken, in hetzelfde tegeltje als op de balk --
@@ -602,6 +603,13 @@ button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
 /* Het teken staat in currentColor, dus het keert om zodra het rood eronder
    staat. Inkt op --danger haalt te weinig; papier op --danger haalt 7,3:1. */
 .btn-danger.flooded { color: var(--paper); }
+/* De vinger die bij een losse tik de lange druk voordoet: de top van de
+   vinger op het hart van het huisje. Alleen via Web Animations zichtbaar
+   (zie holdButton()); in rust onzichtbaar. */
+.btn-danger .vinger {
+  position: absolute; z-index: 2; width: 36px; opacity: 0; pointer-events: none;
+  left: calc(50% - 15px); top: calc(50% - 4px);
+}
 
 /* ============================================================
    4. TITEL
@@ -1472,8 +1480,11 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 }
 /* Kleiner dan op de andere schermen, maar met een ondergrens: met alleen
    min() kromp hij liggend tot de maat van de stopknop, en dan wegen de
-   hoofdhandeling en de onomkeerbare even zwaar. */
-.overlay .panel .btn-go { width: max(96px, min(34vw, 20vh, 116px)); }
+   hoofdhandeling en de onomkeerbare even zwaar. Ook 96 tegen 68 woog liggend
+   nog bijna gelijk; 112 houdt staand en liggend dezelfde verhouding. Die 112
+   alleen waar de hoogte het toelaat (29vh): op een liggend scherm van 320 px
+   hoog valt het paneel anders nog verder van het scherm. */
+.overlay .panel .btn-go { width: max(96px, min(112px, 29vh), min(34vw, 20vh, 116px)); }
 /* De twee deuren op één regel, met de ruimte ertussen die ze op het
    spelscherm ook hebben: ze zijn elkaars alternatief, geen lijstje. */
 .doors { display: flex; align-items: center; gap: var(--s-5); }
@@ -1917,7 +1928,6 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   /* De bovenbalk vreet op een laag scherm hoogte die de kaart nodig heeft. */
   .teamchip, .roundchip .ico { width: 40px; height: 40px; }
   .roundchip .ico svg { width: 30px; height: 30px; }
-  .btn-icon { width: 44px; height: 44px; }
 
   /* Liggend staan de stand en de opdracht naast elkaar en is hoogte het
      schaarst. De mascotte van wie aan zet is krijgt een bovengrens in vh,
@@ -2073,6 +2083,22 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
    label blijft klein, de tikzone niet. */
 #turnScore { transform-origin: 0% 50%; position: relative; cursor: pointer; }
 #turnScore::after { content: ""; position: absolute; inset: -14px -12px; }
+/* Zolang het punt terug kan, zegt het label dat zelf: onder het label een
+   pijltje dat omkeert, met een lont erachter die in TERUG_MS opbrandt. Is de
+   lont op, dan gaan ze allebei weg. Geen woord en geen eigen knop: het label
+   dat het punt gaf, neemt het terug. Eronder en niet ernaast, want op 320 px
+   breed raakt "+10" het rondetegeltje al bijna; tussen balk en kaart is
+   ruimte genoeg. Het donkere groen, omdat de lont op papier ligt. */
+#turnScore .terug, #turnScore .lont { display: none; }
+#turnScore.kan-terug .terug {
+  display: block; position: absolute; width: 14px; height: 14px;
+  left: calc(-1 * var(--line-2)); top: calc(100% + var(--line-2) + 2px);
+}
+#turnScore.kan-terug .lont {
+  display: block; position: absolute; left: 15px; right: calc(-1 * var(--line-2));
+  top: calc(100% + var(--line-2) + 7px); height: 4px;
+  background: var(--good-ink); transform-origin: 0 50%;
+}
 #s-play.over #turnScore:not([hidden]) {
   animation: buit calc(.5s / max(var(--dur), .001)) var(--e-pop) calc(.15s / max(var(--dur), .001)) both;
 }
@@ -2238,12 +2264,30 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
           fill="none" stroke="#14110F" stroke-width="10" stroke-linejoin="round"/>
   </symbol>
 
+  <!-- Stoppen: het huisje, want daar brengt het je, en het is het huisje dat
+       op de overdracht dit paneel opende. Geen kruis: een kruis op een paneel
+       betekent "sluit dit", en wie dat dacht wilde juist verder spelen.
+       Dikker dan #i-huis, omdat het kleiner staat. currentColor, zodat het
+       teken kan omkeren naar papier zodra het rood van de vasthoud-vloed
+       eronder staat. -->
   <symbol id="i-stop" viewBox="0 0 100 100">
-    <!-- currentColor, zodat het teken kan omkeren naar papier zodra het
-         rood van de vasthoud-vloed eronder staat. -->
-    <g stroke="currentColor" stroke-width="14" stroke-linecap="round">
-      <path d="M26 26 L74 74"/><path d="M74 26 L26 74"/>
+    <path d="M50 12 L90 46 V88 H60 V62 H40 V88 H10 V46 Z"
+          fill="none" stroke="currentColor" stroke-width="12" stroke-linejoin="round"/>
+  </symbol>
+
+  <!-- Terugnemen: een pijl die omkeert. Alleen op het +N van de beurt, zie
+       .kan-terug. -->
+  <symbol id="i-terug" viewBox="0 0 100 100">
+    <g fill="none" stroke="#14110F" stroke-width="13" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M30 40 H62 A22 22 0 0 1 62 84 H40"/><path d="M40 20 L18 40 L40 60"/>
     </g>
+  </symbol>
+
+  <!-- Een vinger die drukt: verschijnt boven de stopknop als je er alleen op
+       tikt, en wijst zo de lange druk aan. Zie holdButton(). -->
+  <symbol id="i-vinger" viewBox="0 0 100 100">
+    <path d="M40 94 C28 82 18 68 14 58 C11 50 20 46 26 52 L36 62 V18 C36 9 48 9 48 18 V42 C48 35 59 35 59 42 V48 C59 41 70 41 70 48 V54 C70 47 81 47 81 54 V72 C81 84 74 94 66 94 Z"
+          fill="#F4EBDA" stroke="#14110F" stroke-width="6" stroke-linejoin="round"/>
   </symbol>
 
   <symbol id="i-vink" viewBox="0 0 100 100">
@@ -2614,7 +2658,9 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   <div class="play-top">
     <div class="who">
       <div class="teamchip"><svg id="plMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg></div>
-      <b class="gain turn-gain" id="turnScore" aria-hidden="true" hidden>+0</b>
+      <!-- Het pijltje en de lont staan er alleen zolang het punt nog terug
+           kan (TERUG_MS): zie .kan-terug. -->
+      <b class="gain turn-gain" id="turnScore" aria-hidden="true" hidden><span class="n">+0</span><svg class="terug" viewBox="0 0 100 100"><use href="#i-terug"/></svg><i class="lont"></i></b>
     </div>
     <!-- Alleen het pictogram, geen <b> meer: zie .roundchip hieronder. -->
     <div class="roundchip" id="plRoundChip">
@@ -2673,7 +2719,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
        leeg. Alleen de tegel in de hoek breekt af. -->
   <div class="countdown" id="countdown" hidden role="timer" aria-label="Aftellen">
     <button class="btn-icon cd-back" id="cdBack" aria-label="Terug, nog niet beginnen">
-      <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pass"/></svg>
+      <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pauze"/></svg>
     </button>
     <!-- Wie en wat: dezelfde twee tegels die een tel later op de balk staan,
          op dezelfde plek. Alleen het teken van de ronde; het woord staat een
@@ -2758,6 +2804,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
         <i></i>
         <span class="hold-rule" aria-hidden="true"></span>
         <svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-stop"/></svg>
+        <svg class="vinger" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vinger"/></svg>
       </button>
       <button class="btn-go" id="btnResume" aria-label="Verder spelen">
         <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-play"/></svg>
@@ -3669,24 +3716,63 @@ $("#btnBack").addEventListener("click", () => show("title"));
    en een aparte toetsenbordtak zou het vasthouden overslaan.
    ============================================================== */
 function holdButton(el, ms, run, paint) {
-  let raf = null, t0 = 0;
-  const draw = p => { if (paint) paint(p); };
+  /* raf loopt tijdens het houden, weg tijdens het voordoen en leeglopen.
+     p is waar de vloed nu staat: een nieuwe druk gaat daar verder, in
+     plaats van terug op nul te springen. */
+  let raf = null, weg = null, t0 = 0, druk = 0, p = 0;
+  const TIK_MS = 250;                       // korter dan dit is een tik, geen druk
+  const vinger = el.querySelector(".vinger");
+  const draw = v => { p = v; if (paint) paint(v); };
+
+  /* Van waar de vloed staat naar `naar`, in `duur` ms; daarna eventueel
+     verder. Eén lus, zodat een nieuwe druk hem altijd kan afbreken. */
+  function loop(naar, duur, daarna) {
+    cancelAnimationFrame(weg);
+    const van = p, s = performance.now();
+    const stap = n => {
+      const k = Math.min(1, (n - s) / duur);
+      draw(van + (naar - van) * k);
+      if (k < 1) weg = requestAnimationFrame(stap);
+      else { weg = null; if (daarna) daarna(); }
+    };
+    weg = requestAnimationFrame(stap);
+  }
 
   function start() {
     if (raf !== null) return;               // al bezig (toets die herhaalt)
-    t0 = performance.now();
+    cancelAnimationFrame(weg); weg = null;
+    druk = performance.now();
+    t0 = druk - p * ms;
     raf = requestAnimationFrame(step);
   }
   function step(now) {
-    const p = Math.min(1, (now - t0) / ms);
-    draw(p);
-    if (p >= 1) { cancel(false); Snd.dicht(); Tril.doe(); run(); }
+    const v = Math.min(1, (now - t0) / ms);
+    draw(v);
+    if (v >= 1) { raf = null; draw(0); Snd.dicht(); Tril.doe(); run(); }
     else raf = requestAnimationFrame(step);
   }
-  function cancel(complain) {
+  /* Losgelaten voor het vol was. Een tik is geen fout maar een vraag
+     ("wat doet dit?"), dus geen nee: de knop doet de druk voor -- de vloed
+     loopt een kwart op, de vinger drukt -- en loopt dan weer leeg. Wie
+     wél hield en te vroeg losliet, ziet het rood weglopen in plaats van
+     verdwijnen: bijna, niet kapot. */
+  function cancel() {
     if (raf === null) return;
-    cancelAnimationFrame(raf); raf = null; draw(0);
-    if (complain) nudge(el);
+    cancelAnimationFrame(raf); raf = null;
+    if (performance.now() - druk < TIK_MS) {
+      loop(.28, 300, () => setTimeout(() => { if (raf === null) loop(0, 600); }, 250));
+      if (vinger && vinger.animate) {
+        const s = stilAan();
+        vinger.animate(s
+          ? [{ opacity: 0 }, { opacity: 1, offset: .15 }, { opacity: 1, offset: .8 }, { opacity: 0 }]
+          : [{ opacity: 0, transform: "translate(6px, -10px)" },
+             { opacity: 1, transform: "translate(0, 0)", offset: .25 },
+             { opacity: 1, transform: "translate(0, 0) scale(.9)", offset: .45 },
+             { opacity: 1, transform: "translate(0, 0) scale(.9)", offset: .8 },
+             { opacity: 0, transform: "translate(0, 0) scale(.9)" }],
+          { duration: 1100, easing: "ease-out" });
+      }
+    } else loop(0, 300);
   }
 
   /* Een lange druk opent op een tablet het eigen menu van het toestel
@@ -3698,11 +3784,11 @@ function holdButton(el, ms, run, paint) {
   el.addEventListener("contextmenu", e => e.preventDefault());
   el.addEventListener("pointerdown", e => { e.preventDefault(); Snd.unlock(); start(); });
   ["pointerup", "pointerleave", "pointercancel"].forEach(ev =>
-    el.addEventListener(ev, () => cancel(true)));
+    el.addEventListener(ev, cancel));
   el.addEventListener("keydown", e => {
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); Snd.unlock(); start(); }
   });
-  ["keyup", "blur"].forEach(ev => el.addEventListener(ev, () => cancel(true)));
+  ["keyup", "blur"].forEach(ev => el.addEventListener(ev, cancel));
 }
 
 /* Een vulling die van onder naar boven loopt: stoppen. Halverwege haalt ze
@@ -4344,8 +4430,28 @@ function paintTurnScore() {
   // en dát verschijnen is zelf al het teken. Een "+0" zou bovendien de hele
   // beurt lang beweren dat er iets bij kwam.
   box.hidden = n === 0;
-  if (n === 0) return;
-  box.textContent = "+" + n;
+  if (n === 0) { sluitTerug(); return; }
+  box.querySelector(".n").textContent = "+" + n;
+}
+
+/* Het venster om een geraden kaart terug te nemen (TERUG_MS): het pijltje
+   en de lont aan, de lont brandt op, daarna weer uit. Elke tik op goed
+   steekt een nieuwe lont aan. */
+let terugTimer = 0, lontAnim = null;
+function openTerug() {
+  const box = $("#turnScore");
+  sluitTerug();
+  box.classList.add("kan-terug");
+  const lont = box.querySelector(".lont");
+  if (lont.animate) lontAnim = lont.animate(
+    [{ transform: "scaleX(1)" }, { transform: "scaleX(0)" }],
+    { duration: TERUG_MS, easing: "linear", fill: "forwards" });
+  terugTimer = setTimeout(sluitTerug, TERUG_MS);
+}
+function sluitTerug() {
+  clearTimeout(terugTimer);
+  if (lontAnim) { lontAnim.cancel(); lontAnim = null; }
+  $("#turnScore").classList.remove("kan-terug");
 }
 
 /* De wip op de teller: het tweede kanaal naast het getal. Een eigen functie,
@@ -4431,11 +4537,11 @@ function vlucht() {
 /* Waar de teller straks staat, zonder hem nu al te tonen: vooruit schilderen,
    meten, terugzetten. Daartussen tekent de browser niet. */
 function meetTurnScore() {
-  const box = $("#turnScore");
-  const tekst = box.textContent, verborgen = box.hidden;
+  const box = $("#turnScore"), n = box.querySelector(".n");
+  const tekst = n.textContent, verborgen = box.hidden;
   paintTurnScore();
   const plek = midden("#turnScore");
-  box.textContent = tekst;
+  n.textContent = tekst;
   box.hidden = verborgen;
   return plek;
 }
@@ -4465,7 +4571,9 @@ $("#btnGoed").addEventListener("click", () => {
   const naar = meetTurnScore();
   kaartSpook("goed", naar);
   flyGain(from, naar);
+  if (!leeg) openTerug();
   if (leeg) {
+    sluitTerug();
     /* De laatste kaart: G.card staat nu op null, dezelfde vlag waar acts()
        en openPause() op letten, zodat er niets tussen kan komen terwijl het
        punt onderweg is. De klok gaat hier al stil: liep de tijd tijdens de
@@ -4506,6 +4614,7 @@ $("#turnScore").addEventListener("click", () => {
   landFly();
   if (!Spel.terug(G)) return;
   lastAct.goed = 0;
+  sluitTerug();
   Snd.pas(); Tril.pas();
   paintTurnScore();
   paintCard("goed");
@@ -4644,6 +4753,7 @@ function timeUp() {
   Snd.timeUp();
   Tril.om();
   Spel.tijdOm(G);           // onafgemaakte kaart terug op de stapel
+  sluitTerug();             // na tijd om valt er niets meer terug te nemen
   /* Het punt achter de beurt (zie #s-play.over). startTurn() haalt de klasse
      er weer af. */
   $("#s-play").classList.add("over");

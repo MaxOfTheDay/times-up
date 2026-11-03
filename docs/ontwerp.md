@@ -194,7 +194,15 @@ Drie kanalen, en ze doen elk één ding:
 Zet een primaire knop nooit met alleen `min()` op maat. De knop in het
 pauzepaneel kromp liggend mee met de schermhoogte tot 68 px — even groot als
 de stopknop ernaast — en dan wegen de hoofdhandeling en de onomkeerbare even
-zwaar. Er hoort een `max()` met een ondergrens omheen.
+zwaar. Er hoort een `max()` met een ondergrens omheen. Ook 96 tegen 68 woog
+liggend nog bijna gelijk; de ondergrens is nu 112 px waar de hoogte het
+toelaat (`min(112px, 29vh)`), met 96 als bodem. Op 568 bij 320 valt het
+paneel al van het scherm, met of zonder deze maat; dat vraagt een liggende
+opbouw van het paneel, niet een kleinere knop.
+
+`--tap` (48 px) geldt ook liggend. De hulpknoppen gingen op een laag scherm
+naar 44 px om hoogte te sparen, en dat waren de pauzeknop en het huisje: de
+knoppen die een volwassene snel moet raken.
 
 En: **stapel nooit twee knoppen van rand tot rand met een verschillende
 `--lift`.** Op het instellingenscherm stonden "Beginnen" (8 px) en "Terug"
@@ -297,10 +305,27 @@ Dat afbreken ging eerst via het hele vlak, en daar brak precies het kind af
 dat op "drie, twee, een" enthousiast op het scherm tikt: het meest
 natuurlijke wat je bij een aftellend cijfer doet. Een strijkende vinger
 tijdens het doorgeven is met de tik op start en de drie tellen al twee keer
-opgevangen, dus het vlak hoeft dat niet ook nog te doen. Het teken stond er
-al als bijschrift in de hoek (de pas-pijl omgekeerd); het is nu een echte
-`.btn-icon`, dezelfde tegel op dezelfde plek als de pauzeknop die er een
-tel later staat.
+opgevangen, dus het vlak hoeft dat niet ook nog te doen. Afbreken is een
+echte `.btn-icon`, dezelfde tegel op dezelfde plek als de pauzeknop die er
+een tel later staat, en met hetzelfde teken: die hoek betekent de hele beurt
+"wacht even". Er stond eerst de pas-pijl omgekeerd, en die las als
+terugspoelen, of als familie van de pasknop eronder.
+
+**Het teken op stoppen is het huisje, geen kruis.** Een kruis op een paneel
+betekent overal "sluit dit", en wie dat dacht, wilde juist verder spelen: de
+betekenis was precies omgekeerd. Het huisje zegt waar je heen gaat, en het is
+het huisje dat op de overdracht dit paneel opende. Dat het iets kost, zegt
+de stippellijn en de lange druk, niet het teken.
+
+**Een tik is een vraag, geen fout.** Wie er alleen op tikt, wil weten wat de
+knop doet. Een schud en een nee-trilling vertelden alleen dát het niet
+mocht. Nu doet de knop de druk voor: de vloed loopt een kwart op, een vinger
+drukt op het huisje, en dan loopt het weer leeg (`holdButton()`, korter dan
+250 ms telt als tik). Wie wél hield en te vroeg losliet, ziet het rood in
+0,3 s weglopen in plaats van in één beeld te verdwijnen, en een nieuwe druk
+gaat verder waar de vloed stond. Twee keer tikken als alternatief is bekeken
+en afgewezen: een kleuter die twee keer port, stopt dan het spel, en dat is
+precies wat de lange druk tegenhoudt.
 
 Daarmee is de speelknop op de titel en die op het overdrachtscherm ook
 dezelfde knop geworden: zelfde maat, zelfde vlak, zelfde rand. Ze betekenen
@@ -1319,7 +1344,11 @@ lag gaat bovenop de stapel. Eén stap, niet meer (`G.vorige`), en niet na tijd
 om, een lege stapel of een nieuwe beurt.
 
 Geen eigen knop en geen tekst: je tikt op het groene `+N` in de balk, het
-label dat het punt kreeg neemt het ook weer af. De tikzone is groter dan het
+label dat het punt kreeg neemt het ook weer af. Dát het kan, en hoe lang nog,
+staat eronder: een pijltje dat omkeert met een lont die in `TERUG_MS`
+opbrandt (`.kan-terug`). Zonder dat wist alleen wie de regels had gelezen
+dat het label een knop was. Eronder en niet ernaast: op 320 px breed staat
+"+10" al op 2 px van het rondetegeltje. De tikzone is groter dan het
 label (`::after`). Het venster is `TERUG_MS` (3 s) na de laatste tik op goed,
 zodat een ploeg aan het eind van haar beurt geen buit kan terugdraaien; hoe
 lang beslist het hoofdscript, niet de spelkern. Uitgelegd staat het alleen
