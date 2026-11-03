@@ -10,6 +10,59 @@ git en in de pull requests; een "hier stond eerst ..." hoort daar, niet hier,
 tenzij de oude toestand nodig is om de regel te begrijpen. Klopt iets niet
 meer met de code, pas het dan hier aan in dezelfde pull request.
 
+## Het speelbord
+
+Na een reeks losse verbeteringen (de rastergrond, één grond, één pen, één
+taal voor een druk) is de hele vormtaal in één keer naast elkaar gelegd:
+elk scherm gerenderd op drie maten, en geteld wat er aan kleuren, curves,
+lengtes en lettermaten in `index.html` staat. Het bleek al grotendeels één
+taal; ze was alleen niet als één opgeschreven, maar als dertig losse regels
+van het type "één X". Daarom staat er nu een thema boven: een gedrukt
+bordspel waarop alleen Vos en Uil leven, in vier regels (materiaal,
+stukken, krachten, stem; zie `CLAUDE.md`).
+
+Wat er bij die audit niet bij het thema paste, en is aangepast:
+
+- op de overdracht bewogen vier dingen uit zichzelf (zie "De grond beweegt
+  alleen als iets hem indrukt");
+- wijnrood las als een derde rood (zie "Stoppen heeft geen eigen kleur");
+- de regel voor goud beschreef iets anders dan goud deed (zie "Goud is
+  'dit, nu'");
+- de beweging had naast de vier tokens vijf losse curves, vijf namen
+  (`ease-out` en verwanten) en zo'n twintig lengtes (zie "Vier lengtes,
+  vier curves");
+- acht lettermaten op het grote scherm stonden buiten de trap.
+
+Wat erbij paste en bleef: de sluier van 82% bij pauze (een gedrukt
+raster in plaats daarvan was druk en trok het oog weg van het paneel), de
+papieren tegel om de mascotte op het aftellen (blauw op blauw verdwijnt),
+en de hitte van de klok als enige eigen kleurtrap.
+
+### Vier lengtes, vier curves
+
+Elke animatie pakt een lengte uit `--t-press` (60 ms, indrukken),
+`--t-los` (160 ms, terugveren en kleine wissels), `--t-kom` (280 ms, iets
+komt binnen) of `--t-groot` (450 ms, een groot moment), en een curve uit
+`--e-uit` (indrukken, binnenkomen, tot rust komen), `--e-los` (veren),
+`--e-weg` (vertrekken) of `--e-vloei` (heen en weer: vliegen, ademen).
+`linear` blijft voor wat stroomt: de klokband, de stralen, de snippers.
+Web Animations lezen geen `var()`, dus halen ze hun curve met `curve()` uit
+`:root`.
+
+Buiten de trap blijven, met reden: `--t-card` (180 ms) en `--t-fly`
+(220 ms), gemeten voor een speellus waarin een snelle ploeg om de twee
+tellen scoort; `telDruk` (220 ms, precies één druk plus terugveren); en
+de lussen die leven of een gevoel dragen (ademen, juichen, de zandloper,
+de stralen, de val snippers), die hun eigen, lange tijd hebben. De
+`--e-pop` van vroeger is opgegaan in `--e-los`; het verschil was niet te
+zien.
+
+Op het grote scherm (700 bij 700 en meer) zijn de lettermaten naar de trap
+geschoven: 18 en 19 px naar `--fs-4`, 24 naar `--fs-5`, 34 tot 46 naar
+`--fs-6`. Het rondewoord op de overdracht wordt daarmee iets kleiner (46
+naar 40 px) en blijft het grootste woord op het scherm; een eigen trede van
+56 px was niet nodig.
+
 ## De harde eis
 
 Geen enkele speler hoeft ooit een woord te lezen: niet op de kaarten, niet op
