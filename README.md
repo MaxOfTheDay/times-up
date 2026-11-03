@@ -138,16 +138,20 @@ npm install
 npm test
 ```
 
+`test/kern.test.js` toetst de spelregels zelf, zonder browser en in
+milliseconden: trekken, raden, passen, de beurt- en rondewissel met de
+overgedragen tijd, de winnaar en het terugzetten van een bewaard potje
+(`npm run test:kern`).
 `test/deck.test.js` bewaakt de kaartregels: het aantal, dubbels over alle
 standen heen, dat elke stand alles eronder bevat, en of elke emoji tekent.
 `test/game.test.js` speelt een volledig potje in een echte browser: de drie
 rondes, passen, de klok die afloopt, de ploegwissel, de overgedragen tijd, dat
 een herlaadbeurt midden in een beurt terugkomt op de overdracht ervoor, de
 terugveeg, pauzeren en stoppen, de laatste kaart op de bel, en wegklikken
-tijdens een beurt of het aftellen. Die duurt ruim anderhalve minuut, omdat
-één beurt echt moet uitlopen.
+tijdens een beurt of het aftellen. Die duurt anderhalve tot twee minuten,
+omdat één beurt echt moet uitlopen.
 
-Beide draaien ook op elke pull request, via `.github/workflows/test.yml`.
+Alle drie draaien ook op elke pull request, via `.github/workflows/test.yml`.
 
 Twee scripts maken ingebakken beelden opnieuw: `npm run pictogrammen` voor de
 app-pictogrammen (na een wijziging aan de zandloper) en `npm run schermen`
