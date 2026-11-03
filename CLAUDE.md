@@ -181,7 +181,9 @@ het aftellen; daar gaat bij elke tel een ring vanuit de schijf
 beweging één stilstaand beeld.
 
 **Vertrekken mag, als er niets achter wacht.** Geen vertrekanimaties, behalve
-`cdOut`, het oplossen van de pauzesluier bij hervatten (`.uit`) en de kopie
+de schijf die op nul opengaat (`.countdown.open`; `cdOut` bij beperkte
+beweging), de opdrachtkaart die op het aftellen in de grond zakt
+(`.cd-kaart`), het oplossen van de pauzesluier bij hervatten (`.uit`) en de kopie
 van de kaart die naar de teller krimpt of onder de stapel zakt
 (`kaartSpook()`): de volgende kaart ligt er dan al onder. `hidden` gaat
 meteen aan; `inert` pas na het verzetten van de focus.
