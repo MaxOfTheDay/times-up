@@ -159,33 +159,57 @@ test('beurtwissel: de andere ploeg, een volle beurt', () => {
   assert.equal(Spel.beurtMs(G), 30000);
 });
 
-test('ronde-einde: de rest gaat mee naar dezelfde ploeg, minstens drie tellen', () => {
+test('ronde-einde: de andere ploeg opent de volgende ronde, met een volle beurt', () => {
   const G = potje(2);
   G.team = 1;
   Spel.trek(G); Spel.geraden(G); Spel.geraden(G);
-  const r = Spel.rondeEinde(G, 1200.4, rng(5));
+  const r = Spel.rondeEinde(G, rng(5));
   assert.deepEqual(r, { uit: false, vers: [0, 2] });
   assert.equal(G.round, 2);
-  assert.equal(G.team, 1, 'geen ploegwissel bij een rondewissel');
-  assert.equal(G.pendingMs, Spel.MIN_CARRY);
-  assert.equal(Spel.beurtMs(G), Spel.MIN_CARRY);
+  assert.equal(G.team, 0, 'wie de stapel leeg speelde, opent niet ook de volgende ronde');
+  assert.equal(G.pendingMs, 0);
+  assert.equal(Spel.beurtMs(G), 30000);
   assert.deepEqual(inSpel(G), [0, 1], 'de hele greep ligt weer op de stapel');
+});
 
-  const H = potje(2);
-  Spel.trek(H); Spel.geraden(H); Spel.geraden(H);
-  Spel.rondeEinde(H, 17654.6);
-  assert.equal(H.pendingMs, 17655);
-  const K = potje(2);
-  Spel.rondeEinde(K, 0);
-  assert.equal(K.pendingMs, 0);
-  assert.equal(Spel.beurtMs(K), 30000);
+test('terug: het laatste punt eraf, de kaart weer in beeld', () => {
+  const G = potje(5);
+  G.team = 0;
+  const eerste = Spel.trek(G);
+  Spel.geraden(G);
+  const tweede = G.card;
+  assert.equal(Spel.terug(G), true);
+  assert.equal(G.card, eerste);
+  assert.equal(G.pile[0], tweede, 'de kaart die er lag komt meteen weer');
+  assert.equal(G.gained, 0);
+  assert.equal(G.scores[0][0], 0);
+  assert.deepEqual(inSpel(G).sort(), [0, 1, 2, 3, 4]);
+  assert.equal(Spel.terug(G), false, 'één stap terug, niet meer');
+});
+
+test('terug: niet na passen-alleen, tijd om, de laatste kaart of een nieuwe beurt', () => {
+  const G = potje(5);
+  Spel.trek(G);
+  assert.equal(Spel.terug(G), false, 'nog niets geraden');
+  Spel.geraden(G); Spel.tijdOm(G);
+  assert.equal(Spel.terug(G), false, 'na tijd om');
+  Spel.beurtWissel(G); Spel.beurtKlaar(G); Spel.trek(G);
+  assert.equal(Spel.terug(G), false, 'nieuwe beurt');
+  const H = potje(1);
+  Spel.trek(H);
+  assert.equal(Spel.geraden(H).leeg, true);
+  assert.equal(Spel.terug(H), false, 'de ronde is al om');
+  const K = potje(5);
+  Spel.trek(K); Spel.geraden(K); Spel.passen(K);
+  assert.equal(Spel.terug(K), true, 'na een pas mag het nog');
+  assert.deepEqual(inSpel(K).sort(), [0, 1, 2, 3, 4]);
 });
 
 test('na ronde 3 is het potje uit', () => {
   const G = potje(1);
   G.round = Spel.ROUNDS;
   Spel.trek(G); Spel.geraden(G);
-  assert.equal(Spel.rondeEinde(G, 5000).uit, true);
+  assert.equal(Spel.rondeEinde(G).uit, true);
   assert.equal(G.round, Spel.ROUNDS);
 });
 
@@ -253,10 +277,12 @@ test('een heel potje: elke kaart drie keer geraden, niets dubbel', () => {
     // Een beurt: willekeurig raden en passen, tot vijf acties, dan tijd om.
     let einde = null;
     for (let i = 0; i < 5 && !einde; i++) {
-      if (rand() < .7) { if (Spel.geraden(G).leeg) einde = 'leeg'; }
+      const k = rand();
+      if (k < .6) { if (Spel.geraden(G).leeg) einde = 'leeg'; }
+      else if (k < .75) Spel.terug(G);
       else Spel.passen(G);
     }
-    if (einde === 'leeg') uit = Spel.rondeEinde(G, 4000, rand).uit;
+    if (einde === 'leeg') uit = Spel.rondeEinde(G, rand).uit;
     else { Spel.tijdOm(G); Spel.beurtWissel(G); }
     assert.ok(beurten < 1000, 'het potje eindigt');
     if (!uit) {
