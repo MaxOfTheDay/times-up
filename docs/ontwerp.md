@@ -682,7 +682,7 @@ punt op over zijn eigen plek.
 Daarbovenop twee bewegingen, gekozen uit vier die naast elkaar zijn
 gezet (een golf bij binnenkomst, ademende punten, deining, een rimpel):
 
-- **Deining**: om de negen tellen trekt er een brede band schuin over de
+- **Deining**: om de elf tellen trekt er een brede band schuin over de
   grond, als wind over een veld, waarin de punten opzwellen
   (`#s-handoff::after`, een tweede laag grotere punten met een
   bandmasker, `--band` via `@property`). Sfeer vanuit de ooghoek. De
@@ -699,6 +699,12 @@ Ook op het aftellen, dat dezelfde ploeggrond heeft (`#countdown::before`),
 met het open midden rond de schijf. Daar gaat bij elke tel één ring vanuit
 de schijf naar buiten (`#cdGolf`, `telGolf()`), op de maat van het tikje:
 drie, twee, een, ook te zien voor wie het geluid niet hoort.
+
+Na de eerste versie op een telefoon was het een tik te veel: de opgezwollen
+punten stonden op het dubbele van de grond, en de ring van het aftellen
+kwam drie keer op volle sterkte voorbij. Nu zwellen de punten minder op
+(27% tegen 16%), komt de deining om de elf tellen, en staat de ring van het
+aftellen op 60% van de rimpel die je zelf met een tik maakt.
 
 Niet op de papieren schermen (titel, spel, eindstand)
 lazen ze als vuil op het papier, bovenop de korrel die daar al ligt

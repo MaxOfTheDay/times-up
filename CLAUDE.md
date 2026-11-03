@@ -165,7 +165,7 @@ naar ploegkleur, en het spelscherm verandert van grond niet. Bij beperkte
 beweging geen vloed. De rasterpunten op die grond zijn papier op lage
 dekking (16%), geen eigen kleur, op één stilstaand raster dat alle lagen
 delen (`--stip`, `--stip-op`); ze vervagen naar de kaart, er trekt om de
-negen tellen een deining over, en een tik op de grond geeft een rimpel. Ze
+elf tellen een deining over, en een tik op de grond geeft een rimpel. Ze
 staan alleen op de overdracht en het aftellen; daar gaat bij elke tel een
 ring vanuit de schijf (`telGolf()`).
 
