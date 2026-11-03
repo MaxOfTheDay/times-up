@@ -119,7 +119,8 @@ in één stuk, zonder inkepingen.
 **Vorm zegt wat het is, diepte hoe zwaar.** Eén cirkel op tapmaat per scherm,
 voor de handeling waar het scherm voor bestaat; al het andere is een
 rechthoek. `--lift-2` (8 px) is de hoofdhandeling, `--lift-1` (5 px) de
-rest. Indrukbaar is wat bij `:active` zijn schaduw inzakt. Een primaire knop
+rest. Indrukbaar is wat bij `:active` zijn schaduw inzakt: snel in
+(`--t-press`), verend uit (`--t-los`). Een primaire knop
 krijgt nooit alleen `min()`, maar een `max()` met ondergrens. Stapel nooit
 twee knoppen van rand tot rand met verschillende lift. Een uitgang staat
 rechtsboven.
@@ -230,7 +231,9 @@ voor de volwassene blijft de systeemletter. Opnieuw maken met
 
 **Het titelscherm heeft twee dingen**: het merk en de knop. Vos en Uil zitten
 op de bovenrand van het merk (`.gluur` in `.wordmark`), niet ernaast, en
-komen bij binnenkomst van achter de rand omhoog. Zet er niets bij.
+komen bij binnenkomst van achter de rand omhoog. De knip staat stil; elke
+beweging heeft haar eigen eigenschap (`rotate`, `translate`, `scale`,
+`transform` voor `mascotte()`), om het punt op de rand. Zet er niets bij.
 
 **Het instellingenscherm.** Vier groepen, in de volgorde waarin je ze nodig
 hebt: Spel (moeilijkheid met de bak, kaarten per potje, tijd), Voorkeuren

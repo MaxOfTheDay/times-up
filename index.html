@@ -216,7 +216,9 @@
   /* ---- beweging ----
      Niets in de speellus duurt langer dan --t-card: een beurt is
      twintig seconden en een snelle ploeg scoort om de twee. */
-  --t-press: .09s;
+  --t-press: .06s;   /* een knop zakt in: meteen, ook bij een vluchtige tik */
+  --t-los:   .16s;   /* en veert terug, iets voorbij zijn rust */
+  --e-los: cubic-bezier(.3, 1.6, .5, 1);
   --t-card:  .18s;
   --t-fly:   .22s;   /* het "+1" van de kaart naar de teller (zie flyGain) */
   --e-pop: cubic-bezier(.2, 1.5, .4, 1);
@@ -380,8 +382,18 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    schaduw in. Wie een knop toevoegt, zet hem in deze lijst. */
 button.btn-go, button.btn-good, button.btn-skip,
 button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain {
-  transition: transform calc(var(--t-press) * var(--dur)) ease,
-              box-shadow calc(var(--t-press) * var(--dur)) ease;
+  transition: transform calc(var(--t-los) * var(--dur)) var(--e-los),
+              box-shadow calc(var(--t-los) * var(--dur)) var(--e-los);
+}
+/* Indrukken en loslaten zijn twee bewegingen. In is kort en zonder veer: een
+   tik van 50 ms moet al te zien zijn. Uit veert even door, zodat de knop
+   zichtbaar terugkomt nadat je vinger weg is; gelijk op allebei las als een
+   knipper. */
+button.btn-go:active, button.btn-good:active, button.btn-skip:active,
+button.btn-icon:active, button.btn-danger:active, button.chip:active,
+button.pv:active, button.btn-plain:active {
+  transition-duration: calc(var(--t-press) * var(--dur));
+  transition-timing-function: ease-out;
 }
 .btn-go:active, .btn-good:active {
   transform: translate(var(--lift-2), var(--lift-2));
@@ -2106,26 +2118,37 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   --zak: calc(var(--gluur) * .24);
   position: absolute; bottom: calc(100% - var(--zak)); width: var(--gluur); aspect-ratio: 1;
   display: block; cursor: pointer; -webkit-tap-highlight-color: transparent;
-  clip-path: inset(-30% -30% var(--zak) -30%);
+  /* De knip staat stil en snijdt alleen onderaan, op de rand van de plaat.
+     Boven en opzij ruim, zodat een sprong of een kanteling nergens afknipt. */
+  clip-path: inset(-120% -60% var(--zak) -60%);
 }
 .gluur[data-team="0"] { left: var(--kant);  --kantel: -8deg; }
 .gluur[data-team="1"] { right: var(--kant); --kantel: 7deg; }
-.gluur svg { rotate: var(--kantel); }
-/* Bij binnenkomst komen ze van achter de rand omhoog kijken, één na één. De
-   knip schuift mee met de beweging (100% plus --zak tegen 100% verschuiving),
-   zodat hij op de rand van de plaat blijft staan. */
-@keyframes gluurOp {
-  from { transform: translateY(100%); clip-path: inset(-30% -30% calc(100% + var(--zak)) -30%); }
-  to   { transform: none;             clip-path: inset(-30% -30% var(--zak) -30%); }
+/* Elke beweging heeft haar eigen eigenschap, zodat ze elkaar niet
+   overschrijven: rotate voor de kanteling, translate voor het opkomen, scale
+   voor de adem, en transform blijft vrij voor mascotte(). Allemaal draaien ze
+   om het punt waar de tekening de rand raakt (76% = 100% min --zak), zodat
+   de onderkant op de plaat blijft staan en alleen de kop beweegt. */
+.gluur svg {
+  width: 100%; height: 100%; display: block;
+  rotate: var(--kantel); transform-origin: 50% 76%;
+  will-change: transform;
 }
-#s-title.on .gluur {
-  animation: gluurOp calc(.42s / max(var(--dur), .001)) var(--e-pop) backwards;
-  animation-delay: calc(.32s / max(var(--dur), .001));
+/* Bij binnenkomst komen ze van achter de rand omhoog kijken, één na één. Ze
+   schuiven onder de stilstaande knip door; er beweegt dus maar één ding, en
+   dat kan de grafische kaart alleen. Een meeschuivende clip-path liep op een
+   telefoon een paar beelden achter de tekening aan, en dat gaf het
+   schokken op de rand. */
+@keyframes gluurOp { from { translate: 0 100%; } to { translate: 0 0; } }
+@keyframes gluurAdem { 0%, 100% { scale: 1; } 50% { scale: 1.05; } }
+#s-title.on .gluur svg {
+  animation: gluurOp calc(.42s / max(var(--dur), .001)) var(--e-pop) backwards,
+             gluurAdem calc(2.8s / max(var(--dur), .001)) ease-in-out infinite;
+  animation-delay: calc(.32s / max(var(--dur), .001)), 0s;
 }
-#s-title.on .gluur[data-team="1"] { animation-delay: calc(.46s / max(var(--dur), .001)); }
-.gluur svg { width: 100%; height: 100%; display: block; transform-origin: 50% 100%; }
-#s-title.on .gluur svg { animation: ademen calc(2.8s / max(var(--dur), .001)) ease-in-out infinite; }
-#s-title.on .gluur[data-team="1"] svg { animation-delay: -1.4s; }
+#s-title.on .gluur[data-team="1"] svg {
+  animation-delay: calc(.46s / max(var(--dur), .001)), -1.4s;
+}
 
 .teamchip svg { transform-origin: 50% 90%; }
 
@@ -4738,8 +4761,14 @@ function mascotte(el, soort, n) {
              [0, -3, 1, 1, -5, .7], [0, 0, 1, 1, 0, 1]]
   };
   const duur = { wip: 340, juich: 820, schrik: 560, nee: 420 }[soort];
+  /* Juich draait om het midden, maar rekt en kletst op de voeten: een plat
+     gedrukte mascotte die om haar midden krimpt, komt los van de grond en
+     zweeft net bij de landing. Daarom schuift ze telkens zoveel omlaag als
+     haar voeten opkomen (die staan op 90%, 40% van de hoogte onder het
+     midden). */
+  const voet = soort === "juich" ? el.getBoundingClientRect().height * .4 : 0;
   el.animate(vormen[soort].map(([y, x, sx, sy, r, offset]) =>
-    ({ transform: `translate(${x}px, ${y}px) rotate(${r}deg) scale(${sx}, ${sy})`, offset,
+    ({ transform: `translate(${x}px, ${y + voet * (1 - sy)}px) rotate(${r}deg) scale(${sx}, ${sy})`, offset,
        /* De draai in de lucht om het midden, niet om de voeten. */
        ...(soort === "juich" ? { transformOrigin: "50% 50%" } : {}) })),
     { duration: duur, easing: "ease-in-out" });
@@ -4802,10 +4831,18 @@ $("#s-handoff").addEventListener("pointerdown", e => {
   el.classList.remove("speel"); void el.offsetWidth; el.classList.add("speel");
 });
 
+/* Safari zet :active op een aanraking alleen als er ergens naar touchstart
+   geluisterd wordt. Zonder dit zakt op een iPhone geen enkele knop in. */
+document.addEventListener("touchstart", () => {}, { passive: true });
+
 $$(".gluur").forEach(g => g.addEventListener("pointerdown", () => {
   Snd.unlock();
   Snd.goed(g.dataset.team === "0" ? 0 : 4);
-  mascotte(g.querySelector("svg"), "juich");
+  /* Een hoge wip met een blij gezicht, geen salto: wie achter een rand
+     gluurt, draait daar niet rond, en een salto werd door de rand doorsneden. */
+  const svg = g.querySelector("svg");
+  mascotte(svg, "wip", 7);
+  if (!stilAan()) zetGezicht(svg, "-blij", 600);
 }));
 
 /* De kaart als losse kopie, voor ze plaatsmaakt voor de volgende. Ze blijft

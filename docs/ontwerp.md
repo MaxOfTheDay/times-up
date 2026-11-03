@@ -189,7 +189,12 @@ Drie kanalen, en ze doen elk één ding:
   zijn. Reken dus niet uit de schaduw af of iets een knop is.
 - **Beweging.** Dát is waar indrukbaarheid staat: elke knop zakt bij
   `:active` precies zijn eigen schaduw in, een stilstaand vlak beweegt
-  nooit.
+  nooit. In en uit zijn twee bewegingen: in in `--t-press` (60 ms) zonder
+  veer, zodat ook een vluchtige tik te zien is; uit in `--t-los` (160 ms)
+  met `--e-los`, die even voorbij de rust veert. Allebei gelijk op 90 ms las
+  als een knipper, en een snelle tik zag je soms helemaal niet. Safari zet
+  `:active` op een aanraking alleen als er naar `touchstart` geluisterd
+  wordt; daarom staat er een lege, passieve luisteraar op `document`.
 
 Zet een primaire knop nooit met alleen `min()` op maat. De knop in het
 pauzepaneel kromp liggend mee met de schermhoogte tot 68 px — even groot als
@@ -754,10 +759,27 @@ het merk, als één logo, en daaronder alleen de knop.
 Ze zijn kinderen van `.wordmark`, zodat ze meedraaien en meelanden, en staan
 net boven de rand: hun inktlijn op de inkt van de plaat zou verdwijnen. Ze
 zijn zo groot als een letter van de titel (`--gluur`), een beetje naar
-binnen en elk een kant op gekanteld. Aantikken laat ze nog steeds juichen.
-Bij binnenkomst komen ze één na één van achter de rand omhoog kijken
-(`gluurOp`); het stuk dat nog "achter" het merk zit is weggeknipt, zodat ze
-uit de plaat lijken te komen in plaats van eroverheen te schuiven.
+binnen en elk een kant op gekanteld. Bij binnenkomst komen ze één na één van
+achter de rand omhoog kijken (`gluurOp`); het stuk dat nog "achter" het merk
+zit is weggeknipt, zodat ze uit de plaat lijken te komen in plaats van
+eroverheen te schuiven.
+
+**Ze mochten niet schokken.** Op een telefoon trilden ze een beetje, om drie
+redenen. De knip schoof mee met de tekening: `clip-path` en `transform` in
+één keyframe, maar alleen de transform loopt op de grafische kaart, dus de
+rand liep een paar beelden achter. Nu staat de knip stil op het vak, en
+schuift de tekening eronderdoor (`translate`). Ten tweede overschreef de
+sprong bij aantikken (Web Animations op `transform`) de adem (een CSS-animatie
+op dezelfde `transform`): bij het eind sprong de schaal van 1 terug naar
+waar de adem net was, tot 6% in één beeld. Nu heeft elke beweging haar eigen
+eigenschap: `rotate` de kanteling, `translate` het opkomen, `scale` de adem
+(`gluurAdem`), en `transform` blijft voor `mascotte()`. Ten derde ademden ze
+om hun onderkant, die onder de rand zit; dan schoof het stuk op de rand op
+en neer. Alles draait nu om het punt waar de tekening de rand raakt (76%).
+
+Aantikken is een hoge wip met het blije gezicht, geen juich: de salto werd
+door de rand doorsneden, en wie achter een rand gluurt draait daar niet rond.
+De knip is boven en opzij ruim, zodat een sprong nergens afknipt.
 
 Ze zakken een kwart achter de rand (`--zak`) en blijven daar. Eerst stonden
 ze er in rust bovenop, met hun onderkant net boven de plaat: dan gluurde er
@@ -843,7 +865,10 @@ wie won, de hele tijd.
 schaal. Nu rekt de mascotte uit bij het opspringen en wordt ze plat bij de
 landing, zoals een stuiterbal, en draait ze bij juichen één keer rond in de
 lucht (om haar midden, niet om haar voeten). Dat is het verschil tussen een
-plaatje dat beweegt en een dier dat springt.
+plaatje dat beweegt en een dier dat springt. Rek en klets gebeuren wel op de
+voeten: plat drukken om het midden tilde de voeten bij de landing van de
+grond, en dan zweefde ze net als ze moest neerkomen. Daarom schuift juich bij
+elke vorm zoveel omlaag als de voeten opkomen.
 
 **Knipperen en glans.** Elke mascotte in beeld met het gewone gezicht doet om
 de drie à zes tellen even haar ogen dicht (`#m-vos-dicht`, `#m-uil-dicht`),
