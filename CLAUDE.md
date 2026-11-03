@@ -151,9 +151,10 @@ fiche per punt op dit scherm. De wake lock blijft hier aan, begrensd op
 **Eén pen voor tekening en mascotte.** Het teken op de kaart (en in
 `#kijk`) krijgt de inktlijn van Vos en Uil: vier `drop-shadow`s zonder
 vervaging, 4 px (2 px op de kleine plaatjes). Niet vlakker maken met een
-filter. De mascottes tekenen hun lijn op `--m-lijn`, die `mascotteLijn()`
-per plek zet: nooit dunner dan 2,3 px op het scherm. Een nieuwe mascotte
-buiten `svgUse()` meld je daar aan.
+filter. De mascottes, de rondetekens en `#i-kaarten` nemen voor hun lijn
+`max(eigen dikte, min(var(--pen), plafond))`; `penLijn()` zet `--pen` per
+svg, zodat geen lijn dunner wordt dan 2,3 px op het scherm. Een nieuw
+gebruik buiten `svgUse()` meld je daar aan.
 
 **De ronde in drie maten** komt altijd uit `paintRound(ico, size, host)`
 (`"teken"`, `"chip"`, `"kaart"`), nooit los bijgewerkt.
@@ -175,8 +176,9 @@ dekking (16%), geen eigen kleur, op één stilstaand raster van 12 px, getekend
 op één canvas per grond (`stipveld()`). Wat beweegt is rastertoon: een punt
 groeit, hij licht niet alleen op. Ze vervagen naar de kaart, er trekt om de
 elf tellen een deining over, en een tik op de grond geeft een rimpel die de
-punten opzij duwt en terug laat veren. Ze staan alleen op de overdracht en
-het aftellen; daar gaat bij elke tel een ring vanuit de schijf
+punten opzij duwt en terug laat veren. Ze staan alleen op de overdracht,
+het aftellen en de eindstand van wie won (in de ploegkleur, met de stralen
+als papier); op het aftellen gaat bij elke tel een ring vanuit de schijf
 (`telGolf()`). Er loopt alleen een lus zolang er iets beweegt; bij beperkte
 beweging één stilstaand beeld.
 

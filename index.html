@@ -1832,6 +1832,8 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   opacity: .55;
 }
 .tally .sr.now { opacity: 1; }
+/* Na het laatste potje is geen ronde meer "nu": alle drie in volle inkt. */
+#s-winner .tally .sr { opacity: 1; }
 .tally .sr svg { width: max(16px, min(20px, 2.6vh)); height: max(16px, min(20px, 2.6vh)); }
 .tally .sr b {
   font-weight: 900; font-size: max(var(--type-label), min(14px, 1.9vh));
@@ -1851,7 +1853,15 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 /* ============================================================
    10. WINNAAR
    ============================================================ */
-#s-winner { justify-content: center; align-items: center; gap: 2vh; overflow: hidden; }
+/* De grond van wie won: dezelfde ploegkleur met rasterpunten als op de
+   overdracht, met de stralen als papier erop. Een tint van de ploegkleur gaf
+   roze en grijsblauw, de enige kleuren in de app buiten het palet. Bij
+   gelijkspel blijft het papier, met gouden stralen. De stand staat op een
+   papieren kaart, dus er komt geen tekst op de ploegkleur. */
+#s-winner {
+  justify-content: center; align-items: center; gap: 2vh; overflow: hidden;
+  background: var(--wn-grond, var(--paper));
+}
 .rays {
   position: absolute; inset: -30%; z-index: -1;
   display: grid; place-items: center;
@@ -2224,14 +2234,15 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
        tijd om) en dicht (knipperen, en bij overslaan). De kop staat apart,
        zodat hij maar op één plek getekend is. -->
   <!-- De inktlijn is 5 eenheden, maar nooit dunner dan zo'n 2,3 px op het
-       scherm: mascotteLijn() zet --m-lijn per plek, zodat een kleine Vos in
-       de stand geen haarlijn krijgt naast de 4 px van de kaart. -->
+       scherm: penLijn() zet --pen per plek (de eenheden voor 2,3 px), zodat
+       een kleine Vos in de stand geen haarlijn krijgt naast de 4 px van de
+       kaart. De rondetekens en #i-kaarten doen hetzelfde. -->
   <g id="m-vos-kop">
     <path d="M8 26 L21 3 L37 21 H63 L79 3 L92 26 L50 95 Z"
-          fill="#E8452B" stroke="#14110F" style="stroke-width: var(--m-lijn, 5px)" stroke-linejoin="round"/>
+          fill="#E8452B" stroke="#14110F" style="stroke-width: max(5px, min(var(--pen, 0px), 10px))" stroke-linejoin="round"/>
     <path d="M21 22 L25 11 L32 20 Z"  fill="#F4EBDA"/>
     <path d="M79 22 L75 11 L68 20 Z"  fill="#F4EBDA"/>
-    <path d="M50 95 L31 60 H69 Z"     fill="#F4EBDA" stroke="#14110F" style="stroke-width: var(--m-lijn, 5px)" stroke-linejoin="round"/>
+    <path d="M50 95 L31 60 H69 Z"     fill="#F4EBDA" stroke="#14110F" style="stroke-width: max(5px, min(var(--pen, 0px), 10px))" stroke-linejoin="round"/>
     <circle cx="50" cy="78" r="5"     fill="#14110F"/>
   </g>
   <symbol id="m-vos" viewBox="0 0 100 100">
@@ -2244,17 +2255,17 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   <symbol id="m-vos-dicht" viewBox="0 0 100 100">
     <use href="#m-vos-kop"/>
     <path d="M27 46 H39 M61 46 H73" fill="none"
-          stroke="#14110F" style="stroke-width: var(--m-lijn, 5px)" stroke-linecap="round"/>
+          stroke="#14110F" style="stroke-width: max(5px, min(var(--pen, 0px), 10px))" stroke-linecap="round"/>
   </symbol>
   <symbol id="m-vos-blij" viewBox="0 0 100 100">
     <use href="#m-vos-kop"/>
     <path d="M26 48 Q33 38 40 48 M60 48 Q67 38 74 48" fill="none"
-          stroke="#14110F" style="stroke-width: var(--m-lijn, 5px)" stroke-linecap="round"/>
+          stroke="#14110F" style="stroke-width: max(5px, min(var(--pen, 0px), 10px))" stroke-linecap="round"/>
   </symbol>
   <symbol id="m-vos-schrik" viewBox="0 0 100 100">
     <use href="#m-vos-kop"/>
-    <circle cx="33" cy="44" r="9"     fill="#F4EBDA" stroke="#14110F" style="stroke-width: calc(var(--m-lijn, 5px) * .8)"/>
-    <circle cx="67" cy="44" r="9"     fill="#F4EBDA" stroke="#14110F" style="stroke-width: calc(var(--m-lijn, 5px) * .8)"/>
+    <circle cx="33" cy="44" r="9"     fill="#F4EBDA" stroke="#14110F" style="stroke-width: max(4px, min(var(--pen, 0px) * .8, 8px))"/>
+    <circle cx="67" cy="44" r="9"     fill="#F4EBDA" stroke="#14110F" style="stroke-width: max(4px, min(var(--pen, 0px) * .8, 8px))"/>
     <circle cx="33" cy="44" r="3"     fill="#14110F"/>
     <circle cx="67" cy="44" r="3"     fill="#14110F"/>
   </symbol>
@@ -2262,13 +2273,13 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   <!-- De oorpluimen eerst, dan de kop eroverheen: zo begint elke pluim
        achter de rand, en loopt er geen lijn door het hoofd. -->
   <g id="m-uil-kop">
-    <path d="M14 30 L24 6 L38 24 Z"   fill="#1B6FC4" stroke="#14110F" style="stroke-width: var(--m-lijn, 5px)" stroke-linejoin="round"/>
-    <path d="M86 30 L76 6 L62 24 Z"   fill="#1B6FC4" stroke="#14110F" style="stroke-width: var(--m-lijn, 5px)" stroke-linejoin="round"/>
-    <circle cx="50" cy="52" r="42"    fill="#1B6FC4" stroke="#14110F" style="stroke-width: var(--m-lijn, 5px)"/>
-    <circle cx="35" cy="46" r="16"    fill="#F4EBDA" stroke="#14110F" style="stroke-width: var(--m-lijn, 5px)"/>
-    <circle cx="65" cy="46" r="16"    fill="#F4EBDA" stroke="#14110F" style="stroke-width: var(--m-lijn, 5px)"/>
+    <path d="M14 30 L24 6 L38 24 Z"   fill="#1B6FC4" stroke="#14110F" style="stroke-width: max(5px, min(var(--pen, 0px), 10px))" stroke-linejoin="round"/>
+    <path d="M86 30 L76 6 L62 24 Z"   fill="#1B6FC4" stroke="#14110F" style="stroke-width: max(5px, min(var(--pen, 0px), 10px))" stroke-linejoin="round"/>
+    <circle cx="50" cy="52" r="42"    fill="#1B6FC4" stroke="#14110F" style="stroke-width: max(5px, min(var(--pen, 0px), 10px))"/>
+    <circle cx="35" cy="46" r="16"    fill="#F4EBDA" stroke="#14110F" style="stroke-width: max(5px, min(var(--pen, 0px), 10px))"/>
+    <circle cx="65" cy="46" r="16"    fill="#F4EBDA" stroke="#14110F" style="stroke-width: max(5px, min(var(--pen, 0px), 10px))"/>
   </g>
-  <path id="m-uil-snavel" d="M50 58 L42 70 H58 Z" fill="#F2B705" stroke="#14110F" style="stroke-width: calc(var(--m-lijn, 5px) * .8)" stroke-linejoin="round"/>
+  <path id="m-uil-snavel" d="M50 58 L42 70 H58 Z" fill="#F2B705" stroke="#14110F" style="stroke-width: max(4px, min(var(--pen, 0px) * .8, 8px))" stroke-linejoin="round"/>
   <symbol id="m-uil" viewBox="0 0 100 100">
     <use href="#m-uil-kop"/>
     <circle cx="35" cy="46" r="7"     fill="#14110F"/>
@@ -2280,13 +2291,13 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   <symbol id="m-uil-dicht" viewBox="0 0 100 100">
     <use href="#m-uil-kop"/>
     <path d="M27 47 H43 M57 47 H73" fill="none"
-          stroke="#14110F" style="stroke-width: var(--m-lijn, 5px)" stroke-linecap="round"/>
+          stroke="#14110F" style="stroke-width: max(5px, min(var(--pen, 0px), 10px))" stroke-linecap="round"/>
     <use href="#m-uil-snavel"/>
   </symbol>
   <symbol id="m-uil-blij" viewBox="0 0 100 100">
     <use href="#m-uil-kop"/>
     <path d="M28 49 Q35 39 42 49 M58 49 Q65 39 72 49" fill="none"
-          stroke="#14110F" style="stroke-width: var(--m-lijn, 5px)" stroke-linecap="round"/>
+          stroke="#14110F" style="stroke-width: max(5px, min(var(--pen, 0px), 10px))" stroke-linecap="round"/>
     <use href="#m-uil-snavel"/>
   </symbol>
   <symbol id="m-uil-schrik" viewBox="0 0 100 100">
@@ -2395,7 +2406,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
        er maar één keer achter te komen. -->
   <symbol id="r-praten" viewBox="0 0 100 100">
     <path d="M22 12 H78 A16 16 0 0 1 94 28 V56 A16 16 0 0 1 78 72 H52 L30 92 L33 72 H22 A16 16 0 0 1 6 56 V28 A16 16 0 0 1 22 12 Z"
-          fill="#F4EBDA" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
+          fill="#F4EBDA" stroke="#14110F" style="stroke-width: max(7px, min(var(--pen, 0px), 12px))" stroke-linejoin="round"/>
     <g fill="#14110F">
       <circle cx="30" cy="42" r="7"/><circle cx="50" cy="42" r="7"/><circle cx="70" cy="42" r="7"/>
     </g>
@@ -2403,13 +2414,13 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 
   <symbol id="r-eenwoord" viewBox="0 0 100 100">
     <path d="M22 12 H78 A16 16 0 0 1 94 28 V56 A16 16 0 0 1 78 72 H52 L30 92 L33 72 H22 A16 16 0 0 1 6 56 V28 A16 16 0 0 1 22 12 Z"
-          fill="#F4EBDA" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
+          fill="#F4EBDA" stroke="#14110F" style="stroke-width: max(7px, min(var(--pen, 0px), 12px))" stroke-linejoin="round"/>
     <circle cx="50" cy="42" r="16" fill="#14110F"/>
   </symbol>
 
   <symbol id="r-mimen" viewBox="0 0 100 100">
     <path d="M22 12 H78 A16 16 0 0 1 94 28 V56 A16 16 0 0 1 78 72 H52 L30 92 L33 72 H22 A16 16 0 0 1 6 56 V28 A16 16 0 0 1 22 12 Z"
-          fill="#F4EBDA" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
+          fill="#F4EBDA" stroke="#14110F" style="stroke-width: max(7px, min(var(--pen, 0px), 12px))" stroke-linejoin="round"/>
     <!-- De streep stond in vermiljoen, en vermiljoen is Vos. Wijnrood is
          de kleur van "dit mag niet" (de stopknop, de laatste seconden) en
          betekent hier dus hetzelfde als overal elders. -->
@@ -2435,7 +2446,8 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   </symbol>
   <symbol id="i-kaarten" viewBox="0 0 100 100">
     <path d="M10 34 H62 V90 H10 Z M26 34 V10 H90 V66 H62"
-          fill="none" stroke="currentColor" stroke-width="9"
+          fill="none" stroke="currentColor"
+          style="stroke-width: max(9px, min(var(--pen, 0px), 14px))"
           stroke-linejoin="round"/>
   </symbol>
 
@@ -2800,6 +2812,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 
 <!-- ========================== WINNAAR =========================== -->
 <section class="screen" id="s-winner">
+  <canvas class="stipveld" id="wnVeld" aria-hidden="true"></canvas>
   <div class="rays">
     <svg viewBox="-100 -100 200 200" aria-hidden="true">
       <g id="rayGroup"></g>
@@ -4952,6 +4965,11 @@ const veldHo = stipveld($("#hoVeld"), {
   masker: maskerHo
 });
 /* Aftellen: leeg rond de schijf in het midden, van 110 tot 260 px. */
+const veldWn = stipveld($("#wnVeld"), {
+  band: true,
+  zichtbaar: () => $("#s-winner").classList.contains("on"),
+  masker: maskerHo
+});
 const veldCd = stipveld($("#cdVeld"), {
   band: false,
   zichtbaar: () => !$("#countdown").hidden,
@@ -4969,6 +4987,11 @@ $("#s-handoff").addEventListener("pointerdown", e => {
   if (e.target !== e.currentTarget) return;
   const r = e.currentTarget.getBoundingClientRect();
   veldHo.rimpel(e.clientX - r.left, e.clientY - r.top, 1);
+});
+$("#s-winner").addEventListener("pointerdown", e => {
+  if (e.target !== e.currentTarget) return;
+  const r = e.currentTarget.getBoundingClientRect();
+  veldWn.rimpel(e.clientX - r.left, e.clientY - r.top, 1);
 });
 
 /* Safari zet :active op een aanraking alleen als er ergens naar touchstart
@@ -5229,30 +5252,31 @@ function svgUse(href, cls) {
   const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
   use.setAttribute("href", href);
   svg.appendChild(use);
-  if (href.startsWith("#m-")) mascotteLijn(svg);
+  if (/^#(m-|r-|i-kaarten$)/.test(href)) penLijn(svg);
   return svg;
 }
 
-/* Vos en Uil tekenen hun lijn als 5 van de 100: op de titel 4 px, net als
-   de kaartrand, maar in de stand op de overdracht 1,3 px. Hier krijgt elke
-   mascotte een lijn van minstens 2,3 px op het scherm, met een plafond van
-   10 eenheden zodat een heel kleine kop niet dichtloopt. Een waarnemer en
-   geen meting bij het bouwen: de maat hangt aan schermstand en scherm, en
-   een verborgen scherm meet nul. De waarnemer hangt aan de functie en niet
-   aan een const, omdat svgUse() al bij het opstarten loopt. */
-function mascotteLijn(svg) {
+/* Vos en Uil en de kleine tekens tekenen hun lijn als een deel van 100: op
+   de titel 4 px, net als de kaartrand, maar in de stand op de overdracht
+   1,3 px, en een rondeteken op de eindstand 1,1 px. Hier krijgt elke svg
+   --pen: hoeveel eenheden 2,3 px op het scherm zijn. Elke lijn in die
+   symbolen neemt het grootste van haar eigen dikte en --pen, onder een
+   plafond zodat een heel kleine kop niet dichtloopt. Een waarnemer en geen
+   meting bij het bouwen: de maat hangt aan schermstand en scherm, en een
+   verborgen scherm meet nul. De waarnemer hangt aan de functie en niet aan
+   een const, omdat svgUse() al bij het opstarten loopt. */
+function penLijn(svg) {
   if (!window.ResizeObserver) return;
-  mascotteLijn.kijker = mascotteLijn.kijker || new ResizeObserver(rijen => {
+  penLijn.kijker = penLijn.kijker || new ResizeObserver(rijen => {
     for (const r of rijen) {
       const w = r.contentRect.width;
-      if (!w) continue;
-      const eenheden = Math.min(10, Math.max(5, 2.3 * 100 / w));
-      r.target.style.setProperty("--m-lijn", eenheden.toFixed(2) + "px");
+      if (w) r.target.style.setProperty("--pen", (230 / w).toFixed(2) + "px");
     }
   });
-  mascotteLijn.kijker.observe(svg);
+  penLijn.kijker.observe(svg);
 }
-document.querySelectorAll('svg > use[href^="#m-"]').forEach(u => mascotteLijn(u.parentNode));
+document.querySelectorAll('svg > use[href^="#m-"], svg > use[href^="#r-"], svg > use[href="#i-kaarten"]')
+  .forEach(u => penLijn(u.parentNode));
 
 function tallyNode(t) {
   const wrap = document.createElement("div");
@@ -5307,7 +5331,10 @@ function winner() {
     u.setAttribute("href", u.getAttribute("href") + "-blij"));
   $("#s-winner").dataset.draw = win === null ? "1" : "0";
 
-  rays(win === null ? "#F2B705" : TEAMS[win].hex);
+  const scherm = $("#s-winner");
+  if (win === null) scherm.style.removeProperty("--wn-grond");
+  else scherm.style.setProperty("--wn-grond", TEAMS[win].color);
+  rays(win === null ? "#F2B705" : "#F4EBDA");
   /* Uitgespeeld, maar de eindstand blijft bewaard tot je het scherm verlaat:
      een herlaadbeurt of een toestel dat de app opruimt toont haar opnieuw,
      in plaats van de uitslag van de avond te wissen. Huisje, terug en
@@ -5315,11 +5342,13 @@ function winner() {
   saveGame("uit");
   G = null;
   show("winner");
+  veldWn.aan();
 
   /* De onthulling: de totalen tellen samen op, dan valt de kroon en pas dán
      het feest. Bij beperkte beweging staat alles er meteen. */
   const feest = () => {
-    confetti(win === null ? ["#E8452B", "#1B6FC4", "#F2B705"] : [TEAMS[win].hex, "#F2B705"]);
+    // Op de ploegkleur zou snipper in dezelfde kleur verdwijnen: papier en goud.
+    confetti(win === null ? ["#E8452B", "#1B6FC4", "#F2B705"] : ["#F4EBDA", "#F2B705"]);
     Snd.fanfare(win);
     // Trillen is geen beweging op het scherm: wie het niet wil, zet het
     // uit in de instellingen.
