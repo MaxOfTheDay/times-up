@@ -181,12 +181,21 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGP4z8DAwMDAxMDAwMDAAAANHQEDasKb6QAAAABJRU5ErkJggg==', 'base64');
   await page.evaluate(() => window.__tijd.eigenKlaar);
   await page.click('#btnGear');
-  await page.click('#btnEigenNieuw');
+  // Zonder eigen kaarten is de stapel een lege plek die meteen de maker opent.
+  ok(await page.evaluate(() => document.querySelector('#stEigen').classList.contains('leeg')),
+    'de stapel Eigen is niet leeg zonder eigen kaarten');
+  await page.click('#stEigen');
   await page.setInputFiles('#mkBestand', { name: 'hond.png', mimeType: 'image/png', buffer: png });
   await page.waitForFunction(() => document.querySelector('#mkVak').classList.contains('vol'));
   await page.fill('#mkWoord', 'hond');
   await page.click('#mkBewaar');
   await page.waitForFunction(() => document.querySelectorAll('#eigenRij .eigen-tegel').length === 1);
+  const stapel = await page.evaluate(() => ({
+    lade: !document.querySelector('#ladeEigen').hidden,
+    tal: document.querySelector('#eigenTel').textContent,
+    leeg: document.querySelector('#stEigen').classList.contains('leeg') }));
+  ok(stapel.lade && stapel.tal === '1' && !stapel.leeg,
+    `na bewaren staat de eigen lade niet open op de nieuwe kaart (${JSON.stringify(stapel)})`);
   const eigen = await page.evaluate(() => {
     const T = window.__tijd;
     const out = { lijst: T.eigen.kaarten.length, beeld: T.beelden.size, inPotje: 0, gewoneHond: 0 };
