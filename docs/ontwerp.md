@@ -255,10 +255,10 @@ Drie kanalen, en ze doen elk één ding:
   iets anders: een teken dat je telt, zoals de fiches op het scorebord.
   Het tandwiel brak dit als enige — een ronde knop van 64 px voor iets
   waar het titelscherm niet voor bestaat — en is nu gewoon een `.btn-icon`.
-- **Diepte.** `--lift-2` (8 px) is de hoofdhandeling, `--lift-1` (5 px) al
+- **Diepte.** `--lift-2` (6 px) is de hoofdhandeling, `--lift-1` (4 px) al
   het andere. Dit stond ooit als "5 staat stil, 8 kun je indrukken"
   genoteerd en dat is nooit waar geweest: de pauzeknop, "terug", de chips
-  en de kaarttegels in de bak liggen allemaal op 5 px en zijn allemaal
+  en de kaarttegels in de bak liggen allemaal op `--lift-1` en zijn allemaal
   indrukbaar, op dezelfde hoogte als de kaart en de opdracht, die het niet
   zijn. Reken dus niet uit de schaduw af of iets een knop is.
 - **Beweging.** Dát is waar indrukbaarheid staat: elke knop zakt bij
@@ -269,6 +269,20 @@ Drie kanalen, en ze doen elk één ding:
   als een knipper, en een snelle tik zag je soms helemaal niet. Safari zet
   `:active` op een aanraking alleen als er naar `touchstart` geluisterd
   wordt; daarom staat er een lege, passieve luisteraar op `document`.
+
+Hoe groot de twee hoogtes zijn, is op het oog bijgesteld. Op 5 en 8 px hing
+er onder elke grote cirkel een zware zwarte sikkel, en op de sluiter van
+72 px was de schaduw ruim een tiende van de knop. Op 4 en 6 px liggen kaarten
+en tegels nog zichtbaar op het bord en blijven de twee gewichten te
+onderscheiden. Lager kan niet: op 3 px is de schaduw van een kaart dunner dan
+haar eigen rand van 4 px (`--line`), en dan leest hij niet meer als diepte
+maar als een scheve, dikke rand. Houd `--lift-1` dus minstens op `--line`.
+
+De sluiter in de maker droeg als enige cirkel geen teken maar een dunne
+binnenring, en die las als een doelwit of een munt. Nu draagt hij het
+fototoestel, zoals spelen het driehoekje en goed het vinkje. Een papieren
+kern in een gouden ring (de sluiter van een telefoon) viel af: dat zijn drie
+randen.
 
 Zet een primaire knop nooit met alleen `min()` op maat. De knop in het
 pauzepaneel kromp liggend mee met de schermhoogte tot 68 px — even groot als
@@ -334,8 +348,8 @@ regels, allebei hier misgegaan:
 Cirkels zijn vrijgesteld: die wijken in de hoek vanzelf terug. Het meest
 blootgestelde vlak van de app is daarom `.btn-skip`, het vierkant linksonder.
 
-Hoever 32 px reikt is gemeten en niet geschat: met de slagschaduw van 5 px
-erbij ligt zo'n hoek feitelijk op (27, 27), en die blijft binnen een straal
+Hoever 32 px reikt is gemeten en niet geschat: met de slagschaduw van 4 px
+erbij ligt zo'n hoek feitelijk op (28, 28), en die blijft binnen een straal
 tot 93 px. Uit de opname van het toestel volgt dat er minstens 48 px ronding
 op staat (een hoek op (16, 12) werd afgesneden, en dat kan pas vanaf 48);
 telefoons zitten rond de 50 à 60. Er zit dus ruim een factor twee tussen.
@@ -953,7 +967,7 @@ de vinger zelf, met zijn rimpel vanaf de knop.
 
 Bij het nalopen van alle knoppen tegen die taal:
 
-- elke cirkel heeft 8 px lift en elk vierkant 5 px, en ze zakken allemaal
+- elke cirkel heeft `--lift-2` en elk vierkant `--lift-1`, en ze zakken allemaal
   hun volle lift in;
 - het kaartentegeltje op de overdracht en de letters A-Z in de instellingen
   zakten wel in, maar stonden niet in de selectorlijst en sprongen dus terug
@@ -2496,7 +2510,8 @@ code: een foto of tekening en het woord, in Instellingen.
   liggen het album, de sluiter en omdraaien. De keuze van de telefoon zelf
   (`<input type="file">`) haalde je uit de app naar een ander scherm met
   andere knoppen; zo blijft alles op de kaart. De sluiter is de enige cirkel
-  op het paneel en heeft `--lift-2`, want afdrukken is zolang de camera
+  op het paneel: 80 px, met het fototoestel van de Foto-chip erin, en
+  `--lift-2`, want afdrukken is zolang de camera
   loopt waar het paneel voor is; een tik op de zoeker zelf drukt ook af.
   Omdraaien staat er alleen als er twee camera's zijn, en houdt dan zijn
   plek (`visibility`), zodat de sluiter in het midden blijft.

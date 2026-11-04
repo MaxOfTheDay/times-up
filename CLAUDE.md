@@ -145,8 +145,8 @@ in één stuk, zonder inkepingen.
 
 **Vorm zegt wat het is, diepte hoe zwaar.** Eén cirkel op tapmaat per scherm,
 voor de handeling waar het scherm voor bestaat; al het andere is een
-rechthoek. `--lift-2` (8 px) is de hoofdhandeling, `--lift-1` (5 px) de
-rest. Indrukbaar is wat bij `:active` zijn schaduw inzakt: snel in
+rechthoek. `--lift-2` (6 px) is de hoofdhandeling, `--lift-1` (4 px) de
+rest; `--lift-1` nooit dunner dan `--line`. Indrukbaar is wat bij `:active` zijn schaduw inzakt: snel in
 (`--t-press`), verend uit (`--t-los`). Een primaire knop
 krijgt nooit alleen `min()`, maar een `max()` met ondergrens. Stapel nooit
 twee knoppen van rand tot rand met verschillende lift. Een uitgang staat
