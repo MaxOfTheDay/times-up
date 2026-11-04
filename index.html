@@ -1187,13 +1187,6 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   padding: var(--s-2) var(--s-3);
   justify-content: center;
 }
-.roundcard .ico {
-  width: var(--tap); height: var(--tap);
-  display: grid; place-items: center;
-  background: var(--paper-2); border: var(--line-2) solid var(--ink);
-  flex: 0 0 auto;
-}
-.roundcard .ico svg { width: 76%; height: 76%; }
 .roundcard b {
   font-size: var(--type-label); font-weight: 900;
   letter-spacing: var(--track-caps); text-transform: uppercase;
@@ -1203,22 +1196,43 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
    2,0:1 op rood. Op papier blijft het 6,6:1. */
 .roundcard p { display: none; }
 
-/* De hoeveelste ronde van de drie: drie merktekens, verder niets -- geen
-   tekening, woord of cijfer, want die staan er al. In de kaart, op papier (op
-   de ploegkleur haalt goud maar 3,0:1). Vierkantjes en geen bolletjes: een
-   kleine cirkel betekent in deze app "een teken dat je telt". Verbruikt is
-   inkt, nu is goud (--go), nog te komen is leeg (--paper-2). 16 px: kleiner
-   is op armlengte nauwelijks een teken. */
-.rounddots { display: flex; gap: 6px; flex: 0 0 auto; }
-.rounddots i {
-  display: block; width: 16px; height: 16px;
-  background: var(--paper-2); border: 2px solid var(--ink);
+/* De drie rondes als één rij: de tekening van nu is de gouden schijf, de
+   twee andere zijn kleine papieren tegels met hun eigen ballon. Welke ronde
+   al geweest is en welke nog komt, zegt de plek links of rechts van de
+   schijf; de tegels hebben daarom één en dezelfde huid. Elke ronde staat zo
+   één keer in beeld, en er is niets te ontcijferen. De rij is altijd zo hoog
+   als de schijf, zodat de kaart niet verspringt als de schijf doorschuift.
+   --vak groeit mee met --schijf, met een ondergrens: liggend wordt de schijf
+   62 px, en een tegel onder 30 px is geen teken meer. */
+.ronderij {
+  --schijf: min(16vh, 30vw, 132px);
+  --vak: max(30px, calc(var(--schijf) * .3));
+  display: flex; align-items: center; justify-content: center;
+  gap: var(--s-3); height: var(--schijf); flex: 0 0 auto;
 }
-.rounddots i.now { background: var(--go); }
-/* Verbruikt is inkt, nu is goud, nog te komen is leeg. Dat volgelopen vakje
-   is het enige teken op dit scherm dat zegt dat er een ronde afgesloten is --
-   en het kost geen enkel nieuw element. */
-.rounddots i.done { background: var(--ink); }
+.ronderij .vak {
+  flex: 0 0 auto; display: grid; place-items: center;
+  width: var(--vak); height: var(--vak);
+  background: var(--paper-2); border: var(--line-2) solid var(--ink);
+}
+.ronderij .vak svg { width: 72%; height: 72%; display: block; }
+.ronderij .vak.nu {
+  width: var(--schijf); height: var(--schijf);
+  border-radius: 50%; border-width: 5px; background: var(--go);
+}
+/* RI_ART tekent alleen de ballon, op de maat van het vlak: de schijf zelf is
+   dit vak, zodat ze van tegel naar schijf kan groeien. */
+.ronderij .vak.nu svg { width: 100%; height: 100%; overflow: visible; }
+.ronderij .vak.stil svg * { animation: none; }
+/* Bij een rondewissel geeft de schijf de beurt door: ze krimpt tot tegel en
+   de tegel van de nieuwe ronde groeit tot schijf (zie paintRij()). Alleen
+   onder .wissel, zodat een gewone overdracht of een hersteld potje niets
+   naspeelt. */
+.ronderij.wissel .vak {
+  transition: width var(--t-groot) var(--e-los), height var(--t-groot) var(--e-los),
+    border-radius var(--t-kom) var(--e-uit), background-color var(--t-kom) var(--e-uit),
+    border-width var(--t-kom) var(--e-uit);
+}
 
 /* Op een kort scherm (onder 620 px hoog) wat minder lucht tussen de vakken en
    in de stand, zodat de stand niet onder het zwevende huisje doorloopt en er
@@ -1250,29 +1264,23 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   width: min(88vw, 24rem);
   max-width: min(88vw, 24rem);
 }
-.roundcard.big .ico {
-  width: min(16vh, 30vw, 132px); height: min(16vh, 30vw, 132px);
-  border: 0; background: none;
-}
-/* Bij een rondewissel komt de tekening op (trap 3), want zij is het nieuwe;
-   bij een beurtwissel gebeurt er niets extra's, en dat verschil is de
-   mededeling. Ze rijdt mee met haar kaart (zelfde vertraging), zodat het één
-   golf blijft in plaats van twee gebaren over elkaar, en de startknop komt
-   als laatste tot stilstand. */
+/* De schijf komt op als het scherm verschijnt (trap 3) en rijdt mee met haar
+   kaart (zelfde vertraging), zodat het één golf blijft in plaats van twee
+   gebaren over elkaar, en de startknop komt als laatste tot stilstand. Bij
+   een rondewissel vanuit het spel niet: daar groeit de schijf uit haar tegel
+   (.ronderij.wissel), en dat is het nieuws. */
 @keyframes roundPop { from { transform: scale(.82); } to { transform: scale(1); } }
-#s-handoff.on .roundcard.big .ico {
+#s-handoff.on .ronderij:not(.wissel) .vak.nu {
   animation: roundPop calc(var(--t-kom) / max(var(--dur), .001)) var(--e-los) backwards;
   animation-delay: calc(.07s / max(var(--dur), .001));
 }
-.roundcard.big .ico svg { width: 100%; height: 100%; overflow: visible; }
 /* De volgorde in de kaart: de stand (buildTally hangt haar er met prepend
-   in), de tekening, de merktekens, de uitleg, en aan de voet wat je
+   in), de rij met de rondes, het woord, de uitleg, en aan de voet wat je
    meekrijgt. Hoe staan we, wat is het, hoe groot is het. */
 .roundcard.big #hoTally  { order: 0; align-self: stretch; width: 100%;
   background: none; border: 0; box-shadow: none; padding: 0;
   justify-content: space-between; }
-.roundcard.big .ico      { order: 1 }
-.roundcard.big .rounddots{ order: 2; margin: 2px 0 }
+.roundcard.big .ronderij { order: 1 }
 .roundcard.big b         { order: 3 }
 .roundcard.big p         { order: 4 }
 .roundcard.big.zelfde-ronde p { visibility: hidden; }
@@ -1376,7 +1384,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   50%      { transform: scale(1.06); }
 }
 /* En bij een beurtwissel komt ze op -- daar is "wie" het nieuws. Bij een
-   rondewissel staat ze stil en komt de tekening op (zie roundPop): precies
+   rondewissel staat ze stil en schuift de schijf door (.ronderij.wissel): precies
    één gebied van de kaart leeft, en welk gebied dat is, ís de mededeling. */
 @keyframes upPop { from { transform: scale(.8); } to { transform: scale(1); } }
 #s-handoff:not(.mode-round).on .mini-score .side.up .head {
@@ -2075,11 +2083,6 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   #s-handoff .mini-score .side.up .head > svg,
   #pauze .mini-score .side.up .head > svg { width: 62px; height: 62px; }
   .mini-score b { font-size: var(--fs-5); }
-  /* Het rondetegeltje groeit mee met .roundchip op het spelscherm (60 px).
-     Het woord blijft op --type-label: een bijschrift groeit niet mee met het
-     toestel. */
-  .roundcard .ico { width: 60px; height: 60px; }
-  .rounddots i { width: 20px; height: 20px; }
   /* Het cijfer en zijn vak groeien samen mee: het vak moet "30" op de grote
      maat blijven dragen, anders loopt het cijfer er in de laatste tellen
      uit. Zie --digit in :root. */
@@ -2094,7 +2097,8 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
      het het scherm is waar het toestel van hand gaat. */
   .roundcard.big { width: min(70vw, 34rem); max-width: min(70vw, 34rem);
                    gap: 14px; padding: 22px 32px 18px; }
-  .roundcard.big .ico { width: min(19vh, 176px); height: min(19vh, 176px); }
+  .ronderij { --schijf: min(19vh, 176px); }
+  .ronderij .vak.nu { border-width: 6px; }
   .roundcard.big b { font-size: var(--fs-6); }
   .roundcard.big p { font-size: var(--fs-4); }
   .ho-count svg { width: 24px; height: 24px; }
@@ -2743,9 +2747,8 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
        het pauzepaneel. Zie daar waarom dat één functie moet zijn. -->
   <div class="mini-score" id="hoTally"></div>
 
-  <!-- 2. WAT. Eén kaart, twee dichtheden: .big voegt de ronde-tekening en
-       de regel toe. Het pictogram in .ico wordt dan door de tekening zelf
-       vervangen, zodat de ronde niet twee keer in beeld staat. -->
+  <!-- 2. WAT. Eén kaart: de stand, de drie rondes met die van nu als
+       tekening, het woord en de regel. -->
   <div class="roundcard surface" id="hoRoundCard">
     <!-- Hoeveel kaarten er nog liggen en hoe lang je krijgt: aan de voet, het
          dichtst bij de knop waar ze over gaan. -->
@@ -2759,12 +2762,11 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
         <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-zand"/></svg><span>30</span>
       </div>
     </div>
-    <div class="ico" id="hoRoundIco"><svg viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
+    <!-- De drie rondes, die van nu als gouden schijf. paintRij() vult ze;
+         wie luistert krijgt "ronde 2 van 3" uit de aria-label van de kaart. -->
+    <div class="ronderij" id="hoRondes" aria-hidden="true"><div class="vak"></div><div class="vak"></div><div class="vak"></div></div>
     <b>Omschrijven</b>
     <p></p>
-    <!-- De hoeveelste van de drie. Zie .rounddots: geen tweede pictogram en
-         geen woord, alleen de plek in de rij. -->
-    <div class="rounddots" id="hoRoundDots" aria-hidden="true"><i></i><i></i><i></i></div>
   </div>
 
   <!-- Een huisje en geen pauzeteken: op dit scherm loopt er geen klok, dus
@@ -3995,11 +3997,12 @@ function total(t) { return Spel.total(G, t); }
 /* Dezelfde tekstballon in het groot, met het aantal woorden erin dat
    terugloopt naar nul. De ballon uit de balk tijdens het spelen is
    letterlijk hetzelfde beeld, zodat de herinnering en de aankondiging
-   niet twee dingen zijn die je apart moet leren. */
+   niet twee dingen zijn die je apart moet leren. De gouden schijf zit er
+   niet in: die is het vak zelf (.ronderij .vak.nu), zodat een tegel tot
+   schijf kan groeien. */
 const RI_ART = [
   /* 1 — omschrijven: drie woorden die stuiteren */
   `<svg viewBox="0 0 200 200">
-     <circle cx="100" cy="100" r="92" fill="#F2B705" stroke="#14110F" stroke-width="8"/>
      <g transform="translate(100 104) scale(1.45) translate(-50 -50)">
        <path d="M22 12 H78 A16 16 0 0 1 94 28 V56 A16 16 0 0 1 78 72 H52 L30 92 L33 72 H22 A16 16 0 0 1 6 56 V28 A16 16 0 0 1 22 12 Z"
              fill="#F4EBDA" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
@@ -4012,7 +4015,6 @@ const RI_ART = [
    </svg>`,
   /* 2 — één woord: nog één stip, en die klopt */
   `<svg viewBox="0 0 200 200">
-     <circle cx="100" cy="100" r="92" fill="#F2B705" stroke="#14110F" stroke-width="8"/>
      <g transform="translate(100 104) scale(1.45) translate(-50 -50)">
        <path d="M22 12 H78 A16 16 0 0 1 94 28 V56 A16 16 0 0 1 78 72 H52 L30 92 L33 72 H22 A16 16 0 0 1 6 56 V28 A16 16 0 0 1 22 12 Z"
              fill="#F4EBDA" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
@@ -4024,7 +4026,6 @@ const RI_ART = [
      alleen de doorgestreepte ballon -- twee plaatjes voor één ronde, en dan
      werkt het systeem juist niet meer. */
   `<svg viewBox="0 0 200 200">
-     <circle cx="100" cy="100" r="92" fill="#F2B705" stroke="#14110F" stroke-width="8"/>
      <g transform="translate(100 104) scale(1.45) translate(-50 -50)">
        <path d="M22 12 H78 A16 16 0 0 1 94 28 V56 A16 16 0 0 1 78 72 H52 L30 92 L33 72 H22 A16 16 0 0 1 6 56 V28 A16 16 0 0 1 22 12 Z"
              fill="#F4EBDA" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
@@ -4054,34 +4055,47 @@ const ROUND_ICON = ["#r-praten", "#r-eenwoord", "#r-mimen"];
      "chip" pictogram, plus het woord áls de host er een <b> voor heeft. De
        balk tijdens het spelen heeft er geen; de naam staat altijd in de
        aria-label.
-     "kaart" de ronde-tekening met de regel eronder. Alleen hier staat
-       ROUND_HOW.
-   ico is het vlak voor het beeld, host het geheel met de aria-label. Bij
-   "teken" geen host: dat tegeltje is aria-hidden. */
+     "kaart" het woord met de regel eronder. Alleen hier staat ROUND_HOW.
+       Het beeld tekent paintRij(), want daar staan alle drie de rondes.
+   ico is het vlak voor het beeld (null bij "kaart"), host het geheel met de
+   aria-label. Bij "teken" geen host: dat tegeltje is aria-hidden. */
 function paintRound(ico, size, host) {
   const r = G.round - 1;
-  ico.textContent = "";
-  if (size === "kaart") ico.innerHTML = RI_ART[r];
-  else ico.appendChild(svgUse(ROUND_ICON[r]));
+  if (ico) { ico.textContent = ""; ico.appendChild(svgUse(ROUND_ICON[r])); }
   if (!host) return;
   /* Directe kinderen, niet de eerste <b> in het vlak: de stand in de kaart
      heeft eigen cijfers, en een kale querySelector("b") schreef het
      rondewoord daarin. */
   const word = host.querySelector(":scope > b"), how = host.querySelector(":scope > p");
   if (word) word.textContent = ROUND_WORD[r];
-  /* De merktekens van de hoeveelste ronde staan alleen in de uitgeklapte
-     kaart (zie .rounddots), maar wie luistert krijgt het getal in beide
-     standen: een schermlezer telt geen vierkantjes. */
+  /* De rij met de rondes is aria-hidden; wie luistert krijgt het getal
+     hier. */
   if (how) how.textContent = size === "kaart" ? ROUND_HOW[r] : "";
   host.setAttribute("aria-label",
     "Ronde " + G.round + " van " + ROUNDS + ": " + ROUND_WORD[r] +
     (size === "kaart" ? ". " + ROUND_HOW[r] : ""));
 }
 
+/* De drie rondes op de overdracht: die van index r is de schijf met haar
+   tekening, de andere zijn tegels. stil houdt de tekening stil (de stand
+   vóór een rondewissel hoort haar regel niet nog eens voor te spelen). */
+function paintRij(r, stil) {
+  [...$("#hoRondes").children].forEach((v, i) => {
+    v.classList.toggle("nu", i === r);
+    v.classList.toggle("stil", !!stil);
+    v.textContent = "";
+    if (i === r) v.innerHTML = RI_ART[i];
+    else v.appendChild(svgUse(ROUND_ICON[i]));
+  });
+}
+
 /* Beide wissels vullen dezelfde vakken. freshA/freshB is wat er net bij kwam
    (voor de aria-label): een beurt bij een beurtwissel, de laatste beurt bij
    een rondewissel, niets bij de eerste overdracht. */
-let handoffMode = "round";      // waar een afgebroken aftelling naar terugkeert
+let handoffMode = "round";
+/* Na de landing van de omgedraaide kaart (landOm, 180 ms) en het klokje van
+   de nieuwe ronde: dan pas schuift de schijf door. */
+const RIJ_WACHT = 260;      // waar een afgebroken aftelling naar terugkeert
 
 function handoff(mode, freshA, freshB, zelfdeGrond) {
   const round = mode === "round";
@@ -4114,14 +4128,15 @@ function handoff(mode, freshA, freshB, zelfdeGrond) {
   if (tossPending) { tossPending = false; tossTeams(); } else veldHo.inkt(false);
 
   // Vak 2: de opdracht. Zelfde schilder als de balk op het spelscherm.
-  paintRound($("#hoRoundIco"), "kaart", $("#hoRoundCard"));
-  /* De hoeveelste van de drie, in beide standen: verbruikt is inkt, nu is
-     goud, nog te komen is leeg. Het volgelopen vakje is het enige teken dat
-     er een ronde afgesloten is. */
-  $$("#hoRoundDots i").forEach((d, i) => {
-    d.classList.toggle("now", i === r);
-    d.classList.toggle("done", i < r);
-  });
+  paintRound(null, "kaart", $("#hoRoundCard"));
+  /* Bij een rondewissel vanuit het spel staat eerst de vorige ronde als
+     schijf; als de kaart geland is, geeft ze de beurt door aan de volgende
+     (zie .ronderij.wissel). Een hersteld potje, een afgebroken aftelling en
+     beperkte beweging krijgen meteen de stand van nu. */
+  const wissel = round && r > 0 && current === "play" && !zelfdeGrond && !stilAan();
+  $("#hoRondes").classList.remove("wissel");
+  paintRij(wissel ? r - 1 : r, wissel);
+
 
   /* Wat je meekrijgt: kaarten op de stapel en seconden, altijd in beeld,
      zodat het teken elke keer hetzelfde betekent. Bij een rondewissel staat
@@ -4158,6 +4173,11 @@ function handoff(mode, freshA, freshB, zelfdeGrond) {
     requestAnimationFrame(() => requestAnimationFrame(() =>
       $("#s-handoff").style.setProperty("--team", t.color)));
   }
+  if (wissel) setTimeout(() => {
+    if (!G) return;
+    $("#hoRondes").classList.add("wissel");
+    paintRij(G.round - 1);
+  }, RIJ_WACHT);
   wakeOverdracht();
 }
 
@@ -5456,8 +5476,8 @@ function endRound() {
       $("#s-play").classList.remove("leeg");
       if (!G || current !== "play") return;
       if (uit) { winner(); landOm($("#wnPiles"), p); return; }
-      /* Klokjes voor de nieuwe ronde, met de tekening die opkomt (70 ms, zie
-         roundPop), en dan de ploeg die haar opent. */
+      /* Klokjes voor de nieuwe ronde, dan schuift de schijf door naar haar
+         (RIJ_WACHT), en dan de ploeg die haar opent. */
       Snd.ploeg(G.team, Snd.ronde(G.round, .07));
       handoff("round", vers[0], vers[1]);
       landOm($("#hoRoundCard"), p);

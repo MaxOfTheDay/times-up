@@ -105,18 +105,18 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     // heeft eigen cijfers. Precies de greep die paintRound() ook maakte.
     ok(await page.textContent('#hoRoundCard > b') === woord,
        `ronde ${round}: verkeerd woord op het overdrachtscherm`);
-    // De kaart heeft nog maar één maat: het pictogramvak draagt altijd de
-    // ronde-tekening (een eigen <svg>, geen <use>) en de regel staat er
-    // altijd in. De compacte variant bestaat niet meer, dus dit hoort in
-    // allebei de standen te gelden.
-    ok(await page.$('#hoRoundCard.big #hoRoundIco > svg') !== null,
-       `ronde ${round}: de opdrachtkaart draagt de ronde-tekening niet`);
+    // De drie rondes staan als één rij; die van nu is de schijf met de
+    // ronde-tekening (een eigen <svg>, geen <use>). Bij een rondewissel
+    // schuift de schijf pas na de landing van de kaart door (RIJ_WACHT),
+    // dus wachten tot ze op haar plek staat.
+    const schijfOk = await page.waitForFunction(r => {
+      const v = document.querySelectorAll('#hoRondes > .vak');
+      return v.length === 3 && [...v].every((e, i) => e.classList.contains('nu') === (i === r - 1)) &&
+        v[r - 1].querySelector('svg') !== null && v[r - 1].querySelector('use') === null;
+    }, round, { timeout: 2000 }).then(() => true, () => false);
+    ok(schijfOk, `ronde ${round}: de schijf staat niet op de ronde van nu`);
     ok((await page.textContent('#hoRoundCard p')).trim() !== '',
        `ronde ${round}: de regel staat niet in de kaart`);
-    // Het verbruikte rondevakje loopt vol met inkt: het enige teken dat zegt
-    // dat er een ronde afgesloten is.
-    ok(await page.$$eval('#hoRoundDots i.done', els => els.length) === round - 1,
-       `ronde ${round}: verkeerd aantal afgesloten rondevakjes`);
 
     // Een gewone tik; het aftellen erna houdt een losse aanraking tegen.
     // Afbreken zet je terug op het overdrachtscherm, zonder begonnen beurt.
