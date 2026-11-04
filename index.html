@@ -1103,21 +1103,31 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   padding: 0 var(--lift-1) var(--lift-1) 0;
 }
 .eigen-rij .pv { flex: 0 0 84px; min-height: 100px; justify-content: center; }
-.eigen-rij .pv img {
-  display: block; width: 60px; height: 60px; object-fit: cover;
-  outline: 2px solid var(--ink);
-}
+.eigen-rij .pv img { display: block; width: 60px; height: 60px; object-fit: cover; }
+/* Uit: de kaarten wijken terug; de gekozen Uit op de kopregel zegt het ook. */
+.eigen-rij.uit .eigen-tegel img { opacity: .4; }
 .eigen-rij .pv small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-wrap: nowrap; }
-.eigen-plus svg { width: 30px; }
-.eigen-rij .pv.tekening img { outline: 0; }
-.field.eigen > .field.rij { margin-top: var(--s-3); }
-.field.eigen > .hint { margin-top: var(--s-2); }
+/* De twee ingangen: een klein plusje voor het teken van wat je maakt. */
+.eigen-plus .plusje { display: flex; align-items: center; gap: 2px; }
+.eigen-plus .plusje svg { width: 30px; }
+.eigen-plus .plusje svg:first-child { width: 14px; }
+/* De kopregel zoals Geluid: naam links, Aan en Uit rechts; de rij eronder. */
+.field.eigen { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; row-gap: var(--s-3); }
+.field.eigen > legend { float: left; margin: 0; min-height: var(--tap); display: flex; align-items: center; }
+.field.eigen > .chips { flex-wrap: nowrap; }
+.field.eigen > .chips > .chip { flex: 0 0 auto; width: 76px; min-height: var(--tap); padding: 0; }
+.field.eigen > .eigen-rij { flex: 1 0 100%; min-width: 0; }
 .field.eigen legend .cb-count { margin-left: var(--s-1); }
+/* Op 320 px passen naam, aantal en Aan/Uit niet op één regel; de tegels
+   tellen dan zelf. */
+@media (max-width: 379px) { .field.eigen legend .cb-count { display: none; } }
 
-/* De foto op de kaart: zo groot als een emoji tekent (die is breder dan
-   haar lettergrootte, zie sizeCard()), vierkant, en met de inktlijn van
-   .glyph als rand. */
+/* Het beeld op de kaart: zo groot als een emoji tekent (die is breder dan
+   haar lettergrootte, zie sizeCard()), vierkant. Een tekening houdt de
+   inktlijn van .glyph; een foto ligt kaal op het papier (.kaal), want een
+   kader om een vierkant is een derde rechthoek op de kaart. */
 .glyph.foto { line-height: 0; }
+.glyph.foto.kaal, .kijk-grid span.foto.kaal { filter: none; }
 .glyph.foto img {
   display: block; width: calc(var(--glyph, 20vmin) * 1.18); height: calc(var(--glyph, 20vmin) * 1.18);
   object-fit: cover;
@@ -1149,7 +1159,7 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   touch-action: none;
 }
 .mk-vak .mk-leeg { width: 34%; }
-.mk-vak.vol { border: 0; outline: 4px solid var(--ink); cursor: grab; background: var(--paper); }
+.mk-vak.vol { border: 0; cursor: grab; background: var(--paper); }
 .mk-vak.vol .mk-leeg { display: none; }
 .mk-vak img {
   position: absolute; left: 0; top: 0; max-width: none;
@@ -1189,10 +1199,6 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 }
 .mk-tg[hidden] { display: none; }
 
-/* Foto of tekenen. */
-.mk-soort { align-self: stretch; }
-.mk-soort > .chip { flex-direction: row; gap: var(--s-2); min-height: var(--tap); }
-.mk-soort svg { width: 22px; height: 22px; }
 /* Tekenen: een vel papier zonder rand. De tekening zelf is doorzichtig, zodat
    ze op de kaart de inktlijn van .glyph krijgt zoals een emoji. */
 .mk-vak.papier { border: 0; outline: var(--line-2) solid var(--paper-2); background: var(--paper); cursor: crosshair; }
@@ -1235,13 +1241,12 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 @media (orientation: landscape) and (max-height: 560px) {
   #maker { --mk: min(52vh, 240px); }
   #maker .panel.maker {
-    display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto 1fr;
+    display: grid; grid-template-columns: auto auto; grid-template-rows: auto 1fr;
     align-items: start; column-gap: var(--s-5);
   }
-  .mk-kaart { grid-column: 1; grid-row: 1 / span 3; }
+  .mk-kaart { grid-column: 1; grid-row: 1 / span 2; }
   .mk-top { grid-column: 2; grid-row: 1; }
-  .mk-soort { grid-column: 2; grid-row: 2; }
-  .mk-rest { grid-column: 2; grid-row: 3; width: 256px; }
+  .mk-rest { grid-column: 2; grid-row: 2; width: 256px; }
 }
 
 /* ---- Installeren ------------------------------------------------------
@@ -2762,20 +2767,23 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
            een tegel opent dezelfde maker om haar aan te passen. -->
       <fieldset class="field eigen" id="eigenVeld">
         <legend>Eigen kaarten <span class="cb-count" id="eigenTel"></span></legend>
+        <!-- Uit als er bezoek is: "Bobby" zegt een vriendje niets. Op de
+             kopregel, zoals Geluid; pas als er een kaart is. -->
+        <div class="chips" id="eigenAanChips" role="radiogroup" aria-label="Eigen kaarten in het spel" hidden>
+          <button class="chip" role="radio" aria-checked="false" data-aan="1">Aan
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-aan="0">Uit
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+        </div>
+        <!-- Twee ingangen: wat je maakt kies je waar je begint. -->
         <div class="eigen-rij" id="eigenRij">
-          <button class="pv eigen-plus" id="btnEigenNieuw" aria-label="Nieuwe eigen kaart">
-            <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-plus"/></svg>
+          <button class="pv eigen-plus" id="btnEigenFoto" aria-label="Nieuwe kaart met een foto">
+            <span class="plusje" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-plus"/></svg><svg viewBox="0 0 100 100"><use href="#i-camera"/></svg></span>
+          </button>
+          <button class="pv eigen-plus" id="btnEigenTeken" aria-label="Nieuwe kaart met een tekening">
+            <span class="plusje" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-plus"/></svg><svg viewBox="0 0 100 100"><use href="#i-potlood"/></svg></span>
           </button>
         </div>
-        <!-- Uit als er bezoek is: "Bobby" zegt een vriendje niets. -->
-        <fieldset class="field rij" id="eigenAanVeld" hidden>
-          <legend>In het spel</legend>
-          <div class="chips" id="eigenAanChips" role="radiogroup" aria-label="Eigen kaarten in het spel">
-            <button class="chip" role="radio" aria-checked="false" data-aan="1">Aan</button>
-            <button class="chip" role="radio" aria-checked="false" data-aan="0">Uit</button>
-          </div>
-        </fieldset>
-        <p class="hint" id="eigenHint">Alleen op deze telefoon bewaard.</p>
       </fieldset>
 
       <fieldset class="field">
@@ -2856,6 +2864,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
       <p>Goed geraden: <b>1 punt</b>. Passen mag. Is de stapel leeg, dan
         begint de andere ploeg de volgende ronde.</p>
       <p>Te vroeg op goed getikt? Tik op het groene <b>+</b>-getal bovenaan.</p>
+      <p>Eigen kaarten blijven op deze telefoon.</p>
     </details>
 
     <!-- De vierde groep, de enige die niet over het spel gaat. Onderaan, want
@@ -3092,11 +3101,6 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
       <button class="btn-icon" id="mkDicht" aria-label="Sluiten">
         <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-kruis"/></svg>
       </button>
-    </div>
-    <!-- Foto of tekening: twee keuzeknoppen, zoals op het instellingenscherm. -->
-    <div class="chips mk-soort" id="mkSoort" role="radiogroup" aria-label="Soort kaart">
-      <button class="chip" role="radio" aria-checked="true" data-soort="foto"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-camera"/></svg>Foto</button>
-      <button class="chip" role="radio" aria-checked="false" data-soort="tekening"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-potlood"/></svg>Tekenen</button>
     </div>
     <div class="mk-kaart">
       <div class="mk-vak" id="mkVak" role="button" tabindex="0" aria-label="Foto kiezen">
@@ -4196,13 +4200,14 @@ const eigenKlaar = (async () => {
   paintEigen();
 })();
 
-/* Het teken op een kaart: een emoji als tekst, een eigen kaart als foto. De
-   inktlijn van .glyph (vier drop-shadows) legt om de foto dezelfde 4 px rand
-   als om een emoji: zo is het een tekening op de kaart en geen geplakt
-   plaatje. */
+/* Het teken op een kaart: een emoji als tekst, een eigen kaart als beeld.
+   Een tekening krijgt de inktlijn van .glyph zoals een emoji; een foto niet
+   (.kaal): om een vierkant wordt die lijn een kader, een derde rand. */
 function zetTeken(el, kaart) {
   const id = Spel.eigenId(kaart);
   el.classList.toggle("foto", id !== null);
+  const k = id === null ? null : eigen.kaarten.find(k => k.id === id);
+  el.classList.toggle("kaal", id !== null && !(k && k.soort === "tekening"));
   if (id === null) { el.textContent = kaart[0]; return; }
   el.textContent = "";
   const img = document.createElement("img");
@@ -4229,10 +4234,10 @@ function paintEigen() {
     rij.appendChild(b);
   });
   const n = eigen.kaarten.length;
-  $("#btnEigenNieuw").hidden = n >= EIGEN_MAX;
-  $("#eigenTel").textContent = !n ? "" :
-    n + (n === 1 ? " kaart" : " kaarten") + (eigen.aan ? "" : " · uit");
-  $("#eigenAanVeld").hidden = !n;
+  $("#btnEigenFoto").hidden = $("#btnEigenTeken").hidden = n >= EIGEN_MAX;
+  $("#eigenTel").textContent = !n ? "" : n + (n === 1 ? " kaart" : " kaarten");
+  $("#eigenAanChips").hidden = !n;
+  $("#eigenRij").classList.toggle("uit", !eigen.aan);
   $$("#eigenAanChips .chip").forEach(c =>
     c.setAttribute("aria-checked", String((c.dataset.aan === "1") === eigen.aan)));
 }
@@ -4241,7 +4246,8 @@ $("#eigenAanChips").addEventListener("click", e => {
   const c = e.target.closest(".chip"); if (!c) return;
   eigen.aan = c.dataset.aan === "1"; bewaarEigen(); paintEigen();
 });
-$("#btnEigenNieuw").addEventListener("click", () => openMaker(null));
+$("#btnEigenFoto").addEventListener("click", () => openMaker(null, "foto"));
+$("#btnEigenTeken").addEventListener("click", () => openMaker(null, "tekening"));
 $("#eigenRij").addEventListener("click", e => {
   const b = e.target.closest(".eigen-tegel"); if (!b) return;
   const k = eigen.kaarten.find(k => k.id === b.dataset.id);
@@ -4254,20 +4260,23 @@ $("#eigenRij").addEventListener("click", e => {
          zoom, x, y, s (px op het scherm per px van de foto),
          acties, basis (de tekening die er al was), kleur, dik, gereed } */
 let mk = null;
-let klad = null;           // een niet bewaarde nieuwe kaart, voor de volgende tik op +
+const klad = {};           // per soort een niet bewaarde nieuwe kaart, voor de volgende tik
 let makerTerug = null;     // waar de focus heen gaat na het sluiten
 const ZOOM_MAX = 4;
 
 function makerOpen() { return !$("#maker").hidden; }
 
-function openMaker(kaart) {
-  if (!kaart && klad) {
-    mk = klad; klad = null;
-    if (mk.soort === "foto" && !mk.img) mk.live = camKan();
+/* Een nieuwe kaart opent in de soort van de tegel waarop getikt is (foto of
+   tekening); een bestaande in haar eigen soort. */
+function openMaker(kaart, soort) {
+  soort = kaart ? kaart.soort || "foto" : soort || "foto";
+  if (!kaart && klad[soort]) {
+    mk = klad[soort]; klad[soort] = null;
+    if (soort === "foto" && !mk.img) mk.live = camKan();
   } else mk = {
-    kaart: kaart, soort: kaart ? kaart.soort || "foto" : "foto",
+    kaart: kaart, soort: soort,
     img: null, nieuw: false, zoom: 1, x: 0, y: 0, s: 1,
-    woord: kaart ? kaart.woord : "", live: !kaart && camKan(),
+    woord: kaart ? kaart.woord : "", live: !kaart && soort === "foto" && camKan(),
     acties: [], basis: null, kleur: KLEUREN[0][0], dik: false, gereed: "pen"
   };
   $("#mkKop").textContent = kaart ? "Kaart aanpassen" : "Nieuwe kaart";
@@ -4286,6 +4295,7 @@ function openMaker(kaart) {
     };
     i.src = beelden.get(kaart.id);
   }
+  if (mk.soort === "tekening") tekenDoek();
   tekenMaker();
   if (mk.img) plaats(false);
   if (mk.live) startCam();
@@ -4296,9 +4306,9 @@ function sluitMaker() {
   if (!makerOpen()) return;
   if (mk && !mk.kaart && (mk.img || mk.acties.length || $("#mkWoord").value.trim())) {
     mk.woord = $("#mkWoord").value;
-    klad = mk;
+    mk.live = false;
+    klad[mk.soort] = mk;
   }
-  if (klad) klad.live = false;
   mk = null;
   stopCam();
   $("#maker").hidden = true;
@@ -4356,8 +4366,6 @@ function tekenMaker() {
   $("#mkCamRij").hidden = !live;
   $("#mkGereedschap").hidden = !heeft;
   $("#mkTeken").hidden = !teken;
-  $$("#mkSoort .chip").forEach(c =>
-    c.setAttribute("aria-checked", String(c.dataset.soort === (mk ? mk.soort : "foto"))));
   if (teken) tekenGereedschap();
   $("#mkOpnieuw").hidden = !camKan();
   keurMaker();
@@ -4372,7 +4380,9 @@ function keurMaker() {
     k !== mk.kaart && k.woord.toLocaleLowerCase("nl") === w);
   const knop = $("#mkBewaar");
   const beeld = mk.soort === "tekening" ? !!(mk.acties.length || mk.basis) : !!(mk.img && !mk.live);
-  knop.disabled = !(beeld && w && !dubbel);
+  /* Goud zodra er een beeld is. Zonder woord wijst een tik de woordregel
+     aan (zie de klik), in plaats van een grijze knop die niets zegt. */
+  knop.disabled = !(beeld && !dubbel);
   knop.textContent = dubbel ? "Dat woord bestaat al" : "Bewaren";
 }
 $("#mkWoord").addEventListener("input", keurMaker);
@@ -4584,13 +4594,6 @@ $("#mkLeeg").addEventListener("click", () => {
   if (!mk || (!mk.acties.length && !mk.basis)) { nudge($("#mkLeeg")); return; }
   mk.acties = []; mk.basis = null; mk.nieuw = true; tekenDoek(); keurMaker();
 });
-$("#mkSoort").addEventListener("click", e => {
-  const c = e.target.closest(".chip"); if (!c || !mk || c.dataset.soort === mk.soort) return;
-  mk.soort = c.dataset.soort;
-  if (mk.soort === "tekening") { mk.live = false; stopCam(); tekenDoek(); }
-  else if (!mk.img) { mk.live = camKan(); if (mk.live) startCam(); }
-  tekenMaker();
-});
 
 function lijn(g, a) {
   g.save();
@@ -4691,6 +4694,10 @@ function snijFoto() {
 let persistGevraagd = false;
 $("#mkBewaar").addEventListener("click", async () => {
   if (!mk || $("#mkBewaar").disabled) return;
+  if (!$("#mkWoord").value.trim()) {
+    nudge($("#mkWoord")); $("#mkWoord").focus({ preventScroll: true });
+    return;
+  }
   const knop = $("#mkBewaar");
   knop.disabled = true;
   const woord = $("#mkWoord").value.trim();
@@ -4747,7 +4754,7 @@ $("#mkWeg").addEventListener("click", () => {
   mk = null;
   sluitMaker();
   paintEigen();
-  $("#btnEigenNieuw").focus({ preventScroll: true });
+  $("#btnEigenFoto").focus({ preventScroll: true });
 });
 $("#mkDicht").addEventListener("click", sluitMaker);
 /* Het waas naast het paneel sluit ook, zoals bij terugkijken. */

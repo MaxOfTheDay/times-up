@@ -376,10 +376,14 @@ knop wisselt met `visibility`, nooit met `hidden`.
 - Een kaart zonder beeld bestaat niet: `Spel.zonder()` en
   `herstel(..., weg)` halen haar uit de stapel. Het herstel bij de start
   wacht daarom op `eigenKlaar`.
-- Elk teken op een kaart gaat door `zetTeken()`; de foto krijgt de inktlijn
-  van `.glyph` als rand.
-- Weggooien kost twee tikken; een niet bewaarde nieuwe kaart blijft als
-  klad liggen.
+- Elk teken op een kaart gaat door `zetTeken()`. Een foto ligt kaal op het
+  papier (`.kaal`, geen inktlijn: om een vierkant is dat een derde rand);
+  een tekening houdt de pen van `.glyph`.
+- Het veld begint met twee tegels, camera en potlood: de maker opent in die
+  soort en heeft zelf geen keuze. Aan/Uit staat op de kopregel, zoals Geluid.
+- Bewaren is goud zodra er een beeld is; zonder woord wijst een tik de
+  woordregel aan (`nudge()` en focus). Weggooien kost twee tikken; een niet
+  bewaarde nieuwe kaart blijft per soort als klad liggen.
 - Een nieuwe kaart opent op de camera in het vierkant (`startCam()`), met
   het album als terugval. De camera gaat uit bij afdrukken, sluiten en
   verbergen (`stopCam()`); de voorcamera spiegelt alleen in de zoeker.
