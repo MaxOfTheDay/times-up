@@ -1167,8 +1167,8 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
    Eén canvas per grond (stipveld() in het script), op een stilstaand raster
    van 12 px dat op het midden is uitgelijnd. In rust is het een vlak
    punten; wat beweegt is rastertoon: een punt groeit en krimpt, zoals in
-   drukwerk, in plaats van alleen op te lichten. Ze vervagen naar de kaart
-   (op het aftellen naar de schijf), zodat er achter de tekst niets beweegt. */
+   drukwerk, in plaats van alleen op te lichten. Het raster loopt van rand
+   tot rand: de stukken zijn papier en liggen erop. */
 .stipveld {
   position: absolute; inset: 0; z-index: -1; pointer-events: none;
   width: 100%; height: 100%; display: block;
@@ -4408,9 +4408,8 @@ function countdown(done) {
   let last = COUNT_FROM;
   Snd.count(0);
   Tril.tel();
-  /* Eén grond. De kaart van de overdracht zakt in de punten en de punten
-     nemen haar plek in (het veld vloeit van het masker van de overdracht
-     naar dat van de schijf); de druk op de knop stuurt een rimpel vanaf de
+  /* Eén grond. De kaart van de overdracht zakt in de punten, die er al
+     die tijd onder lagen; de druk op de knop stuurt een rimpel vanaf de
      knop. Die rimpel is de eerste tel. Alleen als er net op de knop
      getikt is: na een afgebroken aftelling begint het gewoon. */
   const kopie = goKaart;
@@ -4423,7 +4422,7 @@ function countdown(done) {
     ], { duration: 450, easing: curve("uit"), fill: "forwards" });
     a.onfinish = a.oncancel = () => kopie.remove();
   }
-  veldCd.aan(!!kopie);
+  veldCd.aan();
   /* Na een tik heeft de vinger de knop net ingedrukt: de eerste tel is die
      druk, met zijn rimpel vanaf de knop. */
   if (kopie && goRect) veldCd.rimpel(goRect.x + goRect.w / 2, goRect.y + goRect.h / 2, 1.2, goRect.w / 2);
@@ -4910,7 +4909,6 @@ function balkMascotte() { return $("#plMascot"); }
    rastertoon: de punt groeit en wordt iets lichter, en de rimpel duwt hem
    ook even opzij. De grond beweegt alleen als iets hem indrukt: een vinger,
    een ronde knop, de klok van het aftellen of de fanfare.
-   - Vloeien: bij het aftellen nemen de punten de plek van de kaart in.
    - Rimpel: een golfpakket vanaf de vinger (of de schijf), twee ringen die
      uitdempen. De punten worden naar buiten geduwd en veren terug naar hun
      plek, zoals een steentje in water. Het veld rust nooit langer dan de
@@ -4919,15 +4917,14 @@ function balkMascotte() { return $("#plMascot"); }
    beeld is; in rust staat er één getekend beeld. Bij beperkte beweging
    alleen dat beeld. */
 function stipveld(cv, opt) {
-  /* Op ploegkleur papier op 16%; op papier (de titel, de worp) inkt op 7%.
+  /* Op ploegkleur papier op 16%; op papier (de titel, de worp) inkt op 11%.
      Per punt, want tijdens het onthullen ligt de grens midden in het veld.
      De laatste waarde is hoeveel lichter een punt wordt in de rimpel. */
   const INKT = [.11, "20, 17, 15", .16], PAPIER = [.16, "244, 235, 218", .45];
   const CEL = 12, R0 = 2, LEEF = 2100;
   const cx = cv.getContext("2d");
-  let W = 0, H = 0, punten = [], rimpels = [], raf = 0, vloei = -1e9;
+  let W = 0, H = 0, punten = [], rimpels = [], raf = 0;
   let inkt = !!opt.inkt, onthul = null;
-  const VLOEI = 500;
   function maat() {
     const r = cv.getBoundingClientRect();
     if (!r.width || !r.height) return false;
@@ -4940,14 +4937,16 @@ function stipveld(cv, opt) {
       /* Op het midden uitgelijnd, zoals background-position: center. */
       const x0 = W / 2 - CEL * Math.floor(W / 2 / CEL), y0 = H / 2 - CEL * Math.floor(H / 2 / CEL);
       for (let y = y0; y < H; y += CEL) for (let x = x0; x < W; x += CEL) {
-        const m = opt.masker(x, y, W, H), m0 = opt.vanMasker ? opt.vanMasker(x, y, W, H) : m;
-        if (m > .01 || m0 > .01) punten.push({ x, y, m, m0 });
+        /* Een vol bord: elk punt op volle dekking. opt.masker (0 tot 1 per
+           punt) blijft als haak voor wie later toch een verloop wil. */
+        const m = opt.masker ? opt.masker(x, y, W, H) : 1;
+        if (m > .01) punten.push({ x, y, m });
       }
     }
     return true;
   }
   function actief(nu) {
-    return nu - vloei < VLOEI || rimpels.some(r => nu - r.t < LEEF) || !!onthul;
+    return rimpels.some(r => nu - r.t < LEEF) || !!onthul;
   }
   /* Onthullen: de ploegkleur groeit als een cirkel uit de knop, en binnen die
      cirkel worden de punten papier. Klaar: de kleur staat op het scherm zelf,
@@ -4968,11 +4967,8 @@ function stipveld(cv, opt) {
       cx.fillStyle = onthul.kleur;
       cx.beginPath(); cx.arc(onthul.x, onthul.y, straal, 0, 6.2832); cx.fill();
     }
-    /* Vloeien: van het vorige masker naar het eigen, met een zachte uitloop. */
-    const v = 1 - Math.pow(1 - Math.min(1, Math.max(0, (nu - vloei) / VLOEI)), 3);
     for (const p of punten) {
-      const m = v >= 1 ? p.m : p.m0 + (p.m - p.m0) * v;
-      if (m < .01) continue;
+      const m = p.m;
       let golf = 0, ex = 0, ey = 0;
       /* De rimpel moet je zien als antwoord op je tik: 12 px opzij, een punt
          tot ruim het dubbele. Met 4,5 px las hij op een telefoon als niets. */
@@ -5002,10 +4998,9 @@ function stipveld(cv, opt) {
   function wek() { if (!raf) raf = requestAnimationFrame(stap); }
   window.addEventListener("resize", () => { if (opt.zichtbaar()) wek(); });
   return {
-    /* Het scherm komt in beeld: tekenen, en vloeien als het moet. */
-    aan(vloeien) {
+    /* Het scherm komt in beeld: tekenen. */
+    aan() {
       rimpels = [];
-      vloei = vloeien && opt.vanMasker && !stilAan() ? performance.now() : -1e9;
       wek();
     },
     rimpel(x, y, sterk, van) {
@@ -5028,35 +5023,21 @@ function stipveld(cv, opt) {
   };
 }
 
-/* Overdracht: leeg naar de kaart toe, zoals de ellips van 75% bij 60% op
-   (50%, 45%), van 40% tot de rand. */
-function maskerHo(x, y, W, H) {
-  const d = Math.hypot((x - W * .5) / (W * .75), (y - H * .45) / (H * .6));
-  return Math.max(0, Math.min(1, (d - .4) / .6));
-}
+/* Elke grond is een vol bord: de stukken liggen erop, en wat eronder ligt
+   zie je niet. Een rimpel loopt onder een kaart door en verdwijnt daar. */
 /* Titel: inkt op papier, want de titel is van allebei de ploegen. */
 const veldTi = stipveld($("#tiVeld"), {
   inkt: true,
-  zichtbaar: () => $("#s-title").classList.contains("on"),
-  masker: maskerHo
+  zichtbaar: () => $("#s-title").classList.contains("on")
 });
 const veldHo = stipveld($("#hoVeld"), {
-  zichtbaar: () => $("#s-handoff").classList.contains("on"),
-  masker: maskerHo
+  zichtbaar: () => $("#s-handoff").classList.contains("on")
 });
-/* Aftellen: leeg rond de schijf in het midden, van 110 tot 260 px. */
 const veldWn = stipveld($("#wnVeld"), {
-  zichtbaar: () => $("#s-winner").classList.contains("on"),
-  masker: maskerHo
+  zichtbaar: () => $("#s-winner").classList.contains("on")
 });
 const veldCd = stipveld($("#cdVeld"), {
-  zichtbaar: () => !$("#countdown").hidden,
-  /* Na een tik op de knop vloeit het veld vanaf het masker van de
-     overdracht, zodat de punten de plek van de kaart innemen. */
-  vanMasker: (x, y, W, H) => maskerHo(x, y, W, H),
-  masker(x, y, W, H) {
-    return Math.max(0, Math.min(1, (Math.hypot(x - W / 2, y - H / 2) - 110) / 150));
-  }
+  zichtbaar: () => !$("#countdown").hidden
 });
 
 /* De rimpel op de grond van de overdracht. Alleen een tik op de grond zelf,
