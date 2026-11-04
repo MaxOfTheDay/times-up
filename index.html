@@ -246,7 +246,7 @@
    zin-tekst voor de volwassene. */
 .wordmark h1, #s-setup h1, .group-head, .rules > summary,
 .cd-disc b, .chips.getal > .chip, .roundcard b, .ho-count span, .mini-score b,
-.paused-clock .dial b, .secs-left, .gain, .cardword, .kijk-grid small,
+.secs-left, .gain, .cardword, .kijk-grid small,
 .pv small, .tally .sr b, .tally .num, .btn-plain, .cb-index button {
   font-family: var(--font-display);
 }
@@ -1517,41 +1517,31 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 /* De twee deuren op één regel, met de ruimte ertussen die ze op het
    spelscherm ook hebben: ze zijn elkaars alternatief, geen lijstje. */
 .doors { display: flex; align-items: center; gap: var(--s-5); }
-/* Een gepauzeerd spel moet zeggen dát het stilstaat en waar het stond.
-   Het paneel toonde alleen twee pictogrammen op een donker vlak: geen
-   tijd, geen stand, geen woord. */
-.paused-clock { display: flex; align-items: center; gap: var(--s-3); }
-/* Een vierkante wijzerplaat, zoals de klok rond de kaart, stil op de stand
-   waar hij bleef. Geen eigen contour: de gouden baan is de rand, anders staan
-   er twee ringen om één getal. */
-.paused-clock .dial {
-  position: relative; width: 76px; height: 76px; display: grid; place-items: center;
+/* Pauze tijdens een beurt draait de kaart om (draaiPauze()): het paneel ligt
+   als haar achterkant op haar gemeten plek (--kx, --ky, --kw, --kh, gezet
+   door legPaneel()), met dezelfde contour en schaduw, en de rand is haar
+   eigen klokband, stil. Zo dekt het het woord af (door de sluier was het
+   liggend nog te lezen) en staat de klok waar hij altijd staat, in plaats
+   van als tweede wijzerplaat op een tweede vel. De stilstand zegt zich door
+   het omdraaien, de sluier en de band die niet meer afwindt; geen
+   pauzebalken erbij, die staan al rechtsboven. Op de overdracht loopt er
+   geen klok en ligt er geen kaart: daar blijft het een los paneel met de
+   twee deuren. */
+#pauze .panel > .timerframe { display: none; }
+#pauze.kaart.klok .panel > .timerframe { display: block; }
+#pauze.kaart .panel {
+  position: fixed; margin: 0; box-sizing: border-box;
+  left: var(--kx); top: var(--ky); width: var(--kw); height: var(--kh);
+  min-width: 0; justify-content: center;
+  /* Binnen de band blijven: contour 4 en band 12 (17 onder vijf tellen). */
+  padding: var(--s-5);
+  animation: none;
 }
-.paused-clock .dial svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.paused-clock .dial b {
-  position: relative; font-weight: 900; font-size: var(--fs-5); font-variant-numeric: tabular-nums;
-}
-/* De balken zijn het tweede kanaal naast de stilstaande baan: samen zeggen
-   ze "stil", ook zonder kleur. Ze stonden op 10 bij 34 en waren daarmee
-   even zwaar als de wijzerplaat ernaast, terwijl het getal de mededeling
-   is en zij het bijschrift. */
-.paused-clock .bars { display: flex; gap: 5px; }
-.paused-clock .bars i { width: 8px; height: 26px; background: var(--ink); }
-/* Liggend op een laag scherm staan klok en stand links en de twee deuren
-   rechts: onder elkaar is het paneel zo'n 400 px hoog, en op 568 bij 320
-   viel "verder" dan onderaan van het scherm. Naast elkaar past het, en de
-   deuren blijven op één regel, in dezelfde volgorde. Op de overdracht zijn
-   klok en stand verborgen; dan blijven alleen de deuren over. */
-@media (orientation: landscape) and (max-height: 430px) {
-  #pauze .panel {
-    display: grid; grid-template-columns: auto auto; align-items: center;
-    justify-items: center; gap: var(--s-3) var(--s-6);
-    padding: var(--s-4) var(--s-5);
-  }
-  #pauze .panel .paused-clock { grid-column: 1; grid-row: 1; }
-  #pauze .panel .mini-score { grid-column: 1; grid-row: 2; }
-  #pauze .panel .doors { grid-column: 2; grid-row: 1 / span 2; }
-}
+#pauze.kaart .panel > :not(.timerframe) { position: relative; }
+#pauze[data-time="ok"]   .timerframe .band { stroke: var(--time-3); }
+#pauze[data-time="warn"] .timerframe .band { stroke: var(--time-2); }
+#pauze[data-time="crit"] .timerframe .band { stroke: var(--time-1); stroke-width: 17; }
+#pauze.kaart[data-time="crit"] .panel { background: var(--paper-hot); }
 
 /* Klein en gedempt: de rand om de kaart is de klok, dit is het cijfer erbij.
    In de laatste tien seconden neemt het de kleur van de klok over (6,6 / 5,0
@@ -2088,9 +2078,6 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   .overlay .panel .btn-go { width: 148px; }
   .overlay .panel .btn-danger { width: 88px; height: 88px; }
   .overlay .panel .btn-danger .mark { width: 40px; }
-  .paused-clock .dial { width: 100px; height: 100px; }
-  .paused-clock .dial b { font-size: var(--fs-6); }
-  .paused-clock .bars i { width: 10px; height: 34px; }
   #pauze .mini-score .side .head { width: 84px; }
   #pauze .mini-score .side .head > svg { width: 48px; height: 48px; }
   #pauze .mini-score .side.up .head > svg { width: 76px; height: 76px; }
@@ -2886,19 +2873,14 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 
 <div class="overlay" id="pauze" role="dialog" aria-modal="true" aria-label="Pauze" hidden>
   <div class="panel surface">
-    <!-- Het paneel toonde alleen twee pictogrammen: niet dát het stilstond,
-         niet waar de klok bleef staan, niet hoe het ervoor stond. -->
-    <div class="paused-clock" id="pauseClock">
-      <div class="bars" aria-hidden="true"><i></i><i></i></div>
-      <div class="dial">
-        <svg viewBox="0 0 80 80" aria-hidden="true">
-          <!-- Ook hier een <path> vanaf twaalf uur, om dezelfde reden als
-               bij #timerBand. Omtrek blijft 2 * (70 + 70). -->
-          <path id="pauseRect" d="M40 5 H75 V75 H5 V5 Z" fill="none" stroke-width="10"/>
-        </svg>
-        <b id="pauseSecs">30</b>
-      </div>
-    </div>
+    <!-- Tijdens een beurt is het paneel de achterkant van de kaart: het ligt
+         op haar gemeten plek, en de rand is haar eigen klokband, stil op de
+         stand waar hij bleef (legPaneel() neemt pad en stand over). Geen
+         aparte wijzerplaat: dat was een tweede klok vlak voor de eerste. -->
+    <svg class="timerframe" id="pauseFrame" aria-hidden="true">
+      <path class="track" id="pauseTrack"/>
+      <path class="band"  id="pauseBand"/>
+    </svg>
     <!-- Dezelfde stand als op het overdrachtscherm, gebouwd door
          buildTally(): één component, niet twee die uit elkaar groeien. -->
     <div class="mini-score" id="pauseTally" aria-hidden="true"></div>
@@ -4242,7 +4224,10 @@ function sizeCard() {
    waarin de kaart van maat verandert zonder dat het venster dat doet --
    een schermwissel, een toetsenbord dat opkomt, een gedraaide tablet die
    pas na de wissel uitgemeten kan worden. */
-function remeasure() { if (current === "play") { sizeCard(); repaintClock(); } }
+function remeasure() {
+  if (current !== "play") return;
+  sizeCard(); repaintClock();
+}
 if (window.ResizeObserver) new ResizeObserver(remeasure).observe($(".cardwrap"));
 addEventListener("resize", remeasure);
 addEventListener("orientationchange", remeasure);
@@ -4267,8 +4252,8 @@ function paintClock(ms, totalMs) {
   const p = Math.max(0, Math.min(1, ms / totalMs));
   /* De inkt hangt vast op twaalf uur en het vrije uiteinde trekt zich terug:
      de band windt af, tegen de wijzers in, zoals een keukenwekker. De
-     wijzerplaat in het pauzepaneel (#pauseRect) doet precies hetzelfde, met
-     dezelfde formule. Draai dit niet om:
+     achterkant in het pauzepaneel (#pauseBand) neemt deze stand over (zie
+     legPaneel()). Draai dit niet om:
      aflopende tijd windt af. */
   $("#timerBand").style.strokeDashoffset = framePerim * (1 - p);
   /* De kleur van de rand staat in CSS, niet hier: één blok waar alle drie
@@ -5693,7 +5678,7 @@ function naarTitel(k, sluier) {
    De klok staat stil zolang het paneel open is. Verder spelen is één tik;
    stoppen gooit het lopende spel weg en zit daarom achter een lange druk.
    ============================================================== */
-let pauseMs = 0, pauseReturn = null, pauseUit = null;
+let pauseMs = 0, pauseReturn = null, pauseUit = null, pauzeKaart = false;
 
 /* Het scherm achter het paneel gaat op inert: geen punt scoren op een
    stilstaande klok, en de knop die het paneel opent kan zichzelf niet nog
@@ -5724,25 +5709,22 @@ function openPause() {
      loopt dan al niets meer, en een paneel erover zou middenin die adem
      opengaan en het overdrachtscherm er zo weer onder wisselen. */
   if (current === "play" && (!G || G.card === null)) return;
-  if (current === "play") {
+  const opKaart = current === "play";
+  if (opKaart) {
     pauseMs = remaining();
     stopClock();
     releaseWake();
+    /* De kaart precies op de bevroren stand, zodat de achterkant dezelfde
+       band krijgt; en de haast eraf, anders wiebelen haar randen onder het
+       paneel uit. runClock() zet die er bij verder weer op. */
+    paintClock(pauseMs, G.secs * 1000);
+    $("#cardslot").classList.remove("hurry");
   }
-  /* Het paneel toont de bevroren tijd groot in inkt, met de vierkante
-     wijzerplaat eromheen, en de stand eronder. */
-  const totalMs = G ? G.secs * 1000 : 1;
-  const left = current === "play" ? pauseMs : (G ? G.pendingMs : 0);
-  const p = Math.max(0, Math.min(1, left / totalMs));
-  const rect = $("#pauseRect"), perim = 2 * (70 + 70);
-  rect.style.strokeDasharray = perim;
-  rect.style.strokeDashoffset = perim * (1 - p);
-  rect.style.stroke = timerColour(left);
-  $("#pauseSecs").textContent = Math.ceil(left / 1000);
-  // Alleen tijdens een lopende beurt staat er een klok stil. Op de
-  // tussenschermen loopt er niets, en dan is een wijzerplaat op nul
-  // eerder een mededeling dan naslag.
-  $("#pauseClock").hidden = current !== "play";
+  /* De kaart die je voor je hebt draait om: tijdens een beurt de speelkaart
+     (met haar klok), op de overdracht de opdrachtkaart (alleen de deuren). */
+  $("#pauze").classList.remove("kaart");
+  $("#pauze").classList.toggle("klok", opKaart);
+  pauzeKaart = opKaart ? $("#card") : current === "handoff" ? $("#hoRoundCard") : null;
   /* Op de overdracht staat de stand al in de kaart vlak achter het paneel,
      en de startknop eronder is net zo'n gouden cirkel met een speelteken
      als "verder" in het paneel. Twee keer dezelfde stand en twee keer
@@ -5760,7 +5742,65 @@ function openPause() {
   $("#pauze").classList.remove("uit");
   $("#pauze").inert = false;
   $("#pauze").hidden = false;
+  if (pauzeKaart && legPaneel()) draaiPauze();
   $("#btnResume").focus({ preventScroll: true });
+}
+
+/* De achterkant van de kaart (pauzeKaart): het paneel op haar plek, met
+   tijdens een beurt haar band. De kaart zelf kan op scaleX(0) staan (draaiPauze()), dus de maat komt uit
+   de opmaak (offsetWidth) en alleen het midden uit getBoundingClientRect().
+   Past de achterkant niet op de kaart (liggend op 568 bij 320 is ze nog
+   geen 60 px), dan blijft het een los paneel in het midden. Geeft terug of
+   de achterkant er ligt; meten kan alleen met het paneel in beeld. */
+function legPaneel() {
+  const k = pauzeKaart, r = k.getBoundingClientRect();
+  const w = k.offsetWidth, h = k.offsetHeight;
+  const pn = $("#pauze .panel");
+  pn.style.setProperty("--kx", (r.left + r.width / 2 - w / 2) + "px");
+  pn.style.setProperty("--ky", (r.top + r.height / 2 - h / 2) + "px");
+  pn.style.setProperty("--kw", w + "px");
+  pn.style.setProperty("--kh", h + "px");
+  if (k === $("#card")) {
+    const band = $("#timerBand");
+    $("#pauseFrame").setAttribute("viewBox", $("#timerFrame").getAttribute("viewBox"));
+    $("#pauseTrack").setAttribute("d", band.getAttribute("d"));
+    $("#pauseBand").setAttribute("d", band.getAttribute("d"));
+    $("#pauseBand").style.strokeDasharray = band.style.strokeDasharray;
+    $("#pauseBand").style.strokeDashoffset = band.style.strokeDashoffset;
+    $("#pauze").dataset.time = k.dataset.time;
+  } else delete $("#pauze").dataset.time;
+  $("#pauze").classList.add("kaart");
+  const past = pn.scrollHeight <= pn.clientHeight + 1 && pn.scrollWidth <= pn.clientWidth + 1;
+  $("#pauze").classList.toggle("kaart", past);
+  return past;
+}
+
+/* Gedraaid terwijl het paneel openstaat: de achterkant schuift mee, of wordt
+   een los paneel als ze niet meer past (de kaart staat dan nog om, onder de
+   sluier). Na remeasure(), dat eerst geregistreerd is en de kaart uitmeet. */
+addEventListener("resize", () => { if (paused() && pauzeKaart) legPaneel(); });
+
+/* Pauze draait de kaart om, met dezelfde twee helften als elk einde
+   (draaiOm(), landOm()): de kaart wordt smal tot een rand en de achterkant
+   komt op dezelfde plek weer breed. De kaart blijft smal zolang het paneel
+   openstaat; kaartBoven() draait haar weer om. Bij beperkte beweging
+   gebeurt er niets: het paneel ligt er meteen. */
+let kaartOm = null;
+function draaiPauze() {
+  const k = pauzeKaart;
+  if (stilAan() || !k.animate) return;
+  kaartOm = k.animate([{ transform: "scaleX(1)" }, { transform: "scaleX(0)" }],
+    { duration: OMDRAAI, easing: curve("weg"), fill: "forwards" });
+  $("#pauze .panel").animate([{ transform: "scaleX(0)" }, { transform: "none" }],
+    { duration: 180, delay: OMDRAAI, easing: curve("uit"), fill: "backwards" });
+}
+function kaartBoven(draai) {
+  if (!kaartOm) return;
+  const k = kaartOm.effect.target;
+  kaartOm.cancel(); kaartOm = null;
+  if (draai && !stilAan()) k.animate(
+    [{ transform: "scaleX(0)" }, { transform: "none" }],
+    { duration: 180, easing: curve("uit") });
 }
 
 function closePause() {
@@ -5768,6 +5808,7 @@ function closePause() {
   el.hidden = true;
   $("#s-handoff").classList.remove("paneel");
   screensInert(false);
+  kaartBoven(true);     // het paneel is meteen weg; de kaart komt weer boven
   if (pauseReturn && pauseReturn.isConnected) pauseReturn.focus({ preventScroll: true });
   pauseReturn = null;
   /* Pas ná het verzetten van de focus: inert zou hem anders naar de body
@@ -5837,6 +5878,7 @@ holdButton($("#btnStop"), 1100, () => {
   pauseMs = 0; pauseReturn = null;
   stopClock(); releaseWake();
   $("#pauze").hidden = true;
+  kaartBoven(false);
   screensInert(false);        // niet via closePause(): dat zou de klok van
                                // een spel dat we net weggooien weer starten
   G = null;
