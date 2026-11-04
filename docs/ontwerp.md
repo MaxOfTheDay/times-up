@@ -1034,7 +1034,37 @@ opnieuw gemeten worden. Max koos het volle bord. Daarmee verviel ook het
 vloeien van het ene masker naar het andere op het aftellen.
 
 `stipveld()` neemt nog een `masker` (0 tot 1 per punt) als iemand later
-toch een verloop wil; geen enkele grond gebruikt hem nu.
+toch een verloop wil; geen enkele grond gebruikt hem nu. Past dat ooit, dan
+als rastertoon: een punt die groter wordt, niet een die vervaagt.
+
+### Rastertoon, afgewerkt
+
+Bij het nalopen van het volle bord, live naast elkaar gezet:
+
+- **Rood en blauw even zichtbaar.** Papier op 16% haalde op rood 1,17:1 en
+  op blauw 1,28:1: Vos had een vlakker bord dan Uil. Nu 23% op rood
+  (1,27:1) en 16% op blauw (`STIP_PAPIER`); de titel van 11 naar 12% inkt
+  (1,28:1). Alles blijft onder 1,3:1, dus een textuur en geen patroon.
+- **Een rimpel met een dal.** Alleen de kam was te zien: punten die groeien
+  en oplichten, zodat een tik een ring van kralen tekende, een los ding op
+  de grond. Nu krimpen de punten ook in het dal achter de kam (tot 80% van
+  hun straal), en leest de tik als een duw door het bord. Sterkte en
+  snelheid zijn gelijk gebleven.
+- **De stralen in de punten.** De eindstand had bleke wiggen (een svg op
+  16%) over de punten heen, die eindeloos draaiden: twee texturen op
+  elkaar. Nu zijn de stralen rastertoon: binnen twaalf stralen vanuit het
+  midden is een punt 1,75 keer zo groot en een kwart voller. Voorgesteld
+  was dat ze één keer meedraaien met de fanfare en dan stilstaan; Max wilde
+  het draaien houden, binnen de punten. Ze draaien dus in 26 s rond zolang
+  het scherm in beeld is: het feest is het enige dat hier uit zichzelf
+  loopt. Bij gelijkspel blijft de grond papier en worden het inkten punten,
+  zoals op de titel (de gouden wiggen vielen weg met de svg). Bij beperkte
+  beweging staan ze stil.
+- **Scherp op 3x.** Het canvas stopte bij 2x, dus op de meeste telefoons van
+  nu was elke punt zacht aan de rand. Nu tot 3x.
+
+Bekeken en gehouden: de worp, de snelheid en maat van de rimpel, de ring per
+tel op het aftellen, het vuurwerk, en het vlakke spelscherm.
 
 ## Het titelscherm heeft twee dingen
 
@@ -1390,10 +1420,10 @@ van die kleur op papier: roze voor Vos, grijsblauw voor Uil. Dat waren de
 enige kleuren in de app buiten het palet, en de winst las als een vale
 kleur in plaats van als de ploeg. Nu krijgt het scherm dezelfde grond als de
 overdracht van die ploeg: de volle ploegkleur met het stipveld (`#wnVeld`),
-en de stralen als papier op 16% erover, net als de punten. De stand blijft
+met de stralen in de punten (zie "Rastertoon, afgewerkt"). De stand blijft
 op papier, dus er komt geen tekst op de ploegkleur. De confetti is papier en
 goud, want snippers in de ploegkleur verdwijnen in de grond. Bij gelijkspel
-is er geen ploeg: papier met gouden stralen, zoals het was.
+is er geen ploeg: papier met inkten punten, zoals de titel.
 
 Let op de klassenaam als je hier ooit tóch iets bijtekent: `.bar` bestond
 al -- dat is de streep door de pas-knop als de stapel op is. Een tweede
