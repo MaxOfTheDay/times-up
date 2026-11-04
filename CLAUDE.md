@@ -153,7 +153,9 @@ twee knoppen van rand tot rand met verschillende lift. Een uitgang staat
 rechtsboven. Een nieuwe knop gaat in de selectorlijst van 3. KNOPPEN, anders
 veert hij niet terug. Een cirkel op een stippengrond stuurt bij de druk een
 rimpel vanaf zijn rand (`knopRimpel()`, en `rimpelDoor()` als het scherm
-meteen wisselt); een rechthoek niet. Vervormen (rek en klets) is alleen
+meteen wisselt); een rechthoek niet. Glijdt die cirkel daarna over de
+punten, dan neemt hij zijn golf mee: zwakke ringen vanaf zijn rand zolang
+hij onderweg is (`golfMee()`), geen tweede rimpel bij de landing. Vervormen (rek en klets) is alleen
 voor Vos en Uil: een knop zakt in, hij knijpt nooit.
 
 **De hoek van het scherm is geen rechte hoek.** Elk blijvend rechthoekig vlak
