@@ -2470,7 +2470,11 @@ code: een foto of tekening en het woord, in Instellingen.
 - **Een rij die opzij schuift, met één lege kaart vooraan.** Veertig tegels
   onder elkaar zouden Voorkeuren een scherm ver wegduwen. Vooraan staat een
   lege kaart met een stippelrand en een plus, ook als de rij leeg is: ze
-  leest als "kaart erbij" en staat altijd op dezelfde plek. Twee tegels
+  leest als "kaart erbij" en staat altijd op dezelfde plek. Ze ligt plat,
+  zonder schaduw: stippelrand en slagschaduw samen zeiden "lege plek" en
+  "stuk dat hier ligt" tegelijk. Een druk kleurt haar `--paper-2`, zoals een
+  putje. Een volle tegel met een plus verloor de lege plek, een tegel in de
+  stippelrand gaf een rechthoek in een rechthoek. Twee tegels
   (camera en potlood) zonder naam stonden tussen de kaarten, zagen eruit als
   kaarten, en lieten je in de maker vastzitten in de soort waarop je had
   getikt; een derde voor toveren zou niemand meer raden.

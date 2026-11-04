@@ -1107,8 +1107,11 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 /* Uit: de kaarten wijken terug; de gekozen Uit op de kopregel zegt het ook. */
 .eigen-rij.uit .eigen-tegel img { opacity: .4; }
 .eigen-rij .pv small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-wrap: nowrap; }
-/* De ingang: een lege kaart, gestippeld zoals het lege vak in de maker. */
-.eigen-rij .eigen-plus { border-style: dashed; }
+/* De ingang: een lege plek op het bord, gestippeld zoals het lege vak in de
+   maker. Plat: een schaduw hoort bij een stuk dat er ligt, en hier ligt nog
+   niets. Ze zakt dus niet in; een druk kleurt het putje. */
+.eigen-rij .eigen-plus { border-style: dashed; box-shadow: none; }
+.eigen-rij .eigen-plus:active { transform: none; background: var(--paper-2); }
 .eigen-plus svg { width: 34px; height: 34px; }
 /* De kopregel zoals Geluid: naam links, Aan en Uit rechts; de rij eronder. */
 .field.eigen { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; row-gap: var(--s-3); }

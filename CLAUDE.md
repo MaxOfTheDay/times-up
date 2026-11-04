@@ -379,7 +379,7 @@ knop wisselt met `visibility`, nooit met `hidden`.
 - Elk teken op een kaart gaat door `zetTeken()`. Een foto ligt kaal op het
   papier (`.kaal`, geen inktlijn: om een vierkant is dat een derde rand);
   een tekening houdt de pen van `.glyph`.
-- Het veld begint met één lege kaart met een plus (`#btnEigenNieuw`). Foto
+- Het veld begint met één lege kaart met een plus (`#btnEigenNieuw`), gestippeld en plat. Foto
   of tekening kies je in de kop van de maker (`#mkSoort`, `wisselSoort()`):
   het woord gaat mee, wat er al was blijft als klad, en een nieuwe kaart
   opent in de soort van de vorige keer (`tijdisom.soort`). Een bestaande
