@@ -394,12 +394,20 @@ knop wisselt met `visibility`, nooit met `hidden`.
   zijn inhoud, geen betekenis. Een tekening is een doorzichtige PNG en
   krijgt de pen van `.glyph`, geen kader.
 
+**Toveren.** De toverstaf vraagt een tekening aan een Cloudflare Worker
+(`worker/tover.mjs`, uitgerold door `.github/workflows/worker.yml`). Het is
+de enige plek waar de app het net op gaat, alleen op een tik van de
+volwassene, en alleen met het woord. Zonder net, of als het dagbudget op is,
+werkt alles behalve de staf.
+
 ## Tests
 
-`npm test` draait drie suites, en CI draait ze op elke pull request:
+`npm test` draait vier suites, en CI draait ze op elke pull request:
 
 - `test/kern.test.js` toetst de spelkern in Node, in milliseconden
   (`npm run test:kern`). Dit is de plek voor een nieuwe spelregel.
+- `test/tover.test.js` toetst de toverstaf-Worker met een nagebootste
+  Workers AI (`npm run test:tover`).
 - `test/deck.test.js` bewaakt de kaartregels in een echte browser.
 - `test/game.test.js` speelt een volledig potje in een echte browser, zo'n
   anderhalve tot twee minuten. Hij klikt bewust trager dan 280 ms, omdat

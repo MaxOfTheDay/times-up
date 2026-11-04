@@ -2530,6 +2530,39 @@ code: een foto of tekening en het woord, in Instellingen.
   tekent verder op het bewaarde beeld; een stap terug haalt alleen wat er in
   deze beurt bij kwam.
 
+## Toveren
+
+Een tekening uit een woord: typ "kameel", tik op de toverstaf, en een
+tekening in de stijl van de app landt op het doek van de tekenmaker. Gekozen
+op 4 november 2026, na drie mockups (Tover een kaart, Foto tekenen of
+toveren); de afwegingen staan hieronder.
+
+- **Een Cloudflare Worker, geen sleutel in de app.** `worker/tover.mjs`
+  roept Workers AI aan via een binding; `index.html` kent alleen het adres.
+  Uitgerold door `.github/workflows/worker.yml` met het geheim
+  `CLOUDFLARE_API_TOKEN` (sjabloon "Edit Cloudflare Workers"), los van
+  GitHub Pages. Vanaf de ontwikkelmachine zijn `api.cloudflare.com` en
+  `workers.dev` niet bereikbaar; daarom rolt GitHub uit en tekent GitHub het
+  proefvel (`workflow_dispatch` met `proef`, op de branch `tover-proef`).
+- **Twee stappen.** Een klein taalmodel (Llama 3.1 8B) zet het woord om naar
+  Engels en keurt het: FLUX begrijpt Engels het best, en het taalmodel is het
+  slot voor wat niet op een kinderkaart hoort. Daarna tekent FLUX.1 schnell
+  in vier stappen een sticker met een dikke zwarte lijn op effen crème.
+- **Alleen het woord gaat de deur uit.** Geen foto, geen naam, geen adres.
+  Cloudflare traint niet op wat Workers AI verwerkt en bewaart niets na het
+  antwoord, zolang er geen logging aan staat (`observability` uit).
+- **Begrensd.** Alleen `https://maxoftheday.github.io` mag hem aanroepen
+  (CORS, `text/plain` zodat er geen preflight is), per adres twaalf per
+  minuut (rate-limit-binding), en per dag het gratis budget van 10.000
+  neurons: zo'n honderdvijftig tekeningen. Daarna weigert Workers AI tot
+  middernacht UTC; op het gratis plan kost het nooit geld.
+- **Antwoorden.** `{ beeld }` als data-URL, of `{ fout }`: `nee` (verboden
+  of afgekeurd woord), `druk` (de limiet per minuut), `op` (het dagbudget),
+  `stuk` (iets anders). De app maakt van elke fout dezelfde schudbeweging;
+  alleen `op` krijgt een eigen teken.
+- **Getoetst** in `test/tover.test.js` met een nagebootste Workers AI. Of de
+  tekening mooi is, ziet alleen een mens: daarvoor is het proefvel.
+
 ## Weggaan kost niets
 
 Android sluit de app bij de tweede terugveeg als er tussen de twee vegen
