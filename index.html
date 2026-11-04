@@ -1343,10 +1343,6 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   font-size: var(--type-label); font-weight: 900;
   letter-spacing: var(--track-caps); text-transform: uppercase;
 }
-/* De uitleg hoort bij de opdracht, dus staat ze ín de kaart en niet als
-   losse regel op de ploegkleur: daar haalt --ink-2 maar 1,5:1 op blauw en
-   2,0:1 op rood. Op papier blijft het 6,6:1. */
-.roundcard p { display: none; }
 
 /* De drie rondes als één rij: de tekening van nu is de gouden schijf, de
    twee andere zijn kleine papieren tegels met hun eigen ballon. Welke ronde
@@ -1434,8 +1430,6 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   justify-content: space-between; }
 .roundcard.big .ronderij { order: 1 }
 .roundcard.big b         { order: 3 }
-.roundcard.big p         { order: 4 }
-.roundcard.big.zelfde-ronde p { visibility: hidden; }
 .roundcard.big .ho-meta  { order: 5 }
 
 /* Wat je meekrijgt: kaarten op de stapel en seconden. Twee feiten van
@@ -1483,15 +1477,6 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   text-align: center; overflow-wrap: anywhere; hyphens: auto;
 }
 .roundcard.big b { font-size: max(20px, min(8vw, 4vh, 34px)); line-height: 1; }
-.roundcard.big p {
-  display: block; margin: 0;
-  /* Twee regels hoogte, ook als er één past, anders verspringt de kaarthoogte
-     per ronde en daarmee alles eronder. */
-  text-wrap: balance; min-height: 2.7em;
-  font-size: max(var(--type-note), min(3.6vw, 1.7vh, 15px));
-  font-weight: 700; line-height: 1.35;
-  color: var(--ink-2);
-}
 
 /* ---- de stand: één regel voor twee schermen ----
    buildTally() bouwt de opmaak voor de overdracht en het pauzepaneel; deze
@@ -2246,7 +2231,6 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   .ronderij { --schijf: min(19vh, 176px); }
   .ronderij .vak.nu { border-width: 6px; }
   .roundcard.big b { font-size: var(--fs-6); }
-  .roundcard.big p { font-size: var(--fs-4); }
   .ho-count svg { width: 24px; height: 24px; }
   .ho-count span { font-size: var(--fs-5); }
   #s-handoff .mini-score .side .head { width: 92px; }
@@ -2980,7 +2964,6 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
          wie luistert krijgt "ronde 2 van 3" uit de aria-label van de kaart. -->
     <div class="ronderij" id="hoRondes" aria-hidden="true"><div class="vak"></div><div class="vak"></div><div class="vak"></div></div>
     <b>Omschrijven</b>
-    <p></p>
   </div>
 
   <!-- Een huisje en geen pauzeteken: op dit scherm loopt er geen klok, dus
@@ -5034,8 +5017,9 @@ const ROUND_ICON = ["#r-praten", "#r-eenwoord", "#r-mimen"];
      "chip" pictogram, plus het woord áls de host er een <b> voor heeft. De
        balk tijdens het spelen heeft er geen; de naam staat altijd in de
        aria-label.
-     "kaart" het woord met de regel eronder. Alleen hier staat ROUND_HOW.
-       Het beeld tekent paintRij(), want daar staan alle drie de rondes.
+     "kaart" het woord, zonder regel: de tekening zegt de regel al. ROUND_HOW
+       staat alleen in de aria-label, voor wie luistert. Het beeld tekent
+       paintRij(), want daar staan alle drie de rondes.
    ico is het vlak voor het beeld (null bij "kaart"), host het geheel met de
    aria-label. Bij "teken" geen host: dat tegeltje is aria-hidden. */
 function paintRound(ico, size, host) {
@@ -5045,11 +5029,10 @@ function paintRound(ico, size, host) {
   /* Directe kinderen, niet de eerste <b> in het vlak: de stand in de kaart
      heeft eigen cijfers, en een kale querySelector("b") schreef het
      rondewoord daarin. */
-  const word = host.querySelector(":scope > b"), how = host.querySelector(":scope > p");
+  const word = host.querySelector(":scope > b");
   if (word) word.textContent = ROUND_WORD[r];
   /* De rij met de rondes is aria-hidden; wie luistert krijgt het getal
      hier. */
-  if (how) how.textContent = size === "kaart" ? ROUND_HOW[r] : "";
   host.setAttribute("aria-label",
     "Ronde " + G.round + " van " + ROUNDS + ": " + ROUND_WORD[r] +
     (size === "kaart" ? ". " + ROUND_HOW[r] : ""));
@@ -5127,10 +5110,6 @@ function handoff(mode, freshA, freshB, zelfdeGrond) {
      resttijd verdergaat. Een volle beurt is elke keer dezelfde 30, en een
      getal dat nooit verandert, is iets om langs te kijken. */
   $("#hoSecs").hidden = !(G.pendingMs > 0 && G.pendingMs < G.secs * 1000);
-  /* De regel van de ronde alleen als de ronde nieuw is. Bij een beurtwissel
-     in dezelfde ronde hebben beide ploegen hem al gezien; de kaart houdt
-     zijn maat (visibility), zodat beide wissels even groot blijven. */
-  $("#hoRoundCard").classList.toggle("zelfde-ronde", !round);
   $("#hoCards").querySelector("span").textContent = G.pile.length;
   $("#hoCards").disabled = G.round < 2;
   $("#hoCards").classList.toggle("kort", G.pile.length <= 5);
