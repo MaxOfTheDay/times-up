@@ -395,10 +395,15 @@ knop wisselt met `visibility`, nooit met `hidden`.
   krijgt de pen van `.glyph`, geen kader.
 
 **Toveren.** De toverstaf vraagt een tekening aan een Cloudflare Worker
-(`worker/tover.mjs`, uitgerold door `.github/workflows/worker.yml`). Het is
-de enige plek waar de app het net op gaat, alleen op een tik van de
-volwassene, en alleen met het woord. Zonder net, of als het dagbudget op is,
-werkt alles behalve de staf.
+(`worker/tover.mjs`, uitgerold door `.github/workflows/worker.yml`, adres in
+`TOVER_URL`; leeg is geen staf). Het is de enige plek waar de app het net op
+gaat, alleen op een tik van de volwassene, en alleen met het woord. Zonder
+net, of als het dagbudget op is, werkt alles behalve de staf.
+
+- De staf ligt midden op het lege vel van Tekenen (`#mkStaf`), daarna in het
+  gereedschap (`#mkStafRij`); er is geen derde soort kaart.
+- Een getoverde tekening is één actie in `mk.acties` (`{ beeld }`) die het
+  vel vervangt, met de achtergrond weggeknipt (`knipUit()`).
 
 ## Tests
 

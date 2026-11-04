@@ -205,6 +205,58 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(eigen.gewoneHond === 0, 'de gewone kaart "hond" komt nog in een potje terwijl er een eigen "hond" is');
   ok(!eigen.uit, 'eigen kaarten op uit komen toch in een potje');
 
+  /* ------------------------------------------------------------------
+   * Toveren, met een nagebootste Worker: de staf ligt op het lege vel, de
+   * tekening landt erop met een doorzichtige achtergrond, stap terug haalt
+   * haar weg, en een leeg dagbudget zet de zandloper op de staf. De Worker
+   * zelf staat in test/tover.test.js.
+   * ------------------------------------------------------------------ */
+  // Een "FLUX-beeld": effen crème met een gele bol met inktrand.
+  const nepBeeld = await page.evaluate(() => {
+    const c = document.createElement('canvas'); c.width = c.height = 256;
+    const g = c.getContext('2d');
+    g.fillStyle = '#F3EAD8'; g.fillRect(0, 0, 256, 256);
+    g.fillStyle = '#F2B705'; g.strokeStyle = '#14110F'; g.lineWidth = 10;
+    g.beginPath(); g.arc(128, 128, 70, 0, 7); g.fill(); g.stroke();
+    return c.toDataURL('image/jpeg', .9);
+  });
+  let antwoord = { beeld: nepBeeld };
+  let vragen = 0;
+  await page.route('**/teken', async route => {
+    vragen++;
+    await route.fulfill({ status: antwoord.beeld ? 200 : 503, contentType: 'application/json',
+      headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(antwoord) });
+  });
+  await page.click('#btnEigenNieuw');
+  await page.click('#mkSoort [data-soort="tekening"]');
+  const stafLeeg = await page.evaluate(() => {
+    const b = document.querySelector('#mkStaf');
+    return { zichtbaar: !b.hidden, klaar: b.classList.contains('klaar') };
+  });
+  ok(stafLeeg.zichtbaar && !stafLeeg.klaar, 'de staf ligt niet grijs op het lege vel');
+  await page.click('#mkStaf');
+  ok(vragen === 0, 'de staf vroeg een tekening zonder woord');
+  await page.fill('#mkWoord', 'zon');
+  ok(await page.evaluate(() => document.querySelector('#mkStaf').classList.contains('klaar')), 'de staf wordt niet goud met een woord');
+  await page.click('#mkStaf');
+  await page.waitForFunction(() => document.querySelector('#mkStaf').hidden && !document.querySelector('#mkStafRij').hidden);
+  const vel = await page.evaluate(() => {
+    const g = document.querySelector('#mkDoek').getContext('2d');
+    return { hoek: g.getImageData(4, 4, 1, 1).data[3], midden: g.getImageData(256, 256, 1, 1).data[3],
+             bewaar: !document.querySelector('#mkBewaar').disabled };
+  });
+  ok(vragen === 1, `de staf vroeg ${vragen} tekeningen in plaats van één`);
+  ok(vel.hoek === 0, 'de crème achtergrond van de getoverde tekening is niet weggeknipt');
+  ok(vel.midden === 255, 'de getoverde tekening staat niet op het vel');
+  ok(vel.bewaar, 'Bewaren gaat niet aan na toveren');
+  await page.click('#mkStap');
+  ok(await page.evaluate(() => !document.querySelector('#mkStaf').hidden), 'stap terug haalt de getoverde tekening niet weg');
+  antwoord = { fout: 'op' };
+  await page.click('#mkStaf');
+  await page.waitForFunction(() => document.querySelector('#mkStaf').dataset.teken === 'zand');
+  ok(await page.evaluate(() => !document.querySelector('#mkStaf').classList.contains('klaar')), 'de staf blijft goud met het dagbudget op');
+  await page.click('#mkDicht');
+
   await browser.close();
   if (fails.length) { console.log('\nFOUT:\n' + fails.map(f => ' - ' + f).join('\n')); process.exit(1); }
   console.log('  kaarten in orde');

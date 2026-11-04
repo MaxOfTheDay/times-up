@@ -2562,6 +2562,23 @@ toveren); de afwegingen staan hieronder.
   alleen `op` krijgt een eigen teken.
 - **Getoetst** in `test/tover.test.js` met een nagebootste Workers AI. Of de
   tekening mooi is, ziet alleen een mens: daarvoor is het proefvel.
+- **De staf zit in Tekenen, niet in een derde soort.** Een getoverde kaart ís
+  een tekening: daarna kun je bijkleuren en gummen. Een derde knop "Toveren"
+  naast Foto en Tekenen was een weg te veel. Een gouden tegel naast het
+  woord las als "OK"; midden op het lege vel zegt de staf "hier komt het",
+  zoals het album in het lege fotovak. Grijs en gestippeld zonder woord (een
+  tik wijst de woordregel aan), goud met woord; "Klaar" op het toetsenbord
+  tovert ook. Staat er iets op het vel, dan staat de staf in het gereedschap,
+  voor nog een.
+- **Een getoverde tekening is een stap.** Ze komt als één actie in
+  `mk.acties` die het vel vervangt; stap terug haalt de vorige terug, de
+  prullenbak alles. De crème achtergrond knipt de telefoon weg (`knipUit()`,
+  vanaf de randen, met een halve rand), zodat ze doorzichtig is zoals een
+  getekende en de pen van `.glyph` krijgt.
+- **Wachten is rastertoon.** Terwijl Workers AI tekent (twee tot vijf tellen)
+  zwellen de punten van het vel, geen draaiend wieltje. Zonder net een
+  wifi-teken op de staf, met het dagbudget op de zandloper (`#i-glass`);
+  een afgekeurd woord of een andere fout laat de staf schudden.
 
 ## Weggaan kost niets
 

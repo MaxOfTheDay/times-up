@@ -1227,6 +1227,46 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 }
 .mk-teken .mk-gereedschap { gap: var(--s-2); }
 .mk-teken .mk-tg { width: 40px; }
+/* Met de staf erbij zijn het zes knoppen: op een smalle telefoon iets
+   kleiner, met een groter raakvlak eromheen. */
+@media (max-width: 379px) {
+  .mk-teken .mk-gereedschap { gap: 6px; }
+  .mk-teken .mk-tg { width: 36px; min-height: 40px; position: relative; }
+  .mk-teken .mk-tg::after { content: ""; position: absolute; inset: -3px; }
+}
+
+/* De toverstaf. Midden op het lege vel: een tegel, gestippeld en grijs tot er
+   een woord staat, dan goud ("dit, nu"). Zonder net of met het dagbudget op
+   draagt hij een teken in een inktbolletje. */
+.mk-staf {
+  position: absolute; inset: 0; margin: auto; z-index: 2;
+  width: 84px; height: 84px; padding: 0; justify-content: center;
+  background: var(--paper-2); border-style: dashed; box-shadow: none; cursor: pointer;
+}
+.mk-staf > svg { width: 44px; height: 44px; opacity: .45; }
+.mk-staf.klaar { background: var(--go); border-style: solid; box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink); }
+.mk-staf.klaar > svg { opacity: 1; }
+.mk-staf-teken {
+  display: none; position: absolute; top: -10px; right: -10px;
+  width: 26px; height: 26px; border-radius: 50%; background: var(--ink);
+  place-items: center;
+}
+.mk-staf-teken svg { width: 16px; height: 16px; }
+.mk-staf[data-teken="wifi"] .wifi, .mk-staf[data-teken="zand"] .zand,
+.mk-staf-rij[data-teken="wifi"] .wifi, .mk-staf-rij[data-teken="zand"] .zand { display: grid; }
+.mk-staf-rij { position: relative; overflow: visible; }
+.mk-staf-rij .mk-staf-teken { top: -9px; right: -9px; width: 20px; height: 20px; }
+.mk-staf-rij .mk-staf-teken svg { width: 12px; height: 12px; }
+/* Terwijl Workers AI tekent zwellen de punten van het vel: rastertoon, geen
+   draaiend wieltje. */
+.mk-tovert {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background-image: radial-gradient(circle, var(--ink) 2px, transparent 2.6px);
+  background-size: 12px 12px; background-position: 6px 6px;
+  animation: mk-tovert var(--t-groot) var(--e-vloei) infinite alternate;
+}
+@keyframes mk-tovert { from { opacity: .08; } to { opacity: .32; } }
+@media (prefers-reduced-motion: reduce) { .mk-tovert { animation: none; opacity: .2; } }
 .mk-tg[aria-pressed="true"] { background: var(--go); }
 .mk-scheid { width: var(--line-2); align-self: stretch; margin: 6px 2px; background: var(--rule); }
 .mk-stip { display: block; width: 8px; height: 8px; border-radius: 50%; background: var(--ink); }
@@ -2527,6 +2567,17 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   <symbol id="i-potlood" viewBox="0 0 100 100">
     <path d="M18 82 L24 60 L68 16 L84 32 L40 76 Z M60 24 L76 40" fill="none" stroke="#14110F" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
   </symbol>
+  <!-- De toverstaf: een stok met drie sterretjes. Het wifi-teken staat erbij
+       als de staf zonder net niets kan. -->
+  <symbol id="i-staf" viewBox="0 0 100 100">
+    <path d="M16 84 L62 38" fill="none" stroke="#14110F" stroke-width="10" stroke-linecap="round"/>
+    <path d="M70 10 V30 M60 20 H80 M86 40 V52 M80 46 H92 M40 12 V22 M35 17 H45" fill="none" stroke="#14110F" stroke-width="7" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-wifi" viewBox="0 0 100 100">
+    <path d="M14 40 C36 20 64 20 86 40 M28 56 C42 44 58 44 72 56" fill="none" stroke="#F4EBDA" stroke-width="10" stroke-linecap="round"/>
+    <circle cx="50" cy="74" r="7" fill="#F4EBDA"/>
+    <path d="M18 14 L82 86" stroke="#F4EBDA" stroke-width="10" stroke-linecap="round"/>
+  </symbol>
   <symbol id="i-emmer" viewBox="0 0 100 100">
     <path d="M16 46 L46 16 L80 50 L50 80 Z M16 46 H76" fill="none" stroke="#14110F" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
     <path d="M86 62 C92 72 92 82 86 82 C80 82 80 72 86 62 Z" fill="#14110F"/>
@@ -3123,6 +3174,14 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
         <img id="mkFoto" alt="" hidden draggable="false">
         <video id="mkZoeker" playsinline muted hidden></video>
         <canvas id="mkDoek" width="512" height="512" hidden></canvas>
+        <!-- Toveren: de staf ligt midden op het lege vel; tijdens het tekenen
+             zwellen de punten. Zie docs/ontwerp.md, Toveren. -->
+        <div class="mk-tovert" id="mkTovert" hidden></div>
+        <button class="btn-plain mk-staf" id="mkStaf" aria-label="Tover een tekening van het woord" hidden>
+          <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-staf"/></svg>
+          <i class="mk-staf-teken wifi" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-wifi"/></svg></i>
+          <i class="mk-staf-teken zand" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></i>
+        </button>
       </div>
       <input class="mk-woord" id="mkWoord" maxlength="14" placeholder="woord"
              autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="done"
@@ -3151,6 +3210,9 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
           <button class="btn-plain mk-tg" id="mkPen" aria-label="Pen, nog een tik voor dik of dun" aria-pressed="true"><i class="mk-stip"></i></button>
           <button class="btn-plain mk-tg" id="mkEmmer" aria-label="Een vlak kleuren" aria-pressed="false"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-emmer"/></svg></button>
           <button class="btn-plain mk-tg" id="mkGum" aria-label="Gum" aria-pressed="false"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-gum"/></svg></button>
+          <button class="btn-plain mk-tg mk-staf-rij" id="mkStafRij" aria-label="Nog een tekening van het woord" hidden><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-staf"/></svg>
+            <i class="mk-staf-teken wifi" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-wifi"/></svg></i>
+            <i class="mk-staf-teken zand" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></i></button>
           <span class="mk-scheid" aria-hidden="true"></span>
           <button class="btn-plain mk-tg" id="mkStap" aria-label="Laatste stap weg"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-stap"/></svg></button>
           <button class="btn-plain mk-tg" id="mkLeeg" aria-label="Alles weg"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-prul"/></svg></button>
@@ -4335,6 +4397,108 @@ function openMaker(kaart) {
   toonMk();
   $(mk.img ? "#mkWoord" : "#mkVak").focus({ preventScroll: true });
 }
+/* ---- toveren ----
+   Een tekening uit het woord, van de Worker in worker/tover.mjs. Leeg adres:
+   geen staf. Zie docs/ontwerp.md, Toveren. */
+const TOVER_URL = "https://tijdisom-tover.maxheyrman.workers.dev/teken";
+const TOVER_MS = 30000;
+let toverOp = false;       // het dagbudget is op: de zandloper, tot herladen
+
+function tekenStaf() {
+  const midden = $("#mkStaf"), rij = $("#mkStafRij");
+  const kan = !!TOVER_URL && !!mk && mk.soort === "tekening";
+  const leeg = kan && !mk.acties.length && !mk.basis;
+  midden.hidden = !(kan && leeg && !mk.tovert);
+  rij.hidden = !(kan && !leeg);
+  $("#mkTovert").hidden = !(kan && mk.tovert);
+  if (!kan) return;
+  const teken = navigator.onLine === false ? "wifi" : toverOp ? "zand" : "";
+  midden.classList.toggle("klaar", !!$("#mkWoord").value.trim() && !teken);
+  [midden, rij].forEach(b => { b.dataset.teken = teken; b.setAttribute("aria-busy", String(!!mk.tovert)); });
+}
+window.addEventListener("online", keurMaker);
+window.addEventListener("offline", keurMaker);
+
+/* De achtergrond van FLUX is effen crème: vanaf de randen weg, zodat de
+   tekening doorzichtig is zoals een getekende en de pen van .glyph krijgt.
+   Wat op de rand van de achtergrond ligt wordt half doorzichtig. */
+function knipUit(src) {
+  return new Promise((ok, nee) => {
+    const i = new Image();
+    i.onload = () => {
+      const c = document.createElement("canvas");
+      c.width = c.height = DOEK;
+      const g = c.getContext("2d", { willReadFrequently: true });
+      g.drawImage(i, 0, 0, DOEK, DOEK);
+      const im = g.getImageData(0, 0, DOEK, DOEK), d = im.data;
+      let r = 0, gr = 0, b = 0, n = 0;
+      for (let k = 0; k < DOEK; k += 8) for (const [x, y] of [[k, 0], [k, DOEK - 1], [0, k], [DOEK - 1, k]]) {
+        const j = (y * DOEK + x) * 4; r += d[j]; gr += d[j + 1]; b += d[j + 2]; n++;
+      }
+      r /= n; gr /= n; b /= n;
+      const afstand = j => Math.abs(d[j] - r) + Math.abs(d[j + 1] - gr) + Math.abs(d[j + 2] - b);
+      const GRENS = 60;
+      const weg = new Uint8Array(DOEK * DOEK), stapel = [];
+      for (let k = 0; k < DOEK; k++) stapel.push(k, (DOEK - 1) * DOEK + k, k * DOEK, k * DOEK + DOEK - 1);
+      while (stapel.length) {
+        const q = stapel.pop();
+        if (weg[q] || afstand(q * 4) > GRENS) continue;
+        weg[q] = 1;
+        const x = q % DOEK;
+        if (x > 0) stapel.push(q - 1);
+        if (x < DOEK - 1) stapel.push(q + 1);
+        if (q >= DOEK) stapel.push(q - DOEK);
+        if (q < DOEK * (DOEK - 1)) stapel.push(q + DOEK);
+      }
+      for (let q = 0; q < weg.length; q++) {
+        const j = q * 4;
+        if (weg[q]) { d[j + 3] = 0; continue; }
+        const x = q % DOEK;
+        const buur = (x > 0 && weg[q - 1]) || (x < DOEK - 1 && weg[q + 1]) ||
+                     (q >= DOEK && weg[q - DOEK]) || (q < DOEK * (DOEK - 1) && weg[q + DOEK]);
+        if (buur && afstand(j) < GRENS * 2) d[j + 3] = 128;
+      }
+      g.putImageData(im, 0, 0);
+      ok(c);
+    };
+    i.onerror = nee;
+    i.src = src;
+  });
+}
+
+async function tover(knop) {
+  if (!mk || mk.soort !== "tekening" || mk.tovert || !TOVER_URL) return;
+  const woord = $("#mkWoord").value.trim();
+  if (!woord) { nudge($("#mkWoord")); $("#mkWoord").focus({ preventScroll: true }); return; }
+  if (navigator.onLine === false || toverOp) { nudge(knop); return; }
+  const dit = mk;
+  dit.tovert = true; keurMaker();
+  let uit = null;
+  try {
+    const stop = new AbortController();
+    const klok = setTimeout(() => stop.abort(), TOVER_MS);
+    const r = await fetch(TOVER_URL, { method: "POST", body: JSON.stringify({ woord: woord }),
+      headers: { "Content-Type": "text/plain" }, signal: stop.signal });
+    clearTimeout(klok);
+    uit = await r.json();
+  } catch (e) { uit = null; }
+  let beeld = null;
+  if (uit && uit.beeld) { try { beeld = await knipUit(uit.beeld); } catch (e) {} }
+  dit.tovert = false;
+  if (uit && uit.fout === "op") toverOp = true;
+  if (mk !== dit) return;           // gesloten of gewisseld: de tekening vervalt
+  if (!beeld) {
+    keurMaker();
+    nudge($("#mkStaf").hidden ? $("#mkStafRij") : $("#mkStaf"));
+    return;
+  }
+  mk.acties.push({ beeld: beeld });
+  mk.nieuw = true;
+  tekenDoek(); keurMaker();
+}
+$("#mkStaf").addEventListener("click", e => tover(e.currentTarget));
+$("#mkStafRij").addEventListener("click", e => tover(e.currentTarget));
+
 /* Wisselen tussen foto en tekening zonder te sluiten: wat er al was blijft
    als klad liggen, het woord gaat mee. */
 function wisselSoort(soort) {
@@ -4424,6 +4588,7 @@ function tekenMaker() {
    kaarten. Een gewone kaart met hetzelfde woord mag: de eigen gaat voor. */
 function keurMaker() {
   if (!mk) return;
+  tekenStaf();
   const w = $("#mkWoord").value.trim().toLocaleLowerCase("nl");
   const dubbel = !!w && eigen.kaarten.some(k =>
     k !== mk.kaart && k.woord.toLocaleLowerCase("nl") === w);
@@ -4436,7 +4601,10 @@ function keurMaker() {
 }
 $("#mkWoord").addEventListener("input", keurMaker);
 $("#mkWoord").addEventListener("keydown", e => {
-  if (e.key === "Enter") { e.preventDefault(); e.target.blur(); }
+  if (e.key !== "Enter") return;
+  e.preventDefault();
+  if (!$("#mkStaf").hidden && $("#mkStaf").classList.contains("klaar")) tover($("#mkStaf"));
+  else e.target.blur();
 });
 
 const kiesFoto = () => $("#mkBestand").click();
@@ -4478,7 +4646,10 @@ $("#mkBestand").addEventListener("change", e => {
 const wijzers = new Map();
 $("#mkVak").addEventListener("pointerdown", e => {
   if (!mk) return;
-  if (mk.soort === "tekening") { penNeer(e); return; }
+  if (mk.soort === "tekening") {
+    if (e.target.closest("#mkStaf") || mk.tovert) return;
+    penNeer(e); return;
+  }
   if (mk.live) { afdrukken(); return; }
   if (!mk.img) { kiesFoto(); return; }
   e.currentTarget.setPointerCapture(e.pointerId);
@@ -4693,7 +4864,13 @@ function tekenDoek() {
   const g = doek();
   g.clearRect(0, 0, DOEK, DOEK);
   if (mk && mk.basis) g.drawImage(mk.basis, 0, 0, DOEK, DOEK);
-  if (mk) mk.acties.forEach(a => a.vul ? vul(g, a.x, a.y, a.kleur) : lijn(g, a));
+  if (mk) mk.acties.forEach(a => {
+    if (a.beeld) {               // een getoverde tekening vervangt het vel
+      g.clearRect(0, 0, DOEK, DOEK);
+      g.drawImage(a.beeld, 0, 0, DOEK, DOEK);
+    } else if (a.vul) vul(g, a.x, a.y, a.kleur);
+    else lijn(g, a);
+  });
 }
 const doekPunt = e => {
   const r = $("#mkDoek").getBoundingClientRect(), k = DOEK / r.width;
