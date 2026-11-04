@@ -82,7 +82,7 @@ jobs:
             head -c 300 uit.json || true; echo
             sleep 10
           done
-          jq -r '"fout: \(.fout // "-")  en: \(.en // "-")  beeld: \((.beeld // "") | length) tekens"' uit.json
+          jq -r '"fout: \(.fout // "-")  waarom: \(.waarom // "-")  en: \(.en // "-")  beeld: \((.beeld // "") | length) tekens"' uit.json
           test "$code" = "200"
 
       - name: Proefvel tekenen

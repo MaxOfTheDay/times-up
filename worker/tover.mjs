@@ -49,15 +49,27 @@ function antwoord(data, status, herkomst) {
   return new Response(JSON.stringify(data), { status: status || 200, headers: h });
 }
 
-/* Het eerste JSON-object uit een antwoord dat er meer omheen kan zetten. */
+/* Het eerste JSON-object uit een antwoord dat er meer omheen kan zetten.
+   Workers AI geeft een antwoord dat zelf JSON is soms al ontleed terug. */
 export function leesOordeel(tekst) {
-  const m = String(tekst || '').match(/\{[\s\S]*?\}/);
-  if (!m) return null;
+  let o = tekst && typeof tekst === 'object' ? tekst : null;
+  if (!o) {
+    const m = String(tekst || '').match(/\{[\s\S]*?\}/);
+    if (!m) return null;
+    try { o = JSON.parse(m[0]); } catch (e) { return null; }
+  }
   try {
-    const o = JSON.parse(m[0]);
     const en = typeof o.en === 'string' ? o.en.trim().slice(0, 60) : '';
     return { ok: o.ok === true && !!en, en: en };
   } catch (e) { return null; }
+}
+
+/* Een fout van Workers AI over het dagbudget heet anders dan een gewone.
+   Bij "stuk" zegt waarom kort welke stap het was: zonder logging is dat de
+   enige weg om het te zien. Het bevat nooit het woord. */
+function stuk(stap, e) {
+  const fout = soortFout(e);
+  return fout === 'op' ? { fout } : { fout, waarom: (stap + ': ' + String(e && (e.message || e))).slice(0, 160) };
 }
 
 /* Een fout van Workers AI over het dagbudget heet anders dan een gewone. */
@@ -84,8 +96,8 @@ export async function teken(woord, env, rnd) {
       max_tokens: 40, temperature: 0
     });
     oordeel = leesOordeel(r && r.response);
-  } catch (e) { return { fout: soortFout(e) }; }
-  if (!oordeel) return { fout: 'stuk' };
+    if (!oordeel) return { fout: 'stuk', waarom: 'oordeel: ' + typeof (r && r.response) };
+  } catch (e) { return stuk('taal', e); }
   if (!oordeel.ok) return { fout: 'nee' };
   try {
     const r = await env.AI.run(TEKENAAR, {
@@ -93,9 +105,9 @@ export async function teken(woord, env, rnd) {
       steps: 4,
       seed: Math.floor((rnd || Math.random)() * 2147483647)
     });
-    if (!r || !r.image) return { fout: 'stuk' };
+    if (!r || !r.image) return { fout: 'stuk', waarom: 'teken: geen beeld' };
     return { beeld: 'data:image/jpeg;base64,' + await base64(r.image), en: oordeel.en };
-  } catch (e) { return { fout: soortFout(e) }; }
+  } catch (e) { return stuk('teken', e); }
 }
 
 export default {
