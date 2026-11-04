@@ -112,7 +112,7 @@ Kleur staat ook nooit alleen: elke toestand heeft er een tweede kanaal bij
 ### Goud is "dit, nu"
 
 De regel zei eerst dat goud "verdergaan" betekent, maar goud stond ook op de
-gekozen keuzeknop, de duim van de schuif, de ronde waarin je zit, de kroon en
+gekozen keuzeknop, de ronde waarin je zit, de kroon en
 de plaat onder het merk. Bij de audit van de hele vormtaal bleek dat geen
 verwarring maar één betekenis: goud is wat nu geldt, het ene uit een rij.
 De regel is herschreven naar wat er al stond; er is geen pixel veranderd.
@@ -1888,11 +1888,30 @@ hoofdletters scheidden een kop van een veld. Nu:
   moeilijkheid, geen eigen veld;
 - keuzeknoppen dragen `--line-2` (3 px) in plaats van de primaire contour,
   en zijn 52 px hoog: op dit scherm is geen enkele knop de hoofdhandeling;
-- de tijd staat als getal op de regel van de veldnaam, de schuif krijgt de
-  volle breedte eronder;
+- de tijd is een rij van vier keuzeknoppen (20, 30, 45, 60 s), net als
+  kaarten per potje (zie hieronder);
 - ritme: 24 px tussen velden, 40 tussen groepen, 8 tussen de bak en de
   moeilijkheid. Op 390x844 is het scherm 1013 px hoog (was 1228 vanochtend). Het scherm werd
 op 390x844 151 px korter (1228 naar 1077).
+
+**Drie keer dezelfde knop.** De tijd per beurt was een schuif van 20 tot 60
+in stappen van 5: het enige op dit scherm dat geen tegel was, met een ronde
+gouden duim op een scherm zonder hoofdhandeling, en een slepende vinger met
+negen standen waar elke andere keuze één tik is. De lege strook onder de baan
+zette Voorkeuren ook 64 px verder in plaats van de 48 tussen de andere
+groepen. Nu zijn het vier knoppen (`TIJDEN`: 20, 30, 45, 60), dezelfde als
+kaarten per potje: goud met een vinkje is gekozen, zoals overal. Een bewaarde
+waarde ertussenin gaat in `load()` naar de dichtstbijzijnde knop (35 wordt
+30, 50 wordt 45).
+
+**Eén vet in de systeemletter.** Veldnamen, keuzeknoppen en "Alle kaarten"
+stonden op 800, de vette woorden in de regels op 700. 800 is op een iPhone SF
+Heavy, maar Roboto had vóór Android 12 geen 800, en dan valt de browser door
+naar Black (900): dezelfde veldnaam was per toestel anders zwaar, en altijd
+zwaarder dan het vet in de regels. Alles staat nu op 700, die elk toestel
+heeft. De uitlegzinnen (`.hint`, `.handmatig`) gingen van 13 naar 14 px
+(`--fs-2`), de maat van de regeltekst eronder; 13 stond als enige op dit
+scherm buiten de trap.
 
 ## Eén letter voor cijfers en koppen
 
@@ -1908,7 +1927,9 @@ lange woorden zoals OMSCHRIJVEN. Baloo 2 had een te hoge regel voor
 cijfers in een vak, Lilita One maar één dikte.
 
 **Waar hij staat.** Op wat je in één blik ziet: cijfers, koppen, het woord
-op de kaart, de rondenaam en knoppen in hoofdletters. Eén selectorlijst
+op de kaart, de rondenaam en knoppen in hoofdletters. Ook de getallen in een
+keuzeknop (`.chips.getal`: kaarten per potje en tijd per beurt), zodat 16,
+24 en 32 dezelfde letter hebben als elk ander getal in de app. Eén selectorlijst
 direct na `:root`, zodat je ziet wat erin zit. Niet op zin-tekst voor de
 volwassene (veldnamen, keuzeknoppen, uitleg): die leest beter in de letter
 van het toestel, en zou anders met de koppen wedijveren.

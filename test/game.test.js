@@ -47,9 +47,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     if (await screen() !== 'setup') throw new Error('instellingenscherm ging niet open');
     await page.click(`#tierChips .chip[data-tier="${tier}"]`);
     await page.click(`#sizeChips .chip[data-size="${size}"]`);
-    await page.$eval('#secs', (el, v) => {
-      el.value = v; el.dispatchEvent(new Event('input', { bubbles: true }));
-    }, String(secs));
+    await page.click(`#secsChips .chip[data-secs="${secs}"]`);
     await page.click('#btnBack');
     await page.waitForTimeout(150);
     if (await screen() !== 'title') throw new Error('het huisje kwam niet op de titel uit');

@@ -298,11 +298,13 @@ en het andere antwoordt (`wipOpRand()`); de landing van zo'n wip rimpelt de
 punten. Wat de dieren uit zichzelf doen, rimpelt niet.
 
 **Het instellingenscherm.** Vier groepen, in de volgorde waarin je ze nodig
-hebt: Spel (moeilijkheid met de bak, kaarten per potje, tijd), Voorkeuren
+hebt: Spel (moeilijkheid met de bak, kaarten per potje, tijd; alle drie
+rijen keuzeknoppen, geen schuif), Voorkeuren
 (aan/uit als één regel met twee kleine knoppen), Zo speel je (de vouwregel
 is de groepskop), Deze app. Drie lagen tekst: hoofdletters alleen voor de
 titel en de groepskoppen (klein, in `--ink-2`); veldnamen in inkt het luidst
-na de titel; keuzeknoppen op `--line-2`. Geen strepen onder koppen, en geen
+na de titel; keuzeknoppen op `--line-2`, getallen erin in Fredoka
+(`.chips.getal`). De systeemletter kent één vet: 700, nooit 800. Geen strepen onder koppen, en geen
 uitlegzin onder een knop die zichzelf uitlegt: minder is meer.
 
 ## Kaarten
