@@ -1107,10 +1107,9 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 /* Uit: de kaarten wijken terug; de gekozen Uit op de kopregel zegt het ook. */
 .eigen-rij.uit .eigen-tegel img { opacity: .4; }
 .eigen-rij .pv small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-wrap: nowrap; }
-/* De twee ingangen: een klein plusje voor het teken van wat je maakt. */
-.eigen-plus .plusje { display: flex; align-items: center; gap: 2px; }
-.eigen-plus .plusje svg { width: 30px; }
-.eigen-plus .plusje svg:first-child { width: 14px; }
+/* De ingang: een lege kaart, gestippeld zoals het lege vak in de maker. */
+.eigen-rij .eigen-plus { border-style: dashed; }
+.eigen-plus svg { width: 34px; height: 34px; }
 /* De kopregel zoals Geluid: naam links, Aan en Uit rechts; de rij eronder. */
 .field.eigen { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; row-gap: var(--s-3); }
 .field.eigen > legend { float: left; margin: 0; min-height: var(--tap); display: flex; align-items: center; }
@@ -1145,6 +1144,14 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   margin: 0; font-family: var(--font-display); font-size: var(--fs-4); font-weight: 700;
   text-transform: uppercase; letter-spacing: var(--track-caps); color: var(--ink);
 }
+/* Bij een nieuwe kaart staat de keuze Foto | Tekenen in de kop, en de kop
+   zelf alleen voor de schermlezer. */
+.mk-kop.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.mk-soort { flex: 1 1 auto; flex-wrap: nowrap; gap: var(--s-2); }
+.mk-soort > .chip { min-height: var(--tap); padding-block: var(--s-1); font-size: var(--fs-2); gap: 2px; }
+.mk-sicoon { width: 22px; height: 22px; }
+/* Het vinkje rechtsboven: onderaan liep "Tekenen" er op 320 px in. */
+.mk-soort > .chip .tick { top: var(--s-1); bottom: auto; }
 /* Op het paneel en niet in de hoek van het scherm: daar viel hij op een
    smalle telefoon over de kaart. */
 #maker .btn-icon { position: static; flex: 0 0 auto; }
@@ -2775,13 +2782,11 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
           <button class="chip" role="radio" aria-checked="false" data-aan="0">Uit
             <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
         </div>
-        <!-- Twee ingangen: wat je maakt kies je waar je begint. -->
+        <!-- Eén ingang: een lege kaart met een plus, vooraan de rij. Foto of
+             tekening kies je in de maker. -->
         <div class="eigen-rij" id="eigenRij">
-          <button class="pv eigen-plus" id="btnEigenFoto" aria-label="Nieuwe kaart met een foto">
-            <span class="plusje" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-plus"/></svg><svg viewBox="0 0 100 100"><use href="#i-camera"/></svg></span>
-          </button>
-          <button class="pv eigen-plus" id="btnEigenTeken" aria-label="Nieuwe kaart met een tekening">
-            <span class="plusje" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-plus"/></svg><svg viewBox="0 0 100 100"><use href="#i-potlood"/></svg></span>
+          <button class="pv eigen-plus" id="btnEigenNieuw" aria-label="Nieuwe kaart">
+            <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-plus"/></svg><small>Nieuw</small>
           </button>
         </div>
       </fieldset>
@@ -3098,6 +3103,16 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   <div class="panel surface maker">
     <div class="mk-top">
       <h2 class="mk-kop" id="mkKop">Nieuwe kaart</h2>
+      <!-- Foto of tekening, bij een nieuwe kaart. Wisselen houdt het woord en
+           een klad per soort; een bestaande kaart blijft wat ze is. -->
+      <div class="chips mk-soort" id="mkSoort" role="radiogroup" aria-label="Soort kaart">
+        <button class="chip" role="radio" aria-checked="true" data-soort="foto">
+          <svg class="mk-sicoon" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-camera"/></svg>Foto
+          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+        <button class="chip" role="radio" aria-checked="false" data-soort="tekening">
+          <svg class="mk-sicoon" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-potlood"/></svg>Tekenen
+          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+      </div>
       <button class="btn-icon" id="mkDicht" aria-label="Sluiten">
         <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-kruis"/></svg>
       </button>
@@ -4234,7 +4249,7 @@ function paintEigen() {
     rij.appendChild(b);
   });
   const n = eigen.kaarten.length;
-  $("#btnEigenFoto").hidden = $("#btnEigenTeken").hidden = n >= EIGEN_MAX;
+  $("#btnEigenNieuw").hidden = n >= EIGEN_MAX;
   $("#eigenTel").textContent = !n ? "" : n + (n === 1 ? " kaart" : " kaarten");
   $("#eigenAanChips").hidden = !n;
   $("#eigenRij").classList.toggle("uit", !eigen.aan);
@@ -4246,8 +4261,7 @@ $("#eigenAanChips").addEventListener("click", e => {
   const c = e.target.closest(".chip"); if (!c) return;
   eigen.aan = c.dataset.aan === "1"; bewaarEigen(); paintEigen();
 });
-$("#btnEigenFoto").addEventListener("click", () => openMaker(null, "foto"));
-$("#btnEigenTeken").addEventListener("click", () => openMaker(null, "tekening"));
+$("#btnEigenNieuw").addEventListener("click", () => openMaker(null));
 $("#eigenRij").addEventListener("click", e => {
   const b = e.target.closest(".eigen-tegel"); if (!b) return;
   const k = eigen.kaarten.find(k => k.id === b.dataset.id);
@@ -4266,21 +4280,44 @@ const ZOOM_MAX = 4;
 
 function makerOpen() { return !$("#maker").hidden; }
 
-/* Een nieuwe kaart opent in de soort van de tegel waarop getikt is (foto of
-   tekening); een bestaande in haar eigen soort. */
-function openMaker(kaart, soort) {
-  soort = kaart ? kaart.soort || "foto" : soort || "foto";
+/* Een nieuwe kaart opent in de soort van de vorige keer (de eerste keer de
+   foto); een bestaande in haar eigen soort. */
+const KEY_SOORT = "tijdisom.soort";
+function vorigeSoort() {
+  try { return localStorage.getItem(KEY_SOORT) === "tekening" ? "tekening" : "foto"; }
+  catch (e) { return "foto"; }
+}
+function onthoudSoort(soort) {
+  try { localStorage.setItem(KEY_SOORT, soort); } catch (e) {}
+}
+/* mk voor deze soort: het klad als dat er is, anders een lege. Een woord dat
+   al getypt is gaat mee. */
+function zetMk(kaart, soort, woord) {
   if (!kaart && klad[soort]) {
     mk = klad[soort]; klad[soort] = null;
     if (soort === "foto" && !mk.img) mk.live = camKan();
+    if (woord && woord.trim()) mk.woord = woord;
   } else mk = {
     kaart: kaart, soort: soort,
     img: null, nieuw: false, zoom: 1, x: 0, y: 0, s: 1,
-    woord: kaart ? kaart.woord : "", live: !kaart && soort === "foto" && camKan(),
+    woord: kaart ? kaart.woord : woord || "", live: !kaart && soort === "foto" && camKan(),
     acties: [], basis: null, kleur: KLEUREN[0][0], dik: false, gereed: "pen"
   };
-  $("#mkKop").textContent = kaart ? "Kaart aanpassen" : "Nieuwe kaart";
   $("#mkWoord").value = mk.woord;
+}
+function toonMk() {
+  $$("#mkSoort .chip").forEach(c =>
+    c.setAttribute("aria-checked", String(c.dataset.soort === mk.soort)));
+  if (mk.soort === "tekening") tekenDoek();
+  tekenMaker();
+  if (mk.img) plaats(false);
+  if (mk.live) startCam();
+}
+function openMaker(kaart) {
+  zetMk(kaart, kaart ? kaart.soort || "foto" : vorigeSoort(), null);
+  $("#mkKop").textContent = kaart ? "Kaart aanpassen" : "Nieuwe kaart";
+  $("#mkKop").classList.toggle("vh", !kaart);
+  $("#mkSoort").hidden = !!kaart;
   const weg = $("#mkWeg");
   weg.hidden = !kaart; weg.classList.remove("zeker"); weg.textContent = "Kaart weggooien";
   makerTerug = document.activeElement;
@@ -4295,12 +4332,24 @@ function openMaker(kaart, soort) {
     };
     i.src = beelden.get(kaart.id);
   }
-  if (mk.soort === "tekening") tekenDoek();
-  tekenMaker();
-  if (mk.img) plaats(false);
-  if (mk.live) startCam();
+  toonMk();
   $(mk.img ? "#mkWoord" : "#mkVak").focus({ preventScroll: true });
 }
+/* Wisselen tussen foto en tekening zonder te sluiten: wat er al was blijft
+   als klad liggen, het woord gaat mee. */
+function wisselSoort(soort) {
+  if (!mk || mk.kaart || mk.soort === soort) return;
+  const woord = $("#mkWoord").value;
+  mk.woord = woord; mk.live = false;
+  stopCam();
+  if (mk.img || mk.acties.length) klad[mk.soort] = mk;
+  zetMk(null, soort, woord);
+  onthoudSoort(soort);
+  toonMk();
+}
+$("#mkSoort").addEventListener("click", e => {
+  const c = e.target.closest(".chip"); if (c) wisselSoort(c.dataset.soort);
+});
 
 function sluitMaker() {
   if (!makerOpen()) return;
@@ -4716,7 +4765,7 @@ $("#mkBewaar").addEventListener("click", async () => {
     return;
   }
   if (kaart) { kaart.woord = woord; kaart.soort = mk.soort; }
-  else eigen.kaarten.push({ id: id, woord: woord, laatst: 0, soort: mk.soort });
+  else { eigen.kaarten.push({ id: id, woord: woord, laatst: 0, soort: mk.soort }); onthoudSoort(mk.soort); }
   bewaarEigen();
   /* Safari wist de gegevens van een site in een tabblad na zeven dagen
      zonder bezoek. Vragen kost niets; een geïnstalleerde app heeft het niet
@@ -4754,7 +4803,7 @@ $("#mkWeg").addEventListener("click", () => {
   mk = null;
   sluitMaker();
   paintEigen();
-  $("#btnEigenFoto").focus({ preventScroll: true });
+  $("#btnEigenNieuw").focus({ preventScroll: true });
 });
 $("#mkDicht").addEventListener("click", sluitMaker);
 /* Het waas naast het paneel sluit ook, zoals bij terugkijken. */

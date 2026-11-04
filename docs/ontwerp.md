@@ -2453,11 +2453,21 @@ code: een foto of tekening en het woord, in Instellingen.
   op het papier (`.kaal`), ook in de maker, de tegels en `#kijk`. Gedrukt in
   rasterpunten paste beter bij het bord, maar op kaartmaat herken je er geen
   gezicht meer in.
-- **Een rij die opzij schuift, met twee ingangen.** Veertig tegels onder
-  elkaar zouden Voorkeuren een scherm ver wegduwen. Vooraan staan twee
-  tegels, een plusje met de camera en een plusje met het potlood, ook als de
-  rij leeg is: dat zegt meteen wat hier kan, en wat je maakt kies je waar je
-  begint. De maker heeft daardoor geen eigen keuze tussen foto en tekening.
+- **Een rij die opzij schuift, met één lege kaart vooraan.** Veertig tegels
+  onder elkaar zouden Voorkeuren een scherm ver wegduwen. Vooraan staat een
+  lege kaart met een stippelrand en een plus, ook als de rij leeg is: ze
+  leest als "kaart erbij" en staat altijd op dezelfde plek. Twee tegels
+  (camera en potlood) zonder naam stonden tussen de kaarten, zagen eruit als
+  kaarten, en lieten je in de maker vastzitten in de soort waarop je had
+  getikt; een derde voor toveren zou niemand meer raden.
+- **Foto of tekening kies je in de maker.** In de kop staan Foto en Tekenen
+  als keuzeknoppen, zoals de keuzes in Instellingen (goud met een vinkje).
+  Wisselen houdt het woord, en wat er al gemaakt was blijft als klad liggen:
+  terugwisselen brengt het terug. Een nieuwe kaart opent in de soort van de
+  vorige keer, de eerste keer op de foto. Een bestaande kaart heeft de keuze
+  niet: wisselen zou haar beeld weggooien. Twee knoppen in het veld ("+ Foto",
+  "+ Tekening") zeiden meteen welke soorten er zijn, maar herhaalden die
+  keuze en stonden los van de kaarten.
 - **Het paneel is de kaart.** Het beeld in het vierkant, het woord eronder,
   op de plek waar het in het spel komt. Schuiven met één vinger, knijpen met
   twee, en − en + voor wie dat niet doet. Het kruis staat rechtsboven op het
@@ -2470,7 +2480,7 @@ code: een foto of tekening en het woord, in Instellingen.
   woord de woordregel schudden en opent het toetsenbord, zoals elders een
   losse tik voordoet in plaats van te weigeren.
 - **Niets gaat verloren.** Wie per ongeluk op het kruis tikt of terugveegt,
-  vindt de niet bewaarde kaart terug bij de volgende tik op dezelfde tegel
+  vindt de niet bewaarde kaart terug bij de volgende tik op de plus
   (een klad per soort). Geen
   "weet je het zeker?": dat is een vraag in tekst. Weggooien kost twee tikken
   (de knop wordt inkt en vraagt het), geen lange druk, want die is alleen
