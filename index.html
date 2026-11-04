@@ -416,11 +416,11 @@ button.ho-count, .cb-index button, button.mk-sluiter {
 button.btn-go:active, button.btn-good:active, button.btn-skip:active,
 button.btn-icon:active, button.btn-danger:active, button.chip:active,
 button.pv:active, button.btn-plain:active, button.ho-count:active,
-.cb-index button:active, button.mk-sluiter:active {
+.cb-index button:active, button.mk-sluiter:active, button.mk-staf.klaar:active {
   transition-duration: calc(var(--t-press) * var(--dur));
   transition-timing-function: var(--e-uit);
 }
-.btn-go:active, .btn-good:active, .mk-sluiter:active {
+.btn-go:active, .btn-good:active, .mk-sluiter:active, .mk-staf.klaar:active {
   transform: translate(var(--lift-2), var(--lift-2));
   box-shadow: 0 0 0 var(--ink);
 }
@@ -1223,6 +1223,13 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   text-transform: uppercase; letter-spacing: var(--track-caps);
 }
 .mk-woord::placeholder { color: var(--ink-2); opacity: 1; }
+/* Al in het spel: het teken van de gewone kaart en één zin, in de tweede
+   inkt. Voor de volwassene, zoals alles in de maker. */
+.mk-al {
+  width: var(--mk); margin: 0; display: flex; align-items: center; gap: var(--s-2);
+  font-size: var(--fs-2); line-height: 1.35; color: var(--ink-2);
+}
+.mk-al-teken { font-size: 26px; line-height: 1; flex: 0 0 auto; }
 .mk-woord:focus { outline: none; border-bottom-style: solid; }
 /* Minstens 256 px: zes kleuren en vijf stukken gereedschap op één rij. Op
    320 px is dat precies de binnenmaat van het paneel. */
@@ -1275,16 +1282,19 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   .mk-teken .mk-tg::after { content: ""; position: absolute; inset: -3px; }
 }
 
-/* De toverstaf. Midden op het lege vel: een tegel, gestippeld en grijs tot er
-   een woord staat, dan goud ("dit, nu"). Zonder net of met het dagbudget op
-   draagt hij een teken in een inktbolletje. */
+/* De toverstaf. Midden op het lege vel: de fiche van Tekenen, zoals de
+   sluiter die van Foto. Gestippeld en grijs tot er een woord staat, dan goud
+   ("dit, nu"). Zolang Workers AI tekent blijft hij ingedrukt en stuurt hij
+   ringen door de punten van het vel (toverGolf()). Zonder net of met het
+   dagbudget op draagt hij een teken in een inktbolletje. */
 .mk-staf {
   position: absolute; inset: 0; margin: auto; z-index: 2;
-  width: 84px; height: 84px; padding: 0; justify-content: center;
+  width: 84px; height: 84px; padding: 0; justify-content: center; border-radius: 50%;
   background: var(--paper-2); border-style: dashed; box-shadow: none; cursor: pointer;
 }
 .mk-staf > svg { width: 44px; height: 44px; opacity: .45; }
-.mk-staf.klaar { background: var(--go); border-style: solid; box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink); }
+.mk-staf.klaar { background: var(--go); border-style: solid; box-shadow: var(--lift-2) var(--lift-2) 0 var(--ink); }
+.mk-staf.klaar[aria-busy="true"] { transform: translate(var(--lift-2), var(--lift-2)); box-shadow: 0 0 0 var(--ink); }
 .mk-staf.klaar > svg { opacity: 1; }
 .mk-staf-teken {
   display: none; position: absolute; top: -10px; right: -10px;
@@ -1297,16 +1307,10 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 .mk-staf-rij { position: relative; overflow: visible; }
 .mk-staf-rij .mk-staf-teken { top: -9px; right: -9px; width: 20px; height: 20px; }
 .mk-staf-rij .mk-staf-teken svg { width: 12px; height: 12px; }
-/* Terwijl Workers AI tekent zwellen de punten van het vel: rastertoon, geen
-   draaiend wieltje. */
-.mk-tovert {
-  position: absolute; inset: 0; z-index: 1; pointer-events: none;
-  background-image: radial-gradient(circle, var(--ink) 2px, transparent 2.6px);
-  background-size: 12px 12px; background-position: 6px 6px;
-  animation: mk-tovert var(--t-groot) var(--e-vloei) infinite alternate;
-}
-@keyframes mk-tovert { from { opacity: .08; } to { opacity: .32; } }
-@media (prefers-reduced-motion: reduce) { .mk-tovert { animation: none; opacity: .2; } }
+/* Terwijl Workers AI tekent liggen er punten op het vel (stipveld(), inkt
+   op papier zoals de titel), en de staf drukt er ringen door: rastertoon,
+   geen draaiend wieltje. */
+.mk-tovert { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
 .mk-tg[aria-pressed="true"] { background: var(--go); }
 .mk-scheid { width: var(--line-2); align-self: stretch; margin: 6px 2px; background: var(--rule); }
 .mk-stip { display: block; width: 8px; height: 8px; border-radius: 50%; background: var(--ink); }
@@ -3278,8 +3282,8 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
         <video id="mkZoeker" playsinline muted hidden></video>
         <canvas id="mkDoek" width="512" height="512" hidden></canvas>
         <!-- Toveren: de staf ligt midden op het lege vel; tijdens het tekenen
-             zwellen de punten. Zie docs/ontwerp.md, Toveren. -->
-        <div class="mk-tovert" id="mkTovert" hidden></div>
+             stuurt hij ringen door de punten. Zie docs/ontwerp.md, Toveren. -->
+        <canvas class="mk-tovert" id="mkTovert" hidden></canvas>
         <button class="btn-plain mk-staf" id="mkStaf" aria-label="Tover een tekening van het woord" hidden>
           <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-staf"/></svg>
           <i class="mk-staf-teken wifi" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-wifi"/></svg></i>
@@ -3289,6 +3293,8 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
       <input class="mk-woord" id="mkWoord" maxlength="14" placeholder="woord"
              autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="done"
              aria-label="Het woord op de kaart">
+      <!-- Het woord is al een gewone kaart: zeg het, en wat bewaren dan doet. -->
+      <p class="mk-al" id="mkAl" hidden><span class="mk-al-teken" aria-hidden="true"></span>Staat al in het spel. Jouw kaart neemt haar plaats in.</p>
     </div>
     <div class="mk-rest">
       <!-- Zolang de camera loopt: album, afdrukken, omdraaien. De sluiter is
@@ -4626,9 +4632,11 @@ function tekenStaf() {
   const midden = $("#mkStaf"), rij = $("#mkStafRij");
   const kan = !!TOVER_URL && !!mk && mk.soort === "tekening";
   const leeg = kan && !mk.acties.length && !mk.basis;
-  midden.hidden = !(kan && leeg && !mk.tovert);
+  midden.hidden = !(kan && leeg);
   rij.hidden = !(kan && !leeg);
+  const bezig = $("#mkTovert").hidden;
   $("#mkTovert").hidden = !(kan && mk.tovert);
+  if (bezig && !$("#mkTovert").hidden) veldMk.aan();
   if (!kan) return;
   const teken = navigator.onLine === false ? "wifi" : toverOp ? "zand" : "";
   midden.classList.toggle("klaar", !!$("#mkWoord").value.trim() && !teken);
@@ -4711,6 +4719,7 @@ async function tover(knop) {
   if (navigator.onLine === false || toverOp) { nudge(knop); return; }
   const dit = mk;
   dit.tovert = true; keurMaker();
+  const golf = toverGolf();
   let uit = null;
   try {
     const stop = new AbortController();
@@ -4723,6 +4732,7 @@ async function tover(knop) {
   let beeld = null;
   if (uit && uit.beeld) { try { beeld = await knipUit(uit.beeld); } catch (e) {} }
   dit.tovert = false;
+  clearInterval(golf);
   if (uit && uit.fout === "op") toverOp = true;
   if (mk !== dit) return;           // gesloten of gewisseld: de tekening vervalt
   if (!beeld) {
@@ -4733,6 +4743,18 @@ async function tover(knop) {
   mk.acties.push({ beeld: beeld });
   mk.nieuw = true;
   tekenDoek(); keurMaker();
+}
+/* Zolang er getekend wordt, drukt de staf om de TOVER_TEL een ring door de
+   punten, vanaf zijn rand, zoals de klok elke tel bij het aftellen. Geen
+   ring bij de landing, en geen trilling: een rimpel trilt niet. */
+const TOVER_TEL = 900;
+function toverGolf() {
+  const ring = () => {
+    const v = $("#mkVak").getBoundingClientRect();
+    veldMk.rimpel(v.width / 2, v.height / 2, 1, $("#mkStaf").offsetWidth / 2 || 42);
+  };
+  ring();
+  return setInterval(ring, TOVER_TEL);
 }
 $("#mkStaf").addEventListener("click", e => tover(e.currentTarget));
 $("#mkStafRij").addEventListener("click", e => tover(e.currentTarget));
@@ -4822,6 +4844,15 @@ function tekenMaker() {
   keurMaker();
 }
 
+/* De gewone kaart met dit woord, over alle standen, of null. Zonder accenten
+   vergeleken: "pinguin" is "pinguïn". */
+const zonderAccent = w => w.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("nl").trim();
+let gewoneWoorden = null;
+function gewoneKaart(w) {
+  if (!gewoneWoorden) gewoneWoorden = new Map(Object.values(DECKS).flat().map(k => [zonderAccent(k[1]), k]));
+  return gewoneWoorden.get(zonderAccent(w)) || null;
+}
+
 /* Bewaren kan met een beeld en een woord dat nog niet bestaat bij de eigen
    kaarten. Een gewone kaart met hetzelfde woord mag: de eigen gaat voor. */
 function keurMaker() {
@@ -4830,6 +4861,10 @@ function keurMaker() {
   const w = $("#mkWoord").value.trim().toLocaleLowerCase("nl");
   const dubbel = !!w && eigen.kaarten.some(k =>
     k !== mk.kaart && k.woord.toLocaleLowerCase("nl") === w);
+  /* Een gewone kaart met hetzelfde woord: zeggen, niet tegenhouden. */
+  const gewoon = w && !dubbel ? gewoneKaart(w) : null;
+  $("#mkAl").hidden = !gewoon;
+  if (gewoon) $("#mkAl .mk-al-teken").textContent = gewoon[0];
   const knop = $("#mkBewaar");
   const beeld = mk.soort === "tekening" ? !!(mk.acties.length || mk.basis) : !!(mk.img && !mk.live);
   /* Goud zodra er een beeld is. Zonder woord wijst een tik de woordregel
@@ -6504,6 +6539,11 @@ let wnPloeg = null;
 const veldWn = stipveld($("#wnVeld"), {
   zichtbaar: () => $("#s-winner").classList.contains("on"),
   ploeg: () => wnPloeg
+});
+/* Het vel van de maker terwijl de staf tovert: inkt op papier. */
+const veldMk = stipveld($("#mkTovert"), {
+  inkt: true,
+  zichtbaar: () => !$("#mkTovert").hidden
 });
 const veldCd = stipveld($("#cdVeld"), {
   zichtbaar: () => !$("#countdown").hidden,

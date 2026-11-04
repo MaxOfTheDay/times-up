@@ -251,6 +251,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   let vragen = 0;
   await page.route('**/teken', async route => {
     vragen++;
+    await new Promise(r => setTimeout(r, 400));  // zodat de staf even tovert
     await route.fulfill({ status: antwoord.beeld ? 200 : 503, contentType: 'application/json',
       headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify(antwoord) });
   });
@@ -263,9 +264,16 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(stafLeeg.zichtbaar && !stafLeeg.klaar, 'de staf ligt niet grijs op het lege vel');
   await page.click('#mkStaf');
   ok(vragen === 0, 'de staf vroeg een tekening zonder woord');
+  // Al in het spel: een woord van een gewone kaart krijgt een regel, een ander niet.
+  await page.fill('#mkWoord', 'blub');
+  ok(await page.evaluate(() => document.querySelector('#mkAl').hidden), '"al in het spel" staat er bij een woord dat geen kaart is');
   await page.fill('#mkWoord', 'zon');
+  ok(await page.evaluate(() => !document.querySelector('#mkAl').hidden && !!document.querySelector('#mkAl .mk-al-teken').textContent),
+     '"al in het spel" ontbreekt bij een woord dat al een gewone kaart is');
   ok(await page.evaluate(() => document.querySelector('#mkStaf').classList.contains('klaar')), 'de staf wordt niet goud met een woord');
   await page.click('#mkStaf');
+  ok(await page.evaluate(() => document.querySelector('#mkStaf').getAttribute('aria-busy') === 'true' && !document.querySelector('#mkTovert').hidden),
+     'de staf blijft niet ingedrukt op de punten terwijl hij tovert');
   await page.waitForFunction(() => document.querySelector('#mkStaf').hidden && !document.querySelector('#mkStafRij').hidden);
   const vel = await page.evaluate(() => {
     const g = document.querySelector('#mkDoek').getContext('2d');

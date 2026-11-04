@@ -403,6 +403,8 @@ knop wisselt met `visibility`, nooit met `hidden`.
   opent in de soort van de vorige keer (`tijdisom.soort`). Een bestaande
   kaart heeft die keuze niet. Er is geen Aan/Uit: 0 bij "In elk potje"
   is uit, en dan staat "uit" in de rij.
+- Is het woord al een gewone kaart, dan zegt een regel onder het woord dat
+  (`#mkAl`, `gewoneKaart()`); bewaren mag nog steeds.
 - Bewaren is goud zodra er een beeld is; zonder woord wijst een tik de
   woordregel aan (`nudge()` en focus). Weggooien kost twee tikken; een niet
   bewaarde nieuwe kaart blijft per soort als klad liggen.
@@ -419,8 +421,10 @@ knop wisselt met `visibility`, nooit met `hidden`.
 gaat, alleen op een tik van de volwassene, en alleen met het woord. Zonder
 net, of als het dagbudget op is, werkt alles behalve de staf.
 
-- De staf ligt midden op het lege vel van Tekenen (`#mkStaf`), daarna in het
-  gereedschap (`#mkStafRij`); er is geen derde soort kaart.
+- De staf ligt midden op het lege vel van Tekenen (`#mkStaf`, rond, de fiche
+  van Tekenen), daarna in het gereedschap (`#mkStafRij`); er is geen derde
+  soort kaart. Zolang hij tovert blijft hij ingedrukt en drukt hij om de
+  `TOVER_TEL` een ring door de punten van het vel (`toverGolf()`, `veldMk`).
 - Een getoverde tekening is één actie in `mk.acties` (`{ beeld }`) die het
   vel vervangt, met de achtergrond weggeknipt (`knipUit()`) en bijgesneden
   tot de tekening (`snijBij()`). Ze heeft haar eigen zwarte lijn en ligt
