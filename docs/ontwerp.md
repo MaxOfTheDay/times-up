@@ -818,8 +818,8 @@ punten werden een patroon om naar te kijken in plaats van een grond.
 Eerst waren ze inkt. Dat maakte de ploegkleur donker en een beetje vuil;
 papier licht hem op, zoals de witte punten op gedrukt karton, en het is
 geen nieuwe kleur: papier staat al overal op het scherm, en een
-donkerder ploegtint zou een derde "rood" of "blauw" zijn. Een masker laat
-ze naar het midden vervagen, zodat achter de kaart niets onrustigs ligt.
+donkerder ploegtint zou een derde "rood" of "blauw" zijn. Ze lopen van
+rand tot rand (zie "Een vol bord" hieronder).
 
 Het raster staat stil. Het schoof eerst traag, maar dan liepen de
 opzwellende punten van de deining en de rimpel (een tweede laag op een
@@ -844,7 +844,7 @@ het onrustig. Beide lagen liggen achter de kaart en de knop, en staan
 stil bij beperkte beweging.
 
 Ook op het aftellen, dat dezelfde ploeggrond heeft (`#countdown::before`),
-met het open midden rond de schijf. Daar gaat bij elke tel één ring vanuit
+Daar gaat bij elke tel één ring vanuit
 de schijf naar buiten (`#cdGolf`, `telGolf()`), op de maat van het tikje:
 drie, twee, een, ook te zien voor wie het geluid niet hoort.
 
@@ -874,10 +874,8 @@ aanraakte:
   eerste tel.
 - **De opdrachtkaart zakt in de grond**: een kopie op haar gemeten plek
   (`.cd-kaart`, in de klik-handler gemaakt, want een tel later is de kaart
-  weg) zakt 10 px en krimpt naar 94% terwijl ze in 0,42 s verdwijnt. Het
-  veld vloeit in 0,5 s van het masker van de overdracht naar dat van de
-  schijf (`vanMasker`), zodat de punten haar plek innemen en de grond niet
-  springt.
+  weg) zakt 10 px en krimpt naar 94% terwijl ze in 0,42 s verdwijnt. De
+  punten lagen er al die tijd onder, dus de grond springt niet.
 - **Op nul gaat de schijf open** (`.countdown.open`): een gat zo groot als
   de schijf groeit in 0,45 s uit tot het hele scherm, met een laatste ring.
   Door het gat ligt het spelscherm al klaar; `done()` draait meteen, dus er
@@ -948,15 +946,14 @@ gekozen.
 Dat kan niet met CSS-verlopen: elke punt krijgt een eigen maat en een eigen
 verschuiving. Het is nu één canvas per grond (`.stipveld`, `stipveld()`),
 met dezelfde maten als ervoor: raster 12 px op het midden, straal 2 px op
-16%, aanzwellend tot 3,3 px op 28%; het masker naar de kaart (overdracht,
-de ellips van 75% bij 60%) of naar de schijf (aftellen, 110 tot 260 px).
+16%, aanzwellend tot 3,3 px op 28%, van rand tot rand.
 
 - **Rimpel**: een golfpakket (een gaussische omhullende maal een cosinus)
   dat met 360 px/s uitloopt en uitdempt. De positieve kant laat de punten
   groeien; het hele pakket duwt ze tot 4,5 px opzij, dus naar buiten en
   daarna terug. Op het aftellen sterkte 0,6, vanaf de rand van de schijf.
 - **Zuinig**: er loopt alleen een `requestAnimationFrame`-lus zolang er een
-  rimpel onderweg is (of het veld van het aftellen vloeit) en de grond in
+  rimpel onderweg is (of een onthulling loopt) en de grond in
   beeld is. Daarbuiten staat er één getekend beeld. Bij beperkte beweging
   alleen dat beeld, zonder rimpel.
 
@@ -980,6 +977,30 @@ oorzaak die je net zag of voelde. Het rondeteken op de overdracht speelt
 zijn regel twee keer voor als het scherm binnenkomt (`paintRound()` zet het
 opnieuw neer) en staat daarna stil. Vergeleken in een live mock-up naast de
 oude versie; Max koos deze.
+
+### Een vol bord
+
+De punten vervaagden naar het midden: één ellips (75% bij 60% op 45% van de
+hoogte), gemaakt voor de opdrachtkaart en ongewijzigd overgenomen op de
+titel en de eindstand; op het aftellen een vaste ring van 110 tot 260 px om
+het midden van het scherm. Geen van die uitsparingen volgde wat er op het
+scherm lag, en daarom oogde de lege plek willekeurig. Liggend was het het
+duidelijkst: op de overdracht een lege band tussen kaart en knop, op het
+aftellen bleven er twee stroken punten over aan de zijkanten. Bij beperkte
+beweging staat de schijf op de plek van de startknop, en lag het gat naast
+haar.
+
+De uitsparing kwam uit de tijd van de deining: achter de kaart mocht niets
+onrustigs bewegen. De deining is weg, en de kaart is ondoorzichtig papier;
+een rimpel die eronder doorloopt verdwijnt gewoon. Drie versies naast elkaar
+gezet, op echte opnames staand en liggend: de ellips, een vol bord, en een
+harde uitsparing van 18 px om elk stuk. Die laatste tekent een derde rand
+om elke kaart (zie "Papier heeft twee randen") en moet bij elke draai
+opnieuw gemeten worden. Max koos het volle bord. Daarmee verviel ook het
+vloeien van het ene masker naar het andere op het aftellen.
+
+`stipveld()` neemt nog een `masker` (0 tot 1 per punt) als iemand later
+toch een verloop wil; geen enkele grond gebruikt hem nu.
 
 ## Het titelscherm heeft twee dingen
 

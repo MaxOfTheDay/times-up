@@ -211,8 +211,9 @@ naar ploegkleur, en het spelscherm verandert van grond niet. Bij beperkte
 beweging geen vloed. De rasterpunten op die grond zijn papier op lage
 dekking (16%), geen eigen kleur, op één stilstaand raster van 12 px, getekend
 op één canvas per grond (`stipveld()`). Wat beweegt is rastertoon: een punt
-groeit, hij licht niet alleen op. Ze vervagen naar de kaart en bewegen
-alleen als iets ze indrukt (geen deining): een tik op de grond geeft een rimpel die de
+groeit, hij licht niet alleen op. Ze lopen van rand tot rand, zonder
+uitsparing: de stukken liggen erop (`opt.masker` is een haak, geen
+standaard). Ze bewegen alleen als iets ze indrukt (geen deining): een tik op de grond geeft een rimpel die de
 punten opzij duwt en terug laat veren: 12 px opzij en een punt tot ruim het
 dubbele, want minder leest op een telefoon als niets. Ze staan op de
 overdracht, het aftellen, de eindstand van wie won (in de ploegkleur, met
