@@ -334,14 +334,18 @@ punten. Wat de dieren uit zichzelf doen, rimpelt niet. Een tik op de plaat
 zelf draait de zandloper meteen om (`draaiGlas()`, op `rotate`); de plaat
 zakt niet in en er komt geen rimpel.
 
-**Het instellingenscherm.** Vier groepen, elk één vraag: Potje (hoe één
-potje gedeeld wordt: Kaarten met de strook als één dunne rij en de telling
-op de regel van de naam, Waarvan eigen, Tijd per beurt), Kaarten (welke
-kaarten er bestaan: moeilijkheid, met de kaartenbak eronder), Deze telefoon
-(Geluid en Trilling als twee schakelaars op één rij, elk met zijn teken en
-uit verbleekt, installeren), Zo speel je (de vouwregel is de groepskop).
-Een veldnaam herhaalt zijn groepskop niet. Toets een nieuw veld zo: verandert het wat er in
-de bak zit, of wat er in het potje van vanavond komt? De keuzes zijn rijen
+**Het instellingenscherm.** Vier groepen, elk één vraag: Potje (hoe lang
+een potje loopt: Aantal kaarten met de telling van de menging op de regel
+van de naam, Tijd per beurt), Kaarten (welke kaarten erin kunnen:
+Moeilijkheid, dan een lijst met Gewone en Eigen, en "In elk potje" in de rij
+van Eigen), Deze telefoon (Geluid en Trilling als schakelaars in een lijst,
+installeren), Zo speel je (de vouwregel is de groepskop). Een veldnaam
+herhaalt zijn groepskop niet. De lange lijsten staan op hun eigen scherm,
+`#s-kaarten`, met bovenaan Gewone of Eigen als keuzeknoppen en de uitgang
+rechtsboven; terug brengt je op Instellingen (`terug()`). Twee soorten
+stukken, elk één betekenis: een rij keuzeknoppen kiest er één, een rij in
+een `.lijst` gaat naar een scherm (de pijl) of schakelt (`.knop`, goud is
+aan). Een rij zakt niet in; een druk kleurt hem. De keuzes zijn rijen
 keuzeknoppen, geen schuif. Drie lagen tekst: hoofdletters alleen voor de
 titel en de groepskoppen (klein, in `--ink-2`); veldnamen in inkt het luidst
 na de titel; keuzeknoppen op `--line-2`, getallen erin in Fredoka
@@ -363,9 +367,9 @@ Hoe nieuw een emoji mag zijn is een keuze: de test meet alleen de machine die
 hem draait. Kijk bij twijfel op het oudste toestel in huis.
 
 **De bak en de greep.** De bak is alles waar uit getrokken kan worden:
-in Instellingen twee gelijke stapels (Gewone, Eigen), elk met haar getal;
-een tik laat hem inzakken en opent zijn lade, één lade tegelijk
-(`settings.lade`). De greep (16, 24 of 32) bestaat pas als je op Beginnen tikt (`drawDeck` in
+in Instellingen twee rijen (Gewone, Eigen), elk met haar getal; een tik
+opent haar kaarten op `#s-kaarten`, één lijst tegelijk (`settings.lade`,
+`openKaarten()`). De greep (16, 24 of 32) bestaat pas als je op Beginnen tikt (`drawDeck` in
 `newGame`). Trek nooit vooruit. `settings.hidden` gaat op het woord, één lijst
 voor alle standen; alles op het paneel gaat over de stand die je voor je
 hebt. `MIN_BAK` (40) geldt over alle drie de standen. De sleuf van hint en
@@ -388,15 +392,15 @@ knop wisselt met `visibility`, nooit met `hidden`.
 - Elk teken op een kaart gaat door `zetTeken()`. Een foto ligt kaal op het
   papier (`.kaal`, geen inktlijn: om een vierkant is dat een derde rand);
   een tekening houdt de pen van `.glyph`.
-- Zonder eigen kaarten is de stapel Eigen een gestippelde lege plek die
-  meteen de maker opent. In de lade staan de kaarten in hetzelfde raster als
-  de gewone, met vooraan één lege kaart met een plus (`#btnEigenNieuw`),
+- Zonder eigen kaarten heeft de rij Eigen een gestippelde plus en opent
+  ze meteen de maker; na bewaren staat `#s-kaarten` open op Eigen. Daar
+  staan de kaarten in hetzelfde raster als de gewone, met vooraan één lege kaart met een plus (`#btnEigenNieuw`),
   gestippeld en plat; nooit een rij die opzij schuift.
   Foto of tekening kies je in de kop van de maker (`#mkSoort`, `wisselSoort()`):
   het woord gaat mee, wat er al was blijft als klad, en een nieuwe kaart
   opent in de soort van de vorige keer (`tijdisom.soort`). Een bestaande
-  kaart heeft die keuze niet. Er is geen Aan/Uit: 0 bij "Waarvan eigen"
-  is uit, en dan staat "uit" op de stapel.
+  kaart heeft die keuze niet. Er is geen Aan/Uit: 0 bij "In elk potje"
+  is uit, en dan staat "uit" in de rij.
 - Bewaren is goud zodra er een beeld is; zonder woord wijst een tik de
   woordregel aan (`nudge()` en focus). Weggooien kost twee tikken; een niet
   bewaarde nieuwe kaart blijft per soort als klad liggen.
