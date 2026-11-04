@@ -1806,12 +1806,40 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 #pauze.kaart .panel {
   position: fixed; margin: 0; box-sizing: border-box;
   left: var(--kx); top: var(--ky); width: var(--kw); height: var(--kh);
-  min-width: 0; justify-content: center;
+  min-width: 0;
+  /* Bovenaan de stand met het huisje in de hoek, daaronder het rondeteken
+     en "verder". Alles schaalt met de kaart (cqmin), zodat het liggend en
+     klein binnen de band blijft; legPaneel() valt terug op een los paneel
+     als het toch niet past. */
+  container-type: size;
+  display: grid; grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr auto auto 1fr;
+  align-items: center; justify-items: center; gap: 0;
   /* Binnen de band blijven: contour 4 en band 12 (17 onder vijf tellen). */
-  padding: var(--s-5);
+  padding: max(22px, 6cqmin);
   animation: none;
 }
 #pauze.kaart .panel > :not(.timerframe) { position: relative; }
+#pauze.kaart .panel > .doors { display: contents; }
+#pauze.kaart #pauseTally {
+  grid-area: 1 / 1; justify-self: start; padding: 0; gap: 4cqmin;
+}
+#pauze.kaart .mini-score .side .head { width: auto; min-width: 15cqmin; }
+#pauze.kaart .mini-score .side .head > svg { width: 12cqmin; height: 12cqmin; }
+#pauze.kaart .mini-score .side.up .head > svg { width: 20cqmin; height: 20cqmin; }
+#pauze.kaart .mini-score b { font-size: 10cqmin; }
+#pauze.kaart #btnStop { grid-area: 1 / 2; width: max(48px, 15cqmin); height: max(48px, 15cqmin); }
+#pauze.kaart #btnStop .mark { width: 62%; }
+#pauze.kaart #pauseRonde {
+  display: block; grid-area: 3 / 1 / 4 / 3;
+  width: 20cqmin; height: 20cqmin;
+}
+#pauze.kaart #pauseRonde svg { width: 100%; height: 100%; display: block; }
+#pauze.kaart #btnResume {
+  grid-area: 4 / 1 / 5 / 3; margin-top: 6cqmin;
+  width: max(96px, 40cqmin);
+}
+#pauseRonde { display: none; }
 #pauze[data-time="ok"]   .timerframe .band { stroke: var(--time-3); }
 #pauze[data-time="warn"] .timerframe .band { stroke: var(--time-2); }
 #pauze[data-time="crit"] .timerframe .band { stroke: var(--time-1); stroke-width: 17; }
@@ -3357,10 +3385,14 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
     <!-- Dezelfde stand als op het overdrachtscherm, gebouwd door
          buildTally(): één component, niet twee die uit elkaar groeien. -->
     <div class="mini-score" id="pauseTally" aria-hidden="true"></div>
-    <!-- Twee keuzes naast elkaar, in dezelfde volgorde als tijdens het
-         spelen: links het vierkant (de mindere keuze, waar "pas" zit), rechts
-         de cirkel (de hoofdhandeling, waar "goed" zit). Onder elkaar las de
-         onderste als naschrift. -->
+    <!-- De regel waar je mee speelt: na een pauze is dat het eerste wat je
+         kwijt bent, en in de balk ligt hij onder de sluier. -->
+    <div class="rondeteken" id="pauseRonde" aria-hidden="true"></div>
+    <!-- Op de achterkant van de kaart staat het huisje in de hoek
+         rechtsboven, waar elke uitgang staat, en "verder" alleen in het
+         midden: naast elkaar woog een vierkant van 68 tegen een gouden
+         cirkel van 112, en dat stond scheef. Als los paneel (de kaart is te
+         klein, of er ligt er geen) staan ze naast elkaar. -->
 
     <div class="doors">
       <button class="btn-danger" id="btnStop" aria-label="Spel stoppen — houd ingedrukt">
@@ -7264,12 +7296,12 @@ function openPause() {
   $("#pauze").classList.remove("kaart");
   $("#pauze").classList.toggle("klok", opKaart);
   pauzeKaart = opKaart ? $("#card") : current === "handoff" ? $("#hoRoundCard") : null;
-  /* Op de overdracht staat de stand al in de kaart vlak achter het paneel,
-     en de startknop eronder is net zo'n gouden cirkel met een speelteken
-     als "verder" in het paneel. Twee keer dezelfde stand en twee keer
-     hetzelfde teken voor twee verschillende dingen: dus daar alleen de
-     twee deuren, en de startknop even weg zolang het paneel open is. */
-  $("#pauseTally").hidden = current !== "play";
+  /* De achterkant dekt de voorkant af, dus de stand en de ronde staan er
+     ook op de overdracht op. De startknop eronder is net zo'n gouden cirkel
+     met een speelteken als "verder": die is even weg zolang het paneel
+     open is. */
+  $("#pauseTally").hidden = !G;
+  if (G) paintRound($("#pauseRonde"), "teken");
   $("#s-handoff").classList.toggle("paneel", current === "handoff");
   paintPauseScore();
 

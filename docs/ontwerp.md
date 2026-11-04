@@ -1283,10 +1283,32 @@ meteen weg, zoals altijd, en de kaart wordt op haar plek weer breed.
   paneel in het midden.
 - **Op de overdracht draait de opdrachtkaart om** (`#hoRoundCard`), op
   Max' vraag om overal hetzelfde gedrag. Daar loopt geen klok, dus de
-  achterkant heeft geen band (`#pauze.klok` staat alleen tijdens een beurt)
-  en geen stand: die staat op de voorkant, en het paneel draagt alleen de
-  twee deuren. De startknop blijft verborgen zolang het paneel openstaat,
-  anders staan er twee gouden speeltekens.
+  achterkant heeft geen band (`#pauze.klok` staat alleen tijdens een beurt).
+  De startknop blijft verborgen zolang het paneel openstaat, anders staan er
+  twee gouden speeltekens.
+
+Wat er op de achterkant staat. Eerst lagen de stand en de twee deuren klein
+in het midden van een grote kaart: leeg, zei Max, en het huisje (een
+vierkant van 68) naast "verder" (een gouden cirkel van 112) stond scheef:
+twee vormen, twee maten en twee gewichten op één regel. Drie versies in de
+echte app gefotografeerd; Max koos deze:
+
+- **Het huisje in de hoek rechtsboven**, waar elke uitgang in de app staat.
+  Het blijft de knop die je vasthoudt. "Verder" staat alleen in het midden,
+  groter, en heeft niets naast zich om tegen af te wegen.
+- **De stand bovenaan, groter**, op één regel met het huisje.
+- **Het rondeteken boven "verder"** (`#pauseRonde`, via `paintRound(...,
+  "teken")`). Na een pauze is de regel van de ronde het eerste wat je kwijt
+  bent, en in de balk ligt hij onder de sluier. Dat vult de kaart met iets
+  wat je nodig hebt, in plaats van alles groter te maken.
+- **Alles in `cqmin`**: het paneel is een container (`container-type:
+  size`), dus de maten volgen de kaart, en liggend en op 320 bij 568 blijft
+  alles binnen de band. De rijen zijn `auto 1fr auto auto 1fr`: rondeteken
+  en "verder" staan samen in het midden van wat er onder de stand overblijft.
+- Op de overdracht staan de stand en de ronde er nu ook op: de achterkant
+  dekt de voorkant af, dus wat daar stond is anders weg.
+- Het losse paneel (de kaart is te klein) houdt de deuren naast elkaar,
+  zonder rondeteken.
 - Bij beperkte beweging draait er niets; het paneel ligt er meteen.
 
 ## Vertrekken mag, als er niets achter wacht

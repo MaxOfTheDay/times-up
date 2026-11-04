@@ -285,10 +285,13 @@ ploegkleur.
 
 **Pauze draait de kaart om.** Tijdens een beurt ligt het pauzepaneel als
 achterkant op de gemeten plek van de kaart (`legPaneel()`), met haar eigen
-stilstaande band als rand en de stand en de twee deuren erop. Geen tweede
+stilstaande band als rand. Erop: bovenaan de stand met het huisje in de hoek
+rechtsboven, daaronder het rondeteken (`#pauseRonde`) en "verder" alleen in
+het midden; alles in `cqmin`, zodat het met de kaart meeschaalt. Geen tweede
 klok, geen pauzebalken, en het woord ligt afgedekt. Verder draait haar weer
 om (`kaartBoven()`). Op de overdracht draait de opdrachtkaart zo om, met
-alleen de deuren. Past de achterkant niet op de kaart, dan een los paneel.
+dezelfde achterkant zonder band. Past de achterkant niet op de kaart, dan
+een los paneel met de deuren naast elkaar.
 
 **Eén stand, twee schermen.** `buildTally()` bouwt de stand voor
 `#hoTally` en `#pauseTally`. Ook de stijlen staan in één selectorlijst met
