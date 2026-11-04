@@ -323,8 +323,8 @@ zelf draait de zandloper meteen om (`draaiGlas()`, op `rotate`); de plaat
 zakt niet in en er komt geen rimpel.
 
 **Het instellingenscherm.** Vier groepen, in de volgorde waarin je ze nodig
-hebt: Spel (moeilijkheid met de bak, kaarten per potje, tijd; alle drie
-rijen keuzeknoppen, geen schuif), Voorkeuren
+hebt: Spel (moeilijkheid met de bak, eigen kaarten, kaarten per potje, tijd;
+de keuzes zijn rijen keuzeknoppen, geen schuif), Voorkeuren
 (aan/uit als één regel met twee kleine knoppen), Zo speel je (de vouwregel
 is de groepskop), Deze app. Drie lagen tekst: hoofdletters alleen voor de
 titel en de groepskoppen (klein, in `--ink-2`); veldnamen in inkt het luidst
@@ -352,6 +352,22 @@ greep (16, 24 of 32) bestaat pas als je op Beginnen tikt (`drawDeck` in
 voor alle standen; alles op het paneel gaat over de stand die je voor je
 hebt. `MIN_BAK` (40) geldt over alle drie de standen. De sleuf van hint en
 knop wisselt met `visibility`, nooit met `hidden`.
+
+**Eigen kaarten.** Een foto met het woord dat telt, gemaakt in Instellingen
+(`openMaker()`). De lijst staat in `tijdisom.eigen`, de beelden in IndexedDB
+(`Beeld`), niets verlaat de telefoon. In de greep is een eigen kaart
+`[Spel.EIGEN + id, woord]`.
+
+- `Spel.drawDeck` neemt er hoogstens een kwart van de greep (`EIGEN_DEEL`),
+  de langst niet getrokken eerst, en een eigen kaart verdringt de gewone
+  met hetzelfde woord.
+- Een kaart zonder beeld bestaat niet: `Spel.zonder()` en
+  `herstel(..., weg)` halen haar uit de stapel. Het herstel bij de start
+  wacht daarom op `eigenKlaar`.
+- Elk teken op een kaart gaat door `zetTeken()`; de foto krijgt de inktlijn
+  van `.glyph` als rand.
+- Weggooien kost twee tikken; een niet bewaarde nieuwe kaart blijft als
+  klad liggen.
 
 ## Tests
 
