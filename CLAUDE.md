@@ -295,7 +295,9 @@ beweging heeft haar eigen eigenschap (`rotate`, `translate`, `scale`,
 `transform` voor `mascotte()`), om het punt op de rand. Zet er niets bij.
 De titel komt binnen zonder `screenIn`. Wie een dier aantikt, laat het wippen
 en het andere antwoordt (`wipOpRand()`); de landing van zo'n wip rimpelt de
-punten. Wat de dieren uit zichzelf doen, rimpelt niet.
+punten. Wat de dieren uit zichzelf doen, rimpelt niet. Een tik op de plaat
+zelf draait de zandloper meteen om (`draaiGlas()`, op `rotate`); de plaat
+zakt niet in en er komt geen rimpel.
 
 **Het instellingenscherm.** Vier groepen, in de volgorde waarin je ze nodig
 hebt: Spel (moeilijkheid met de bak, kaarten per potje, tijd), Voorkeuren

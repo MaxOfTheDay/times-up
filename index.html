@@ -744,8 +744,10 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 /* De eerste draai valt vlak na binnenkomst, via een negatieve vertraging (de
    draai zit in de laatste 12% van 9 s). Onder #s-title.on en niet op het
    element zelf: show() zet die klasse opnieuw, dus de animatie herstart bij
-   elke binnenkomst. Het merk reageert niet op aanraking -- in deze app zegt
-   een vlak dat beweegt onder je vinger "ik ben een knop". */
+   elke binnenkomst. De plaat zelf reageert niet op aanraking -- in deze app
+   zegt een vlak dat inzakt onder je vinger "ik ben een knop" -- maar een tik
+   erop draait de zandloper meteen om (draaiGlas()), op `rotate`, zodat de
+   draai van de klok op `transform` vrij blijft. */
 #s-title.on > .wordmark > svg {
   animation: glasturn calc(9s / max(var(--dur), .001)) var(--e-vloei) infinite;
   animation-delay: calc(-7.4s / max(var(--dur), .001));
@@ -5146,6 +5148,35 @@ function wipOpRand(g, n) {
     const voet = r.bottom - r.height * .24;          // de rand: 100% min --zak
     veldTi.rimpel(r.left + r.width / 2 - s.left, voet - s.top, n > 3 ? .7 : .45, r.width * .3);
   }, 265);
+}
+
+/* Een tik op de plaat draait de zandloper om: de klok is, met de vinger en
+   de dieren, het enige wat iets mag laten bewegen, en hier draait je vinger
+   haar. De plaat zelf blijft stil, dus ze belooft geen knop. Een halve draai
+   met vering op `rotate` (--t-groot, --e-los), vanaf waar de zandloper nu
+   staat, ook midden in een draai of in een vorige tik; daarna begint de
+   wachttijd van de klok opnieuw, zodat er niet meteen nog een draai volgt.
+   Geen rimpel (er landt niets op het bord) en geen geluid (elke klank heeft
+   al een betekenis). Een tik op Vos of Uil hoort bij hen. */
+const glas = $("#s-title .wordmark > svg");
+$("#s-title .wordmark").addEventListener("pointerdown", e => {
+  if (e.target.closest(".gluur")) return;
+  Snd.unlock();
+  if (!stilAan()) draaiGlas();
+});
+function draaiGlas() {
+  const cs = getComputedStyle(glas);
+  const m = new DOMMatrix(cs.transform === "none" ? undefined : cs.transform);
+  /* Het silhouet is puntsymmetrisch: alleen de stand binnen een halve draai telt. */
+  const nu = ((Math.atan2(m.b, m.a) * 180 / Math.PI) % 180 + 180) % 180 + (parseFloat(cs.rotate) || 0);
+  let doel = (Math.floor(nu / 180) + 1) * 180;
+  if (doel - nu < 90) doel += 180;
+  glas.getAnimations().forEach(a => {
+    if (a.animationName === "glasturn") a.currentTime = a.effect.getTiming().delay;
+    else a.cancel();
+  });
+  glas.animate([{ rotate: nu + "deg" }, { rotate: doel + "deg" }],
+    { duration: 450, easing: curve("los") });
 }
 
 /* De kaart als losse kopie, voor ze plaatsmaakt voor de volgende. Ze blijft
