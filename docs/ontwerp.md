@@ -1054,6 +1054,37 @@ Niet gedaan: een derde ding (verder spelen, een ploegkeuze, tekst) en een
 knop die uit zichzelf klopt. Alleen de vinger, de klok en de dieren laten
 iets bewegen.
 
+### Je vinger draait de zandloper
+
+Max vroeg of een tik op het merk ook iets moet doen. De plaat was het enige
+dode vlak op het scherm: een tik ernaast rimpelt de punten, een tik erop
+deed niets, en voor een kind leest het grootste ding op het scherm dan als
+kapot. Drie versies naast elkaar in een prototype: niets (zoals het was), de
+zandloper draait om, en Vos en Uil wippen allebei. Gekozen is de zandloper.
+
+- **De plaat blijft stil.** In deze app zegt een vlak dat onder je vinger
+  inzakt "ik ben een knop", en de plaat is er geen. Alleen de zandloper erin
+  beweegt.
+- **De klok draait, en jij draait haar.** Alleen de vinger, de klok en de
+  dieren laten iets bewegen; de zandloper is de klok. Ze draait al om de
+  negen seconden uit zichzelf om; een tik doet die draai meteen, sneller en
+  met vering (`draaiGlas()`, --t-groot, --e-los), en zet de wachttijd van de
+  klok terug op nul, zodat er niet vlak daarna nog een draai volgt.
+- **Vanaf waar ze staat.** Een tik midden in een draai, of in een vorige
+  tik, draait verder vanaf die stand naar de volgende halve draai (minstens
+  een kwart verder). De tik draait op `rotate`, de klok op `transform`, zodat
+  ze elkaar niet overschrijven; het silhouet is puntsymmetrisch, dus na elke
+  halve draai valt `rotate` weg zonder dat je iets ziet springen.
+- **Geen rimpel en geen geluid.** Een rimpel betekent dat er iets op het bord
+  drukte; de zandloper draait in de plaat en raakt de punten niet. Elke
+  klank heeft al een betekenis.
+
+Niet gedaan: de plaat laten inzakken (een knop die niets doet), het spel
+laten starten (twee knoppen voor één ding, en een kind dat de telefoon
+pakt start per ongeluk), de instellingen openen (die zijn voor de
+volwassene, achter het tandwiel), en beide dieren laten wippen (dat doet een
+tik op een dier al).
+
 ## Elke kaart draait om
 
 Tussen twee beurten stond een harde knip: de gestempelde kaart bleef een
