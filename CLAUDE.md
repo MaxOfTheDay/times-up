@@ -266,9 +266,11 @@ Twee totalen even groot, op een papieren kaart zo breed als de opdrachtkaart
 klassenaam pakt (`.bar` bestond al).
 
 **Eén label voor "wat er bij komt".** Het groene `+N` (`.gain`) staat alleen
-in de balk tijdens het spelen. Het vliegende punt draagt dezelfde huid, gaat
-via Web Animations, en het getal plus de wip horen bij de landing
-(`landFly()`), ook bij een schermwissel.
+in de balk tijdens het spelen. Bij goed vliegt alleen de kaart erin
+(`vliegKaart()`), geen los `+1`: ze krimpt tot de hoogte van het vak, en
+terugnemen (`kaartTerug()`) is dezelfde vlucht achterstevoren. Via Web
+Animations; het getal plus de wip horen bij de landing (`landFly()`), ook
+bij een schermwissel.
 
 **De balk heeft drie stukken.** Wie (`.who`: mascotte | buit), hoe (het
 rondeteken, alleen, in het midden) en de klok (`.klokknop`: seconden |
