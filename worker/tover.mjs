@@ -30,15 +30,17 @@ const MAX_WOORD = 14;            // zoals het woordveld in de maker
    Klein gehouden: het taalmodel is het eigenlijke slot, dit is de vangrail. */
 const NOOIT = /\b(seks|sex|naakt|bloot|porno|lul|kut|tiet|pik|neuk|dood|lijk|bloed|moord|wapen|pistool|geweer|mes|bom|drugs|nazi|hitler)\b/i;
 
-const STIJL = 'A cute flat sticker illustration of {X} for a children\'s card game, ' +
-  'centered, the whole subject visible, thick bold black outline, ' +
-  'three or four flat colours, no shading, no gradient, no text, no letters, ' +
-  'plain flat cream background, simple shapes a four-year-old recognises.';
+/* Geen woorden als "game", "card" of "no text" in de stijl: FLUX schnell
+   kent geen ontkenning en schreef ze er als letters bij ("Flat game", "4"). */
+const STIJL = '{X}, cute flat sticker illustration, centered, the whole subject ' +
+  'visible, thick bold black outline, few flat bright colours, simple shapes, ' +
+  'isolated on a plain flat cream background.';
 
 const VRAAG = 'You translate one Dutch word or short phrase, typed by a parent for a ' +
   'party game with young children, into a short English noun phrase that names ' +
   'the same thing (for example: "luiaard" -> "a sloth", "brandweerauto" -> ' +
-  '"a fire engine", "oma" -> "a grandmother"). Answer with JSON only: ' +
+  '"a fire engine", "oma" -> "a grandmother", "bank" -> "a sofa"). Pick the meaning a ' +
+  'young child would mean. Answer with JSON only: ' +
   '{"en": "<english>", "ok": true} if it is a concrete, harmless thing a young ' +
   'child could draw, or {"en": "", "ok": false} if it is violent, sexual, ' +
   'scary, hateful, a brand, a real famous person, or not a thing at all.';
