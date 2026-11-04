@@ -1,0 +1,20 @@
+kameel: a camel
+ridder: a knight
+brandweerauto: a fire engine
+oma: a grandmother
+luiaard: a sloth
+regenboog: a rainbow
+taart: a cake
+fiets: a bicycle
+olifant: an elephant
+tractor: a tractor
+kasteel: a castle
+dinosaurus: a dinosaur
+zeemeermin: a mermaid
+raket: a rocket
+pinguin: a penguin
+knuffel: a stuffed animal
+bank: a sofa
+vulkaan: a volcano
+sneeuwpop: a snowman
+draak: a dragon
