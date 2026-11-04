@@ -335,11 +335,12 @@ zelf draait de zandloper meteen om (`draaiGlas()`, op `rotate`); de plaat
 zakt niet in en er komt geen rimpel.
 
 **Het instellingenscherm.** Vier groepen, elk één vraag: Potje (hoe één
-potje gedeeld wordt: kaarten per potje met de strook en de telling op de
-regel van de naam, eigen kaarten erin, tijd), Kaarten (welke kaarten er
-bestaan: moeilijkheid, met de kaartenbak eronder), Deze telefoon (Geluid en
-Trilling als twee schakelaars op één rij, installeren), Zo speel je (de
-vouwregel is de groepskop). Toets een nieuw veld zo: verandert het wat er in
+potje gedeeld wordt: Kaarten met de strook als één dunne rij en de telling
+op de regel van de naam, Waarvan eigen, Tijd per beurt), Kaarten (welke
+kaarten er bestaan: moeilijkheid, met de kaartenbak eronder), Deze telefoon
+(Geluid en Trilling als twee schakelaars op één rij, elk met zijn teken en
+uit verbleekt, installeren), Zo speel je (de vouwregel is de groepskop).
+Een veldnaam herhaalt zijn groepskop niet. Toets een nieuw veld zo: verandert het wat er in
 de bak zit, of wat er in het potje van vanavond komt? De keuzes zijn rijen
 keuzeknoppen, geen schuif. Drie lagen tekst: hoofdletters alleen voor de
 titel en de groepskoppen (klein, in `--ink-2`); veldnamen in inkt het luidst
@@ -379,7 +380,8 @@ knop wisselt met `visibility`, nooit met `hidden`.
   (`settings.eigenDeel`, een van `Spel.EIGEN_DELEN`: 0, ⅛, ¼, ½; standaard
   ¼), de langst niet getrokken eerst, en een eigen kaart verdringt de
   gewone met hetzelfde woord. Een deel en geen vast aantal; de knoppen
-  tonen het aantal dat het deel bij deze maat geeft (`paintPotje()`).
+  tonen het aantal dat er echt in gaat (`paintPotje()`); een verzonken
+  knop houdt zijn eigen getal.
 - Een kaart zonder beeld bestaat niet: `Spel.zonder()` en
   `herstel(..., weg)` halen haar uit de stapel. Het herstel bij de start
   wacht daarom op `eigenKlaar`.
@@ -393,8 +395,8 @@ knop wisselt met `visibility`, nooit met `hidden`.
   Foto of tekening kies je in de kop van de maker (`#mkSoort`, `wisselSoort()`):
   het woord gaat mee, wat er al was blijft als klad, en een nieuwe kaart
   opent in de soort van de vorige keer (`tijdisom.soort`). Een bestaande
-  kaart heeft die keuze niet. Er is geen Aan/Uit: 0 bij "Eigen kaarten
-  erin" is uit, en dan staat "uit" op de stapel.
+  kaart heeft die keuze niet. Er is geen Aan/Uit: 0 bij "Waarvan eigen"
+  is uit, en dan staat "uit" op de stapel.
 - Bewaren is goud zodra er een beeld is; zonder woord wijst een tik de
   woordregel aan (`nudge()` en focus). Weggooien kost twee tikken; een niet
   bewaarde nieuwe kaart blijft per soort als klad liggen.
