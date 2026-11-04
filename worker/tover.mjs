@@ -9,7 +9,7 @@
    1. Een klein taalmodel zet het woord om naar een Engels zelfstandig
       naamwoord en zegt of het iets is voor kleuters. FLUX begrijpt Engels het
       best, en "bank" is in het Nederlands een zitbank.
-   2. FLUX.1 schnell tekent het in de stijl van de app: een sticker met een
+   2. FLUX.1 schnell tekent het in de stijl van de app: een vlakke tekening met een
       dikke zwarte lijn, weinig vlakke kleuren, op effen crème. De app knipt
       die achtergrond weg.
 
@@ -31,10 +31,12 @@ const MAX_WOORD = 14;            // zoals het woordveld in de maker
 const NOOIT = /\b(seks|sex|naakt|bloot|porno|lul|kut|tiet|pik|neuk|dood|lijk|bloed|moord|wapen|pistool|geweer|mes|bom|drugs|nazi|hitler)\b/i;
 
 /* Geen woorden als "game", "card" of "no text" in de stijl: FLUX schnell
-   kent geen ontkenning en schreef ze er als letters bij ("Flat game", "4"). */
-const STIJL = '{X}, cute flat sticker illustration, centered, the whole subject ' +
-  'visible, thick bold black outline, few flat bright colours, simple shapes, ' +
-  'isolated on a plain flat cream background.';
+   kent geen ontkenning en schreef ze er als letters bij ("Flat game", "4").
+   Geen "sticker": dat gaf een witte snijrand en een slagschaduw, die de app
+   niet wegknipt. */
+const STIJL = '{X}, cute flat cartoon drawing, centered, the whole subject ' +
+  'visible and filling the picture, thick bold black outline, few flat bright ' +
+  'colours, simple shapes, on a plain flat cream background.';
 
 const VRAAG = 'You translate one Dutch word or short phrase, typed by a parent for a ' +
   'party game with young children, into a short English noun phrase that names ' +

@@ -2645,7 +2645,7 @@ toveren); de afwegingen staan hieronder.
 - **Twee stappen.** Een klein taalmodel (Llama 3.1 8B) zet het woord om naar
   Engels en keurt het: FLUX begrijpt Engels het best, en het taalmodel is het
   slot voor wat niet op een kinderkaart hoort. Daarna tekent FLUX.1 schnell
-  in vier stappen een sticker met een dikke zwarte lijn op effen crème.
+  in vier stappen een vlakke tekening met een dikke zwarte lijn op effen crème.
 - **Alleen het woord gaat de deur uit.** Geen foto, geen naam, geen adres.
   Cloudflare traint niet op wat Workers AI verwerkt en bewaart niets na het
   antwoord, zolang er geen logging aan staat (`observability` uit).
@@ -2672,7 +2672,15 @@ toveren); de afwegingen staan hieronder.
   `mk.acties` die het vel vervangt; stap terug haalt de vorige terug, de
   prullenbak alles. De crème achtergrond knipt de telefoon weg (`knipUit()`,
   vanaf de randen, met een halve rand), zodat ze doorzichtig is zoals een
-  getekende en de pen van `.glyph` krijgt.
+  getekende, en snijdt haar bij tot de tekening (`snijBij()`): FLUX liet de
+  helft van het vel leeg, en dan stond ze een maat kleiner dan een emoji.
+- **Een getoverde kaart ligt kaal.** Ze heeft haar eigen zwarte lijn. De pen
+  van `.glyph` erom gaf een dubbele, vlekkerige rand: om de lijn van FLUX,
+  een witte snijrand en een slagschaduw. Uit drie versies naast elkaar op de
+  kaart (de pen houden, de rand ook wegknippen, geen pen) las alleen "geen
+  pen" als dezelfde wereld als de emoji. De kaart onthoudt het
+  (`getoverd`); wie op een getoverde kaart bijtekent, houdt haar kaal. De
+  stijl noemt geen "sticker" meer: dat woord gaf de snijrand en de schaduw.
 - **Wachten is rastertoon.** Terwijl Workers AI tekent (twee tot vijf tellen)
   zwellen de punten van het vel, geen draaiend wieltje. Zonder net een
   wifi-teken op de staf, met het dagbudget op de zandloper (`#i-glass`);
