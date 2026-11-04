@@ -336,3 +336,79 @@ test('een heel potje: elke kaart drie keer geraden, niets dubbel', () => {
   G.scores.forEach(rondes => rondes.forEach(p => assert.ok(p >= 0)));
   assert.equal(G.scores[0].map((_, r) => G.scores[0][r] + G.scores[1][r]).join(), [n, n, n].join());
 });
+
+/* ---- eigen kaarten ---- */
+const eigenVan = (n, laatst = () => 0) =>
+  Array.from({ length: n }, (_, i) => ({ id: 'f' + i, woord: 'eigen' + i, laatst: laatst(i) }));
+
+test('eigen kaarten: hoogstens een kwart van de greep', () => {
+  for (const [size, max] of [[16, 4], [24, 6], [32, 8]]) {
+    const greep = Spel.drawDeck(DECKS, 'klein', size, [], rng(5), eigenVan(20));
+    assert.equal(greep.length, size, 'de greep blijft even groot');
+    assert.equal(greep.filter(c => Spel.eigenId(c) !== null).length, max);
+  }
+  const weinig = Spel.drawDeck(DECKS, 'klein', 24, [], rng(5), eigenVan(2));
+  assert.equal(weinig.filter(c => Spel.eigenId(c) !== null).length, 2, 'minder dan een kwart: allemaal');
+  assert.equal(weinig.length, 24);
+});
+
+test('eigen kaarten: wie het langst niet kwam, gaat voor', () => {
+  // f0..f5 net gespeeld, f6..f9 nooit of lang geleden.
+  const eigen = eigenVan(10, i => (i < 6 ? 1000 + i : i - 6));
+  const greep = Spel.drawDeck(DECKS, 'klein', 16, [], rng(9), eigen);
+  const ids = greep.map(Spel.eigenId).filter(x => x !== null).sort();
+  assert.deepEqual(ids, ['f6', 'f7', 'f8', 'f9']);
+});
+
+test('eigen kaarten: bij gelijke stand beslist het lot, herhaalbaar', () => {
+  const a = Spel.eigenGreep(eigenVan(12), 16, rng(3)).map(k => k.id);
+  const b = Spel.eigenGreep(eigenVan(12), 16, rng(3)).map(k => k.id);
+  const c = Spel.eigenGreep(eigenVan(12), 16, rng(4)).map(k => k.id);
+  assert.deepEqual(a, b);
+  assert.notDeepEqual(a, c);
+});
+
+test('eigen kaarten: hetzelfde woord als een gewone kaart, de eigen wint', () => {
+  // 'Klein3' in andere hoofdletters: het woord telt, niet de schrijfwijze.
+  const eigen = [{ id: 'hond', woord: 'Klein3', laatst: 0 }];
+  for (let s = 1; s < 30; s++) {
+    const greep = Spel.drawDeck(DECKS, 'klein', 32, [], rng(s), eigen);
+    assert.equal(greep.filter(c => c[1].toLowerCase() === 'klein3').length, 1);
+    assert.equal(greep.find(c => c[1].toLowerCase() === 'klein3')[0], Spel.EIGEN + 'hond');
+  }
+});
+
+test('eigen kaarten: zonder eigen kaarten trekt drawDeck precies als voorheen', () => {
+  const zonder = Spel.drawDeck(DECKS, 'midden', 24, [], rng(11));
+  const leeg = Spel.drawDeck(DECKS, 'midden', 24, [], rng(11), []);
+  assert.deepEqual(zonder, leeg);
+});
+
+test('eigenId: alleen het voorvoegsel telt, geen emoji', () => {
+  assert.equal(Spel.eigenId([Spel.EIGEN + 'abc', 'oma']), 'abc');
+  assert.equal(Spel.eigenId(['🐶', 'hond']), null);
+  assert.equal(Spel.eigenId(['#️⃣', 'hekje']), null);
+});
+
+test('zonder: een eigen kaart zonder beeld gaat uit de stapel', () => {
+  const deck = [['🐶', 'hond'], [Spel.EIGEN + 'a', 'oma'], [Spel.EIGEN + 'b', 'opa'], ['🐱', 'kat']];
+  const G = Spel.nieuw(deck, 30, rng(2));
+  Spel.beurtKlaar(G);
+  assert.equal(Spel.zonder(G, id => id === 'a'), 3);
+  assert.ok(!G.pile.includes(1), 'oma is weg');
+  assert.ok(G.pile.includes(2), 'opa blijft');
+});
+
+test('herstel: eigen kaarten zonder beeld vallen eruit, en niets over is geen spel', () => {
+  const t = 5000;
+  const deck = [[Spel.EIGEN + 'a', 'oma'], ['🐶', 'hond']];
+  const G = Spel.nieuw(deck, 30, rng(1));
+  const opslag = () => JSON.parse(JSON.stringify({ t, mode: 'turn', G }));
+  const h = Spel.herstel(opslag(), t, id => id === 'a');
+  assert.deepEqual(h.G.pile, [1]);
+  assert.deepEqual(Spel.herstel(opslag(), t, () => false).G.pile.length, 2, 'met beeld blijft alles');
+  const alleenOma = Spel.nieuw([[Spel.EIGEN + 'a', 'oma']], 30, rng(1));
+  const s = JSON.parse(JSON.stringify({ t, mode: 'turn', G: alleenOma }));
+  assert.equal(Spel.herstel(s, t, () => true), null);
+  assert.notEqual(Spel.herstel({ ...s, mode: 'uit' }, t, () => true), null, 'een eindstand mag blijven');
+});

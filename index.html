@@ -1092,6 +1092,104 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 }
 .hint { text-wrap: pretty; font-size: var(--fs-2); color: var(--ink-2); margin: var(--s-2) 0 0; line-height: 1.45; }
 
+/* ============================================================
+   EIGEN KAARTEN — het veld in Instellingen en de maker.
+   ============================================================ */
+/* Eén rij tegels die opzij schuift, met de plus vooraan: veertig kaarten
+   onder elkaar zouden Voorkeuren een scherm ver wegduwen. Ruimte rechts en
+   onder voor de slagschaduw, zoals .cb-index. */
+.eigen-rij {
+  display: flex; gap: var(--s-2); overflow-x: auto; overscroll-behavior-x: contain;
+  padding: 0 var(--lift-1) var(--lift-1) 0;
+}
+.eigen-rij .pv { flex: 0 0 84px; min-height: 100px; justify-content: center; }
+.eigen-rij .pv img {
+  display: block; width: 60px; height: 60px; object-fit: cover;
+  outline: 2px solid var(--ink);
+}
+.eigen-rij .pv small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-wrap: nowrap; }
+.eigen-plus svg { width: 30px; }
+.field.eigen > .field.rij { margin-top: var(--s-3); }
+.field.eigen > .hint { margin-top: var(--s-2); }
+.field.eigen legend .cb-count { margin-left: var(--s-1); }
+
+/* De foto op de kaart: zo groot als een emoji tekent (die is breder dan
+   haar lettergrootte, zie sizeCard()), vierkant, en met de inktlijn van
+   .glyph als rand. */
+.glyph.foto { line-height: 0; }
+.glyph.foto img {
+  display: block; width: calc(var(--glyph, 20vmin) * 1.18); height: calc(var(--glyph, 20vmin) * 1.18);
+  object-fit: cover;
+}
+.kijk-grid span.foto img { display: block; width: 40px; height: 40px; object-fit: cover; }
+
+/* De maker: het paneel is de kaart. --mk is de zijde van het vierkant. */
+#maker { --mk: min(70vw, 42vh, 300px); }
+#maker .panel.maker {
+  width: auto; max-height: calc(100dvh - 2 * var(--s-4)); overflow-y: auto;
+  gap: var(--s-3); padding: var(--s-4) var(--s-4) var(--s-5);
+}
+.mk-top { align-self: stretch; display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); }
+.mk-kop {
+  margin: 0; font-family: var(--font-display); font-size: var(--fs-4); font-weight: 700;
+  text-transform: uppercase; letter-spacing: var(--track-caps); color: var(--ink);
+}
+/* Op het paneel en niet in de hoek van het scherm: daar viel hij op een
+   smalle telefoon over de kaart. */
+#maker .btn-icon { position: static; flex: 0 0 auto; }
+.mk-kaart { display: flex; flex-direction: column; align-items: center; gap: var(--s-2); }
+/* Leeg: een gestippeld vak met het albumteken, en een tik erop kiest een
+   foto. Vol: de foto met de inktrand, zoals in het spel, en schuiven en
+   knijpen zetten hem goed. */
+.mk-vak {
+  position: relative; width: var(--mk); height: var(--mk); overflow: hidden;
+  display: grid; place-items: center; cursor: pointer;
+  background: var(--paper-2); border: var(--line-2) dashed var(--ink);
+  touch-action: none;
+}
+.mk-vak .mk-leeg { width: 34%; }
+.mk-vak.vol { border: 0; outline: 4px solid var(--ink); cursor: grab; background: var(--paper); }
+.mk-vak.vol .mk-leeg { display: none; }
+.mk-vak img {
+  position: absolute; left: 0; top: 0; max-width: none;
+  transform-origin: 0 0; user-select: none; -webkit-user-select: none; pointer-events: none;
+}
+/* Het woord staat waar het in het spel komt, in Fredoka en hoofdletters
+   zoals .cardword, maar in inkt: hier wordt het geschreven, niet gelezen. */
+.mk-woord {
+  width: var(--mk); min-height: var(--tap); padding: var(--s-1);
+  border: 0; border-bottom: var(--line-2) dashed var(--ink); border-radius: 0;
+  background: transparent; color: var(--ink); text-align: center;
+  font-family: var(--font-display); font-size: var(--fs-4); font-weight: 700;
+  text-transform: uppercase; letter-spacing: var(--track-caps);
+}
+.mk-woord::placeholder { color: var(--ink-2); opacity: 1; }
+.mk-woord:focus { outline: none; border-bottom-style: solid; }
+.mk-rest { width: var(--mk); display: flex; flex-direction: column; gap: var(--s-3); }
+.mk-gereedschap { display: flex; justify-content: center; gap: var(--s-3); }
+.mk-tg { width: var(--tap); padding: 0; justify-content: center; }
+.mk-tg svg { width: 22px; }
+/* Bewaren is wat je hier komt doen: goud, "dit, nu". Een rechthoek: de
+   cirkel op dit paneel is voor de camera. Zonder beeld of woord is hij
+   papier zonder lift, met de reden erop als het woord al bestaat. */
+.mk-bewaar { justify-content: center; }
+.mk-bewaar:enabled { background: var(--go); }
+.mk-bewaar:disabled { color: var(--ink-2); border-color: var(--rule); box-shadow: none; }
+.mk-weg { justify-content: center; background: transparent; border-color: transparent; box-shadow: none; text-decoration: underline; }
+.mk-weg.zeker { background: var(--ink); color: var(--paper); text-decoration: none; }
+
+/* Liggend past het niet onder elkaar: de kaart links, de rest rechts. */
+@media (orientation: landscape) and (max-height: 560px) {
+  #maker { --mk: min(52vh, 240px); }
+  #maker .panel.maker {
+    display: grid; grid-template-columns: auto auto; grid-template-rows: auto 1fr;
+    align-items: start; column-gap: var(--s-5);
+  }
+  .mk-kaart { grid-column: 1; grid-row: 1 / span 2; }
+  .mk-top { grid-column: 2; grid-row: 1; }
+  .mk-rest { grid-column: 2; grid-row: 2; width: max(200px, var(--mk)); }
+}
+
 /* ---- Installeren ------------------------------------------------------
    De plaat op de knop is de belofte zelf: dít vlak komt op het beginscherm te
    staan (zelfde plaat als .wordmark en het app-pictogram). Tekst staat hier
@@ -2361,6 +2459,23 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
     <use href="#m-uil-snavel"/>
   </symbol>
 
+  <!-- Eigen kaarten: het album (een foto met een berg en een zon), een
+       plus voor een nieuwe kaart, en het kruis dat een paneel sluit. -->
+  <symbol id="i-album" viewBox="0 0 100 100">
+    <rect x="12" y="18" width="76" height="64" fill="none" stroke="#14110F" stroke-width="8" stroke-linejoin="round"/>
+    <path d="M12 70 L38 44 L58 64 L70 52 L88 70" fill="none" stroke="#14110F" stroke-width="8" stroke-linejoin="round"/>
+    <circle cx="67" cy="36" r="7" fill="#14110F"/>
+  </symbol>
+  <symbol id="i-plus" viewBox="0 0 100 100">
+    <path d="M50 18 V82 M18 50 H82" stroke="#14110F" stroke-width="12" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-min" viewBox="0 0 100 100">
+    <path d="M18 50 H82" stroke="#14110F" stroke-width="12" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-kruis" viewBox="0 0 100 100">
+    <path d="M24 24 L76 76 M76 24 L24 76" stroke="#14110F" stroke-width="12" stroke-linecap="round"/>
+  </symbol>
+
   <symbol id="i-play" viewBox="0 0 100 100">
     <path d="M24 12 L86 50 L24 88 Z" fill="#14110F" stroke="#14110F" stroke-width="8" stroke-linejoin="round"/>
   </symbol>
@@ -2584,6 +2699,28 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
           <div class="cards" id="cbAll"></div>
         </div>
       </details>
+      <!-- Eigen kaarten: een foto van oma, de hond of de knuffel, met het
+           woord eronder. Een rij tegels met de plus vooraan, open en niet
+           ingeklapt: dit is het enige veld dat het spel van jullie maakt,
+           en een lege rij zegt meteen dat er nog niets in zit. Een tik op
+           een tegel opent dezelfde maker om haar aan te passen. -->
+      <fieldset class="field eigen" id="eigenVeld">
+        <legend>Eigen kaarten <span class="cb-count" id="eigenTel"></span></legend>
+        <div class="eigen-rij" id="eigenRij">
+          <button class="pv eigen-plus" id="btnEigenNieuw" aria-label="Nieuwe eigen kaart">
+            <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-plus"/></svg>
+          </button>
+        </div>
+        <!-- Uit als er bezoek is: "Bobby" zegt een vriendje niets. -->
+        <fieldset class="field rij" id="eigenAanVeld" hidden>
+          <legend>In het spel</legend>
+          <div class="chips" id="eigenAanChips" role="radiogroup" aria-label="Eigen kaarten in het spel">
+            <button class="chip" role="radio" aria-checked="false" data-aan="1">Aan</button>
+            <button class="chip" role="radio" aria-checked="false" data-aan="0">Uit</button>
+          </div>
+        </fieldset>
+        <p class="hint" id="eigenHint">Alleen op deze telefoon bewaard.</p>
+      </fieldset>
 
       <fieldset class="field">
         <!-- "Per potje", niet "Aantal kaarten": de bak erboven telt ook
@@ -2888,6 +3025,41 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   </button>
 </section>
 
+<!-- Een eigen kaart maken of aanpassen. Het paneel ís de kaart zoals ze in
+     het spel komt: het beeld in het vierkant, het woord eronder. Het kruis
+     rechtsboven op het paneel sluit het (op het scherm zelf zou het op een
+     smalle telefoon over het paneel vallen); wat niet bewaard is blijft als klad
+     liggen tot de volgende tik op de plus. -->
+<div class="overlay" id="maker" role="dialog" aria-modal="true" aria-labelledby="mkKop" hidden>
+  <div class="panel surface maker">
+    <div class="mk-top">
+      <h2 class="mk-kop" id="mkKop">Nieuwe kaart</h2>
+      <button class="btn-icon" id="mkDicht" aria-label="Sluiten">
+        <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-kruis"/></svg>
+      </button>
+    </div>
+    <div class="mk-kaart">
+      <div class="mk-vak" id="mkVak" role="button" tabindex="0" aria-label="Foto kiezen">
+        <svg class="mk-leeg" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-album"/></svg>
+        <img id="mkFoto" alt="" hidden draggable="false">
+      </div>
+      <input class="mk-woord" id="mkWoord" maxlength="14" placeholder="woord"
+             autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="done"
+             aria-label="Het woord op de kaart">
+    </div>
+    <div class="mk-rest">
+      <div class="mk-gereedschap" id="mkGereedschap" hidden>
+        <button class="btn-plain mk-tg" id="mkKleiner" aria-label="Kleiner"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-min"/></svg></button>
+        <button class="btn-plain mk-tg" id="mkGroter" aria-label="Groter"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-plus"/></svg></button>
+        <button class="btn-plain mk-tg" id="mkAlbum" aria-label="Andere foto"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-album"/></svg></button>
+      </div>
+      <button class="btn-plain mk-bewaar" id="mkBewaar" disabled>Bewaren</button>
+      <button class="btn-plain mk-weg" id="mkWeg" hidden>Kaart weggooien</button>
+    </div>
+    <input type="file" id="mkBestand" accept="image/*" hidden>
+  </div>
+</div>
+
 <!-- Pauze: de klok staat stil. Verder spelen is één tik; stoppen moet je
      vasthouden, want dat gooit het lopende spel weg. -->
 <!-- De kaarten die nog liggen, als plaatjes op alfabet (niet in de volgorde
@@ -2946,7 +3118,8 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
    de weggelegde kaarten komen als argument binnen.
 
    De vorm van G (zo staat hij ook in localStorage):
-     deck      [[emoji, woord], ...]  de greep van dit potje
+     deck      [[emoji, woord], ...]  de greep van dit potje; een eigen
+                                      kaart is [EIGEN + id, woord]
      pile      [index in deck, ...]   wat er nog ligt, bovenste eerst
      card      index | null           de kaart in beeld
      round     1..ROUNDS
@@ -2998,9 +3171,40 @@ const Spel = (() => {
     return TIER_ORDER.every(t =>
       poolFor(decks, t).filter(c => !weg.has(c[1])).length >= MIN_BAK);
   }
-  /* De greep bestaat pas bij de start van een potje, nergens eerder. */
-  function drawDeck(decks, tier, size, hidden, rnd) {
-    return shuffle(bakFor(decks, tier, hidden), rnd).slice(0, size);
+  /* Eigen kaarten: een foto van oma of de hond, gemaakt op het
+     instellingenscherm. In de greep staan ze als [EIGEN + id, woord]; het
+     beeld zelf woont buiten de spelkern, in IndexedDB. Het voorvoegsel kan
+     geen emoji zijn (een emoji begint nooit met een letter). */
+  const EIGEN = "eigen:";
+  /* Een kwart van de greep, niet meer: met de helft zaten na drie avonden
+     steeds dezelfde gezichten in elk potje. */
+  const EIGEN_DEEL = 4;
+  function eigenId(kaart) {
+    return typeof kaart[0] === "string" && kaart[0].indexOf(EIGEN) === 0
+      ? kaart[0].slice(EIGEN.length) : null;
+  }
+  /* Welke eigen kaarten in dit potje gaan: de kaarten die het langst niet
+     kwamen eerst (laatst = wanneer ze voor het laatst getrokken werden, 0 is
+     nooit), bij gelijke stand door het lot. Zo komt elke kaart aan de beurt. */
+  function eigenGreep(eigen, size, rnd) {
+    const n = Math.min(eigen.length, Math.floor(size / EIGEN_DEEL));
+    return shuffle(eigen, rnd)
+      .sort((a, b) => (a.laatst || 0) - (b.laatst || 0))
+      .slice(0, n);
+  }
+  /* De greep bestaat pas bij de start van een potje, nergens eerder.
+     Eigen kaarten gaan voor: een gewone kaart met hetzelfde woord blijft uit
+     het potje zolang de eigen kaart bestaat (een foto van je eigen hond heet
+     "hond"). */
+  function drawDeck(decks, tier, size, hidden, rnd, eigen) {
+    eigen = eigen || [];
+    const woorden = new Set(eigen.map(k => k.woord.toLocaleLowerCase("nl")));
+    const bak = bakFor(decks, tier, hidden)
+      .filter(c => !woorden.has(c[1].toLocaleLowerCase("nl")));
+    const mijn = eigenGreep(eigen, size, rnd);
+    if (!mijn.length) return shuffle(bak, rnd).slice(0, size);
+    return shuffle(mijn.map(k => [EIGEN + k.id, k.woord])
+      .concat(shuffle(bak, rnd).slice(0, size - mijn.length)), rnd);
   }
 
   function nieuw(deck, secs, rnd) {
@@ -3110,6 +3314,18 @@ const Spel = (() => {
     G.pendingMs = Math.max(MIN_REST, Math.round(restMs));
   }
 
+  /* Een eigen kaart waarvan het beeld weg is (gewist, of het potje komt van
+     een andere telefoon) gaat uit de stapel: een kaart met alleen een woord
+     is voor wie niet leest een lege kaart. Geeft terug hoeveel er nog over
+     zijn. */
+  function zonder(G, weg) {
+    const telt = i => !(eigenId(G.deck[i]) !== null && weg(eigenId(G.deck[i])));
+    G.pile = G.pile.filter(telt);
+    if (G.card !== null && !telt(G.card)) G.card = null;
+    if (G.vorige !== null && !telt(G.vorige)) G.vorige = null;
+    return over(G);
+  }
+
   /* Wie won: 0, 1, of null bij gelijkspel. */
   function winnaar(G) {
     const a = total(G, 0), b = total(G, 1);
@@ -3124,7 +3340,7 @@ const Spel = (() => {
      oudere versie komen, half geschreven zijn of overschreven: bij de minste
      twijfel null, en dan begint de app gewoon op de titel. Vluchtige velden
      worden opnieuw gezet in plaats van overgenomen. */
-  function herstel(s, nu) {
+  function herstel(s, nu, weg) {
     if (!s || typeof s !== "object" || typeof s.t !== "number") return null;
     if (nu - s.t > GAME_MAX_AGE) return null;
     const g = s.G;
@@ -3142,21 +3358,23 @@ const Spel = (() => {
       typeof g.secs === "number" && g.secs > 0 &&
       typeof g.pendingMs === "number" && g.pendingMs >= 0;
     if (!(pileOk && scoresOk && restOk)) return null;
-    return {
-      /* "uit": het potje is uitgespeeld en de eindstand stond in beeld. */
-      mode: s.mode === "round" || s.mode === "uit" ? s.mode : "turn",
-      G: {
-        deck: g.deck, pile: g.pile, card: null,
-        round: g.round, team: g.team, scores: g.scores,
-        gained: 0, vorige: null,
-        pendingMs: g.pendingMs, secs: g.secs
-      }
+    const mode = s.mode === "round" || s.mode === "uit" ? s.mode : "turn";
+    const G = {
+      deck: g.deck, pile: g.pile, card: null,
+      round: g.round, team: g.team, scores: g.scores,
+      gained: 0, vorige: null,
+      pendingMs: g.pendingMs, secs: g.secs
     };
+    /* Zijn er alleen kaarten zonder beeld over, dan valt er niets meer te
+       spelen: liever de titel dan een beurt zonder kaart. */
+    if (weg && !zonder(G, weg) && mode !== "uit") return null;
+    /* "uit": het potje is uitgespeeld en de eindstand stond in beeld. */
+    return { mode: mode, G: G };
   }
 
   return {
-    ROUNDS, TIER_ORDER, MIN_BAK, GAME_MAX_AGE, MIN_REST,
-    shuffle, poolFor, bakFor, canHide, drawDeck,
+    ROUNDS, TIER_ORDER, MIN_BAK, GAME_MAX_AGE, MIN_REST, EIGEN, EIGEN_DEEL,
+    shuffle, poolFor, bakFor, canHide, drawDeck, eigenId, eigenGreep, zonder,
     nieuw, total, over, beurtKlaar, beurtMs, trek,
     geraden, terug, passen, tijdOm, beurtWissel, rondeEinde, onderbreek,
     winnaar, gespeeld, herstel
@@ -3543,7 +3761,7 @@ function clearGame() {
 function loadGame() {
   let s = null;
   try { s = JSON.parse(localStorage.getItem(KEY_GAME) || "null"); } catch (e) { return null; }
-  return Spel.herstel(s, Date.now());
+  return Spel.herstel(s, Date.now(), eigenWeg);
 }
 
 /* De kaartregels staan in de spelkern; deze vier binden er DECKS en de
@@ -3555,7 +3773,8 @@ const shuffle = a => Spel.shuffle(a);
 const poolFor = tier => Spel.poolFor(DECKS, tier);
 const bakFor = tier => Spel.bakFor(DECKS, tier, settings.hidden);
 const canHide = word => Spel.canHide(DECKS, settings.hidden, word);
-const drawDeck = (tier, size) => Spel.drawDeck(DECKS, tier, size, settings.hidden);
+const drawDeck = (tier, size) =>
+  Spel.drawDeck(DECKS, tier, size, settings.hidden, undefined, eigenInSpel());
 
 /* ==============================================================
    4. SCHERMEN
@@ -3636,6 +3855,7 @@ function paintSetup() {
   $("#rules").open = !!settings.rulesOpen;
   $("#cardBox").open = !!settings.cardsOpen;
   paintCards();
+  paintEigen();
 }
 
 /* ==============================================================
@@ -3798,6 +4018,388 @@ $("#cardBox").addEventListener("toggle", () => {
   if (open !== !!settings.cardsOpen) { settings.cardsOpen = open; saveSettings(); }
   if (open) paintCards();
 });
+
+/* ==============================================================
+   EIGEN KAARTEN
+   Een foto van oma, de hond of de knuffel, met het woord dat telt. De
+   lijst (id, woord, wanneer laatst getrokken) staat in localStorage,
+   de beelden zelf in IndexedDB: een foto is zo'n 50 kB en
+   localStorage is daar te klein en te traag voor. Niets verlaat de
+   telefoon. Welke kaarten in een potje gaan beslist de spelkern
+   (Spel.drawDeck); hier staan de opslag, het veld in Instellingen en
+   de maker.
+   ============================================================== */
+const KEY_EIGEN = "tijdisom.eigen";
+const EIGEN_MAX = 40;        // veertig foto's is zo'n 2 MB
+const EIGEN_PX = 512;        // zo groot wordt elke foto bewaard
+let eigen = { aan: true, kaarten: [] };   // kaarten: [{ id, woord, laatst }]
+const beelden = new Map();   // id -> object-URL van het bewaarde beeld
+let eigenStuk = false;       // geen IndexedDB (privévenster): veld weg
+
+/* IndexedDB in drie handelingen. Elke fout wordt een verworpen belofte;
+   de aanroepers vangen ze. */
+const Beeld = (() => {
+  let db = null;
+  function open() {
+    if (!db) db = new Promise((ok, nee) => {
+      const r = indexedDB.open("tijdisom", 1);
+      r.onupgradeneeded = () => r.result.createObjectStore("beelden");
+      r.onsuccess = () => ok(r.result);
+      r.onerror = () => nee(r.error);
+      r.onblocked = () => nee(new Error("geblokkeerd"));
+    });
+    return db;
+  }
+  async function doe(modus, werk) {
+    const d = await open();
+    return new Promise((ok, nee) => {
+      const tx = d.transaction("beelden", modus);
+      const uit = werk(tx.objectStore("beelden"));
+      tx.oncomplete = () => ok(uit && uit.result);
+      tx.onerror = tx.onabort = () => nee(tx.error);
+    });
+  }
+  return {
+    zet: (id, blob) => doe("readwrite", s => s.put(blob, id)),
+    weg: id => doe("readwrite", s => s.delete(id)),
+    async alle() {
+      const sleutels = await doe("readonly", s => s.getAllKeys());
+      const waarden = await doe("readonly", s => s.getAll());
+      return sleutels.map((k, i) => [k, waarden[i]]);
+    }
+  };
+})();
+
+function bewaarEigen() {
+  try { localStorage.setItem(KEY_EIGEN, JSON.stringify(eigen)); } catch (e) {}
+}
+function laadEigenLijst() {
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY_EIGEN) || "null");
+    if (!s || typeof s !== "object") return;
+    eigen.aan = s.aan !== false;
+    if (Array.isArray(s.kaarten)) eigen.kaarten = s.kaarten
+      .filter(k => k && typeof k.id === "string" && typeof k.woord === "string" && k.woord.trim())
+      .map(k => ({ id: k.id, woord: k.woord, laatst: Number(k.laatst) || 0 }));
+  } catch (e) { /* kapotte opslag: geen eigen kaarten */ }
+}
+/* Wat er van een potje mee mag doen: aan, en met een beeld. */
+function eigenInSpel() {
+  return eigen.aan ? eigen.kaarten.filter(k => beelden.has(k.id)) : [];
+}
+const eigenWeg = id => !beelden.has(id);
+
+/* Bij het opstarten: de lijst en de beelden naast elkaar leggen. Een beeld
+   zonder kaart is een overblijfsel en gaat weg; een kaart zonder beeld ook,
+   want die kan niemand meer zien. Het herstel van een bewaard potje wacht
+   hierop (zie onderaan), anders weet het niet welke kaarten nog bestaan. */
+const eigenKlaar = (async () => {
+  laadEigenLijst();
+  try {
+    if (!window.indexedDB) throw new Error("geen IndexedDB");
+    const ids = new Set(eigen.kaarten.map(k => k.id));
+    (await Beeld.alle()).forEach(([id, blob]) => {
+      if (ids.has(id) && blob instanceof Blob) beelden.set(id, URL.createObjectURL(blob));
+      else Beeld.weg(id).catch(() => {});
+    });
+    const voor = eigen.kaarten.length;
+    eigen.kaarten = eigen.kaarten.filter(k => beelden.has(k.id));
+    if (eigen.kaarten.length !== voor) bewaarEigen();
+  } catch (e) {
+    eigenStuk = true;
+  }
+  paintEigen();
+})();
+
+/* Het teken op een kaart: een emoji als tekst, een eigen kaart als foto. De
+   inktlijn van .glyph (vier drop-shadows) legt om de foto dezelfde 4 px rand
+   als om een emoji: zo is het een tekening op de kaart en geen geplakt
+   plaatje. */
+function zetTeken(el, kaart) {
+  const id = Spel.eigenId(kaart);
+  el.classList.toggle("foto", id !== null);
+  if (id === null) { el.textContent = kaart[0]; return; }
+  el.textContent = "";
+  const img = document.createElement("img");
+  img.alt = ""; img.draggable = false;
+  if (beelden.has(id)) img.src = beelden.get(id);
+  el.appendChild(img);
+}
+
+/* ---- het veld in Instellingen ---- */
+function paintEigen() {
+  const veld = $("#eigenVeld");
+  veld.hidden = eigenStuk;
+  if (eigenStuk) return;
+  const rij = $("#eigenRij");
+  rij.querySelectorAll(".eigen-tegel").forEach(b => b.remove());
+  eigen.kaarten.forEach(k => {
+    const b = document.createElement("button");
+    b.className = "pv eigen-tegel";
+    b.dataset.id = k.id;
+    b.setAttribute("aria-label", k.woord + " — tik om aan te passen");
+    b.innerHTML = "<img alt='' draggable='false'><small></small>";
+    b.querySelector("img").src = beelden.get(k.id) || "";
+    b.querySelector("small").textContent = k.woord;
+    rij.appendChild(b);
+  });
+  const n = eigen.kaarten.length;
+  $("#btnEigenNieuw").hidden = n >= EIGEN_MAX;
+  $("#eigenTel").textContent = !n ? "" :
+    n + (n === 1 ? " kaart" : " kaarten") + (eigen.aan ? "" : " · uit");
+  $("#eigenAanVeld").hidden = !n;
+  $$("#eigenAanChips .chip").forEach(c =>
+    c.setAttribute("aria-checked", String((c.dataset.aan === "1") === eigen.aan)));
+}
+
+$("#eigenAanChips").addEventListener("click", e => {
+  const c = e.target.closest(".chip"); if (!c) return;
+  eigen.aan = c.dataset.aan === "1"; bewaarEigen(); paintEigen();
+});
+$("#btnEigenNieuw").addEventListener("click", () => openMaker(null));
+$("#eigenRij").addEventListener("click", e => {
+  const b = e.target.closest(".eigen-tegel"); if (!b) return;
+  const k = eigen.kaarten.find(k => k.id === b.dataset.id);
+  if (k) openMaker(k);
+});
+
+/* ---- de maker ----
+   mk: { kaart (null bij een nieuwe), img, nieuw (het beeld is veranderd),
+         zoom, x, y, s (px op het scherm per px van de foto) } */
+let mk = null;
+let klad = null;           // een niet bewaarde nieuwe kaart, voor de volgende tik op +
+let makerTerug = null;     // waar de focus heen gaat na het sluiten
+const ZOOM_MAX = 4;
+
+function makerOpen() { return !$("#maker").hidden; }
+
+function openMaker(kaart) {
+  if (!kaart && klad) { mk = klad; klad = null; }
+  else mk = { kaart: kaart, img: null, nieuw: false, zoom: 1, x: 0, y: 0, s: 1,
+              woord: kaart ? kaart.woord : "" };
+  $("#mkKop").textContent = kaart ? "Kaart aanpassen" : "Nieuwe kaart";
+  $("#mkWoord").value = mk.woord;
+  const weg = $("#mkWeg");
+  weg.hidden = !kaart; weg.classList.remove("zeker"); weg.textContent = "Kaart weggooien";
+  makerTerug = document.activeElement;
+  screensInert(true);
+  $("#maker").hidden = false;
+  if (kaart && !mk.img && beelden.has(kaart.id)) {
+    const i = new Image();
+    i.onload = () => { if (mk && mk.kaart === kaart) { mk.img = i; plaats(true); tekenMaker(); } };
+    i.src = beelden.get(kaart.id);
+  }
+  tekenMaker();
+  if (mk.img) plaats(false);
+  $(mk.img ? "#mkWoord" : "#mkVak").focus({ preventScroll: true });
+}
+
+function sluitMaker() {
+  if (!makerOpen()) return;
+  if (mk && !mk.kaart && (mk.img || $("#mkWoord").value.trim())) {
+    mk.woord = $("#mkWoord").value;
+    klad = mk;
+  }
+  mk = null;
+  $("#maker").hidden = true;
+  screensInert(false);
+  if (makerTerug && makerTerug.isConnected) makerTerug.focus({ preventScroll: true });
+}
+
+/* Het vierkant meet zichzelf: zijn maat komt uit CSS (--mk). */
+const vakMaat = () => $("#mkVak").clientWidth || 1;
+function plaats(midden) {
+  const i = mk.img, v = vakMaat();
+  mk.s = v / Math.min(i.naturalWidth, i.naturalHeight) * mk.zoom;
+  if (midden) {
+    mk.x = (v - i.naturalWidth * mk.s) / 2;
+    mk.y = (v - i.naturalHeight * mk.s) / 2;
+  }
+  klem();
+}
+/* De foto dekt het vierkant altijd helemaal: geen papier aan een rand. */
+function klem() {
+  const i = mk.img, v = vakMaat();
+  mk.x = Math.min(0, Math.max(v - i.naturalWidth * mk.s, mk.x));
+  mk.y = Math.min(0, Math.max(v - i.naturalHeight * mk.s, mk.y));
+  const f = $("#mkFoto");
+  f.style.transform = `translate(${mk.x}px, ${mk.y}px) scale(${mk.s})`;
+}
+/* Zoomen rond een punt in het vierkant: wat onder je vingers ligt blijft
+   daar liggen. */
+function zoomOm(cx, cy, zoom) {
+  const z = Math.max(1, Math.min(ZOOM_MAX, zoom));
+  const f = z / mk.zoom;
+  mk.x = cx - (cx - mk.x) * f;
+  mk.y = cy - (cy - mk.y) * f;
+  mk.zoom = z;
+  mk.s *= f;
+  mk.nieuw = true;
+  klem();
+}
+
+function tekenMaker() {
+  const heeft = !!(mk && mk.img);
+  const vak = $("#mkVak"), foto = $("#mkFoto");
+  vak.classList.toggle("vol", heeft);
+  vak.setAttribute("aria-label", heeft ? "De foto: schuif om te verplaatsen" : "Foto kiezen");
+  foto.hidden = !heeft;
+  if (heeft && foto.src !== mk.img.src) foto.src = mk.img.src;
+  $("#mkGereedschap").hidden = !heeft;
+  keurMaker();
+}
+
+/* Bewaren kan met een beeld en een woord dat nog niet bestaat bij de eigen
+   kaarten. Een gewone kaart met hetzelfde woord mag: de eigen gaat voor. */
+function keurMaker() {
+  if (!mk) return;
+  const w = $("#mkWoord").value.trim().toLocaleLowerCase("nl");
+  const dubbel = !!w && eigen.kaarten.some(k =>
+    k !== mk.kaart && k.woord.toLocaleLowerCase("nl") === w);
+  const knop = $("#mkBewaar");
+  knop.disabled = !(mk.img && w && !dubbel);
+  knop.textContent = dubbel ? "Dat woord bestaat al" : "Bewaren";
+}
+$("#mkWoord").addEventListener("input", keurMaker);
+$("#mkWoord").addEventListener("keydown", e => {
+  if (e.key === "Enter") { e.preventDefault(); e.target.blur(); }
+});
+
+const kiesFoto = () => $("#mkBestand").click();
+$("#mkAlbum").addEventListener("click", kiesFoto);
+$("#mkKleiner").addEventListener("click", () => {
+  const v = vakMaat(); zoomOm(v / 2, v / 2, mk.zoom / 1.25);
+});
+$("#mkGroter").addEventListener("click", () => {
+  const v = vakMaat(); zoomOm(v / 2, v / 2, mk.zoom * 1.25);
+});
+$("#mkVak").addEventListener("keydown", e => {
+  if ((e.key === "Enter" || e.key === " ") && mk && !mk.img) { e.preventDefault(); kiesFoto(); }
+});
+
+/* Een foto uit het album, of van de camera: op een telefoon biedt dezelfde
+   keuze allebei aan. De browser draait de foto zelf volgens de EXIF. Wat de
+   browser niet kan lezen (HEIC op Android) wordt geweigerd zoals overal:
+   het vierkant schudt. */
+$("#mkBestand").addEventListener("change", e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (!f || !mk) return;
+  const url = URL.createObjectURL(f);
+  const i = new Image();
+  i.onload = () => {
+    if (!mk) { URL.revokeObjectURL(url); return; }
+    mk.img = i; mk.nieuw = true; mk.zoom = 1;
+    tekenMaker(); plaats(true);
+    if (!$("#mkWoord").value.trim()) $("#mkWoord").focus({ preventScroll: true });
+  };
+  i.onerror = () => { URL.revokeObjectURL(url); nudge($("#mkVak")); };
+  i.src = url;
+});
+
+/* Schuiven met één vinger, knijpen met twee. */
+const wijzers = new Map();
+$("#mkVak").addEventListener("pointerdown", e => {
+  if (!mk) return;
+  if (!mk.img) { kiesFoto(); return; }
+  e.currentTarget.setPointerCapture(e.pointerId);
+  wijzers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+});
+$("#mkVak").addEventListener("pointermove", e => {
+  if (!mk || !mk.img || !wijzers.has(e.pointerId)) return;
+  const r = e.currentTarget.getBoundingClientRect();
+  const oud = [...wijzers.values()].map(p => ({ ...p }));
+  wijzers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  const nu = [...wijzers.values()];
+  const mid = ps => ({ x: ps.reduce((a, p) => a + p.x, 0) / ps.length - r.left,
+                       y: ps.reduce((a, p) => a + p.y, 0) / ps.length - r.top });
+  const m0 = mid(oud), m1 = mid(nu);
+  if (nu.length >= 2) {
+    const d = ps => Math.hypot(ps[0].x - ps[1].x, ps[0].y - ps[1].y) || 1;
+    zoomOm(m0.x, m0.y, mk.zoom * d(nu) / d(oud));
+  }
+  mk.x += m1.x - m0.x; mk.y += m1.y - m0.y; mk.nieuw = true;
+  klem();
+});
+const losWijzer = e => wijzers.delete(e.pointerId);
+$("#mkVak").addEventListener("pointerup", losWijzer);
+$("#mkVak").addEventListener("pointercancel", losWijzer);
+
+/* Het vierkant zoals het er nu uitziet, als JPEG van 512 px. */
+function snijFoto() {
+  const c = document.createElement("canvas");
+  c.width = c.height = EIGEN_PX;
+  const g = c.getContext("2d");
+  const k = EIGEN_PX / vakMaat(), i = mk.img;
+  g.fillStyle = "#F4EBDA"; g.fillRect(0, 0, EIGEN_PX, EIGEN_PX);
+  g.drawImage(i, mk.x * k, mk.y * k, i.naturalWidth * mk.s * k, i.naturalHeight * mk.s * k);
+  return new Promise(ok => c.toBlob(ok, "image/jpeg", .82));
+}
+
+let persistGevraagd = false;
+$("#mkBewaar").addEventListener("click", async () => {
+  if (!mk || $("#mkBewaar").disabled) return;
+  const knop = $("#mkBewaar");
+  knop.disabled = true;
+  const woord = $("#mkWoord").value.trim();
+  const kaart = mk.kaart;
+  const id = kaart ? kaart.id : Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  try {
+    if (!kaart || mk.nieuw) {
+      const blob = await snijFoto();
+      if (!blob) throw new Error("geen beeld");
+      await Beeld.zet(id, blob);
+      if (beelden.has(id)) URL.revokeObjectURL(beelden.get(id));
+      beelden.set(id, URL.createObjectURL(blob));
+    }
+  } catch (e) {
+    nudge(knop); keurMaker();
+    return;
+  }
+  if (kaart) kaart.woord = woord;
+  else eigen.kaarten.push({ id: id, woord: woord, laatst: 0 });
+  bewaarEigen();
+  /* Safari wist de gegevens van een site in een tabblad na zeven dagen
+     zonder bezoek. Vragen kost niets; een geïnstalleerde app heeft het niet
+     nodig. */
+  if (!persistGevraagd && navigator.storage && navigator.storage.persist) {
+    persistGevraagd = true;
+    navigator.storage.persist().catch(() => {});
+  }
+  mk = null;            // bewaard: geen klad
+  sluitMaker();
+  paintEigen();
+  const tegel = $(`#eigenRij .eigen-tegel[data-id="${id}"]`);
+  if (tegel) {
+    tegel.scrollIntoView({ block: "nearest", inline: "nearest" });
+    if (!kaart && !stilAan() && tegel.animate)
+      tegel.animate([{ transform: "scale(.6) rotate(-6deg)" }, { transform: "none" }],
+                    { duration: 280, easing: curve("los") });
+  }
+});
+
+/* Weggooien kost twee tikken, geen lange druk: die is in dit spel alleen
+   voor stoppen. De eerste tik maakt er een inktknop van die het vraagt. */
+$("#mkWeg").addEventListener("click", () => {
+  const b = $("#mkWeg");
+  if (!mk || !mk.kaart) return;
+  if (!b.classList.contains("zeker")) {
+    b.classList.add("zeker"); b.textContent = "Echt weg? Tik nog eens";
+    return;
+  }
+  const id = mk.kaart.id;
+  eigen.kaarten = eigen.kaarten.filter(k => k.id !== id);
+  bewaarEigen();
+  if (beelden.has(id)) { URL.revokeObjectURL(beelden.get(id)); beelden.delete(id); }
+  Beeld.weg(id).catch(() => {});
+  mk = null;
+  sluitMaker();
+  paintEigen();
+  $("#btnEigenNieuw").focus({ preventScroll: true });
+});
+$("#mkDicht").addEventListener("click", sluitMaker);
+/* Het waas naast het paneel sluit ook, zoals bij terugkijken. */
+$("#maker").addEventListener("click", e => { if (e.target === $("#maker")) sluitMaker(); });
 
 $("#tierChips").addEventListener("click", e => {
   const c = e.target.closest(".chip"); if (!c) return;
@@ -3973,6 +4575,14 @@ function newGame() {
      geloot; de worp op het overdrachtscherm (tossTeams) toont alleen de
      uitkomst. */
   G = Spel.nieuw(drawDeck(settings.tier, settings.size), settings.secs);
+  /* De eigen kaarten in deze greep zijn nu gespeeld: de volgende keer gaan
+     de andere voor (Spel.eigenGreep). */
+  const nu = Date.now();
+  G.deck.forEach(c => {
+    const k = eigen.kaarten.find(k => k.id === Spel.eigenId(c));
+    if (k) k.laatst = nu;
+  });
+  bewaarEigen();
   // Alleen de allereerste overdracht van een potje toont de worp; bij een
   // rondewissel is allang bekend wie er speelt.
   tossPending = true;
@@ -4584,7 +5194,7 @@ function nextCard(how) {
 }
 function paintCard(how) {
   if (G.card === null) return;
-  $("#glyph").textContent = G.deck[G.card][0];
+  zetTeken($("#glyph"), G.deck[G.card]);
   $("#cardWord").textContent = G.deck[G.card][1];
   if (how) {
     const c = $("#card");
@@ -5910,11 +6520,11 @@ $("#hoCards").addEventListener("click", () => {
   const frag = document.createDocumentFragment();
   G.pile.map(i => G.deck[i])
     .sort((a, b) => a[1].localeCompare(b[1], "nl"))
-    .forEach(([e, w]) => {
+    .forEach(kaart => {
       const d = document.createElement("div");
       d.innerHTML = "<span></span><small></small>";
-      d.querySelector("span").textContent = e;
-      d.querySelector("small").textContent = w;
+      zetTeken(d.querySelector("span"), kaart);
+      d.querySelector("small").textContent = kaart[1];
       frag.appendChild(d);
     });
   const grid = $("#kijkGrid");
@@ -5935,6 +6545,7 @@ $("#kijk").addEventListener("click", sluitKijk);
 // Naast het paneel tikken is de veilige uitweg: verder spelen, nooit stoppen.
 $("#pauze").addEventListener("click", e => { if (e.target === $("#pauze")) closePause(); });
 document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && makerOpen()) { e.preventDefault(); sluitMaker(); return; }
   if (e.key === "Escape" && !$("#kijk").hidden) { e.preventDefault(); sluitKijk(); return; }
   if (e.key === "Escape" && !$("#pauze").hidden) { e.preventDefault(); closePause(); }
 });
@@ -6025,6 +6636,7 @@ addEventListener("popstate", () => {
    veeg niets (openPause() keert daar om); beter dan de app verlaten op de
    laatste tel. */
 function terug() {
+  if (makerOpen()) { sluitMaker(); return; }
   if (!$("#kijk").hidden) { sluitKijk(); return; }
   if (!$("#pauze").hidden) { closePause(); return; }
   if (current === "setup")  { show("title"); return; }
@@ -6271,11 +6883,18 @@ paintSetup();
    doet de eerste terugveeg daar niets. */
 backGuard = !!(history.state && history.state.tijd);
 
-const hervat = loadGame();
-if (hervat && hervat.mode === "uit") { G = hervat.G; winner(); }
-else if (hervat) { G = hervat.G; handoff(hervat.mode); }
-else show("title");
-started = true;
+/* Het herstel wacht op de eigen kaarten: pas dan is bekend welke kaarten
+   van een bewaard potje nog een beeld hebben. IndexedDB antwoordt in een
+   paar milliseconden; een toestel dat hangt, krijgt na een seconde gewoon
+   zijn potje (de kaarten zonder beeld vallen er dan bij de volgende start
+   uit). */
+Promise.race([eigenKlaar, new Promise(ok => setTimeout(ok, 1000))]).then(() => {
+  const hervat = loadGame();
+  if (hervat && hervat.mode === "uit") { G = hervat.G; winner(); }
+  else if (hervat) { G = hervat.G; handoff(hervat.mode); }
+  else show("title");
+  started = true;
+});
 
 // Alleen voor de tests: inkijk in de lopende stand (?debug in de URL).
 // stopClock en paintClock staan erbij om de klok op een gekozen stand te
@@ -6297,6 +6916,7 @@ if (location.search.indexOf("debug") !== -1) {
     Spel, DECKS, TIER_ORDER, poolFor, bakFor, canHide, MIN_BAK, shuffle, drawDeck, total,
     stopClock, paintClock, sizeCard, winner, Snd, Tril, toonInstall,
     saveGame, loadGame, clearGame, KEY_GAME, GAME_MAX_AGE,
+    get eigen() { return eigen; }, beelden, eigenKlaar, openMaker,
     // De lock op de overdracht is anders alleen te controleren door er drie
     // minuten voor te gaan zitten.
     get wake() { return wake; }, zetWakeMax(ms) { WAKE_MAX = ms; }

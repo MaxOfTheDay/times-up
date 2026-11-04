@@ -170,6 +170,41 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(!bak.nogEenMakkelijke, 'de ondergrens van 40 laat er tóch nog een makkelijke kaart uit');
   ok(bak.nogEenMoeilijke, 'de ondergrens houdt een moeilijke kaart tegen terwijl Makkelijk daar niet door krimpt');
 
+
+  /* ------------------------------------------------------------------
+   * Eigen kaarten, door de echte maker: een foto kiezen, het woord typen,
+   * bewaren. Daarna moet de kaart in een potje terechtkomen, de gewone
+   * kaart met hetzelfde woord verdringen, en op de kaart als foto staan.
+   * De regels zelf (het kwart, de rotatie) staan in test/kern.test.js.
+   * ------------------------------------------------------------------ */
+  // Een PNG van 2 bij 2 pixels: genoeg om te knippen en te bewaren.
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGP4z8DAwMDAxMDAwMDAAAANHQEDasKb6QAAAABJRU5ErkJggg==', 'base64');
+  await page.evaluate(() => window.__tijd.eigenKlaar);
+  await page.click('#btnGear');
+  await page.click('#btnEigenNieuw');
+  await page.setInputFiles('#mkBestand', { name: 'hond.png', mimeType: 'image/png', buffer: png });
+  await page.waitForFunction(() => document.querySelector('#mkVak').classList.contains('vol'));
+  await page.fill('#mkWoord', 'hond');
+  await page.click('#mkBewaar');
+  await page.waitForFunction(() => document.querySelectorAll('#eigenRij .eigen-tegel').length === 1);
+  const eigen = await page.evaluate(() => {
+    const T = window.__tijd;
+    const out = { lijst: T.eigen.kaarten.length, beeld: T.beelden.size, inPotje: 0, gewoneHond: 0 };
+    for (let i = 0; i < 50; i++) {
+      const greep = T.drawDeck('klein', 16);
+      if (greep.some(c => T.Spel.eigenId(c) !== null)) out.inPotje++;
+      if (greep.some(c => c[0] === '🐶')) out.gewoneHond++;
+    }
+    T.eigen.aan = false;
+    out.uit = T.drawDeck('klein', 16).some(c => T.Spel.eigenId(c) !== null);
+    T.eigen.aan = true;
+    return out;
+  });
+  ok(eigen.lijst === 1 && eigen.beeld === 1, 'de bewaarde eigen kaart staat niet in de lijst of heeft geen beeld');
+  ok(eigen.inPotje === 50, `de eigen kaart zat in ${eigen.inPotje} van de 50 potjes in plaats van in alle`);
+  ok(eigen.gewoneHond === 0, 'de gewone kaart "hond" komt nog in een potje terwijl er een eigen "hond" is');
+  ok(!eigen.uit, 'eigen kaarten op uit komen toch in een potje');
+
   await browser.close();
   if (fails.length) { console.log('\nFOUT:\n' + fails.map(f => ' - ' + f).join('\n')); process.exit(1); }
   console.log('  kaarten in orde');

@@ -2377,6 +2377,62 @@ huisje hangt. "89 in het spel · 1 weggelegd" verdween er half achter zodra
 je dat veld in beeld scrollde. Alles op dit scherm lijnt links uit, en dat
 is niet toevallig: rechtsboven is van de uitgang.
 
+## Eigen kaarten
+
+Er stond één zelfgemaakte kaart in `DECKS` (🦸 "Max H"), met de hand in de
+code gezet. Dat het spel van jullie is, is wat kinderen het hardst laat
+gieren: oma uitbeelden, of de hond. Eigen kaarten maken dat mogelijk zonder
+code: een foto en het woord, in Instellingen.
+
+- **Een kwart van het potje, de langst niet getrokken eerst.** Met de helft
+  zat na drie avonden steeds hetzelfde gezicht in elk potje en was oma geen
+  verrassing meer. Los erdoor schudden was het andere uiterste: bij 275
+  kaarten komt een eigen kaart dan bijna nooit, en daar maakte je haar niet
+  voor. `laatst` wordt gezet als de kaart getrokken wordt (`newGame`), dus
+  elke kaart komt aan de beurt.
+- **Aan en uit.** "Bobby" zegt een vriendje niets, en in ronde 2 en 3 kan
+  het die kaart niet raden. Dit is de enige plek waar het spel de regel
+  "één betekenis los van context" bewust loslaat, dus moet je die keuze
+  kunnen terugdraaien.
+- **Het woord wint van een gewone kaart.** Een foto van je eigen hond heet
+  "hond"; weigeren voelde als een fout van de app. De gewone kaart met dat
+  woord blijft uit het potje zolang de eigen bestaat. Twee eigen kaarten met
+  hetzelfde woord blijven geweigerd: dan weet niemand welke telt.
+- **Een kaart zonder beeld bestaat niet.** Een kaart met alleen een woord is
+  voor wie niet leest een lege kaart (de harde eis). Is een beeld weg, dan
+  gaat de kaart uit de lijst bij de start en uit de stapel van een bewaard
+  potje.
+- **De foto in kleur, met de inktlijn.** Emoji zijn al kleur, en een kind
+  herkent oma op een foto sneller dan op een gestileerde. De vier
+  `drop-shadow`s van `.glyph` leggen om een vierkante foto precies een rand
+  van 4 px: een tekening op de kaart, geen geplakt plaatje. Gedrukt in
+  rasterpunten paste beter bij het bord, maar op kaartmaat herken je er geen
+  gezicht meer in.
+- **Een rij die opzij schuift.** Veertig tegels onder elkaar zouden
+  Voorkeuren een scherm ver wegduwen. De plus staat vooraan, ook als de rij
+  leeg is: dat zegt meteen dat hier nog iets kan.
+- **Het paneel is de kaart.** Het beeld in het vierkant, het woord eronder,
+  op de plek waar het in het spel komt. Schuiven met één vinger, knijpen met
+  twee, en − en + voor wie dat niet doet. Het kruis staat rechtsboven op het
+  paneel en niet in de hoek van het scherm: daar viel het op 320 px over de
+  kaart. Liggend staat de kaart links en de rest rechts; onder elkaar past
+  het niet in 390 px hoog.
+- **Niets gaat verloren.** Wie per ongeluk op het kruis tikt of terugveegt,
+  vindt de niet bewaarde kaart terug bij de volgende tik op de plus. Geen
+  "weet je het zeker?": dat is een vraag in tekst. Weggooien kost twee tikken
+  (de knop wordt inkt en vraagt het), geen lange druk, want die is alleen
+  voor stoppen.
+- **Opslag.** De lijst in `localStorage`, de beelden als JPEG van 512 px
+  (zo'n 50 kB) in IndexedDB, hoogstens veertig. Safari wist de gegevens van
+  een site in een tabblad na zeven dagen zonder bezoek; daarom vraagt de
+  eerste bewaarbeurt `navigator.storage.persist()`. Een geïnstalleerde app
+  heeft daar geen last van. Zonder IndexedDB (een privévenster) staat het
+  veld er niet.
+- **Album en camera in één keuze.** `<input type="file" accept="image/*">`
+  biedt op een telefoon zowel het album als de camera aan. Wat de browser
+  niet kan lezen (HEIC op Android) wordt geweigerd zoals overal: het vierkant
+  schudt.
+
 ## Weggaan kost niets
 
 Android sluit de app bij de tweede terugveeg als er tussen de twee vegen
