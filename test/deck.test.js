@@ -196,8 +196,9 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     leeg: document.querySelector('#stEigen').classList.contains('leeg') }));
   ok(stapel.lade && stapel.tal === '1' && !stapel.leeg,
     `na bewaren staat de eigen lade niet open op de nieuwe kaart (${JSON.stringify(stapel)})`);
-  // Het potje: de knoppen van "Eigen kaarten erin" tellen voor deze maat,
-  // en de strook toont de ene eigen kaart vooraan.
+  // Het potje: de knoppen van "Waarvan eigen" tonen wat er echt in gaat
+  // (1, niet 3), een verzonken knop houdt zijn eigen getal, en de strook
+  // toont de ene eigen kaart vooraan.
   const potje = await page.evaluate(() => {
     window.__tijd.settings.size = 24;
     document.querySelector('#sizeChips [data-size="24"]').click();
@@ -207,7 +208,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
       vakken: document.querySelectorAll('#strook i').length,
       eigen: document.querySelectorAll('#strook i.eigen').length };
   });
-  ok(potje.zichtbaar && potje.knoppen === '0,3,6,12' && potje.vakken === 24 && potje.eigen === 1,
+  ok(potje.zichtbaar && potje.knoppen === '0,1,6,12' && potje.vakken === 24 && potje.eigen === 1,
     `het potje klopt niet met één eigen kaart bij 24 (${JSON.stringify(potje)})`);
   const eigen = await page.evaluate(() => {
     const T = window.__tijd;

@@ -2101,8 +2101,8 @@ terugveeg.
 Wie het tandwiel aantikt komt iets bijstellen voor het volgende potje. Vier
 groepen, elk één vraag:
 
-- **Potje**: hoe één potje gedeeld wordt. Kaarten per potje (met de strook),
-  Eigen kaarten erin, Tijd per beurt.
+- **Potje**: hoe één potje gedeeld wordt. Kaarten (met de strook), Waarvan
+  eigen, Tijd per beurt.
 - **Kaarten**: welke kaarten er bestaan. Moeilijkheid, met de kaartenbak
   (Gewone, Eigen) eronder.
 - **Deze telefoon**: Geluid, Trilling, installeren.
@@ -2112,7 +2112,7 @@ groepen, elk één vraag:
 Kaarten boven Potje. De toets die het oploste: verandert een veld wat er in
 de bak zit, of wat er in het potje van vanavond komt? Moeilijkheid filtert
 de bak (het plafond van de gewone kaarten), dus staat ze boven de stapel die
-ze verandert: tik Medium en Gewone wordt 183. "Eigen kaarten erin" haalt
+ze verandert: tik Medium en Gewone wordt 183. "Waarvan eigen" haalt
 geen kaart weg en legt er geen bij; het is de menging van de greep, net als
 24 kaarten, en staat onder de strook die ze tekent. Potje gaat voor: het
 heeft een vaste hoogte, en de lange laden van de bak liggen zo onderaan en
@@ -2122,17 +2122,30 @@ eerste scherm.
 Ook gewogen: Moeilijkheid in de lade van Gewone, met het niveau op de
 stapel. Logisch, maar een keuze die per avond verandert (wie speelt er mee)
 moet één tik zijn en als keuze te zien; achter een stapel leest "Gewone 90"
-als een telling, en elke wissel rolt 90 tot 275 kaarten uit. Eigen kaarten
-erin in de eigen lade: dan toont de strook een menging die je daar niet kunt
+als een telling, en elke wissel rolt 90 tot 275 kaarten uit. Waarvan eigen
+in de eigen lade: dan toont de strook een menging die je daar niet kunt
 veranderen.
 
 **Drie regels minder.** De telling van het potje staat op de regel van
-"Kaarten per potje" in plaats van eronder. De bak heeft geen eigen veldnaam:
+"Kaarten" in plaats van eronder. De bak heeft geen eigen veldnaam:
 de groepskop zegt Kaarten en de stapels noemen zichzelf. Geluid en Trilling
 zijn twee schakelaars op één rij (`role="switch"`, goud met een vinkje is
 aan) in plaats van twee regels met Aan en Uit; Installeren staat eronder als
 gewone knop, en alleen als er iets te installeren is. Voorkeuren en Deze app
 waren allebei over het toestel en stonden aan weerskanten van de regels.
+
+**Elk woord zegt iets nieuws.** "Kaarten" stond vier keer op het scherm, en
+onder de kop POTJE herhaalde "Kaarten per potje" de kop. Nu: Kaarten,
+Waarvan eigen, Tijd per beurt. "Waarvan eigen" hangt de tweede rij getallen
+aan de eerste; als "Eigen kaarten erin" las 0 3 6 12 onder 16 24 32 als een
+tweede maat. Geluid en Trilling dragen een teken (luidspreker, trillende
+telefoon) en verbleken als ze uit staan: twee gouden knoppen naast elkaar
+zijn op dit scherm wat "deze is gekozen" eruitziet, en dan las de rij als
+een keuze tussen de twee. De strook is één dunne rij van 26 px in plaats van
+twee rijen kaartjes (zo'n 80 px): ze toont de menging, niet wie erop staat.
+Gewone kaartjes zijn vlak en licht, zonder inktrand; een leeg vakje met een
+zwarte rand las als iets om in te vullen. Op 390x844 staan Potje,
+Moeilijkheid en beide stapels zo in het eerste scherm.
 
 Eerder stonden de regels bovenaan, open bij het eerste bezoek, en waren de
 spelknoppen verdeeld over "Welke kaarten" en "Hoe lang". Die grens ("wat
@@ -2492,12 +2505,15 @@ gieren: oma uitbeelden, of de hond. Eigen kaarten maken dat mogelijk zonder
 code: een foto of tekening en het woord, in Instellingen.
 
 - **Een deel van het potje, de langst niet getrokken eerst.** Je kiest 0,
-  ⅛, ¼ of ½ ("Eigen kaarten erin"), standaard ¼. Een deel en geen vast
+  ⅛, ¼ of ½ ("Waarvan eigen"), standaard ¼. Een deel en geen vast
   aantal: 4 van 16 is een kwart, 4 van 32 een achtste, en dan komt oma bij
-  het grote potje half zo vaak. Op de knoppen staat wel het aantal dat het
-  deel bij deze maat geeft (16: 0, 2, 4, 8; 24: 0, 3, 6, 12), en de strook
-  erboven toont het. Een knop die meer vraagt dan er zijn ligt verzonken,
-  behalve de eerste die ze allemaal neemt. Niet hoger dan de helft: met de
+  het grote potje half zo vaak. Op de knoppen staat wel het aantal dat er
+  echt in gaat (24 met tien eigen: 0, 3, 6, 10; met vijf: 0, 3, 5 en een
+  verzonken 12), en de strook erboven toont het. Stond er het aantal dat het
+  deel vraagt, dan was de gouden knop 6 terwijl de strook en de telling 5
+  zeiden. Een knop die meer vraagt dan er zijn ligt verzonken, behalve de
+  eerste die ze allemaal neemt; die verzonken knop houdt zijn eigen getal,
+  anders stonden er twee keer 5. Niet hoger dan de helft: met de
   helft zat na drie avonden steeds hetzelfde gezicht in elk potje en was oma
   geen verrassing meer. Los erdoor schudden was het andere uiterste: bij 275
   kaarten komt een eigen kaart dan bijna nooit, en daar maakte je haar niet
@@ -2506,7 +2522,7 @@ code: een foto of tekening en het woord, in Instellingen.
 - **Nul is uit.** "Bobby" zegt een vriendje niets, en in ronde 2 en 3 kan
   het die kaart niet raden. Dit is de enige plek waar het spel de regel
   "één betekenis los van context" bewust loslaat, dus moet je die keuze
-  kunnen terugdraaien: 0 bij "Eigen kaarten erin". Een aparte Aan/Uit
+  kunnen terugdraaien: 0 bij "Waarvan eigen". Een aparte Aan/Uit
   stond in de lade, ver van de vraag die er echt toe doet (hoeveel), en een
   oude Uit wordt bij het laden 0. Bij 0 wijken de beelden in de tegels en op
   de stapel terug, en staat "uit" bij het getal. Dat de kaarten op de
