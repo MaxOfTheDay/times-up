@@ -144,7 +144,6 @@
      van de klok hieronder. */
   --go:       #F2B705;  /* "dit, nu"                                (inkt erop, 10,3:1) */
   --good:     #2E9E5B;  /* vlak van de geraden-knop                (inkt erop,  5,5:1) */
-  --good-ink: #17693B;  /* hetzelfde groen, maar donker genoeg om tekst te dragen (5,7:1) */
 
   /* ---- de klok ----
      Eén ramp over drie standen: goud, gebrand, pruim. Pruim ligt ver van
@@ -517,17 +516,17 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 /* De ploeg, tijdens het aftellen: daar stond het anders alleen in de
    achtergrondkleur, en kleur staat hier nooit alleen. Papier eronder, want
    een mascotte in ploegkleur op een vlak in ploegkleur wordt een silhouet.
-   countdown() legt de tegel op de gemeten plek van .teamchip en de mascotte
-   op precies de gemeten maat, zodat ze bij het oplossen blijft staan. */
+   countdown() legt de tegel op de gemeten plek van .who en de mascotte op
+   precies de gemeten maat, zodat ze bij het oplossen blijft staan. */
 .cd-team {
   position: absolute;
   top: calc(env(safe-area-inset-top, 0px) + var(--corner));
   left: calc(env(safe-area-inset-left, 0px) + var(--corner));
+  width: var(--tap); height: var(--tap);
   display: grid; place-items: center;
-  padding: 7px;
   background: var(--paper); border: var(--line-2) solid var(--ink);
 }
-.cd-team svg { width: var(--tap); height: var(--tap); display: block; }
+.cd-team svg { width: 36px; height: 36px; display: block; }
 /* Met een ondergrens: liggend kromp de schijf op 24vh tot 94 px, kleiner dan
    de knop waar ze uit komt. */
 .cd-disc { position: relative; width: max(120px, min(46vw, 30vh, 190px)); aspect-ratio: 1; display: block; }
@@ -1399,32 +1398,57 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
    slagschaduw van de kaart de geraden-knop op een tablet. */
 #s-play { gap: var(--s-4); }
 
-/* Drie zones, elk met één vraag: links wie er speelt en wat hij al binnen
-   heeft, in het midden de opdracht, rechts hoe lang nog en de pauzeknop. */
+/* De grond is van de ploeg die speelt, zoals op de overdracht en het
+   aftellen: als de schijf opengaat verandert er niets behalve de kaart die
+   verschijnt. Vlak, zonder punten: "goed" is een cirkel, en op een
+   stippengrond zou elke geraden kaart rimpelen, tien keer per beurt naast de
+   kaart. Als de beurt of de ronde om is, trekt de kleur weg naar papier
+   (#s-play.over, #s-play.leeg), zodat de overdracht vanaf papier volstroomt
+   zoals altijd. Rechtstreeks naar de volgende ploeg mengt door paars, en paars
+   is al "nog vijf tellen". De overgang staat alleen op die toestand: terug
+   naar de ploegkleur gaat in één beeld, onder het aftellen. */
+#s-play { background: var(--team); }
+#s-play.over, #s-play.leeg {
+  background: var(--paper);
+  transition: background-color calc(var(--t-groot) * var(--dur)) var(--e-vloei);
+}
+
+/* Drie stukken, elk met één betekenis, en in de volgorde waarin je ze leest:
+   - links wie er speelt en wat die ploeg deze beurt binnenhaalde, als één
+     dubbele tegel (.who): de mascotte, een inktlijn, en het groene "+N";
+   - in het midden hoe je mag uitleggen (het rondeteken), alleen;
+   - rechts de klok en de knop die hem stilzet, ook als één dubbel stuk
+     (.klokknop): de seconden, een inktlijn, het pauzeteken.
+   Allemaal --balk hoog. Op het aftellen staan dezelfde drie op dezelfde
+   plekken (.cd-team, .cd-round, #cdBack), dus als de schijf opengaat blijft
+   alles liggen en verschijnen alleen de seconden in de knop.
+   Alle tekst in de balk staat op papier of op het groen van de buit, nooit op
+   de ploegkleur. */
 /* Deze balk raakt beide bovenhoeken; de hulpknop staat hier in de rij, dus
    telt de balk zelf het verschil met --corner op, links en rechts. */
 /* minmax(0, 1fr) en niet 1fr: een kale 1fr zakt niet onder zijn inhoud, en
    dan staat de ronde-tegel niet meer in het midden. */
 .play-top {
+  --balk: var(--tap);
   display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: start; gap: var(--s-3);
   padding: calc(var(--corner) - var(--s-4)) calc(var(--corner) - var(--s-4)) 0;
 }
-/* Mascotte met het "+N" rechts ernaast: dezelfde leesrichting als overal, en
-   het kost geen hoogte die van de kaart afgaat. */
 .play-top .who {
   justify-self: start;
-  display: flex; align-items: center; gap: var(--s-2);
-  max-width: 40vw;
+  display: flex; align-items: stretch;
+  height: var(--balk);
+  background: var(--paper); border: var(--line-2) solid var(--ink);
 }
 .play-top .roundchip { justify-self: center; }
-.play-top .turnbox { justify-self: end; }
+.play-top .klokknop { justify-self: end; }
 
 .teamchip {
-  width: 48px; height: 48px; display: grid; place-items: center;
+  width: calc(var(--balk) - 2 * var(--line-2)); height: 100%;
+  display: grid; place-items: center;
   flex: 0 0 auto;
 }
-.teamchip svg { width: 100%; height: 100%; }
+.teamchip svg { width: 86%; height: 86%; }
 
 /* De opdracht van deze ronde, alleen als pictogram: tijdens het spelen is de
    kaart het enige waar de speler iets mee moet. De drie rondes zijn
@@ -1436,27 +1460,36 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   flex: 0 0 auto;
 }
 .roundchip .ico {
-  width: 48px; height: 48px; display: grid; place-items: center;
+  width: var(--balk, 48px); height: var(--balk, 48px); display: grid; place-items: center;
   border: var(--line-2) solid var(--ink); background: var(--paper-2);
 }
-.roundchip .ico svg { width: 36px; height: 36px; }
+.roundchip .ico svg { width: 75%; height: 75%; }
 
-/* Rechts: de resterende seconden en daarnaast de pauzeknop, die daarmee in
-   de rechterbovenhoek uitkomt -- dezelfde hoek als op elk ander scherm. */
-.turnbox { display: flex; align-items: center; gap: var(--s-3); }
-
-/* Het rondepictogram is een vast vlak van 48 px zonder tekst, dus het
-   kritieke cijfer heeft ook op smalle telefoons zijn volle maat (op 320 px 8
-   px marge). .turnbox houdt --s-2 tussenruimte in plaats van --s-3; dat zijn
-   precies de 4 px die die marge maken. */
-@media (max-width: 340px) {
-  .turnbox { gap: var(--s-2); }
-}
-
-/* Op het spelscherm staat de pauzeknop in de balk mee in plaats van er
-   los overheen: zo dekte hij de seconden af. Hij komt daarmee op precies
-   dezelfde plek uit als op alle andere schermen. */
+/* De pauzeknop draagt de seconden: lezen en stilzetten gaan over dezelfde
+   klok, dus ze zijn één stuk. Hij blijft het enige in de balk met een
+   schaduw, dus het enige dat een knop lijkt, en zijn pauzeteken staat op
+   precies de plek van #cdBack op het aftellen. Het cijfer heeft een vast vak
+   (--digit-w), zodat de knop niet van breedte verandert als 10 naar 9 gaat. */
 #s-play .btn-icon { position: static; flex: 0 0 auto; }
+#s-play .klokknop {
+  width: auto; height: var(--balk);
+  display: flex; align-items: center;
+  padding: 0 calc((var(--tap) - 22px) / 2 - var(--line-2)) 0 var(--s-2);
+}
+.klokknop .secs-left {
+  height: 100%; place-items: center;
+  margin-right: calc((var(--tap) - 22px) / 2 - var(--line-2));
+  padding-right: var(--s-2);
+  border-right: var(--line-2) solid var(--ink);
+}
+/* Op 320 px past het breedste geval ("+12" met pijltje) niet naast een
+   rondeteken dat precies in het midden staat. Daar verdelen de drie stukken
+   de ruimte gelijk; het rondeteken schuift dan een paar pixels als de buit
+   opengaat. */
+@media (max-width: 340px) {
+  .play-top { display: flex; justify-content: space-between; gap: var(--s-2); }
+  .play-top .turn-gain { font-size: var(--fs-3); padding: 0 var(--s-1); }
+}
 
 /* Het waas op 82%: lichter liet de klokrand van de kaart naast het paneel
    uitsteken. De bovenbalk (ploeg en punten) blijft net leesbaar. */
@@ -1990,9 +2023,6 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
      kleiner dan de pauzeknop ernaast, terwijl hij de hoofdhandeling is. */
   .btn-go { width: min(30vw, 34vh, 150px); }
   #s-handoff { flex-direction: row; flex-wrap: wrap; gap: 3vw; }
-  /* De bovenbalk vreet op een laag scherm hoogte die de kaart nodig heeft. */
-  .teamchip, .roundchip .ico { width: 40px; height: 40px; }
-  .roundchip .ico svg { width: 30px; height: 30px; }
 
   /* Liggend staan de stand en de opdracht naast elkaar en is hoogte het
      schaarst. De mascotte van wie aan zet is krijgt een bovengrens in vh,
@@ -2034,8 +2064,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   .tally .sr svg { width: 26px; height: 26px; }
   .tally .sr b { font-size: var(--fs-4); }
   .side-by-side { max-width: 560px; gap: var(--s-3) var(--s-5); }
-  .teamchip, .roundchip .ico { width: 60px; height: 60px; }
-  .roundchip .ico svg { width: 46px; height: 46px; }
+  .play-top { --balk: 56px; }
   /* Op een tablet groeien stand en opdrachtvak mee, de stand altijd kleiner
      dan de kaart: de naslag hoort niet groter te staan dan waar de speler
      iets mee moet. */
@@ -2175,29 +2204,38 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
    label blijft klein, de tikzone niet. */
 #turnScore { transform-origin: 0% 50%; position: relative; cursor: pointer; }
 #turnScore::after { content: ""; position: absolute; inset: -14px -12px; }
-/* Zolang het punt terug kan, zegt het label dat zelf: onder het label een
-   pijltje dat omkeert, met een lont erachter die in TERUG_MS opbrandt. Is de
+/* Het groene vak van de dubbele tegel (.who): geen eigen rand, alleen de
+   inktlijn naar de mascotte. Het staat er pas vanaf de eerste geraden kaart;
+   de wip (gainPop, vanaf de linkerrand) is dan het opengaan van het vak.
+   Zolang het punt terug kan, zegt het vak dat zelf: een pijltje achter het
+   getal, en langs de onderrand een inktlont die in TERUG_MS opbrandt. Is de
    lont op, dan gaan ze allebei weg. Geen woord en geen eigen knop: het label
-   dat het punt gaf, neemt het terug. Eronder en niet ernaast, want op 320 px
-   breed raakt "+10" het rondetegeltje al bijna; tussen balk en kaart is
-   ruimte genoeg. Het donkere groen, omdat de lont op papier ligt. */
+   dat het punt gaf, neemt het terug. Alles binnen het groen, want op de
+   ploegkleur zou een lont verdwijnen. */
+.play-top #turnScore {
+  display: flex; align-items: center; gap: 3px;
+  border: 0; border-left: var(--line-2) solid var(--ink);
+  font-size: var(--fs-4); line-height: 1;
+  padding: 0 var(--s-2) 0 7px;
+}
+.play-top #turnScore[hidden] { display: none; }
 #turnScore .terug, #turnScore .lont { display: none; }
-#turnScore.kan-terug .terug {
-  display: block; position: absolute; width: 14px; height: 14px;
-  left: calc(-1 * var(--line-2)); top: calc(100% + var(--line-2) + 2px);
-}
+#turnScore.kan-terug .terug { display: block; width: 14px; height: 14px; flex: 0 0 auto; }
 #turnScore.kan-terug .lont {
-  display: block; position: absolute; left: 15px; right: calc(-1 * var(--line-2));
-  top: calc(100% + var(--line-2) + 7px); height: 4px;
-  background: var(--good-ink); transform-origin: 0 50%;
+  display: block; position: absolute; left: 0; right: 0; bottom: 0; height: 4px;
+  background: var(--ink); transform-origin: 0 50%;
 }
-#s-play.over #turnScore:not([hidden]) {
+/* De hele dubbele tegel groeit, niet het groene vak alleen: anders steekt
+   het vak boven en onder uit zijn eigen tegel. Vanuit de hoek, en over het
+   rondeteken heen als dat in de weg ligt (de beurt is toch om). */
+#s-play.over .play-top .who:has(#turnScore:not([hidden])) {
+  position: relative; z-index: 2; transform-origin: 0 0;
   animation: buit calc(var(--t-groot) / max(var(--dur), .001)) var(--e-los) calc(.15s / max(var(--dur), .001)) both;
 }
 @keyframes buit {
   0%   { transform: scale(1); }
-  55%  { transform: scale(1.7); }
-  100% { transform: scale(1.4); }
+  55%  { transform: scale(1.45); }
+  100% { transform: scale(1.25); }
 }
 /* De stapel is leeg: er ligt niets meer onder de kaart, het groene stempel
    valt erop, en de knoppen gaan uit zoals bij tijd-om. */
@@ -2749,8 +2787,8 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 
 <!-- =========================== SPEL ============================= -->
 <section class="screen" id="s-play">
-  <!-- Drie zones: wie er speelt met zijn fiches eronder, de opdracht in het
-       midden, en rechts hoe lang nog met de pauzeknop ernaast. -->
+  <!-- Drie stukken: wie er speelt met wat hij binnenhaalde, hoe je mag
+       uitleggen, en de klok met de knop die hem stilzet. Zie .play-top. -->
   <div class="play-top">
     <div class="who">
       <div class="teamchip"><svg id="plMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg></div>
@@ -2762,12 +2800,10 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
     <div class="roundchip" id="plRoundChip">
       <div class="ico"><svg viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
     </div>
-    <div class="turnbox">
-      <div class="secs-left" id="clockDigits">30</div>
-      <button class="btn-icon" id="btnPauze" aria-label="Pauze">
-        <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pauze"/></svg>
-      </button>
-    </div>
+    <button class="btn-icon klokknop" id="btnPauze" aria-label="Pauze">
+      <span class="secs-left" id="clockDigits" aria-hidden="true">30</span>
+      <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pauze"/></svg>
+    </button>
   </div>
 
   <div class="cardwrap">
@@ -4337,22 +4373,23 @@ function countdown(done) {
     }
   }
 
-  /* En van wie deze beurt is (zie .cd-team). Hier ligt het papier óm de
-     mascotte: zij krijgt precies de maat en plek van die op de balk, zodat ze
-     bij het oplossen blijft staan. De tegel is aan elke kant tien pixels
-     groter (7 px binnenmarge plus --line-2). */
-  const PAD = 7 + 3;
+  /* En van wie deze beurt is (zie .cd-team): de tegel op de gemeten plek
+     van de dubbele tegel op de balk (die hier nog alleen de mascotte draagt,
+     want de buit staat op nul), de mascotte op de maat van die op de balk.
+     Zo blijven ze allebei liggen als de schijf opengaat. */
   $("#cdMascot").firstElementChild.setAttribute("href", TEAMS[G.team].mascot);
-  const chipT = $(".teamchip"), tegelT = $(".cd-team");
-  if (chipT && tegelT) {
-    const c = chipT.getBoundingClientRect(), o = el.getBoundingClientRect();
+  const wieT = $(".play-top .who"), tegelT = $(".cd-team");
+  if (wieT && tegelT) {
+    const c = wieT.getBoundingClientRect(), o = el.getBoundingClientRect();
+    const m = $("#plMascot").getBoundingClientRect();
     if (c.width > 0) {
-      tegelT.style.left = (c.left - o.left - PAD) + "px";
-      tegelT.style.top = (c.top - o.top - PAD) + "px";
-      tegelT.style.width = (c.width + PAD * 2) + "px";
-      tegelT.style.height = (c.height + PAD * 2) + "px";
-      $("#cdMascot").style.width = c.width + "px";
-      $("#cdMascot").style.height = c.height + "px";
+      tegelT.style.left = (c.left - o.left) + "px";
+      tegelT.style.top = (c.top - o.top) + "px";
+      tegelT.style.width = c.width + "px";
+      tegelT.style.height = c.height + "px";
+      tegelT.style.padding = "0";
+      $("#cdMascot").style.width = m.width + "px";
+      $("#cdMascot").style.height = m.height + "px";
     }
   }
   /* De schijf begint waar de knop stond en stijgt daarna naar haar eigen

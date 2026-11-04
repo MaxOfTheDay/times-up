@@ -808,6 +808,33 @@ transform meer, en daarmee vervalt de coördinatenval bij `.cd-round` en
 zonder dat je op transform-invariantie hoeft te vertrouwen, en `sizeCard()`
 meet een kaart die stilstaat.
 
+### Het spelscherm in de ploegkleur
+
+Lang was de grond van `#s-play` papier, terwijl de overdracht en het
+aftellen in de ploegkleur stonden. De schijf ging dus open op crème, en op
+het enige scherm waar de tafel echt moet zien wie er speelt, stond de ploeg
+alleen nog in een mascotte van 48 px. De zin hierboven ("daar verandert de
+grond helemaal niet") klopte daardoor niet meer. Nu is de grond
+`var(--team)`, vlak (zie "Rasterpunten op de grond" voor waarom zonder
+punten), en is die zin weer waar: door het gat van de schijf zie je dezelfde
+kleur, met alleen de kaart erbij.
+
+Het einde moest daarvoor mee. De overdracht stroomt vol vanaf papier; vanaf
+een rode grond zou ze in één beeld naar papier springen. Rechtstreeks van
+rood naar blauw laten lopen is bekeken en afgewezen: de tussentint is paars,
+en paars (`--time-1`) betekent al "nog vijf tellen". Daarom trekt de kleur
+weg zodra het stempel valt (`#s-play.over` bij tijd om, `.leeg` bij een lege
+stapel): `--t-groot` lang, binnen de adem van `BEURT_ADEM`, en dan draait de
+kaart om zoals altijd. Het geeft de ploeg die klaar is ook haar eigen
+moment: de hele tafel ziet het vel leeglopen, ook wie niet naar de kaart
+kijkt. De overgang staat alleen op die eindtoestand; terug naar de
+ploegkleur gaat in één beeld, onder het aftellen. Bij beperkte beweging
+meteen papier.
+
+Een omdraai bij elke nieuwe kaart is ook bekeken en afgewezen: omdraaien
+betekent "dit is voorbij" (zie "Elke kaart draait om"), en per kaart zou de
+tekening tien tot twintig keer per beurt 140 ms weg zijn.
+
 ### Rasterpunten op de grond
 
 De ploegkleur op de overdracht was één vlak, en las daardoor als een
@@ -959,7 +986,13 @@ met dezelfde maten als ervoor: raster 12 px op het midden, straal 2 px op
   alleen dat beeld, zonder rimpel.
 
 Op het spelscherm en de instellingen liggen geen punten: het spelscherm
-moet rustig blijven, en de instellingen zijn voor de volwassene. Op de
+moet rustig blijven, en de instellingen zijn voor de volwassene. Op het
+spelscherm is dat gemeten en niet alleen gevoeld: in een live mock-up met
+punten in de ploegkleur rimpelde elke geraden kaart (de regel voor een
+cirkel op een stippengrond), en een rimpel duurt 2,1 s terwijl een goede
+ploeg elke 1 à 2 s tikt. In een reeks golfde de grond dus aan één stuk door
+naast de kaart, en het canvas tekende elk beeld opnieuw terwijl de kaart
+naar de teller vloog. Max koos de vlakke grond. Op de
 titel staan ze wel, als inkt op 11% (zie "Eén taal voor een druk"); een
 eerdere poging met papieren punten op papier las daar als vuil.
 
@@ -1369,8 +1402,8 @@ even voor je een korte naam pakt.
 
 ## Eén label voor "wat er bij komt", en nog maar één plek
 
-Wat je tijdens een beurt verzamelt is een groen `+N` met een inkt-contour
-(`.gain`), rechts van de mascotte in de balk. Het waren ooit twee dingen --
+Wat je tijdens een beurt verzamelt is een groen `+N` (`.gain`), als tweede
+vak van de mascotte-tegel in de balk (zie "De balk heeft drie stukken"). Het waren ooit twee dingen --
 een rij ploegkleurige fiches onder de mascotte tijdens het spelen, een groen
 label op het overdrachtscherm -- en die zijn toen tot één vorm gebracht: zelfde
 kleur, zelfde vorm, zelfde plek, zelfde leesrichting.
@@ -1423,6 +1456,57 @@ geraden kaart van deze beurt, tot zeven. Een reeks klinkt dan als klimmen,
 ook voor het kind dat staat uit te beelden en niet naar het scherm kijkt. Na
 zeven stopt het: een kwint hoger is nog vrolijk, een octaaf hoger is schel,
 en een goede ploeg haalt er twaalf.
+
+## De balk heeft drie stukken
+
+Met de ploegkleur als grond kreeg alles in de balk een papieren tegel, en
+toen stonden er vier losse vakjes van verschillende maat naast elkaar: de
+mascotte op 68 px, de ronde en pauze op 48, de seconden ertussen, en het
+`+N` los tussen mascotte en ronde. Uit vijf mock-ups (zonder seconden, vier
+gelijke tegels, de ronde als hoekteken op de kaart, ronde en seconden op één
+plaatje, en deze) koos Max de indeling naar betekenis:
+
+| Stuk       | Zegt                         | Werkt op      |
+|------------|------------------------------|---------------|
+| mascotte   | wie er speelt                | de ploeg      |
+| `+N`       | wat die ploeg binnenhaalde   | de ploeg      |
+| rondeteken | hoe je mag uitleggen         | wie uitlegt   |
+| seconden   | hoe lang nog                 | de klok       |
+| pauze      | zet de klok stil             | de klok       |
+
+Dat geeft drie stukken, links naar rechts in de volgorde waarin je ze leest:
+**wie** (`.who`: mascotte, inktlijn, groen vak), **hoe** (het rondeteken,
+alleen) en **de klok** (`.klokknop`: seconden, inktlijn, pauzeteken). De
+seconden staan dus in de knop die de klok stilzet, niet bij de ronde: lezen
+en stilzetten gaan over dezelfde klok.
+
+- **Twee vakken, één stuk.** De buit was een sticker op de hoek van de
+  mascotte-tegel, en dat was het enige stuk in de app dat over een ander lag:
+  het dekte de kin van de vos af en gaf de tegel een trapje in het silhouet.
+  Nu is het het tweede vak van dezelfde tegel, net als de seconden in de
+  klokknop. Het pijltje voor terugnemen staat achter het getal en de lont
+  loopt in inkt langs de onderrand van het groen: in donkergroen op de
+  ploegkleur verdween ze.
+- **Het vak gaat open bij de eerste geraden kaart.** Een `+0` vanaf het
+  begin is overwogen, zodat de tegel nooit van breedte verandert, maar dat
+  is een getal zonder nieuws op een plek waar het kind kijkt. De wip van de
+  landing (`gainPop`, vanaf de linkerrand) is nu het opengaan van het vak.
+- **De buit aan het eind groeit als hele tegel** (`buit` op `.who`, vanuit
+  de linkerbovenhoek). Groeide alleen het groene vak, dan stak het boven en
+  onder uit zijn tegel.
+- **Het aftellen ligt eronder.** `.cd-team` krijgt de gemeten rechthoek van
+  `.who` (waar de buit dan op nul staat), `.cd-round` die van het
+  rondeteken, en `#cdBack` staat op de hoek waar het pauzeteken van de
+  klokknop uitkomt. Als de schijf opengaat blijft alles liggen; alleen de
+  seconden verschijnen.
+- **Alleen de klokknop heeft lift**, dus alleen hij leest als knop. Het
+  cijfer houdt zijn vaste vak (`--digit-w`), zodat de knop niet versmalt als
+  10 naar 9 gaat.
+- **Op 320 px** past het breedste geval (`+12` met pijltje) niet naast een
+  rondeteken dat precies in het midden staat. Daar verdeelt `flex` de ruimte
+  gelijk en schuift het rondeteken een paar pixels als het vak opengaat.
+- Liggend krimpen de tegels niet meer tot 40 px: de klokknop is een knop en
+  houdt `--tap`, en de andere twee horen even hoog te zijn.
 
 ## Eén stand, twee schermen
 
