@@ -1690,7 +1690,20 @@ trager dan de weigering (`[20, 110, 20]` tegen `[20, 40, 20]`). De trilling
 voor een lege stapel komt ook in de laatste ronde: wie het toestel
 vasthoudt, voelt het, en de fanfare heeft er geen last van. Het feestritme
 valt niet meer weg bij beperkte beweging: trillen is geen beweging op het
-scherm, en er is een eigen aan/uit voor.
+scherm, en er is een eigen aan/uit voor. Het ritme loopt gelijk met het
+vuurwerk: een puls van 40 ms op elk van de vier uitbarstingen (0, 130, 260,
+390 ms, de noten van de fanfare) en een van 120 ms op de slotring (550 ms).
+Eerder was het in 0,3 s voorbij, terwijl het feest tot 0,55 s doorliep.
+
+**Een rimpel trilt niet.** Een trilling hoort bij een gebeurtenis, niet bij
+het beeld van een druk. Waar een rimpel een gebeurtenis draagt, trilt die al,
+op hetzelfde moment: elke tel van het aftellen (`Tril.tel()` met
+`telGolf()`), de schijf die opengaat (`Tril.go()`), het vuurwerk
+(`Tril.feest()`). De rest is spel: een tik op de grond, de landing van een
+dier op de titel, de golf achter een glijdende knop. Kinderen tikken daar
+twintig keer achter elkaar, en trillen kent alleen duur en ritme, met 20 ms
+als ondergrens; elke extra trilling maakt `tik` en `tel` minder te
+onderscheiden.
 
 **Geen muziek.** De raders moeten de uitbeelder horen, en de klok bouwt de
 spanning al op in de laatste tien seconden.

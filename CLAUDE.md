@@ -300,7 +300,9 @@ muziek. Elke cue moet op een telefoonluidspreker hoorbaar zijn: geen sinus
 onder 400 Hz als drager, meet met het telefoonmodel uit `docs/ontwerp.md`.
 De ploeg klinkt (`Snd.ploeg`) alleen waar de worp landt, waar een beurt of
 ronde overgaat (in `turnEnd`/`endRound`, niet in `handoff()`) en na de
-fanfare. Een trilling duurt minstens 20 ms.
+fanfare. Een trilling duurt minstens 20 ms. Een rimpel trilt niet: de
+trilling hoort bij de gebeurtenis (een tel, het startsein, het vuurwerk),
+niet bij het beeld van een druk.
 
 **App-pictogram en installeerbaarheid.** Het manifest wordt in het geheugen
 gebouwd (blob-URL) met een expliciete `id`, `start_url` en `scope`. De zin
