@@ -181,7 +181,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGP4z8DAwMDAxMDAwMDAAAANHQEDasKb6QAAAABJRU5ErkJggg==', 'base64');
   await page.evaluate(() => window.__tijd.eigenKlaar);
   await page.click('#btnGear');
-  await page.click('#btnEigenFoto');
+  await page.click('#btnEigenNieuw');
   await page.setInputFiles('#mkBestand', { name: 'hond.png', mimeType: 'image/png', buffer: png });
   await page.waitForFunction(() => document.querySelector('#mkVak').classList.contains('vol'));
   await page.fill('#mkWoord', 'hond');
