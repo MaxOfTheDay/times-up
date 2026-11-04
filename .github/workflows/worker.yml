@@ -1,0 +1,108 @@
+# Rolt de toverstaf (worker/tover.mjs) uit naar Cloudflare, en tekent op
+# verzoek een proefvel. Los van de app: GitHub Pages zet index.html neer, dit
+# zet alleen de Worker neer. Zonder het geheim CLOUDFLARE_API_TOKEN doet het
+# niets. Zie docs/ontwerp.md, Toveren.
+name: Toverstaf
+
+on:
+  push:
+    branches: [main]
+    paths: ['worker/**', '.github/workflows/worker.yml']
+  workflow_dispatch:
+    inputs:
+      proef:
+        description: 'Ook twintig proefwoorden tekenen (op de branch tover-proef)'
+        type: boolean
+        default: false
+
+concurrency:
+  group: toverstaf
+  cancel-in-progress: false
+
+jobs:
+  uitrollen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Is er een token?
+        id: token
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "Geen CLOUDFLARE_API_TOKEN: niets uit te rollen."
+            echo "er=nee" >> "$GITHUB_OUTPUT"
+          else
+            echo "er=ja" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Account en adres opzoeken
+        if: steps.token.outputs.er == 'ja'
+        id: account
+        run: |
+          id=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            https://api.cloudflare.com/client/v4/accounts | jq -r '.result[0].id')
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+          echo "CLOUDFLARE_ACCOUNT_ID=$id" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-node@v4
+        if: steps.token.outputs.er == 'ja'
+        with:
+          node-version: 22
+
+      - name: Uitrollen
+        if: steps.token.outputs.er == 'ja'
+        run: npx --yes wrangler@4 deploy --config worker/wrangler.toml
+
+      - name: Adres van de Worker
+        if: steps.token.outputs.er == 'ja'
+        id: adres
+        run: |
+          sub=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain" | jq -r '.result.subdomain')
+          echo "url=https://tijdisom-tover.$sub.workers.dev" >> "$GITHUB_OUTPUT"
+          echo "Adres: https://tijdisom-tover.$sub.workers.dev/teken"
+
+      # Een nieuw adres op workers.dev heeft soms even nodig.
+      - name: Proef met één woord
+        if: steps.token.outputs.er == 'ja'
+        env:
+          URL: ${{ steps.adres.outputs.url }}
+        run: |
+          for poging in 1 2 3 4 5 6; do
+            code=$(curl -sS -o uit.json -w '%{http_code}' -X POST "$URL/teken" \
+              -H 'Origin: https://maxoftheday.github.io' -H 'Content-Type: text/plain' \
+              --data '{"woord":"kameel"}' || echo 000)
+            echo "poging $poging: HTTP $code"
+            if [ "$code" = "200" ]; then break; fi
+            head -c 300 uit.json || true; echo
+            sleep 10
+          done
+          jq -r '"fout: \(.fout // "-")  en: \(.en // "-")  beeld: \((.beeld // "") | length) tekens"' uit.json
+          test "$code" = "200"
+
+      - name: Proefvel tekenen
+        if: steps.token.outputs.er == 'ja' && inputs.proef
+        env:
+          URL: ${{ steps.adres.outputs.url }}
+        run: |
+          mkdir -p proef
+          for w in kameel ridder brandweerauto oma luiaard regenboog taart fiets \
+                   olifant tractor kasteel dinosaurus zeemeermin raket pinguin \
+                   knuffel bank vulkaan sneeuwpop draak; do
+            curl -sS -X POST "$URL/teken" -H 'Origin: https://maxoftheday.github.io' \
+              -H 'Content-Type: text/plain' --data "{\"woord\":\"$w\"}" -o "proef/$w.json"
+            jq -r --arg w "$w" '"\($w): \(.en // .fout)"' "proef/$w.json" | tee -a proef/lijst.txt
+            jq -r '.beeld // empty' "proef/$w.json" | sed 's/^data:image\/jpeg;base64,//' | base64 -d > "proef/$w.jpg" || true
+            rm "proef/$w.json"
+            sleep 6
+          done
+          cd proef
+          git init -q -b tover-proef
+          git add .
+          git -c user.name='Toverstaf' -c user.email='actions@users.noreply.github.com' commit -qm "Proefvel $(date -u +%F)"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" tover-proef
