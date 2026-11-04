@@ -867,15 +867,35 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   font-size: var(--fs-3); font-weight: 700; letter-spacing: 0;
   margin: 0 0 10px; padding: 0; color: var(--ink);
 }
-/* Een aan/uit is één regel: de naam links, twee kleine knoppen rechts. Zo
-   weegt hij minder dan de keuzes erboven, die over het spel gaan. De legend
-   zweeft, anders tekent de browser hem als rand-onderschrift en lukt de
-   regel niet. */
-.field.rij { display: flex; align-items: center; justify-content: space-between; }
-.field.rij legend { float: left; margin: 0; }
-.field.rij .chips { flex-wrap: nowrap; }
-.field.rij .chips > .chip { flex: 0 0 auto; width: 76px; min-height: var(--tap); padding: 0; }
-.field.rij + .field.rij { margin-top: var(--s-3); }
+/* Een veldnaam met een uitkomst op dezelfde regel: de naam links, de
+   telling rechts in bijschrifttekst, de getallen in Fredoka. */
+.field legend.lg-tal {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--s-2); width: 100%; box-sizing: border-box;
+}
+.potje-tal { font-size: var(--fs-2); font-weight: 700; color: var(--ink-2); white-space: nowrap; }
+.potje-tal b { font-family: var(--font-display); color: var(--ink); }
+/* De strook: de greep als twee rijen kaartjes, de eigen kaarten vooraan
+   als foto. Geen schaduw: ze is een beeld van wat komt, geen stuk om op te
+   drukken. */
+.strook {
+  /* Hoogstens 28 px per kaartje: liggend werd de strook anders een
+     muur van 125 px hoog. */
+  display: grid; grid-template-columns: repeat(var(--kol, 12), minmax(0, 28px));
+  gap: var(--s-1); margin-bottom: var(--s-3);
+}
+.strook i {
+  display: block; aspect-ratio: 3 / 4; overflow: hidden;
+  border: 2px solid var(--ink); background: var(--paper);
+}
+.strook i.eigen img { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* Een keuze die meer vraagt dan er is: verzonken, zoals een weggelegde
+   kaart, en een tik schudt (nudge). */
+.chip.op {
+  background: var(--paper-2); border-color: var(--rule); color: var(--ink-2);
+  box-shadow: var(--lift-1) var(--lift-1) 0 var(--rule);
+}
+.chip.op:active { box-shadow: 0 0 0 var(--rule); }
 /* Geen flex-gap: gap telt bovenop de margin van een kind, en dan stond een
    kop verder van zijn eigen veld dan twee velden van elkaar. Expliciete
    marges: elk kind --s-6 van zijn voorganger, behalve vlak na een kop. */
@@ -888,14 +908,12 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
    halve tikhoogte wit onder zijn baan. */
 .field-group + .field-group,
 .field-group + .rules, .rules + .field-group { margin-top: var(--s-4); }
-/* Vier groepen, in de volgorde waarin je ze nodig hebt:
-     Spel -- alles wat het volgende potje verandert: moeilijkheid (met de
-       bak eronder, de fijne knop op hetzelfde ding), kaarten per potje,
-       tijd per beurt. Eén blok, want dit is waar je voor komt.
-     Voorkeuren -- geluid en trilling, van het toestel en niet van het spel;
-       aan/uit-regels, lichter dan de keuzes erboven.
+/* Vier groepen, elk één vraag:
+     Potje -- hoe één potje gedeeld wordt: kaarten per potje (met de
+       strook), eigen kaarten erin, tijd per beurt.
+     Kaarten -- welke kaarten er bestaan: moeilijkheid, met de bak eronder.
+     Deze telefoon -- geluid, trilling en installeren.
      Zo speel je -- de regels, met de vouwregel als groepskop.
-     Deze app -- installeren en delen.
 
    Zet hier nooit een #s-setup h2 naast: die wint op zijn ID, ongeacht de
    volgorde, en dan zien de groepskoppen eruit als veldlabels. Geen goud: dat
@@ -2813,9 +2831,68 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
          hetzelfde als de aria-label van het tandwiel. -->
     <h1>Instellingen</h1>
 
-    <!-- Wat je het vaakst bijstelt eerst; zie .group-head. -->
+    <!-- Twee vragen, twee groepen. POTJE: hoe één potje gedeeld wordt
+         (hoeveel kaarten, hoeveel eigen, hoe lang een beurt). KAARTEN: welke
+         kaarten er bestaan (de moeilijkheid filtert de bak, de bak legt weg
+         en maakt). POTJE eerst: vaste hoogte, en de lange laden van de bak
+         duwen zo niets weg. -->
     <div class="field-group">
-      <h2 class="group-head">Spel</h2>
+      <h2 class="group-head">Potje</h2>
+
+      <!-- "Per potje", niet "Aantal kaarten": de bak eronder telt ook kaarten
+           (90 tot 275), en dit is de greep (16, 24 of 32). De strook ís de
+           greep: één kaartje per kaart, de eigen kaarten als foto vooraan, en
+           de telling op de regel van de naam. Zo zie je wat je instelt. -->
+      <fieldset class="field">
+        <legend class="lg-tal">Kaarten per potje <span class="potje-tal" id="potjeTal"></span></legend>
+        <div class="strook" id="strook" aria-hidden="true"></div>
+        <div class="chips getal" id="sizeChips" role="radiogroup" aria-label="Kaarten per potje">
+          <button class="chip" role="radio" aria-checked="false" data-size="16">16
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-size="24">24
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-size="32">32
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+        </div>
+      </fieldset>
+
+      <!-- Een deel van het potje, geen vast aantal: 6 van 24 voelt als 8 van
+           32. Op de knoppen staat wel het aantal dat dat deel bij deze maat
+           geeft (paintEigenDeel). 0 is voor bezoek: "Bobby" zegt een vriendje
+           niets. Alleen als er eigen kaarten zijn. -->
+      <fieldset class="field" id="eigenDeelVeld" hidden>
+        <legend>Eigen kaarten erin</legend>
+        <div class="chips getal" id="eigenDeelChips" role="radiogroup" aria-label="Eigen kaarten per potje">
+          <button class="chip" role="radio" aria-checked="false" data-deel="0"><span class="n"></span>
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-deel="1"><span class="n"></span>
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-deel="2"><span class="n"></span>
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-deel="3"><span class="n"></span>
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+        </div>
+      </fieldset>
+
+      <!-- Dezelfde knoppen als de velden erboven: één tik, geen schuif. Een
+           bewaarde waarde ertussenin gaat naar de dichtstbijzijnde (load). -->
+      <fieldset class="field">
+        <legend>Tijd per beurt</legend>
+        <div class="chips getal" id="secsChips" role="radiogroup" aria-label="Seconden per beurt">
+          <button class="chip" role="radio" aria-checked="false" data-secs="20">20s
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-secs="30">30s
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-secs="45">45s
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-secs="60">60s
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="field-group">
+      <h2 class="group-head">Kaarten</h2>
 
       <fieldset class="field">
         <legend>Moeilijkheid</legend>
@@ -2839,8 +2916,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
            hem inzakken en legt zijn kaarten in de lade eronder; één lade
            tegelijk. De greep van een potje bestaat pas bij de start
            (newGame), dus wat je hier ziet kan niet verouderen. -->
-      <fieldset class="field bak" id="bakVeld">
-        <legend>Kaartenbak</legend>
+      <fieldset class="field bak" id="bakVeld" aria-label="Kaartenbak">
         <div class="stapels">
           <button class="stapel" id="stGewoon" aria-expanded="false" aria-controls="ladeGewoon">
             <span class="waaier" id="waaierGewoon" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -2879,16 +2955,9 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
              plus vooraan: veertig kaarten lopen naar beneden door, niet
              opzij uit beeld. Een tik op een tegel opent dezelfde maker. -->
         <div class="lade" id="ladeEigen" hidden>
-          <!-- Uit als er bezoek is: "Bobby" zegt een vriendje niets. -->
-          <div class="lade-kop">
-            <span id="eigenAanNaam">In elk potje</span>
-            <div class="chips" id="eigenAanChips" role="radiogroup" aria-labelledby="eigenAanNaam">
-              <button class="chip" role="radio" aria-checked="false" data-aan="1">Aan
-                <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-              <button class="chip" role="radio" aria-checked="false" data-aan="0">Uit
-                <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-            </div>
-          </div>
+          <!-- Waar je eigen kaarten zijn, staat waar je ze maakt. Hoeveel er in
+               een potje gaan, staat bij POTJE ("Eigen kaarten erin"). -->
+          <p class="hint">Tik op een kaart om ze aan te passen. Eigen kaarten blijven op deze telefoon.</p>
           <div class="cards eigen-rij" id="eigenRij">
             <button class="pv eigen-plus" id="btnEigenNieuw" aria-label="Nieuwe kaart">
               <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-plus"/></svg><small>Nieuw</small>
@@ -2896,100 +2965,27 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
           </div>
         </div>
       </fieldset>
-
-      <fieldset class="field">
-        <!-- "Per potje", niet "Aantal kaarten": de bak erboven telt ook
-             kaarten (90 tot 275), en dit is de greep (16, 24 of 32). -->
-        <legend>Kaarten per potje</legend>
-        <div class="chips getal" id="sizeChips" role="radiogroup" aria-label="Kaarten per potje">
-          <button class="chip" role="radio" aria-checked="false" data-size="16">16
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-          <button class="chip" role="radio" aria-checked="false" data-size="24">24
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-          <button class="chip" role="radio" aria-checked="false" data-size="32">32
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-        </div>
-      </fieldset>
-
-      <!-- Dezelfde knoppen als de twee velden erboven: één tik, geen schuif.
-           Een bewaarde waarde ertussenin gaat naar de dichtstbijzijnde (load). -->
-      <fieldset class="field">
-        <legend>Tijd per beurt</legend>
-        <div class="chips getal" id="secsChips" role="radiogroup" aria-label="Seconden per beurt">
-          <button class="chip" role="radio" aria-checked="false" data-secs="20">20s
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-          <button class="chip" role="radio" aria-checked="false" data-secs="30">30s
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-          <button class="chip" role="radio" aria-checked="false" data-secs="45">45s
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-          <button class="chip" role="radio" aria-checked="false" data-secs="60">60s
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-        </div>
-      </fieldset>
     </div>
 
+    <!-- Alles over dit toestel in één groep: geluid, trilling en de app op
+         het beginscherm. Geluid en Trilling zijn twee schakelaars op één rij
+         (goud met een vinkje is aan), geen twee rijen Aan/Uit. -->
     <div class="field-group">
-      <h2 class="group-head">Voorkeuren</h2>
+      <h2 class="group-head">Deze telefoon</h2>
 
-      <fieldset class="field rij">
-        <legend>Geluid</legend>
-        <div class="chips" id="soundChips" role="radiogroup" aria-label="Geluid">
-          <button class="chip" role="radio" aria-checked="false" data-sound="1">Aan
+      <fieldset class="field" aria-label="Geluid en trilling">
+        <div class="chips" id="toestelChips">
+          <button class="chip" role="switch" aria-checked="false" id="chipGeluid">Geluid
             <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-          <button class="chip" role="radio" aria-checked="false" data-sound="0">Uit
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-        </div>
-      </fieldset>
-
-      <!-- Los van Geluid: de helft van de reden om geluid uit te zetten is een
-           stil huis, en juist dan is een trilling in de hand het meest waard.
-           Staat alleen op toestellen die vibrate() kennen (zie paintSetup). -->
-      <fieldset class="field rij" id="hapticsField" hidden>
-        <legend>Trilling</legend>
-        <div class="chips" id="hapticsChips" role="radiogroup" aria-label="Trilling">
-          <button class="chip" role="radio" aria-checked="false" data-haptics="1">Aan
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-          <button class="chip" role="radio" aria-checked="false" data-haptics="0">Uit
+          <!-- Alleen op een toestel dat vibrate() kent (zie paintSetup). -->
+          <button class="chip" role="switch" aria-checked="false" id="chipTril" hidden>Trilling
             <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
         </div>
       </fieldset>
-    </div>
-
-    <!-- De regels zijn een groep op zich, met de vouwregel als kop. Open tot
-         je één keer een spel gestart hebt: wie ze nooit zag (een oppas, een
-         opa) krijgt ze wel, de rest ziet één regel. Onder de knoppen, want
-         wie het tandwiel aantikt komt iets bijstellen. -->
-    <details class="rules" id="rules">
-      <summary>Zo speel je</summary>
-      <!-- De enige plek waar de ploegen bij naam én dier staan: dit is het
-           scherm van de volwassene. Het dier ernaast koppelt de naam aan het
-           beeld op de stand. -->
-      <p>Twee ploegen — <b class="teamname">Vos<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-vos"/></svg></b>
-        en <b class="teamname">Uil<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-uil"/></svg></b> —
-        spelen 3 rondes met dezelfde kaarten:</p>
-      <ol>
-        <li><b>Omschrijven</b> — alles mag, behalve het woord zelf.</li>
-        <li><b>Eén woord</b> — geef precies één woord als hint.</li>
-        <li><b>Uitbeelden</b> — niet praten.</li>
-      </ol>
-      <p>Goed geraden: <b>1 punt</b>. Passen mag. Is de stapel leeg, dan
-        begint de andere ploeg de volgende ronde.</p>
-      <p>Te vroeg op goed getikt? Tik op het groene <b>+</b>-getal bovenaan.</p>
-      <p>Eigen kaarten blijven op deze telefoon.</p>
-    </details>
-
-    <!-- De vierde groep, de enige die niet over het spel gaat. Onderaan, want
-         wie het tandwiel aantikt komt de moeilijkheid of de tijd bijstellen,
-         niet installeren. De prijs is één veeg scrollen; daarom blijft de
-         knop een echte knop met plaat -- verplaats het óf verzwak het, nooit
-         allebei. De kop hoort bij de groep: toonInstall() verbergt de hele
-         groep als er niets te tonen is. -->
-    <div class="field-group" id="appGroup" hidden>
-      <h2 class="group-head">Deze app</h2>
 
       <!-- Geen lange druk: installeren is niets onomkeerbaars. Op iOS staat
            de weg via het deelmenu er als eigen stand (#installHand). -->
-      <div class="field" id="installField">
+      <div class="field" id="installField" hidden>
         <!-- De knop verschijnt op het signaal van het toestel en verdwijnt
              pas als er echt geïnstalleerd is. "Installeren" en niet "App
              installeren": de kop zegt al welke app. -->
@@ -3023,6 +3019,28 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
         <p class="hint" id="installHint"></p>
       </div>
     </div>
+
+    <!-- De regels zijn een groep op zich, met de vouwregel als kop. Open tot
+         je één keer een spel gestart hebt: wie ze nooit zag (een oppas, een
+         opa) krijgt ze wel, de rest ziet één regel. Onder de knoppen, want
+         wie het tandwiel aantikt komt iets bijstellen. -->
+    <details class="rules" id="rules">
+      <summary>Zo speel je</summary>
+      <!-- De enige plek waar de ploegen bij naam én dier staan: dit is het
+           scherm van de volwassene. Het dier ernaast koppelt de naam aan het
+           beeld op de stand. -->
+      <p>Twee ploegen — <b class="teamname">Vos<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-vos"/></svg></b>
+        en <b class="teamname">Uil<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-uil"/></svg></b> —
+        spelen 3 rondes met dezelfde kaarten:</p>
+      <ol>
+        <li><b>Omschrijven</b> — alles mag, behalve het woord zelf.</li>
+        <li><b>Eén woord</b> — geef precies één woord als hint.</li>
+        <li><b>Uitbeelden</b> — niet praten.</li>
+      </ol>
+      <p>Goed geraden: <b>1 punt</b>. Passen mag. Is de stapel leeg, dan
+        begint de andere ploeg de volgende ronde.</p>
+      <p>Te vroeg op goed getikt? Tik op het groene <b>+</b>-getal bovenaan.</p>
+    </details>
   </div>
 
   <!-- Rechtsboven, waar op elk ander scherm ook de uitgang zit -- en waar
@@ -3396,9 +3414,19 @@ const Spel = (() => {
      beeld zelf woont buiten de spelkern, in IndexedDB. Het voorvoegsel kan
      geen emoji zijn (een emoji begint nooit met een letter). */
   const EIGEN = "eigen:";
-  /* Een kwart van de greep, niet meer: met de helft zaten na drie avonden
-     steeds dezelfde gezichten in elk potje. */
-  const EIGEN_DEEL = 4;
+  /* Welk deel van de greep eigen kaarten mogen zijn: de volwassene kiest
+     uit deze vier (Instellingen, "Eigen kaarten erin"). Een deel en geen
+     vast aantal: zo voelt het potje hetzelfde bij 16 als bij 32 kaarten. Een
+     kwart is de standaard; met de helft zaten na drie avonden steeds
+     dezelfde gezichten in elk potje, dus hoger dan de helft gaat het niet. */
+  const EIGEN_DELEN = [0, 1 / 8, 1 / 4, 1 / 2];
+  const EIGEN_DEEL = 1 / 4;
+  /* Hoeveel eigen kaarten een greep van deze maat krijgt bij dit deel, als
+     er genoeg zijn: 16 geeft 0, 2, 4 of 8; 24 geeft 0, 3, 6 of 12. */
+  function eigenAantal(size, deel) {
+    const d = EIGEN_DELEN.indexOf(deel) === -1 ? EIGEN_DEEL : deel;
+    return Math.round(size * d);
+  }
   function eigenId(kaart) {
     return typeof kaart[0] === "string" && kaart[0].indexOf(EIGEN) === 0
       ? kaart[0].slice(EIGEN.length) : null;
@@ -3406,8 +3434,8 @@ const Spel = (() => {
   /* Welke eigen kaarten in dit potje gaan: de kaarten die het langst niet
      kwamen eerst (laatst = wanneer ze voor het laatst getrokken werden, 0 is
      nooit), bij gelijke stand door het lot. Zo komt elke kaart aan de beurt. */
-  function eigenGreep(eigen, size, rnd) {
-    const n = Math.min(eigen.length, Math.floor(size / EIGEN_DEEL));
+  function eigenGreep(eigen, size, rnd, deel) {
+    const n = Math.min(eigen.length, eigenAantal(size, deel));
     return shuffle(eigen, rnd)
       .sort((a, b) => (a.laatst || 0) - (b.laatst || 0))
       .slice(0, n);
@@ -3416,12 +3444,12 @@ const Spel = (() => {
      Eigen kaarten gaan voor: een gewone kaart met hetzelfde woord blijft uit
      het potje zolang de eigen kaart bestaat (een foto van je eigen hond heet
      "hond"). */
-  function drawDeck(decks, tier, size, hidden, rnd, eigen) {
+  function drawDeck(decks, tier, size, hidden, rnd, eigen, deel) {
     eigen = eigen || [];
     const woorden = new Set(eigen.map(k => k.woord.toLocaleLowerCase("nl")));
     const bak = bakFor(decks, tier, hidden)
       .filter(c => !woorden.has(c[1].toLocaleLowerCase("nl")));
-    const mijn = eigenGreep(eigen, size, rnd);
+    const mijn = eigenGreep(eigen, size, rnd, deel);
     if (!mijn.length) return shuffle(bak, rnd).slice(0, size);
     return shuffle(mijn.map(k => [EIGEN + k.id, k.woord])
       .concat(shuffle(bak, rnd).slice(0, size - mijn.length)), rnd);
@@ -3593,7 +3621,7 @@ const Spel = (() => {
   }
 
   return {
-    ROUNDS, TIER_ORDER, MIN_BAK, GAME_MAX_AGE, MIN_REST, EIGEN, EIGEN_DEEL,
+    ROUNDS, TIER_ORDER, MIN_BAK, GAME_MAX_AGE, MIN_REST, EIGEN, EIGEN_DEEL, EIGEN_DELEN, eigenAantal,
     shuffle, poolFor, bakFor, canHide, drawDeck, eigenId, eigenGreep, zonder,
     nieuw, total, over, beurtKlaar, beurtMs, trek,
     geraden, terug, passen, tijdOm, beurtWissel, rondeEinde, onderbreek,
@@ -3907,6 +3935,9 @@ let settings = {
   /* Los van geluid: wie het geluid uitzet om het huis stil te houden heeft
      een trilling in de hand juist het hardst nodig. */
   haptics: true,
+  /* Welk deel van het potje eigen kaarten zijn: een van Spel.EIGEN_DELEN
+     (0, 1/8, 1/4, 1/2). 0 is voor bezoek. */
+  eigenDeel: 1 / 4,
   /* De regeluitleg staat open tot je één keer een spel gestart hebt. Daarna
      klapt ze dicht en blijft dat, tenzij iemand haar zelf weer openzet. */
   rulesOpen: true,
@@ -3946,6 +3977,7 @@ function load() {
     delete settings.cardsOpen;
   }
   if (settings.lade !== "gewoon" && settings.lade !== "eigen") settings.lade = null;
+  if (Spel.EIGEN_DELEN.indexOf(settings.eigenDeel) === -1) settings.eigenDeel = Spel.EIGEN_DEEL;
   settings.hidden = settings.hidden.filter(w => typeof w === "string");
   // De tijd kiest uit vier knoppen. Een waarde ertussenin (van de schuif
   // die er vroeger stond, of een kapotte opslag) gaat naar de dichtstbijzijnde.
@@ -4002,7 +4034,7 @@ const poolFor = tier => Spel.poolFor(DECKS, tier);
 const bakFor = tier => Spel.bakFor(DECKS, tier, settings.hidden);
 const canHide = word => Spel.canHide(DECKS, settings.hidden, word);
 const drawDeck = (tier, size) =>
-  Spel.drawDeck(DECKS, tier, size, settings.hidden, undefined, eigenInSpel());
+  Spel.drawDeck(DECKS, tier, size, settings.hidden, undefined, eigenInSpel(), settings.eigenDeel);
 
 /* ==============================================================
    4. SCHERMEN
@@ -4065,15 +4097,14 @@ function show(name) {
 /* aria-checked in plaats van aria-pressed: dit zijn keuzes uit een rijtje,
    geen drie losse schakelaars die toevallig samen staan. Een schermlezer
    zei anders drie keer "knop, ingedrukt/niet ingedrukt" waar hij nu
-   "keuzerondje, 2 van 3" zegt. */
+   "keuzerondje, 2 van 3" zegt. Geluid en Trilling zijn wél losse
+   schakelaars (role="switch"), elk met zijn eigen aan of uit. */
 function paintSetup() {
-  $$("#soundChips .chip").forEach(c =>
-    c.setAttribute("aria-checked", String((c.dataset.sound === "1") === !!settings.sound)));
+  $("#chipGeluid").setAttribute("aria-checked", String(!!settings.sound));
   // Alleen tonen op een toestel dat vibrate() kent -- anders staat er een
   // knop die niets doet, en dat is precies wat de app nergens anders heeft.
-  $("#hapticsField").hidden = !Tril.supported;
-  $$("#hapticsChips .chip").forEach(c =>
-    c.setAttribute("aria-checked", String((c.dataset.haptics === "1") === !!settings.haptics)));
+  $("#chipTril").hidden = !Tril.supported;
+  $("#chipTril").setAttribute("aria-checked", String(!!settings.haptics));
   $$("#tierChips .chip").forEach(c =>
     c.setAttribute("aria-checked", String(c.dataset.tier === settings.tier)));
   $$("#sizeChips .chip").forEach(c =>
@@ -4084,6 +4115,57 @@ function paintSetup() {
   paintCards();
   paintEigen();
 }
+
+/* ==============================================================
+   HET POTJE
+   De strook is de greep: één kaartje per kaart, de eigen kaarten
+   vooraan als foto. Ze wordt pas bij Beginnen echt getrokken
+   (drawDeck), dus dit is wat er komt, niet welke kaarten. De knoppen
+   van "Eigen kaarten erin" dragen het aantal dat hun deel bij deze
+   maat geeft; een knop die meer vraagt dan er zijn, en waar de knop
+   ervoor er al allemaal neemt, ligt verzonken en schudt bij een tik.
+   ============================================================== */
+function eigenAantal() {
+  return Math.min(eigenInSpel().length, Spel.eigenAantal(settings.size, settings.eigenDeel));
+}
+function deelTeVeel(i) {
+  return i > 0 && Spel.eigenAantal(settings.size, Spel.EIGEN_DELEN[i - 1]) >= eigenInSpel().length;
+}
+function paintPotje() {
+  const n = settings.size, k = eigenAantal();
+  const mijn = eigenInSpel();
+  const strook = $("#strook");
+  strook.style.setProperty("--kol", n / 2);
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < n; i++) {
+    const vak = document.createElement("i");
+    if (i < k) {
+      vak.className = "eigen";
+      const img = document.createElement("img");
+      img.alt = ""; img.draggable = false;
+      img.src = beelden.get(mijn[i].id) || "";
+      vak.appendChild(img);
+    }
+    frag.appendChild(vak);
+  }
+  strook.textContent = "";
+  strook.appendChild(frag);
+  $("#potjeTal").innerHTML = (k ? "<b>" + k + "</b> eigen · " : "") + "<b>" + (n - k) + "</b> gewone";
+
+  $("#eigenDeelVeld").hidden = eigenStuk || !mijn.length;
+  $$("#eigenDeelChips .chip").forEach(c => {
+    const i = Number(c.dataset.deel);
+    c.querySelector(".n").textContent = Spel.eigenAantal(n, Spel.EIGEN_DELEN[i]);
+    c.setAttribute("aria-checked", String(Spel.EIGEN_DELEN[i] === settings.eigenDeel));
+    c.classList.toggle("op", deelTeVeel(i));
+  });
+}
+$("#eigenDeelChips").addEventListener("click", e => {
+  const c = e.target.closest(".chip"); if (!c) return;
+  const i = Number(c.dataset.deel);
+  if (deelTeVeel(i)) { nudge(c); return; }
+  settings.eigenDeel = Spel.EIGEN_DELEN[i]; saveSettings(); paintPotje(); paintEigen();
+});
 
 /* ==============================================================
    DE KAARTENBAK
@@ -4283,7 +4365,7 @@ $("#stEigen").addEventListener("click", () => {
 const KEY_EIGEN = "tijdisom.eigen";
 const EIGEN_MAX = 40;        // veertig foto's is zo'n 2 MB
 const EIGEN_PX = 512;        // zo groot wordt elke foto bewaard
-let eigen = { aan: true, kaarten: [] };   // kaarten: [{ id, woord, laatst }]
+let eigen = { kaarten: [] };   // kaarten: [{ id, woord, laatst }]
 const beelden = new Map();   // id -> object-URL van het bewaarde beeld
 let eigenStuk = false;       // geen IndexedDB (privévenster): veld weg
 
@@ -4328,16 +4410,19 @@ function laadEigenLijst() {
   try {
     const s = JSON.parse(localStorage.getItem(KEY_EIGEN) || "null");
     if (!s || typeof s !== "object") return;
-    eigen.aan = s.aan !== false;
+    // Er was een Aan/Uit; uit wordt het deel 0, en de schakelaar verdwijnt
+    // uit de opslag bij het volgende bewaren.
+    if (s.aan === false) { settings.eigenDeel = 0; saveSettings(); }
     if (Array.isArray(s.kaarten)) eigen.kaarten = s.kaarten
       .filter(k => k && typeof k.id === "string" && typeof k.woord === "string" && k.woord.trim())
       .map(k => ({ id: k.id, woord: k.woord, laatst: Number(k.laatst) || 0,
                    soort: k.soort === "tekening" ? "tekening" : "foto" }));
   } catch (e) { /* kapotte opslag: geen eigen kaarten */ }
 }
-/* Wat er van een potje mee mag doen: aan, en met een beeld. */
+/* Wat er van een potje mee mag doen: alles met een beeld. Hoeveel ervan,
+   beslist het deel (settings.eigenDeel, in Spel.drawDeck). */
 function eigenInSpel() {
-  return eigen.aan ? eigen.kaarten.filter(k => beelden.has(k.id)) : [];
+  return eigen.kaarten.filter(k => beelden.has(k.id));
 }
 const eigenWeg = id => !beelden.has(id);
 
@@ -4382,7 +4467,7 @@ function zetTeken(el, kaart) {
 /* ---- het veld in Instellingen ---- */
 function paintEigen() {
   $("#stEigen").hidden = eigenStuk;
-  if (eigenStuk) { paintLade(); return; }
+  if (eigenStuk) { paintLade(); paintPotje(); return; }
   const rij = $("#eigenRij");
   rij.querySelectorAll(".eigen-tegel").forEach(b => b.remove());
   eigen.kaarten.forEach(k => {
@@ -4397,14 +4482,12 @@ function paintEigen() {
   });
   const n = eigen.kaarten.length;
   $("#btnEigenNieuw").hidden = n >= EIGEN_MAX;
-  $("#eigenRij").classList.toggle("uit", !eigen.aan);
-  $$("#eigenAanChips .chip").forEach(c =>
-    c.setAttribute("aria-checked", String((c.dataset.aan === "1") === eigen.aan)));
+  $("#eigenRij").classList.toggle("uit", !settings.eigenDeel);
 
   /* De stapel: leeg een gestippelde plek met de plus, anders de eerste
      kaart bovenop, het getal, en "uit" als ze niet meedoen. */
   const st = $("#stEigen");
-  const uit = n > 0 && !eigen.aan;
+  const uit = n > 0 && !settings.eigenDeel;
   st.classList.toggle("leeg", !n);
   st.classList.toggle("uit", uit);
   st.setAttribute("aria-label", n
@@ -4424,12 +4507,8 @@ function paintEigen() {
     voor.appendChild(img);
   }
   paintLade();
+  paintPotje();
 }
-
-$("#eigenAanChips").addEventListener("click", e => {
-  const c = e.target.closest(".chip"); if (!c) return;
-  eigen.aan = c.dataset.aan === "1"; bewaarEigen(); paintEigen();
-});
 $("#btnEigenNieuw").addEventListener("click", () => openMaker(null));
 $("#eigenRij").addEventListener("click", e => {
   const b = e.target.closest(".eigen-tegel"); if (!b) return;
@@ -5107,16 +5186,14 @@ $("#secsChips").addEventListener("click", e => {
   const c = e.target.closest(".chip"); if (!c) return;
   settings.secs = Number(c.dataset.secs); saveSettings(); paintSetup();
 });
-$("#soundChips").addEventListener("click", e => {
-  const c = e.target.closest(".chip"); if (!c) return;
-  settings.sound = c.dataset.sound === "1";
+$("#chipGeluid").addEventListener("click", () => {
+  settings.sound = !settings.sound;
   Snd.enabled = settings.sound;
   saveSettings(); paintSetup();
   if (settings.sound) { Snd.unlock(); Snd.goed(); }   // even laten horen
 });
-$("#hapticsChips").addEventListener("click", e => {
-  const c = e.target.closest(".chip"); if (!c) return;
-  settings.haptics = c.dataset.haptics === "1";
+$("#chipTril").addEventListener("click", () => {
+  settings.haptics = !settings.haptics;
   Tril.enabled = settings.haptics;
   saveSettings(); paintSetup();
   if (settings.haptics) Tril.tik();   // even laten voelen
@@ -7490,7 +7567,7 @@ function toonInstall(stand) {
   const hint = INSTALL_HINT[stand] || "";
   $("#installHint").textContent = hint;
   $("#installHint").hidden = !hint;
-  $("#appGroup").hidden = stand === "weg";
+  $("#installField").hidden = stand === "weg";
 }
 
 /* Weggetikt is geen fout: de knop blijft dan gewoon staan, want delen is
