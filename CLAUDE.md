@@ -212,8 +212,9 @@ naar ploegkleur, en het spelscherm verandert van grond niet. Bij beperkte
 beweging geen vloed. De rasterpunten op die grond zijn papier op lage
 dekking (16%), geen eigen kleur, op één stilstaand raster van 12 px, getekend
 op één canvas per grond (`stipveld()`). Wat beweegt is rastertoon: een punt
-groeit, hij licht niet alleen op. Ze vervagen naar de kaart en bewegen
-alleen als iets ze indrukt (geen deining): een tik op de grond geeft een rimpel die de
+groeit, hij licht niet alleen op. Ze lopen van rand tot rand, zonder
+uitsparing: de stukken liggen erop (`opt.masker` is een haak, geen
+standaard). Ze bewegen alleen als iets ze indrukt (geen deining): een tik op de grond geeft een rimpel die de
 punten opzij duwt en terug laat veren: 12 px opzij en een punt tot ruim het
 dubbele, want minder leest op een telefoon als niets. Ze staan op de
 overdracht, het aftellen, de eindstand van wie won (in de ploegkleur, met
@@ -303,14 +304,18 @@ beweging heeft haar eigen eigenschap (`rotate`, `translate`, `scale`,
 `transform` voor `mascotte()`), om het punt op de rand. Zet er niets bij.
 De titel komt binnen zonder `screenIn`. Wie een dier aantikt, laat het wippen
 en het andere antwoordt (`wipOpRand()`); de landing van zo'n wip rimpelt de
-punten. Wat de dieren uit zichzelf doen, rimpelt niet.
+punten. Wat de dieren uit zichzelf doen, rimpelt niet. Een tik op de plaat
+zelf draait de zandloper meteen om (`draaiGlas()`, op `rotate`); de plaat
+zakt niet in en er komt geen rimpel.
 
 **Het instellingenscherm.** Vier groepen, in de volgorde waarin je ze nodig
-hebt: Spel (moeilijkheid met de bak, kaarten per potje, tijd), Voorkeuren
+hebt: Spel (moeilijkheid met de bak, kaarten per potje, tijd; alle drie
+rijen keuzeknoppen, geen schuif), Voorkeuren
 (aan/uit als één regel met twee kleine knoppen), Zo speel je (de vouwregel
 is de groepskop), Deze app. Drie lagen tekst: hoofdletters alleen voor de
 titel en de groepskoppen (klein, in `--ink-2`); veldnamen in inkt het luidst
-na de titel; keuzeknoppen op `--line-2`. Geen strepen onder koppen, en geen
+na de titel; keuzeknoppen op `--line-2`, getallen erin in Fredoka
+(`.chips.getal`). De systeemletter kent één vet: 700, nooit 800. Geen strepen onder koppen, en geen
 uitlegzin onder een knop die zichzelf uitlegt: minder is meer.
 
 ## Kaarten

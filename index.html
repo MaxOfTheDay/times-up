@@ -245,7 +245,7 @@
    kaart en de knoppen in hoofdletters. De chips en veldnamen niet; dat is
    zin-tekst voor de volwassene. */
 .wordmark h1, #s-setup h1, .group-head, .rules > summary,
-.cd-disc b, .secs, .roundcard b, .ho-count span, .mini-score b,
+.cd-disc b, .chips.getal > .chip, .roundcard b, .ho-count span, .mini-score b,
 .secs-left, .gain, .cardword, .kijk-grid small,
 .pv small, .tally .sr b, .tally .num, .btn-plain, .cb-index button {
   font-family: var(--font-display);
@@ -744,8 +744,10 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 /* De eerste draai valt vlak na binnenkomst, via een negatieve vertraging (de
    draai zit in de laatste 12% van 9 s). Onder #s-title.on en niet op het
    element zelf: show() zet die klasse opnieuw, dus de animatie herstart bij
-   elke binnenkomst. Het merk reageert niet op aanraking -- in deze app zegt
-   een vlak dat beweegt onder je vinger "ik ben een knop". */
+   elke binnenkomst. De plaat zelf reageert niet op aanraking -- in deze app
+   zegt een vlak dat inzakt onder je vinger "ik ben een knop" -- maar een tik
+   erop draait de zandloper meteen om (draaiGlas()), op `rotate`, zodat de
+   draai van de klok op `transform` vrij blijft. */
 #s-title.on > .wordmark > svg {
   animation: glasturn calc(9s / max(var(--dur), .001)) var(--e-vloei) infinite;
   animation-delay: calc(-7.4s / max(var(--dur), .001));
@@ -780,7 +782,6 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   .setup-scroll > h1,
   .setup-scroll .group-head,
   .setup-scroll legend,
-  .setup-scroll .legend-label,
   .setup-scroll .hint,
   .setup-scroll .handmatig,
   .setup-scroll summary,
@@ -828,7 +829,6 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   .setup-scroll > h1,
   .setup-scroll .group-head,
   .setup-scroll legend,
-  .setup-scroll .legend-label,
   .setup-scroll .hint,
   .setup-scroll .handmatig,
   .setup-scroll summary,
@@ -863,9 +863,9 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 /* Drie lagen tekst, niet vier: hoofdletters zijn voor de titel en de
    groepskoppen. Een veldnaam is gewone zin-tekst in inkt, zodat hij niet
    met zijn eigen groepskop wedijvert. */
-.field legend, .legend-label {
+.field legend {
   display: block;
-  font-size: var(--fs-3); font-weight: 800; letter-spacing: 0;
+  font-size: var(--fs-3); font-weight: 700; letter-spacing: 0;
   margin: 0 0 10px; padding: 0; color: var(--ink);
 }
 /* Een aan/uit is één regel: de naam links, twee kleine knoppen rechts. Zo
@@ -953,7 +953,7 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   position: relative;
   border: var(--line-2) solid var(--ink); background: var(--paper);
   box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
-  font-weight: 800; font-size: var(--fs-3); line-height: 1.2;
+  font-weight: 700; font-size: var(--fs-3); line-height: 1.2;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
 /* Gelijke delen, ook op 320 px: met flex op inhoudsbreedte sprong
@@ -969,22 +969,9 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 .chip .tick { display: none; position: absolute; bottom: var(--s-1); right: var(--s-1); width: 12px; height: 12px; }
 .chip[aria-checked="true"] .tick { display: block; }
 
-.veldkop { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3); }
-.veldkop .legend-label { margin-bottom: 0; }
-input[type=range] {
-  display: block; width: 100%; margin: 0; height: var(--tap); -webkit-appearance: none; appearance: none; background: none;
-}
-input[type=range]::-webkit-slider-runnable-track { height: 10px; background: var(--paper-2); border: var(--line-2) solid var(--ink); }
-input[type=range]::-moz-range-track { height: 10px; background: var(--paper-2); border: var(--line-2) solid var(--ink); }
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 34px; height: 34px; margin-top: -15px;
-  background: var(--go); border: var(--line) solid var(--ink); border-radius: 50%;
-}
-input[type=range]::-moz-range-thumb {
-  width: 34px; height: 34px; background: var(--go);
-  border: var(--line) solid var(--ink); border-radius: 50%;
-}
-.secs { font-weight: 900; font-size: var(--fs-4); text-align: right; font-variant-numeric: tabular-nums; }
+/* Getallen in een keuzeknop staan in Fredoka, zoals elk ander getal in de
+   app; de woorden op dit scherm blijven de systeemletter. */
+.chips.getal > .chip { font-size: var(--fs-4); }
 
 /* ============================================================
    DE KAARTENBAK — alle kaarten waar een potje uit getrokken kan worden.
@@ -1002,7 +989,7 @@ input[type=range]::-moz-range-thumb {
   list-style: none; cursor: pointer;
   display: flex; align-items: center; flex-wrap: wrap; gap: 2px var(--s-2);
   min-height: var(--tap);
-  font-size: var(--fs-2); font-weight: 800; color: var(--ink);
+  font-size: var(--fs-2); font-weight: 700; color: var(--ink);
 }
 .cardbox > summary::-webkit-details-marker { display: none; }
 .cardbox > summary::before {
@@ -1104,7 +1091,7 @@ input[type=range]::-moz-range-thumb {
   font-weight: 900; text-transform: uppercase; letter-spacing: var(--track-caps); font-size: var(--fs-2);
   color: var(--ink);
 }
-.hint { text-wrap: pretty; font-size: var(--type-note); color: var(--ink-2); margin: var(--s-2) 0 0; line-height: 1.45; }
+.hint { text-wrap: pretty; font-size: var(--fs-2); color: var(--ink-2); margin: var(--s-2) 0 0; line-height: 1.45; }
 
 /* ---- Installeren ------------------------------------------------------
    De plaat op de knop is de belofte zelf: dít vlak komt op het beginscherm te
@@ -1123,7 +1110,7 @@ input[type=range]::-moz-range-thumb {
    .hint, want de plaat is de mededeling en de zin het bijschrift. */
 .handmatig {
   display: flex; align-items: center; gap: var(--s-3);
-  margin: 0; font-size: var(--type-note); line-height: 1.45; color: var(--ink-2);
+  margin: 0; font-size: var(--fs-2); line-height: 1.45; color: var(--ink-2);
 }
 .handmatig .plaat { width: 40px; height: 40px; padding: 3px; }
 .handmatig b { color: var(--ink); font-weight: 900; }
@@ -1180,8 +1167,8 @@ input[type=range]::-moz-range-thumb {
    Eén canvas per grond (stipveld() in het script), op een stilstaand raster
    van 12 px dat op het midden is uitgelijnd. In rust is het een vlak
    punten; wat beweegt is rastertoon: een punt groeit en krimpt, zoals in
-   drukwerk, in plaats van alleen op te lichten. Ze vervagen naar de kaart
-   (op het aftellen naar de schijf), zodat er achter de tekst niets beweegt. */
+   drukwerk, in plaats van alleen op te lichten. Het raster loopt van rand
+   tot rand: de stukken zijn papier en liggen erop. */
 .stipveld {
   position: absolute; inset: 0; z-index: -1; pointer-events: none;
   width: 100%; height: 100%; display: block;
@@ -2566,7 +2553,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
         <!-- "Per potje", niet "Aantal kaarten": de bak erboven telt ook
              kaarten (90 tot 275), en dit is de greep (16, 24 of 32). -->
         <legend>Kaarten per potje</legend>
-        <div class="chips" id="sizeChips" role="radiogroup" aria-label="Kaarten per potje">
+        <div class="chips getal" id="sizeChips" role="radiogroup" aria-label="Kaarten per potje">
           <button class="chip" role="radio" aria-checked="false" data-size="16">16
             <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
           <button class="chip" role="radio" aria-checked="false" data-size="24">24
@@ -2576,15 +2563,21 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
         </div>
       </fieldset>
 
-      <!-- De waarde staat op de regel van de naam, zoals een keuze: de schuif
-           eronder krijgt de volle breedte. -->
-      <div class="field">
-        <div class="veldkop">
-          <label class="legend-label" for="secs">Tijd per beurt</label>
-          <span class="secs" id="secsOut" aria-live="polite">30s</span>
+      <!-- Dezelfde knoppen als de twee velden erboven: één tik, geen schuif.
+           Een bewaarde waarde ertussenin gaat naar de dichtstbijzijnde (load). -->
+      <fieldset class="field">
+        <legend>Tijd per beurt</legend>
+        <div class="chips getal" id="secsChips" role="radiogroup" aria-label="Seconden per beurt">
+          <button class="chip" role="radio" aria-checked="false" data-secs="20">20s
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-secs="30">30s
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-secs="45">45s
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-secs="60">60s
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
         </div>
-        <input type="range" id="secs" min="20" max="60" step="5" value="30">
-      </div>
+      </fieldset>
     </div>
 
     <div class="field-group">
@@ -3438,6 +3431,7 @@ const TEAMS = [
 ];
 const ROUNDS = Spel.ROUNDS;
 const KEY_SET  = "tijdisom.settings";
+const TIJDEN   = [20, 30, 45, 60];   // de knoppen van "Tijd per beurt"
 const KEY_GAME = "tijdisom.game";
 
 let settings = {
@@ -3480,6 +3474,10 @@ function load() {
   // woorden is, telt als "niets weggelegd".
   if (!Array.isArray(settings.hidden)) settings.hidden = [];
   settings.hidden = settings.hidden.filter(w => typeof w === "string");
+  // De tijd kiest uit vier knoppen. Een waarde ertussenin (van de schuif
+  // die er vroeger stond, of een kapotte opslag) gaat naar de dichtstbijzijnde.
+  const t = Number(settings.secs) || 30;
+  settings.secs = TIJDEN.reduce((a, b) => Math.abs(b - t) < Math.abs(a - t) ? b : a);
 }
 function saveSettings() {
   try { localStorage.setItem(KEY_SET, JSON.stringify(settings)); } catch (e) {}
@@ -3606,8 +3604,8 @@ function paintSetup() {
     c.setAttribute("aria-checked", String(c.dataset.tier === settings.tier)));
   $$("#sizeChips .chip").forEach(c =>
     c.setAttribute("aria-checked", String(Number(c.dataset.size) === settings.size)));
-  $("#secs").value = settings.secs;
-  $("#secsOut").textContent = settings.secs + "s";
+  $$("#secsChips .chip").forEach(c =>
+    c.setAttribute("aria-checked", String(Number(c.dataset.secs) === settings.secs)));
   $("#rules").open = !!settings.rulesOpen;
   $("#cardBox").open = !!settings.cardsOpen;
   paintCards();
@@ -3782,10 +3780,9 @@ $("#sizeChips").addEventListener("click", e => {
   const c = e.target.closest(".chip"); if (!c) return;
   settings.size = Number(c.dataset.size); saveSettings(); paintSetup();
 });
-$("#secs").addEventListener("input", e => {
-  settings.secs = Number(e.target.value);
-  $("#secsOut").textContent = settings.secs + "s";
-  saveSettings();
+$("#secsChips").addEventListener("click", e => {
+  const c = e.target.closest(".chip"); if (!c) return;
+  settings.secs = Number(c.dataset.secs); saveSettings(); paintSetup();
 });
 $("#soundChips").addEventListener("click", e => {
   const c = e.target.closest(".chip"); if (!c) return;
@@ -4396,9 +4393,8 @@ function countdown(done) {
   let last = COUNT_FROM;
   Snd.count(0);
   Tril.tel();
-  /* Eén grond. De kaart van de overdracht zakt in de punten en de punten
-     nemen haar plek in (het veld vloeit van het masker van de overdracht
-     naar dat van de schijf); de druk op de knop stuurt een rimpel vanaf de
+  /* Eén grond. De kaart van de overdracht zakt in de punten, die er al
+     die tijd onder lagen; de druk op de knop stuurt een rimpel vanaf de
      knop. Die rimpel is de eerste tel. Alleen als er net op de knop
      getikt is: na een afgebroken aftelling begint het gewoon. */
   const kopie = goKaart;
@@ -4411,7 +4407,7 @@ function countdown(done) {
     ], { duration: 450, easing: curve("uit"), fill: "forwards" });
     a.onfinish = a.oncancel = () => kopie.remove();
   }
-  veldCd.aan(!!kopie);
+  veldCd.aan();
   /* Na een tik heeft de vinger de knop net ingedrukt: de eerste tel is die
      druk, met zijn rimpel vanaf de knop. */
   if (kopie && goRect) veldCd.rimpel(goRect.x + goRect.w / 2, goRect.y + goRect.h / 2, 1.2, goRect.w / 2);
@@ -4898,7 +4894,6 @@ function balkMascotte() { return $("#plMascot"); }
    rastertoon: de punt groeit en wordt iets lichter, en de rimpel duwt hem
    ook even opzij. De grond beweegt alleen als iets hem indrukt: een vinger,
    een ronde knop, de klok van het aftellen of de fanfare.
-   - Vloeien: bij het aftellen nemen de punten de plek van de kaart in.
    - Rimpel: een golfpakket vanaf de vinger (of de schijf), twee ringen die
      uitdempen. De punten worden naar buiten geduwd en veren terug naar hun
      plek, zoals een steentje in water. Het veld rust nooit langer dan de
@@ -4907,15 +4902,14 @@ function balkMascotte() { return $("#plMascot"); }
    beeld is; in rust staat er één getekend beeld. Bij beperkte beweging
    alleen dat beeld. */
 function stipveld(cv, opt) {
-  /* Op ploegkleur papier op 16%; op papier (de titel, de worp) inkt op 7%.
+  /* Op ploegkleur papier op 16%; op papier (de titel, de worp) inkt op 11%.
      Per punt, want tijdens het onthullen ligt de grens midden in het veld.
      De laatste waarde is hoeveel lichter een punt wordt in de rimpel. */
   const INKT = [.11, "20, 17, 15", .16], PAPIER = [.16, "244, 235, 218", .45];
   const CEL = 12, R0 = 2, LEEF = 2100;
   const cx = cv.getContext("2d");
-  let W = 0, H = 0, punten = [], rimpels = [], raf = 0, vloei = -1e9;
+  let W = 0, H = 0, punten = [], rimpels = [], raf = 0;
   let inkt = !!opt.inkt, onthul = null;
-  const VLOEI = 500;
   function maat() {
     const r = cv.getBoundingClientRect();
     if (!r.width || !r.height) return false;
@@ -4928,14 +4922,16 @@ function stipveld(cv, opt) {
       /* Op het midden uitgelijnd, zoals background-position: center. */
       const x0 = W / 2 - CEL * Math.floor(W / 2 / CEL), y0 = H / 2 - CEL * Math.floor(H / 2 / CEL);
       for (let y = y0; y < H; y += CEL) for (let x = x0; x < W; x += CEL) {
-        const m = opt.masker(x, y, W, H), m0 = opt.vanMasker ? opt.vanMasker(x, y, W, H) : m;
-        if (m > .01 || m0 > .01) punten.push({ x, y, m, m0 });
+        /* Een vol bord: elk punt op volle dekking. opt.masker (0 tot 1 per
+           punt) blijft als haak voor wie later toch een verloop wil. */
+        const m = opt.masker ? opt.masker(x, y, W, H) : 1;
+        if (m > .01) punten.push({ x, y, m });
       }
     }
     return true;
   }
   function actief(nu) {
-    return nu - vloei < VLOEI || rimpels.some(r => nu - r.t < LEEF) || !!onthul;
+    return rimpels.some(r => nu - r.t < LEEF) || !!onthul;
   }
   /* Onthullen: de ploegkleur groeit als een cirkel uit de knop, en binnen die
      cirkel worden de punten papier. Klaar: de kleur staat op het scherm zelf,
@@ -4956,11 +4952,8 @@ function stipveld(cv, opt) {
       cx.fillStyle = onthul.kleur;
       cx.beginPath(); cx.arc(onthul.x, onthul.y, straal, 0, 6.2832); cx.fill();
     }
-    /* Vloeien: van het vorige masker naar het eigen, met een zachte uitloop. */
-    const v = 1 - Math.pow(1 - Math.min(1, Math.max(0, (nu - vloei) / VLOEI)), 3);
     for (const p of punten) {
-      const m = v >= 1 ? p.m : p.m0 + (p.m - p.m0) * v;
-      if (m < .01) continue;
+      const m = p.m;
       let golf = 0, ex = 0, ey = 0;
       /* De rimpel moet je zien als antwoord op je tik: 12 px opzij, een punt
          tot ruim het dubbele. Met 4,5 px las hij op een telefoon als niets. */
@@ -4990,10 +4983,9 @@ function stipveld(cv, opt) {
   function wek() { if (!raf) raf = requestAnimationFrame(stap); }
   window.addEventListener("resize", () => { if (opt.zichtbaar()) wek(); });
   return {
-    /* Het scherm komt in beeld: tekenen, en vloeien als het moet. */
-    aan(vloeien) {
+    /* Het scherm komt in beeld: tekenen. */
+    aan() {
       rimpels = [];
-      vloei = vloeien && opt.vanMasker && !stilAan() ? performance.now() : -1e9;
       wek();
     },
     rimpel(x, y, sterk, van) {
@@ -5016,35 +5008,21 @@ function stipveld(cv, opt) {
   };
 }
 
-/* Overdracht: leeg naar de kaart toe, zoals de ellips van 75% bij 60% op
-   (50%, 45%), van 40% tot de rand. */
-function maskerHo(x, y, W, H) {
-  const d = Math.hypot((x - W * .5) / (W * .75), (y - H * .45) / (H * .6));
-  return Math.max(0, Math.min(1, (d - .4) / .6));
-}
+/* Elke grond is een vol bord: de stukken liggen erop, en wat eronder ligt
+   zie je niet. Een rimpel loopt onder een kaart door en verdwijnt daar. */
 /* Titel: inkt op papier, want de titel is van allebei de ploegen. */
 const veldTi = stipveld($("#tiVeld"), {
   inkt: true,
-  zichtbaar: () => $("#s-title").classList.contains("on"),
-  masker: maskerHo
+  zichtbaar: () => $("#s-title").classList.contains("on")
 });
 const veldHo = stipveld($("#hoVeld"), {
-  zichtbaar: () => $("#s-handoff").classList.contains("on"),
-  masker: maskerHo
+  zichtbaar: () => $("#s-handoff").classList.contains("on")
 });
-/* Aftellen: leeg rond de schijf in het midden, van 110 tot 260 px. */
 const veldWn = stipveld($("#wnVeld"), {
-  zichtbaar: () => $("#s-winner").classList.contains("on"),
-  masker: maskerHo
+  zichtbaar: () => $("#s-winner").classList.contains("on")
 });
 const veldCd = stipveld($("#cdVeld"), {
-  zichtbaar: () => !$("#countdown").hidden,
-  /* Na een tik op de knop vloeit het veld vanaf het masker van de
-     overdracht, zodat de punten de plek van de kaart innemen. */
-  vanMasker: (x, y, W, H) => maskerHo(x, y, W, H),
-  masker(x, y, W, H) {
-    return Math.max(0, Math.min(1, (Math.hypot(x - W / 2, y - H / 2) - 110) / 150));
-  }
+  zichtbaar: () => !$("#countdown").hidden
 });
 
 /* De rimpel op de grond van de overdracht. Alleen een tik op de grond zelf,
@@ -5131,6 +5109,35 @@ function wipOpRand(g, n) {
     const voet = r.bottom - r.height * .24;          // de rand: 100% min --zak
     veldTi.rimpel(r.left + r.width / 2 - s.left, voet - s.top, n > 3 ? .7 : .45, r.width * .3);
   }, 265);
+}
+
+/* Een tik op de plaat draait de zandloper om: de klok is, met de vinger en
+   de dieren, het enige wat iets mag laten bewegen, en hier draait je vinger
+   haar. De plaat zelf blijft stil, dus ze belooft geen knop. Een halve draai
+   met vering op `rotate` (--t-groot, --e-los), vanaf waar de zandloper nu
+   staat, ook midden in een draai of in een vorige tik; daarna begint de
+   wachttijd van de klok opnieuw, zodat er niet meteen nog een draai volgt.
+   Geen rimpel (er landt niets op het bord) en geen geluid (elke klank heeft
+   al een betekenis). Een tik op Vos of Uil hoort bij hen. */
+const glas = $("#s-title .wordmark > svg");
+$("#s-title .wordmark").addEventListener("pointerdown", e => {
+  if (e.target.closest(".gluur")) return;
+  Snd.unlock();
+  if (!stilAan()) draaiGlas();
+});
+function draaiGlas() {
+  const cs = getComputedStyle(glas);
+  const m = new DOMMatrix(cs.transform === "none" ? undefined : cs.transform);
+  /* Het silhouet is puntsymmetrisch: alleen de stand binnen een halve draai telt. */
+  const nu = ((Math.atan2(m.b, m.a) * 180 / Math.PI) % 180 + 180) % 180 + (parseFloat(cs.rotate) || 0);
+  let doel = (Math.floor(nu / 180) + 1) * 180;
+  if (doel - nu < 90) doel += 180;
+  glas.getAnimations().forEach(a => {
+    if (a.animationName === "glasturn") a.currentTime = a.effect.getTiming().delay;
+    else a.cancel();
+  });
+  glas.animate([{ rotate: nu + "deg" }, { rotate: doel + "deg" }],
+    { duration: 450, easing: curve("los") });
 }
 
 /* De kaart als losse kopie, voor ze plaatsmaakt voor de volgende. Ze blijft

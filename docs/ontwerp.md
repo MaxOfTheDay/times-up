@@ -112,7 +112,7 @@ Kleur staat ook nooit alleen: elke toestand heeft er een tweede kanaal bij
 ### Goud is "dit, nu"
 
 De regel zei eerst dat goud "verdergaan" betekent, maar goud stond ook op de
-gekozen keuzeknop, de duim van de schuif, de ronde waarin je zit, de kroon en
+gekozen keuzeknop, de ronde waarin je zit, de kroon en
 de plaat onder het merk. Bij de audit van de hele vormtaal bleek dat geen
 verwarring maar één betekenis: goud is wat nu geldt, het ene uit een rij.
 De regel is herschreven naar wat er al stond; er is geen pixel veranderd.
@@ -819,8 +819,8 @@ punten werden een patroon om naar te kijken in plaats van een grond.
 Eerst waren ze inkt. Dat maakte de ploegkleur donker en een beetje vuil;
 papier licht hem op, zoals de witte punten op gedrukt karton, en het is
 geen nieuwe kleur: papier staat al overal op het scherm, en een
-donkerder ploegtint zou een derde "rood" of "blauw" zijn. Een masker laat
-ze naar het midden vervagen, zodat achter de kaart niets onrustigs ligt.
+donkerder ploegtint zou een derde "rood" of "blauw" zijn. Ze lopen van
+rand tot rand (zie "Een vol bord" hieronder).
 
 Het raster staat stil. Het schoof eerst traag, maar dan liepen de
 opzwellende punten van de deining en de rimpel (een tweede laag op een
@@ -845,7 +845,7 @@ het onrustig. Beide lagen liggen achter de kaart en de knop, en staan
 stil bij beperkte beweging.
 
 Ook op het aftellen, dat dezelfde ploeggrond heeft (`#countdown::before`),
-met het open midden rond de schijf. Daar gaat bij elke tel één ring vanuit
+Daar gaat bij elke tel één ring vanuit
 de schijf naar buiten (`#cdGolf`, `telGolf()`), op de maat van het tikje:
 drie, twee, een, ook te zien voor wie het geluid niet hoort.
 
@@ -875,10 +875,8 @@ aanraakte:
   eerste tel.
 - **De opdrachtkaart zakt in de grond**: een kopie op haar gemeten plek
   (`.cd-kaart`, in de klik-handler gemaakt, want een tel later is de kaart
-  weg) zakt 10 px en krimpt naar 94% terwijl ze in 0,42 s verdwijnt. Het
-  veld vloeit in 0,5 s van het masker van de overdracht naar dat van de
-  schijf (`vanMasker`), zodat de punten haar plek innemen en de grond niet
-  springt.
+  weg) zakt 10 px en krimpt naar 94% terwijl ze in 0,42 s verdwijnt. De
+  punten lagen er al die tijd onder, dus de grond springt niet.
 - **Op nul gaat de schijf open** (`.countdown.open`): een gat zo groot als
   de schijf groeit in 0,45 s uit tot het hele scherm, met een laatste ring.
   Door het gat ligt het spelscherm al klaar; `done()` draait meteen, dus er
@@ -949,15 +947,14 @@ gekozen.
 Dat kan niet met CSS-verlopen: elke punt krijgt een eigen maat en een eigen
 verschuiving. Het is nu één canvas per grond (`.stipveld`, `stipveld()`),
 met dezelfde maten als ervoor: raster 12 px op het midden, straal 2 px op
-16%, aanzwellend tot 3,3 px op 28%; het masker naar de kaart (overdracht,
-de ellips van 75% bij 60%) of naar de schijf (aftellen, 110 tot 260 px).
+16%, aanzwellend tot 3,3 px op 28%, van rand tot rand.
 
 - **Rimpel**: een golfpakket (een gaussische omhullende maal een cosinus)
   dat met 360 px/s uitloopt en uitdempt. De positieve kant laat de punten
   groeien; het hele pakket duwt ze tot 4,5 px opzij, dus naar buiten en
   daarna terug. Op het aftellen sterkte 0,6, vanaf de rand van de schijf.
 - **Zuinig**: er loopt alleen een `requestAnimationFrame`-lus zolang er een
-  rimpel onderweg is (of het veld van het aftellen vloeit) en de grond in
+  rimpel onderweg is (of een onthulling loopt) en de grond in
   beeld is. Daarbuiten staat er één getekend beeld. Bij beperkte beweging
   alleen dat beeld, zonder rimpel.
 
@@ -981,6 +978,30 @@ oorzaak die je net zag of voelde. Het rondeteken op de overdracht speelt
 zijn regel twee keer voor als het scherm binnenkomt (`paintRound()` zet het
 opnieuw neer) en staat daarna stil. Vergeleken in een live mock-up naast de
 oude versie; Max koos deze.
+
+### Een vol bord
+
+De punten vervaagden naar het midden: één ellips (75% bij 60% op 45% van de
+hoogte), gemaakt voor de opdrachtkaart en ongewijzigd overgenomen op de
+titel en de eindstand; op het aftellen een vaste ring van 110 tot 260 px om
+het midden van het scherm. Geen van die uitsparingen volgde wat er op het
+scherm lag, en daarom oogde de lege plek willekeurig. Liggend was het het
+duidelijkst: op de overdracht een lege band tussen kaart en knop, op het
+aftellen bleven er twee stroken punten over aan de zijkanten. Bij beperkte
+beweging staat de schijf op de plek van de startknop, en lag het gat naast
+haar.
+
+De uitsparing kwam uit de tijd van de deining: achter de kaart mocht niets
+onrustigs bewegen. De deining is weg, en de kaart is ondoorzichtig papier;
+een rimpel die eronder doorloopt verdwijnt gewoon. Drie versies naast elkaar
+gezet, op echte opnames staand en liggend: de ellips, een vol bord, en een
+harde uitsparing van 18 px om elk stuk. Die laatste tekent een derde rand
+om elke kaart (zie "Papier heeft twee randen") en moet bij elke draai
+opnieuw gemeten worden. Max koos het volle bord. Daarmee verviel ook het
+vloeien van het ene masker naar het andere op het aftellen.
+
+`stipveld()` neemt nog een `masker` (0 tot 1 per punt) als iemand later
+toch een verloop wil; geen enkele grond gebruikt hem nu.
 
 ## Het titelscherm heeft twee dingen
 
@@ -1054,6 +1075,37 @@ deze vier, binnen de regel van twee dingen.
 Niet gedaan: een derde ding (verder spelen, een ploegkeuze, tekst) en een
 knop die uit zichzelf klopt. Alleen de vinger, de klok en de dieren laten
 iets bewegen.
+
+### Je vinger draait de zandloper
+
+Max vroeg of een tik op het merk ook iets moet doen. De plaat was het enige
+dode vlak op het scherm: een tik ernaast rimpelt de punten, een tik erop
+deed niets, en voor een kind leest het grootste ding op het scherm dan als
+kapot. Drie versies naast elkaar in een prototype: niets (zoals het was), de
+zandloper draait om, en Vos en Uil wippen allebei. Gekozen is de zandloper.
+
+- **De plaat blijft stil.** In deze app zegt een vlak dat onder je vinger
+  inzakt "ik ben een knop", en de plaat is er geen. Alleen de zandloper erin
+  beweegt.
+- **De klok draait, en jij draait haar.** Alleen de vinger, de klok en de
+  dieren laten iets bewegen; de zandloper is de klok. Ze draait al om de
+  negen seconden uit zichzelf om; een tik doet die draai meteen, sneller en
+  met vering (`draaiGlas()`, --t-groot, --e-los), en zet de wachttijd van de
+  klok terug op nul, zodat er niet vlak daarna nog een draai volgt.
+- **Vanaf waar ze staat.** Een tik midden in een draai, of in een vorige
+  tik, draait verder vanaf die stand naar de volgende halve draai (minstens
+  een kwart verder). De tik draait op `rotate`, de klok op `transform`, zodat
+  ze elkaar niet overschrijven; het silhouet is puntsymmetrisch, dus na elke
+  halve draai valt `rotate` weg zonder dat je iets ziet springen.
+- **Geen rimpel en geen geluid.** Een rimpel betekent dat er iets op het bord
+  drukte; de zandloper draait in de plaat en raakt de punten niet. Elke
+  klank heeft al een betekenis.
+
+Niet gedaan: de plaat laten inzakken (een knop die niets doet), het spel
+laten starten (twee knoppen voor één ding, en een kind dat de telefoon
+pakt start per ongeluk), de instellingen openen (die zijn voor de
+volwassene, achter het tandwiel), en beide dieren laten wippen (dat doet een
+tik op een dier al).
 
 ## Elke kaart draait om
 
@@ -1929,11 +1981,30 @@ hoofdletters scheidden een kop van een veld. Nu:
   moeilijkheid, geen eigen veld;
 - keuzeknoppen dragen `--line-2` (3 px) in plaats van de primaire contour,
   en zijn 52 px hoog: op dit scherm is geen enkele knop de hoofdhandeling;
-- de tijd staat als getal op de regel van de veldnaam, de schuif krijgt de
-  volle breedte eronder;
+- de tijd is een rij van vier keuzeknoppen (20, 30, 45, 60 s), net als
+  kaarten per potje (zie hieronder);
 - ritme: 24 px tussen velden, 40 tussen groepen, 8 tussen de bak en de
   moeilijkheid. Op 390x844 is het scherm 1013 px hoog (was 1228 vanochtend). Het scherm werd
 op 390x844 151 px korter (1228 naar 1077).
+
+**Drie keer dezelfde knop.** De tijd per beurt was een schuif van 20 tot 60
+in stappen van 5: het enige op dit scherm dat geen tegel was, met een ronde
+gouden duim op een scherm zonder hoofdhandeling, en een slepende vinger met
+negen standen waar elke andere keuze één tik is. De lege strook onder de baan
+zette Voorkeuren ook 64 px verder in plaats van de 48 tussen de andere
+groepen. Nu zijn het vier knoppen (`TIJDEN`: 20, 30, 45, 60), dezelfde als
+kaarten per potje: goud met een vinkje is gekozen, zoals overal. Een bewaarde
+waarde ertussenin gaat in `load()` naar de dichtstbijzijnde knop (35 wordt
+30, 50 wordt 45).
+
+**Eén vet in de systeemletter.** Veldnamen, keuzeknoppen en "Alle kaarten"
+stonden op 800, de vette woorden in de regels op 700. 800 is op een iPhone SF
+Heavy, maar Roboto had vóór Android 12 geen 800, en dan valt de browser door
+naar Black (900): dezelfde veldnaam was per toestel anders zwaar, en altijd
+zwaarder dan het vet in de regels. Alles staat nu op 700, die elk toestel
+heeft. De uitlegzinnen (`.hint`, `.handmatig`) gingen van 13 naar 14 px
+(`--fs-2`), de maat van de regeltekst eronder; 13 stond als enige op dit
+scherm buiten de trap.
 
 ## Eén letter voor cijfers en koppen
 
@@ -1949,7 +2020,9 @@ lange woorden zoals OMSCHRIJVEN. Baloo 2 had een te hoge regel voor
 cijfers in een vak, Lilita One maar één dikte.
 
 **Waar hij staat.** Op wat je in één blik ziet: cijfers, koppen, het woord
-op de kaart, de rondenaam en knoppen in hoofdletters. Eén selectorlijst
+op de kaart, de rondenaam en knoppen in hoofdletters. Ook de getallen in een
+keuzeknop (`.chips.getal`: kaarten per potje en tijd per beurt), zodat 16,
+24 en 32 dezelfde letter hebben als elk ander getal in de app. Eén selectorlijst
 direct na `:root`, zodat je ziet wat erin zit. Niet op zin-tekst voor de
 volwassene (veldnamen, keuzeknoppen, uitleg): die leest beter in de letter
 van het toestel, en zou anders met de koppen wedijveren.
