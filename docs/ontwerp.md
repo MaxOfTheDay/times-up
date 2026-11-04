@@ -101,8 +101,7 @@ de overgedragen tijd én de startknop. Vijf betekenissen op één scherm.
 
 Het label groen maken haalde er één weg en liet er vier staan, en dát is de
 les die overblijft: **één instantie repareren brengt de telling niet omlaag.**
-Er staan er nu drie — de ronde-schijf, het merkteken van de ronde waar je in
-zit, en de startknop — doordat de kroon en de overgedragen tijd om hun eigen
+Er staan er nu twee — de ronde-schijf en de startknop — doordat de kroon en de overgedragen tijd om hun eigen
 redenen van dit scherm verdwenen zijn. Tel bij een nieuw element dus niet of
 díe kleur al iets betekent, maar hoe vaak ze op datzelfde scherm al staat.
 
@@ -483,7 +482,7 @@ twee wissels meetkundig gelijk: gemeten op 390 bij 844 een kaart van 343 bij
 - **beurtwissel** -- de mascotte in de stand komt op en ademt daarna; het
   opdrachtblok staat stil;
 - **rondewissel** -- de tekening en het woord komen op; de stand staat stil,
-  en het vakje van de ronde die net afliep loopt vol met inkt.
+  en de gouden schijf schuift door naar de volgende ronde in de rij.
 
 Precies één gebied van de kaart leeft, en wélk gebied dat is, ís de
 mededeling. `.mode-round` schakelt ertussen, en elke regel die eraan hangt
@@ -572,17 +571,31 @@ De knop rechtsboven draagt hier een huisje en geen pauzeteken: er loopt geen
 klok, dus er valt niets te pauzeren. De enige reden om er te tikken is
 weggaan -- en dat is wat het huisje op het winnaarsscherm ook betekent.
 
-De merktekens van de hoeveelste ronde (`.rounddots`) staan onder de tekening,
-in allebei de standen. Hier stond dat ze alleen in de uitgeklapte kaart
-hoorden, want tussen twee beurten verandert er niets aan het antwoord. Dat
-klopt, maar verbergen is signaleren met een afwezigheid, en het maakte de twee
-standen verschillend op een manier die niets betekent. Ze zijn het
-paginanummer van de ronde, en een paginanummer dat verdwijnt omdat de bladzijde
-niet omsloeg is vreemder dan een dat blijft staan.
+De hoeveelste ronde staat als één rij van de drie rondes (`.ronderij`),
+in allebei de standen: de ronde van nu is de gouden schijf met haar tekening,
+de twee andere zijn kleine papieren tegels met hun eigen ballon. Er stonden
+drie vierkantjes onder de tekening (verbruikt inkt, nu goud, nog te komen
+leeg), en die lazen niet: een code die je moet leren, die naar geen enkele
+ronde wees, en waarvan in ronde 3 het zwart het luidst was -- het oog ging
+naar wat voorbij was in plaats van naar nu.
 
-Verbruikt is inkt, nu is goud, nog te komen is leeg. Dat volgelopen vakje is
-het enige teken op dit scherm dat zegt dat er een ronde afgesloten is, en het
-kost geen enkel nieuw element.
+De rij gebruikt het verhaal dat de tekeningen al vertellen (veel woorden, één
+woord, geen woorden), en voegt niets toe: ze vervangt de tekening en de
+vierkantjes allebei, en elke ronde staat één keer in beeld. Daarom is het geen
+routekaart (zie hierboven): die noemde de ronde van nu een tweede keer.
+
+Geweest en nog te komen hebben dezelfde huid. Een inkt-tegel voor "geweest"
+is geprobeerd in de mockup, en gaf in ronde 2 drie looks naast elkaar (zwart,
+goud, papier). Dat is niet nodig: de plek links of rechts van de schijf zegt
+het al. De rij is zo hoog als de schijf, zodat de kaart niet verspringt.
+
+Bij een rondewissel vanuit het spel staat eerst de vorige ronde als schijf;
+als de omgedraaide kaart geland is (`RIJ_WACHT`), krimpt ze tot tegel en
+groeit de volgende tot schijf, die dan haar regel twee keer voorspeelt. Dat
+doorschuiven is het teken dat er een ronde afgesloten is. Een hersteld potje,
+een afgebroken aftelling en beperkte beweging krijgen meteen de stand van nu.
+De gouden schijf zit daarom niet meer in `RI_ART`: ze is het vak zelf, anders
+kan een tegel niet tot schijf groeien.
 
 Aan de voet van de kaart staan twee tellers: hoeveel kaarten er nog liggen en
 hoe lang je krijgt. Allebei altijd in beeld, ook als er niets bijzonders aan

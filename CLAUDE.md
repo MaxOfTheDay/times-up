@@ -175,7 +175,10 @@ het pauzeteken, niet via het hele vlak.
 tussen twee beurten: stand, opdracht, start. De stand staat ín de
 opdrachtkaart. Beurtwissel en rondewissel hebben dezelfde maat en
 verschillen in beweging (`.mode-round`): bij een beurtwissel ademt de
-mascotte, bij een rondewissel komt de tekening op. Geen kroon, geen "+N", geen
+mascotte, bij een rondewissel krimpt de gouden schijf tot tegel en groeit de
+volgende ronde tot schijf (`.ronderij`, `paintRij()`). De drie rondes staan
+als één rij: nu is de schijf, de andere zijn gelijke papieren tegels, en de
+plek links of rechts zegt geweest of nog te komen. Geen kroon, geen "+N", geen
 fiche per punt op dit scherm. De wake lock blijft hier aan, begrensd op
 `WAKE_MAX`.
 
