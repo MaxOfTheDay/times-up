@@ -181,35 +181,39 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGP4z8DAwMDAxMDAwMDAAAANHQEDasKb6QAAAABJRU5ErkJggg==', 'base64');
   await page.evaluate(() => window.__tijd.eigenKlaar);
   await page.click('#btnGear');
-  // Zonder eigen kaarten is de stapel een lege plek die meteen de maker opent.
-  ok(await page.evaluate(() => document.querySelector('#stEigen').classList.contains('leeg')),
-    'de stapel Eigen is niet leeg zonder eigen kaarten');
-  await page.click('#stEigen');
+  // Zonder eigen kaarten is de rij van Eigen een gestippelde plus die meteen
+  // de maker opent.
+  ok(await page.evaluate(() => document.querySelector('#kaartEigen').classList.contains('leeg')),
+    'de rij Eigen toont geen lege plek zonder eigen kaarten');
+  await page.click('#rijEigen');
   await page.setInputFiles('#mkBestand', { name: 'hond.png', mimeType: 'image/png', buffer: png });
   await page.waitForFunction(() => document.querySelector('#mkVak').classList.contains('vol'));
   await page.fill('#mkWoord', 'hond');
   await page.click('#mkBewaar');
   await page.waitForFunction(() => document.querySelectorAll('#eigenRij .eigen-tegel').length === 1);
+  // Na bewaren staat het kaartenscherm open op Eigen, met de nieuwe kaart.
   const stapel = await page.evaluate(() => ({
+    scherm: document.querySelector('#s-kaarten').classList.contains('on'),
     lade: !document.querySelector('#ladeEigen').hidden,
     tal: document.querySelector('#eigenTel').textContent,
-    leeg: document.querySelector('#stEigen').classList.contains('leeg') }));
-  ok(stapel.lade && stapel.tal === '1' && !stapel.leeg,
-    `na bewaren staat de eigen lade niet open op de nieuwe kaart (${JSON.stringify(stapel)})`);
-  // Het potje: de knoppen van "Waarvan eigen" tonen wat er echt in gaat
-  // (1, niet 3), een verzonken knop houdt zijn eigen getal, en de strook
-  // toont de ene eigen kaart vooraan.
+    leeg: document.querySelector('#kaartEigen').classList.contains('leeg') }));
+  ok(stapel.scherm && stapel.lade && stapel.tal === '1' && !stapel.leeg,
+    `na bewaren staat Eigen niet open op de nieuwe kaart (${JSON.stringify(stapel)})`);
+  // Terug naar Instellingen: de knoppen van "In elk potje" tonen wat er
+  // echt in gaat (1, niet 3), een verzonken knop houdt zijn eigen getal, en
+  // de telling zegt 1 eigen.
+  await page.click('#btnKaartenTerug');
   const potje = await page.evaluate(() => {
-    window.__tijd.settings.size = 24;
     document.querySelector('#sizeChips [data-size="24"]').click();
     return {
+      scherm: document.querySelector('#s-setup').classList.contains('on'),
       zichtbaar: !document.querySelector('#eigenDeelVeld').hidden,
       knoppen: [...document.querySelectorAll('#eigenDeelChips .chip .n')].map(n => n.textContent).join(','),
-      vakken: document.querySelectorAll('#strook i').length,
-      eigen: document.querySelectorAll('#strook i.eigen').length };
+      tal: document.querySelector('#potjeTal').textContent };
   });
-  ok(potje.zichtbaar && potje.knoppen === '0,1,6,12' && potje.vakken === 24 && potje.eigen === 1,
+  ok(potje.scherm && potje.zichtbaar && potje.knoppen === '0,1,6,12' && potje.tal === '1 eigen · 23 gewone',
     `het potje klopt niet met één eigen kaart bij 24 (${JSON.stringify(potje)})`);
+  await page.click('#rijEigen');
   const eigen = await page.evaluate(() => {
     const T = window.__tijd;
     const out = { lijst: T.eigen.kaarten.length, beeld: T.beelden.size, inPotje: 0, gewoneHond: 0 };
