@@ -2432,7 +2432,11 @@ code: een foto of tekening en het woord, in Instellingen.
 - **Aan en uit.** "Bobby" zegt een vriendje niets, en in ronde 2 en 3 kan
   het die kaart niet raden. Dit is de enige plek waar het spel de regel
   "één betekenis los van context" bewust loslaat, dus moet je die keuze
-  kunnen terugdraaien.
+  kunnen terugdraaien. Aan en Uit staan op de kopregel van het veld, zoals
+  Geluid en Trilling, en pas als er een kaart is; bij Uit wijken de beelden
+  in de tegels terug. Op een scherm smaller dan 380 px past het aantal daar
+  niet meer naast en valt het weg: de tegels tellen dan zelf. Dat de kaarten
+  op de telefoon blijven, staat bij Zo speel je, niet als zin onder het veld.
 - **Het woord wint van een gewone kaart.** Een foto van je eigen hond heet
   "hond"; weigeren voelde als een fout van de app. De gewone kaart met dat
   woord blijft uit het potje zolang de eigen bestaat. Twee eigen kaarten met
@@ -2441,23 +2445,33 @@ code: een foto of tekening en het woord, in Instellingen.
   voor wie niet leest een lege kaart (de harde eis). Is een beeld weg, dan
   gaat de kaart uit de lijst bij de start en uit de stapel van een bewaard
   potje.
-- **De foto in kleur, met de inktlijn.** Emoji zijn al kleur, en een kind
-  herkent oma op een foto sneller dan op een gestileerde. De vier
-  `drop-shadow`s van `.glyph` leggen om een vierkante foto precies een rand
-  van 4 px: een tekening op de kaart, geen geplakt plaatje. Gedrukt in
+- **De foto in kleur, zonder kader.** Emoji zijn al kleur, en een kind
+  herkent oma op een foto sneller dan op een gestileerde. De inktlijn van
+  `.glyph` legt om een vierkante foto een kader van 4 px, en dat is op de
+  kaart een derde rand (kaart, gouden band, kader) en in de tegel een kader
+  in een kader; op de telefoon las het als een fout. Een foto ligt daarom kaal
+  op het papier (`.kaal`), ook in de maker, de tegels en `#kijk`. Gedrukt in
   rasterpunten paste beter bij het bord, maar op kaartmaat herken je er geen
   gezicht meer in.
-- **Een rij die opzij schuift.** Veertig tegels onder elkaar zouden
-  Voorkeuren een scherm ver wegduwen. De plus staat vooraan, ook als de rij
-  leeg is: dat zegt meteen dat hier nog iets kan.
+- **Een rij die opzij schuift, met twee ingangen.** Veertig tegels onder
+  elkaar zouden Voorkeuren een scherm ver wegduwen. Vooraan staan twee
+  tegels, een plusje met de camera en een plusje met het potlood, ook als de
+  rij leeg is: dat zegt meteen wat hier kan, en wat je maakt kies je waar je
+  begint. De maker heeft daardoor geen eigen keuze tussen foto en tekening.
 - **Het paneel is de kaart.** Het beeld in het vierkant, het woord eronder,
   op de plek waar het in het spel komt. Schuiven met één vinger, knijpen met
   twee, en − en + voor wie dat niet doet. Het kruis staat rechtsboven op het
   paneel en niet in de hoek van het scherm: daar viel het op 320 px over de
   kaart. Liggend staat de kaart links en de rest rechts; onder elkaar past
   het niet in 390 px hoog.
+- **Bewaren wijst de weg.** Bewaren is goud zodra er een beeld is. Een
+  grijze knop die pas met een woord oplicht, zei niet waarom hij niets deed;
+  met het toetsenbord weg viel de woordregel niet op. Nu laat een tik zonder
+  woord de woordregel schudden en opent het toetsenbord, zoals elders een
+  losse tik voordoet in plaats van te weigeren.
 - **Niets gaat verloren.** Wie per ongeluk op het kruis tikt of terugveegt,
-  vindt de niet bewaarde kaart terug bij de volgende tik op de plus. Geen
+  vindt de niet bewaarde kaart terug bij de volgende tik op dezelfde tegel
+  (een klad per soort). Geen
   "weet je het zeker?": dat is een vraag in tekst. Weggooien kost twee tikken
   (de knop wordt inkt en vraagt het), geen lange druk, want die is alleen
   voor stoppen.
@@ -2490,8 +2504,8 @@ code: een foto of tekening en het woord, in Instellingen.
   `pagehide`, anders blijft het lampje branden. Komt de app terug terwijl de
   zoeker openstond, dan gaat hij weer aan.
 - **Of je tekent haar.** Niet elk ding heeft een foto, en een kind tekent
-  zelf graag. `Foto` en `Tekenen` staan als twee keuzeknoppen boven het
-  vierkant; tekenen gebeurt in datzelfde vierkant, op 512 bij 512. Eén pen
+  zelf graag. De potloodtegel opent de maker op een vel van 512 bij 512 in
+  hetzelfde vierkant. Eén pen
   die met een tweede tik dik of dun wordt, een emmer, een gum, een stap terug
   en alles weg: genoeg voor een kind van vier, zonder menu. Wie de gum pakt,
   heeft geen kleur meer gekozen; een tik op een kleur pakt de pen weer.
@@ -2502,7 +2516,7 @@ code: een foto of tekening en het woord, in Instellingen.
 - **Een tekening is doorzichtig en krijgt de pen.** Bewaard als PNG zonder
   achtergrond, zodat het papier van de kaart erdoor komt en de vier
   `drop-shadow`s van `.glyph` om elke lijn een inktrand leggen, zoals om een
-  emoji. Geen kader zoals bij de foto: een tekening is geen plaatje. Aanpassen
+  emoji. Om een vrije vorm is dat een lijn, geen kader. Aanpassen
   tekent verder op het bewaarde beeld; een stap terug haalt alleen wat er in
   deze beurt bij kwam.
 
