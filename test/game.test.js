@@ -460,8 +460,10 @@ const ok = (c, m) => { if (!c) fails.push(m); };
 
   // Tijdens het aftellen: afbreken, zoals een tik op het vlak. Anders telde
   // het in de achtergrond uit en begon de beurt op het eerste beeld terug.
+  // Wachten tot de kaart is omgedraaid: het huisje staat in de hoek van de
+  // achterkant, en die is de eerste 320 ms nog smal.
   await page.click('#btnPauze');
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(450);
   await hold(page, '#btnStop', 1400);
   await page.waitForTimeout(250);
   await page.click('#btnStart');
