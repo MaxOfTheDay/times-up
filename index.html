@@ -1109,6 +1109,7 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 }
 .eigen-rij .pv small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-wrap: nowrap; }
 .eigen-plus svg { width: 30px; }
+.eigen-rij .pv.tekening img { outline: 0; }
 .field.eigen > .field.rij { margin-top: var(--s-3); }
 .field.eigen > .hint { margin-top: var(--s-2); }
 .field.eigen legend .cb-count { margin-left: var(--s-1); }
@@ -1165,7 +1166,9 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 }
 .mk-woord::placeholder { color: var(--ink-2); opacity: 1; }
 .mk-woord:focus { outline: none; border-bottom-style: solid; }
-.mk-rest { width: var(--mk); display: flex; flex-direction: column; gap: var(--s-3); }
+/* Minstens 256 px: zes kleuren en vijf stukken gereedschap op één rij. Op
+   320 px is dat precies de binnenmaat van het paneel. */
+.mk-rest { width: max(var(--mk), 256px); display: flex; flex-direction: column; gap: var(--s-3); }
 /* De zoeker vult het vierkant zoals de foto het straks doet (cover). De
    voorcamera spiegelt in de zoeker, zoals je dat van een spiegel verwacht;
    de foto zelf niet (zie afdrukken()). */
@@ -1185,6 +1188,37 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   border: var(--line-2) solid var(--ink);
 }
 .mk-tg[hidden] { display: none; }
+
+/* Foto of tekenen. */
+.mk-soort { align-self: stretch; }
+.mk-soort > .chip { flex-direction: row; gap: var(--s-2); min-height: var(--tap); }
+.mk-soort svg { width: 22px; height: 22px; }
+/* Tekenen: een vel papier zonder rand. De tekening zelf is doorzichtig, zodat
+   ze op de kaart de inktlijn van .glyph krijgt zoals een emoji. */
+.mk-vak.papier { border: 0; outline: var(--line-2) solid var(--paper-2); background: var(--paper); cursor: crosshair; }
+.mk-vak.papier .mk-leeg { display: none; }
+.mk-vak canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mk-teken { display: flex; flex-direction: column; gap: var(--s-3); }
+/* Zes kleuren op één rij, ook op 320 px. Een staal is kleiner dan een tik
+   (38 px); ::after maakt het raakvlak groot genoeg. De gekozen kleur komt
+   omhoog (lift) en draagt een papieren ring: niet alleen kleur. */
+.mk-kleuren { display: flex; justify-content: space-between; gap: var(--s-1); }
+.mk-kleur {
+  position: relative; flex: 0 0 auto; width: 38px; height: 38px; padding: 0;
+  border: var(--line-2) solid var(--ink);
+}
+.mk-kleur::after { content: ""; position: absolute; inset: -5px; }
+.mk-kleur[aria-checked="true"] {
+  transform: translate(-2px, -3px); box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
+  outline: var(--line-2) solid var(--paper); outline-offset: -7px;
+}
+.mk-teken .mk-gereedschap { gap: var(--s-2); }
+.mk-teken .mk-tg { width: 40px; }
+.mk-tg[aria-pressed="true"] { background: var(--go); }
+.mk-scheid { width: var(--line-2); align-self: stretch; margin: 6px 2px; background: var(--rule); }
+.mk-stip { display: block; width: 8px; height: 8px; border-radius: 50%; background: var(--ink); }
+.mk-stip.dik { width: 20px; height: 20px; }
+
 .mk-gereedschap { display: flex; justify-content: center; gap: var(--s-3); }
 .mk-tg { width: var(--tap); padding: 0; justify-content: center; }
 .mk-tg svg { width: 22px; }
@@ -1201,12 +1235,13 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 @media (orientation: landscape) and (max-height: 560px) {
   #maker { --mk: min(52vh, 240px); }
   #maker .panel.maker {
-    display: grid; grid-template-columns: auto auto; grid-template-rows: auto 1fr;
+    display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto 1fr;
     align-items: start; column-gap: var(--s-5);
   }
-  .mk-kaart { grid-column: 1; grid-row: 1 / span 2; }
+  .mk-kaart { grid-column: 1; grid-row: 1 / span 3; }
   .mk-top { grid-column: 2; grid-row: 1; }
-  .mk-rest { grid-column: 2; grid-row: 2; width: max(200px, var(--mk)); }
+  .mk-soort { grid-column: 2; grid-row: 2; }
+  .mk-rest { grid-column: 2; grid-row: 3; width: 256px; }
 }
 
 /* ---- Installeren ------------------------------------------------------
@@ -2503,6 +2538,23 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
     <path d="M80 56 A31 31 0 0 1 24 70" fill="none" stroke="#14110F" stroke-width="8" stroke-linecap="round"/>
     <path d="M20 86 L22 66 L42 69" fill="none" stroke="#14110F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
   </symbol>
+  <!-- Tekenen: het potlood, de verfemmer, de gum, terug en de prullenbak. -->
+  <symbol id="i-potlood" viewBox="0 0 100 100">
+    <path d="M18 82 L24 60 L68 16 L84 32 L40 76 Z M60 24 L76 40" fill="none" stroke="#14110F" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-emmer" viewBox="0 0 100 100">
+    <path d="M16 46 L46 16 L80 50 L50 80 Z M16 46 H76" fill="none" stroke="#14110F" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M86 62 C92 72 92 82 86 82 C80 82 80 72 86 62 Z" fill="#14110F"/>
+  </symbol>
+  <symbol id="i-gum" viewBox="0 0 100 100">
+    <path d="M14 64 L52 26 L80 54 L48 86 H30 Z M34 44 L62 72 M48 86 H86" fill="none" stroke="#14110F" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-stap" viewBox="0 0 100 100">
+    <path d="M34 22 L16 40 L34 58 M16 40 H62 A20 20 0 0 1 62 80 H40" fill="none" stroke="#14110F" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-prul" viewBox="0 0 100 100">
+    <path d="M16 26 H84 M38 26 V14 H62 V26 M24 26 L28 88 H72 L76 26 M42 40 V74 M58 40 V74" fill="none" stroke="#14110F" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  </symbol>
   <symbol id="i-kruis" viewBox="0 0 100 100">
     <path d="M24 24 L76 76 M76 24 L24 76" stroke="#14110F" stroke-width="12" stroke-linecap="round"/>
   </symbol>
@@ -3069,11 +3121,17 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
         <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-kruis"/></svg>
       </button>
     </div>
+    <!-- Foto of tekening: twee keuzeknoppen, zoals op het instellingenscherm. -->
+    <div class="chips mk-soort" id="mkSoort" role="radiogroup" aria-label="Soort kaart">
+      <button class="chip" role="radio" aria-checked="true" data-soort="foto"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-camera"/></svg>Foto</button>
+      <button class="chip" role="radio" aria-checked="false" data-soort="tekening"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-potlood"/></svg>Tekenen</button>
+    </div>
     <div class="mk-kaart">
       <div class="mk-vak" id="mkVak" role="button" tabindex="0" aria-label="Foto kiezen">
         <svg class="mk-leeg" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-album"/></svg>
         <img id="mkFoto" alt="" hidden draggable="false">
         <video id="mkZoeker" playsinline muted hidden></video>
+        <canvas id="mkDoek" width="512" height="512" hidden></canvas>
       </div>
       <input class="mk-woord" id="mkWoord" maxlength="14" placeholder="woord"
              autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="done"
@@ -3093,6 +3151,19 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
         <button class="btn-plain mk-tg" id="mkKleiner" aria-label="Kleiner"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-min"/></svg></button>
         <button class="btn-plain mk-tg" id="mkGroter" aria-label="Groter"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-plus"/></svg></button>
         <button class="btn-plain mk-tg" id="mkAlbum" aria-label="Andere foto"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-album"/></svg></button>
+      </div>
+      <!-- Tekenen: een doos van zes kleuren, en een rij gereedschap. Alleen
+           tekens, geen woorden: een kind van drie kan het zonder uitleg. -->
+      <div class="mk-teken" id="mkTeken" hidden>
+        <div class="mk-kleuren" id="mkKleuren" role="radiogroup" aria-label="Kleur"></div>
+        <div class="mk-gereedschap">
+          <button class="btn-plain mk-tg" id="mkPen" aria-label="Pen, nog een tik voor dik of dun" aria-pressed="true"><i class="mk-stip"></i></button>
+          <button class="btn-plain mk-tg" id="mkEmmer" aria-label="Een vlak kleuren" aria-pressed="false"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-emmer"/></svg></button>
+          <button class="btn-plain mk-tg" id="mkGum" aria-label="Gum" aria-pressed="false"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-gum"/></svg></button>
+          <span class="mk-scheid" aria-hidden="true"></span>
+          <button class="btn-plain mk-tg" id="mkStap" aria-label="Laatste stap weg"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-stap"/></svg></button>
+          <button class="btn-plain mk-tg" id="mkLeeg" aria-label="Alles weg"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-prul"/></svg></button>
+        </div>
       </div>
       <button class="btn-plain mk-bewaar" id="mkBewaar" disabled>Bewaren</button>
       <button class="btn-plain mk-weg" id="mkWeg" hidden>Kaart weggooien</button>
@@ -4121,7 +4192,8 @@ function laadEigenLijst() {
     eigen.aan = s.aan !== false;
     if (Array.isArray(s.kaarten)) eigen.kaarten = s.kaarten
       .filter(k => k && typeof k.id === "string" && typeof k.woord === "string" && k.woord.trim())
-      .map(k => ({ id: k.id, woord: k.woord, laatst: Number(k.laatst) || 0 }));
+      .map(k => ({ id: k.id, woord: k.woord, laatst: Number(k.laatst) || 0,
+                   soort: k.soort === "tekening" ? "tekening" : "foto" }));
   } catch (e) { /* kapotte opslag: geen eigen kaarten */ }
 }
 /* Wat er van een potje mee mag doen: aan, en met een beeld. */
@@ -4176,7 +4248,7 @@ function paintEigen() {
   rij.querySelectorAll(".eigen-tegel").forEach(b => b.remove());
   eigen.kaarten.forEach(k => {
     const b = document.createElement("button");
-    b.className = "pv eigen-tegel";
+    b.className = "pv eigen-tegel" + (k.soort === "tekening" ? " tekening" : "");
     b.dataset.id = k.id;
     b.setAttribute("aria-label", k.woord + " — tik om aan te passen");
     b.innerHTML = "<img alt='' draggable='false'><small></small>";
@@ -4205,9 +4277,10 @@ $("#eigenRij").addEventListener("click", e => {
 });
 
 /* ---- de maker ----
-   mk: { kaart (null bij een nieuwe), img, nieuw (het beeld is veranderd),
-         live (de camera loopt in het vierkant),
-         zoom, x, y, s (px op het scherm per px van de foto) } */
+   mk: { kaart (null bij een nieuwe), soort ("foto" of "tekening"),
+         img, nieuw (het beeld is veranderd), live (de camera loopt),
+         zoom, x, y, s (px op het scherm per px van de foto),
+         acties, basis (de tekening die er al was), kleur, dik, gereed } */
 let mk = null;
 let klad = null;           // een niet bewaarde nieuwe kaart, voor de volgende tik op +
 let makerTerug = null;     // waar de focus heen gaat na het sluiten
@@ -4216,9 +4289,15 @@ const ZOOM_MAX = 4;
 function makerOpen() { return !$("#maker").hidden; }
 
 function openMaker(kaart) {
-  if (!kaart && klad) { mk = klad; klad = null; if (!mk.img) mk.live = camKan(); }
-  else mk = { kaart: kaart, img: null, nieuw: false, zoom: 1, x: 0, y: 0, s: 1,
-              woord: kaart ? kaart.woord : "", live: !kaart && camKan() };
+  if (!kaart && klad) {
+    mk = klad; klad = null;
+    if (mk.soort === "foto" && !mk.img) mk.live = camKan();
+  } else mk = {
+    kaart: kaart, soort: kaart ? kaart.soort || "foto" : "foto",
+    img: null, nieuw: false, zoom: 1, x: 0, y: 0, s: 1,
+    woord: kaart ? kaart.woord : "", live: !kaart && camKan(),
+    acties: [], basis: null, kleur: KLEUREN[0][0], dik: false, gereed: "pen"
+  };
   $("#mkKop").textContent = kaart ? "Kaart aanpassen" : "Nieuwe kaart";
   $("#mkWoord").value = mk.woord;
   const weg = $("#mkWeg");
@@ -4226,9 +4305,13 @@ function openMaker(kaart) {
   makerTerug = document.activeElement;
   screensInert(true);
   $("#maker").hidden = false;
-  if (kaart && !mk.img && beelden.has(kaart.id)) {
+  if (kaart && !mk.img && !mk.basis && beelden.has(kaart.id)) {
     const i = new Image();
-    i.onload = () => { if (mk && mk.kaart === kaart) { mk.img = i; plaats(true); tekenMaker(); } };
+    i.onload = () => {
+      if (!mk || mk.kaart !== kaart) return;
+      if (mk.soort === "tekening") { mk.basis = i; tekenDoek(); tekenMaker(); }
+      else { mk.img = i; plaats(true); tekenMaker(); }
+    };
     i.src = beelden.get(kaart.id);
   }
   tekenMaker();
@@ -4239,7 +4322,7 @@ function openMaker(kaart) {
 
 function sluitMaker() {
   if (!makerOpen()) return;
-  if (mk && !mk.kaart && (mk.img || $("#mkWoord").value.trim())) {
+  if (mk && !mk.kaart && (mk.img || mk.acties.length || $("#mkWoord").value.trim())) {
     mk.woord = $("#mkWoord").value;
     klad = mk;
   }
@@ -4284,18 +4367,26 @@ function zoomOm(cx, cy, zoom) {
 }
 
 function tekenMaker() {
-  const live = !!(mk && mk.live);
-  const heeft = !live && !!(mk && mk.img);
+  const teken = !!(mk && mk.soort === "tekening");
+  const live = !teken && !!(mk && mk.live);
+  const heeft = !teken && !live && !!(mk && mk.img);
   const vak = $("#mkVak"), foto = $("#mkFoto");
   vak.classList.toggle("vol", heeft);
   vak.classList.toggle("live", live);
-  vak.setAttribute("aria-label", live ? "Foto nemen" :
+  vak.classList.toggle("papier", teken);
+  vak.setAttribute("aria-label", teken ? "Het tekenvel" : live ? "Foto nemen" :
     heeft ? "De foto: schuif om te verplaatsen" : "Foto kiezen");
+  vak.tabIndex = teken ? -1 : 0;
   foto.hidden = !heeft;
   $("#mkZoeker").hidden = !live;
+  $("#mkDoek").hidden = !teken;
   if (heeft && foto.src !== mk.img.src) foto.src = mk.img.src;
   $("#mkCamRij").hidden = !live;
   $("#mkGereedschap").hidden = !heeft;
+  $("#mkTeken").hidden = !teken;
+  $$("#mkSoort .chip").forEach(c =>
+    c.setAttribute("aria-checked", String(c.dataset.soort === (mk ? mk.soort : "foto"))));
+  if (teken) tekenGereedschap();
   $("#mkOpnieuw").hidden = !camKan();
   keurMaker();
 }
@@ -4308,7 +4399,8 @@ function keurMaker() {
   const dubbel = !!w && eigen.kaarten.some(k =>
     k !== mk.kaart && k.woord.toLocaleLowerCase("nl") === w);
   const knop = $("#mkBewaar");
-  knop.disabled = !(mk.img && !mk.live && w && !dubbel);
+  const beeld = mk.soort === "tekening" ? !!(mk.acties.length || mk.basis) : !!(mk.img && !mk.live);
+  knop.disabled = !(beeld && w && !dubbel);
   knop.textContent = dubbel ? "Dat woord bestaat al" : "Bewaren";
 }
 $("#mkWoord").addEventListener("input", keurMaker);
@@ -4325,7 +4417,7 @@ $("#mkGroter").addEventListener("click", () => {
   const v = vakMaat(); zoomOm(v / 2, v / 2, mk.zoom * 1.25);
 });
 $("#mkVak").addEventListener("keydown", e => {
-  if (!(e.key === "Enter" || e.key === " ") || !mk) return;
+  if (!(e.key === "Enter" || e.key === " ") || !mk || mk.soort === "tekening") return;
   if (mk.live) { e.preventDefault(); afdrukken(); }
   else if (!mk.img) { e.preventDefault(); kiesFoto(); }
 });
@@ -4355,12 +4447,14 @@ $("#mkBestand").addEventListener("change", e => {
 const wijzers = new Map();
 $("#mkVak").addEventListener("pointerdown", e => {
   if (!mk) return;
+  if (mk.soort === "tekening") { penNeer(e); return; }
   if (mk.live) { afdrukken(); return; }
   if (!mk.img) { kiesFoto(); return; }
   e.currentTarget.setPointerCapture(e.pointerId);
   wijzers.set(e.pointerId, { x: e.clientX, y: e.clientY });
 });
 $("#mkVak").addEventListener("pointermove", e => {
+  if (mk && mk.soort === "tekening") { penVerder(e); return; }
   if (!mk || !mk.img || mk.live || !wijzers.has(e.pointerId)) return;
   const r = e.currentTarget.getBoundingClientRect();
   const oud = [...wijzers.values()].map(p => ({ ...p }));
@@ -4376,7 +4470,7 @@ $("#mkVak").addEventListener("pointermove", e => {
   mk.x += m1.x - m0.x; mk.y += m1.y - m0.y; mk.nieuw = true;
   klem();
 });
-const losWijzer = e => wijzers.delete(e.pointerId);
+const losWijzer = e => { wijzers.delete(e.pointerId); penOp(e); };
 $("#mkVak").addEventListener("pointerup", losWijzer);
 $("#mkVak").addEventListener("pointercancel", losWijzer);
 
@@ -4464,6 +4558,153 @@ document.addEventListener("visibilitychange", () => {
 });
 addEventListener("pagehide", stopCam);
 
+/* ---- tekenen ----
+   Een vel van 512 px, doorzichtig: op de kaart legt de inktlijn van .glyph
+   zich om de lijnen zoals om een emoji. Elke stap (een lijn of een vlak) is
+   een actie; terug tekent alles opnieuw zonder de laatste. Zes kleuren: die
+   van een tekening, zoals in een emoji, geen ploegkleuren. */
+const KLEUREN = [["#14110F", "zwart"], ["#E8452B", "rood"], ["#1B6FC4", "blauw"],
+                 ["#F2B705", "geel"], ["#2E9E5B", "groen"], ["#8A5A2B", "bruin"]];
+const PEN = { dun: 10, dik: 26, gum: 44 };
+const DOEK = 512;
+const doek = () => $("#mkDoek").getContext("2d", { willReadFrequently: true });
+
+(() => {
+  const rij = $("#mkKleuren");
+  KLEUREN.forEach(([k, naam]) => {
+    const b = document.createElement("button");
+    b.className = "mk-kleur";
+    b.setAttribute("role", "radio");
+    b.setAttribute("aria-label", naam);
+    b.dataset.kleur = k;
+    b.style.background = k;
+    rij.appendChild(b);
+  });
+})();
+function tekenGereedschap() {
+  $$("#mkKleuren .mk-kleur").forEach(b =>
+    b.setAttribute("aria-checked", String(b.dataset.kleur === mk.kleur && mk.gereed !== "gum")));
+  $("#mkPen").setAttribute("aria-pressed", String(mk.gereed === "pen"));
+  $("#mkEmmer").setAttribute("aria-pressed", String(mk.gereed === "emmer"));
+  $("#mkGum").setAttribute("aria-pressed", String(mk.gereed === "gum"));
+  $("#mkPen .mk-stip").classList.toggle("dik", mk.dik);
+  $("#mkPen .mk-stip").style.background = mk.kleur;
+}
+$("#mkKleuren").addEventListener("click", e => {
+  const b = e.target.closest(".mk-kleur"); if (!b || !mk) return;
+  mk.kleur = b.dataset.kleur;
+  if (mk.gereed === "gum") mk.gereed = "pen";
+  tekenGereedschap();
+});
+/* De pen is één knop: gekozen, dan wisselt nog een tik tussen dun en dik. */
+$("#mkPen").addEventListener("click", () => {
+  if (!mk) return;
+  if (mk.gereed === "pen") mk.dik = !mk.dik; else mk.gereed = "pen";
+  tekenGereedschap();
+});
+$("#mkEmmer").addEventListener("click", () => { if (mk) { mk.gereed = "emmer"; tekenGereedschap(); } });
+$("#mkGum").addEventListener("click", () => { if (mk) { mk.gereed = "gum"; tekenGereedschap(); } });
+$("#mkStap").addEventListener("click", () => {
+  if (!mk || !mk.acties.length) { nudge($("#mkStap")); return; }
+  mk.acties.pop(); mk.nieuw = true; tekenDoek(); keurMaker();
+});
+$("#mkLeeg").addEventListener("click", () => {
+  if (!mk || (!mk.acties.length && !mk.basis)) { nudge($("#mkLeeg")); return; }
+  mk.acties = []; mk.basis = null; mk.nieuw = true; tekenDoek(); keurMaker();
+});
+$("#mkSoort").addEventListener("click", e => {
+  const c = e.target.closest(".chip"); if (!c || !mk || c.dataset.soort === mk.soort) return;
+  mk.soort = c.dataset.soort;
+  if (mk.soort === "tekening") { mk.live = false; stopCam(); tekenDoek(); }
+  else if (!mk.img) { mk.live = camKan(); if (mk.live) startCam(); }
+  tekenMaker();
+});
+
+function lijn(g, a) {
+  g.save();
+  g.globalCompositeOperation = a.gum ? "destination-out" : "source-over";
+  g.strokeStyle = a.kleur; g.lineWidth = a.dikte;
+  g.lineCap = g.lineJoin = "round";
+  g.beginPath();
+  a.punten.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y));
+  if (a.punten.length === 1) g.lineTo(a.punten[0][0] + .1, a.punten[0][1]);
+  g.stroke();
+  g.restore();
+}
+/* Vullen vanaf een punt: alles wat er (in kleur en doorzichtigheid) op lijkt
+   en eraan vast zit. Daarna één pixel groeien, anders blijft er een lichte
+   rand langs de zachte kant van de lijnen. */
+function vul(g, x, y, kleur) {
+  x = Math.floor(x); y = Math.floor(y);
+  if (x < 0 || y < 0 || x >= DOEK || y >= DOEK) return;
+  const im = g.getImageData(0, 0, DOEK, DOEK), d = im.data;
+  const s = (y * DOEK + x) * 4;
+  const r0 = d[s], g0 = d[s + 1], b0 = d[s + 2], a0 = d[s + 3];
+  const [r, gr, b] = [1, 3, 5].map(i => parseInt(kleur.slice(i, i + 2), 16));
+  if (a0 === 255 && Math.abs(r0 - r) + Math.abs(g0 - gr) + Math.abs(b0 - b) < 12) return;
+  const lijkt = j => Math.abs(d[j] - r0) + Math.abs(d[j + 1] - g0) +
+                     Math.abs(d[j + 2] - b0) + Math.abs(d[j + 3] - a0) * 2 < 160;
+  const vol = new Uint8Array(DOEK * DOEK), stapel = [x + y * DOEK];
+  while (stapel.length) {
+    const p = stapel.pop();
+    if (vol[p] || !lijkt(p * 4)) continue;
+    vol[p] = 1;
+    const px = p % DOEK;
+    if (px > 0) stapel.push(p - 1);
+    if (px < DOEK - 1) stapel.push(p + 1);
+    if (p >= DOEK) stapel.push(p - DOEK);
+    if (p < DOEK * (DOEK - 1)) stapel.push(p + DOEK);
+  }
+  for (let p = 0; p < vol.length; p++) {
+    const px = p % DOEK;
+    const rand = vol[p] || (px > 0 && vol[p - 1] === 1) || (px < DOEK - 1 && vol[p + 1] === 1) ||
+                 (p >= DOEK && vol[p - DOEK] === 1) || (p < DOEK * (DOEK - 1) && vol[p + DOEK] === 1);
+    if (!rand) continue;
+    const j = p * 4;
+    d[j] = r; d[j + 1] = gr; d[j + 2] = b; d[j + 3] = 255;
+  }
+  g.putImageData(im, 0, 0);
+}
+function tekenDoek() {
+  const g = doek();
+  g.clearRect(0, 0, DOEK, DOEK);
+  if (mk && mk.basis) g.drawImage(mk.basis, 0, 0, DOEK, DOEK);
+  if (mk) mk.acties.forEach(a => a.vul ? vul(g, a.x, a.y, a.kleur) : lijn(g, a));
+}
+const doekPunt = e => {
+  const r = $("#mkDoek").getBoundingClientRect(), k = DOEK / r.width;
+  return [(e.clientX - r.left) * k, (e.clientY - r.top) * k];
+};
+let streek = null;
+function penNeer(e) {
+  const [x, y] = doekPunt(e);
+  if (mk.gereed === "emmer") {
+    const a = { vul: true, x: x, y: y, kleur: mk.kleur };
+    mk.acties.push(a); mk.nieuw = true;
+    vul(doek(), x, y, a.kleur); keurMaker();
+    return;
+  }
+  if (streek) return;             // één vinger tekent, een tweede niet
+  $("#mkVak").setPointerCapture(e.pointerId);
+  const gum = mk.gereed === "gum";
+  streek = { id: e.pointerId, a: { gum: gum, kleur: mk.kleur, punten: [[x, y]],
+              dikte: gum ? PEN.gum : mk.dik ? PEN.dik : PEN.dun } };
+  mk.acties.push(streek.a); mk.nieuw = true;
+  lijn(doek(), streek.a);
+}
+function penVerder(e) {
+  if (!streek || e.pointerId !== streek.id) return;
+  const a = streek.a, vorige = a.punten[a.punten.length - 1], nu = doekPunt(e);
+  a.punten.push(nu);
+  lijn(doek(), { ...a, punten: [vorige, nu] });
+}
+function penOp(e) {
+  if (!streek || e.pointerId !== streek.id) return;
+  streek = null;
+  keurMaker();
+}
+const doekBlob = () => new Promise(ok => $("#mkDoek").toBlob(ok, "image/png"));
+
 /* Het vierkant zoals het er nu uitziet, als JPEG van 512 px. */
 function snijFoto() {
   const c = document.createElement("canvas");
@@ -4485,7 +4726,7 @@ $("#mkBewaar").addEventListener("click", async () => {
   const id = kaart ? kaart.id : Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   try {
     if (!kaart || mk.nieuw) {
-      const blob = await snijFoto();
+      const blob = mk.soort === "tekening" ? await doekBlob() : await snijFoto();
       if (!blob) throw new Error("geen beeld");
       await Beeld.zet(id, blob);
       if (beelden.has(id)) URL.revokeObjectURL(beelden.get(id));
@@ -4495,8 +4736,8 @@ $("#mkBewaar").addEventListener("click", async () => {
     nudge(knop); keurMaker();
     return;
   }
-  if (kaart) kaart.woord = woord;
-  else eigen.kaarten.push({ id: id, woord: woord, laatst: 0 });
+  if (kaart) { kaart.woord = woord; kaart.soort = mk.soort; }
+  else eigen.kaarten.push({ id: id, woord: woord, laatst: 0, soort: mk.soort });
   bewaarEigen();
   /* Safari wist de gegevens van een site in een tabblad na zeven dagen
      zonder bezoek. Vragen kost niets; een geïnstalleerde app heeft het niet

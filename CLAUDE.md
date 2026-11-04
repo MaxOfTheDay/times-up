@@ -361,7 +361,7 @@ voor alle standen; alles op het paneel gaat over de stand die je voor je
 hebt. `MIN_BAK` (40) geldt over alle drie de standen. De sleuf van hint en
 knop wisselt met `visibility`, nooit met `hidden`.
 
-**Eigen kaarten.** Een foto met het woord dat telt, gemaakt in Instellingen
+**Eigen kaarten.** Een foto of tekening met het woord dat telt, gemaakt in Instellingen
 (`openMaker()`). De lijst staat in `tijdisom.eigen`, de beelden in IndexedDB
 (`Beeld`), niets verlaat de telefoon. In de greep is een eigen kaart
 `[Spel.EIGEN + id, woord]`.
@@ -379,6 +379,9 @@ knop wisselt met `visibility`, nooit met `hidden`.
 - Een nieuwe kaart opent op de camera in het vierkant (`startCam()`), met
   het album als terugval. De camera gaat uit bij afdrukken, sluiten en
   verbergen (`stopCam()`); de voorcamera spiegelt alleen in de zoeker.
+- Of je tekent haar in hetzelfde vierkant (`mkDoek`): zes tekenkleuren
+  zijn inhoud, geen betekenis. Een tekening is een doorzichtige PNG en
+  krijgt de pen van `.glyph`, geen kader.
 
 ## Tests
 

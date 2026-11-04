@@ -2382,7 +2382,7 @@ is niet toevallig: rechtsboven is van de uitgang.
 Er stond één zelfgemaakte kaart in `DECKS` (🦸 "Max H"), met de hand in de
 code gezet. Dat het spel van jullie is, is wat kinderen het hardst laat
 gieren: oma uitbeelden, of de hond. Eigen kaarten maken dat mogelijk zonder
-code: een foto en het woord, in Instellingen.
+code: een foto of tekening en het woord, in Instellingen.
 
 - **Een kwart van het potje, de langst niet getrokken eerst.** Met de helft
   zat na drie avonden steeds hetzelfde gezicht in elk potje en was oma geen
@@ -2450,6 +2450,22 @@ code: een foto en het woord, in Instellingen.
 - **De camera gaat uit** bij afdrukken, sluiten, `visibilitychange` en
   `pagehide`, anders blijft het lampje branden. Komt de app terug terwijl de
   zoeker openstond, dan gaat hij weer aan.
+- **Of je tekent haar.** Niet elk ding heeft een foto, en een kind tekent
+  zelf graag. `Foto` en `Tekenen` staan als twee keuzeknoppen boven het
+  vierkant; tekenen gebeurt in datzelfde vierkant, op 512 bij 512. Eén pen
+  die met een tweede tik dik of dun wordt, een emmer, een gum, een stap terug
+  en alles weg: genoeg voor een kind van vier, zonder menu. Wie de gum pakt,
+  heeft geen kleur meer gekozen; een tik op een kleur pakt de pen weer.
+- **Zes tekenkleuren zijn inhoud, geen betekenis.** Inkt, rood, blauw, goud,
+  groen en bruin. "Kleur betekent één ding" gaat over de stukken van het
+  bord; wat er op een kaart staat is inhoud, net als de kleuren van een
+  emoji. De knoppen zelf houden de regel: gekozen is goud.
+- **Een tekening is doorzichtig en krijgt de pen.** Bewaard als PNG zonder
+  achtergrond, zodat het papier van de kaart erdoor komt en de vier
+  `drop-shadow`s van `.glyph` om elke lijn een inktrand leggen, zoals om een
+  emoji. Geen kader zoals bij de foto: een tekening is geen plaatje. Aanpassen
+  tekent verder op het bewaarde beeld; een stap terug haalt alleen wat er in
+  deze beurt bij kwam.
 
 ## Weggaan kost niets
 
