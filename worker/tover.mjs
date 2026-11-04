@@ -86,7 +86,7 @@ async function base64(beeld) {
   return btoa(s);
 }
 
-export async function teken(woord, env, rnd) {
+export async function teken(woord, env) {
   woord = String(woord || '').trim().toLocaleLowerCase('nl');
   if (!woord || woord.length > MAX_WOORD || NOOIT.test(woord)) return { fout: 'nee' };
   let oordeel;
@@ -102,8 +102,7 @@ export async function teken(woord, env, rnd) {
   try {
     const r = await env.AI.run(TEKENAAR, {
       prompt: STIJL.replace('{X}', oordeel.en),
-      steps: 4,
-      seed: Math.floor((rnd || Math.random)() * 2147483647)
+      steps: 4   // FLUX.1 schnell kent geen seed: elke vraag tekent al anders
     });
     if (!r || !r.image) return { fout: 'stuk', waarom: 'teken: geen beeld' };
     return { beeld: 'data:image/jpeg;base64,' + await base64(r.image), en: oordeel.en };
