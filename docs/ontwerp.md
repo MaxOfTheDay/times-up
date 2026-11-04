@@ -2101,8 +2101,8 @@ terugveeg.
 ## Het instellingenscherm
 
 Wie het tandwiel aantikt komt iets bijstellen voor het volgende potje. Dus
-staat dat bovenaan, in één groep **Spel**: moeilijkheid (met de bak eronder,
-de fijne knop op hetzelfde ding), kaarten per potje, tijd per beurt. Daarna
+staat dat bovenaan, in één groep **Spel**: moeilijkheid, de kaartenbak
+(gewone en eigen kaarten), kaarten per potje, tijd per beurt. Daarna
 **Voorkeuren**, dan **Zo speel je**, dan **Deze app**.
 
 Eerder stonden de regels bovenaan, open bij het eerste bezoek, en waren de
@@ -2157,14 +2157,11 @@ hoofdletters scheidden een kop van een veld. Nu:
   hoofdletters en in `--ink-2`: een etiket boven de groep, niet een regel die
   met de velden wedijvert;
 - veldnamen blijven 16 px in inkt, het luidste na de titel;
-- "Alle kaarten" zakt naar 14 px: het is de fijne knop ónder de
-  moeilijkheid, geen eigen veld;
 - keuzeknoppen dragen `--line-2` (3 px) in plaats van de primaire contour,
   en zijn 52 px hoog: op dit scherm is geen enkele knop de hoofdhandeling;
 - de tijd is een rij van vier keuzeknoppen (20, 30, 45, 60 s), net als
   kaarten per potje (zie hieronder);
-- ritme: 24 px tussen velden, 40 tussen groepen, 8 tussen de bak en de
-  moeilijkheid. Op 390x844 is het scherm 1013 px hoog (was 1228 vanochtend). Het scherm werd
+- ritme: 24 px tussen velden, 40 tussen groepen. Op 390x844 is het scherm 1013 px hoog (was 1228 vanochtend). Het scherm werd
 op 390x844 151 px korter (1228 naar 1077).
 
 **Drie keer dezelfde knop.** De tijd per beurt was een schuif van 20 tot 60
@@ -2177,8 +2174,8 @@ kaarten per potje: goud met een vinkje is gekozen, zoals overal. Een bewaarde
 waarde ertussenin gaat in `load()` naar de dichtstbijzijnde knop (35 wordt
 30, 50 wordt 45).
 
-**Eén vet in de systeemletter.** Veldnamen, keuzeknoppen en "Alle kaarten"
-stonden op 800, de vette woorden in de regels op 700. 800 is op een iPhone SF
+**Eén vet in de systeemletter.** Veldnamen, keuzeknoppen en de vouwregel
+van de bak stonden op 800, de vette woorden in de regels op 700. 800 is op een iPhone SF
 Heavy, maar Roboto had vóór Android 12 geen 800, en dan valt de browser door
 naar Black (900): dezelfde veldnaam was per toestel anders zwaar, en altijd
 zwaarder dan het vet in de regels. Alles staat nu op 700, die elk toestel
@@ -2430,6 +2427,34 @@ huisje hangt. "89 in het spel · 1 weggelegd" verdween er half achter zodra
 je dat veld in beeld scrollde. Alles op dit scherm lijnt links uit, en dat
 is niet toevallig: rechtsboven is van de uitgang.
 
+**Twee stapels, één lade.** Welke kaarten er kunnen komen werd op drie
+manieren beantwoord: keuzeknoppen (Moeilijkheid), een kleine vouwregel met
+een plus ("Alle kaarten · 90 in het spel") en een rij tegels met een
+gestippelde plus (Eigen kaarten). Drie vormen voor één vraag lazen als drie
+losse instellingen, en de twee getallen telden niet op: de 90 liet de eigen
+kaarten weg en stond op een andere plek dan hun aantal. Nu is er één veld,
+**Kaartenbak**, met twee gelijke stapels naast elkaar: Gewone en Eigen,
+elk met haar bovenste kaart en haar getal in Fredoka. Zo is elke rij in
+Spel een rij gelijke stukken (keuzeknoppen, stapels, keuzeknoppen,
+keuzeknoppen), en wie Moeilijkheid omzet ziet de stapel eronder meegaan
+(90, 183, 275, met de eerste kaart van die stand bovenop).
+
+- Een tik op een stapel laat hem inzakken (`aria-expanded`, op
+  `--paper-2`, zonder schaduw) en legt zijn kaarten in de lade eronder; een
+  tik op de andere wisselt, nog een tik sluit. Eén lade tegelijk
+  (`settings.lade`): twee open laden duwden Kaarten per potje een scherm of
+  drie weg. Geen goud: dat is hier "gekozen", en een open lade kiest niets.
+- Zonder eigen kaarten is Eigen een lege plek: gestippeld en plat, zoals de
+  plus, met één lege kaart en het getal 0. Een tik opent meteen de maker;
+  een lade met alleen een plus erin is een tik voor niets. Na bewaren gaat
+  de lade open op de nieuwe kaart.
+- Aan en Uit van de eigen kaarten staan in hun lade ("In elk potje"), zodat
+  het veld niet van vorm verandert bij de eerste kaart. Op de stapel zelf
+  zegt "uit" het, en wijkt de waaier terug.
+- Ook getest: twee gelijke vouwregels onder elkaar (dezelfde vorm, maar een
+  formulier zonder beeld), en alles in één rij die opzij schuift (de stapel
+  gewone kaarten leek er één kaart meer tussen, en Aan/Uit kwam en ging nog).
+
 ## Eigen kaarten
 
 Er stond één zelfgemaakte kaart in `DECKS` (🦸 "Max H"), met de hand in de
@@ -2446,11 +2471,10 @@ code: een foto of tekening en het woord, in Instellingen.
 - **Aan en uit.** "Bobby" zegt een vriendje niets, en in ronde 2 en 3 kan
   het die kaart niet raden. Dit is de enige plek waar het spel de regel
   "één betekenis los van context" bewust loslaat, dus moet je die keuze
-  kunnen terugdraaien. Aan en Uit staan op de kopregel van het veld, zoals
-  Geluid en Trilling, en pas als er een kaart is; bij Uit wijken de beelden
-  in de tegels terug. Op een scherm smaller dan 380 px past het aantal daar
-  niet meer naast en valt het weg: de tegels tellen dan zelf. Dat de kaarten
-  op de telefoon blijven, staat bij Zo speel je, niet als zin onder het veld.
+  kunnen terugdraaien. Aan en Uit staan in de eigen lade van de kaartenbak,
+  op een kopregel zoals Geluid; bij Uit wijken de beelden in de tegels en op
+  de stapel terug, en staat "uit" bij het getal. Dat de kaarten op de
+  telefoon blijven, staat bij Zo speel je, niet als zin onder het veld.
 - **Het woord wint van een gewone kaart.** Een foto van je eigen hond heet
   "hond"; weigeren voelde als een fout van de app. De gewone kaart met dat
   woord blijft uit het potje zolang de eigen bestaat. Twee eigen kaarten met
@@ -2467,9 +2491,11 @@ code: een foto of tekening en het woord, in Instellingen.
   op het papier (`.kaal`), ook in de maker, de tegels en `#kijk`. Gedrukt in
   rasterpunten paste beter bij het bord, maar op kaartmaat herken je er geen
   gezicht meer in.
-- **Een rij die opzij schuift, met één lege kaart vooraan.** Veertig tegels
-  onder elkaar zouden Voorkeuren een scherm ver wegduwen. Vooraan staat een
-  lege kaart met een stippelrand en een plus, ook als de rij leeg is: ze
+- **Hetzelfde raster als de gewone kaarten, met één lege kaart vooraan.**
+  Een rij die opzij schoof verstopte bij tien kaarten de meeste uit beeld;
+  in de lade lopen veertig tegels gewoon naar beneden door, en de lade is
+  dicht als je haar niet nodig hebt (zie Het instellingenscherm). Vooraan
+  staat een lege kaart met een stippelrand en een plus, ook als de rij leeg is: ze
   leest als "kaart erbij" en staat altijd op dezelfde plek. Ze ligt plat,
   zonder schaduw: stippelrand en slagschaduw samen zeiden "lege plek" en
   "stuk dat hier ligt" tegelijk. Een druk kleurt haar `--paper-2`, zoals een

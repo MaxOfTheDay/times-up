@@ -246,7 +246,7 @@
 .wordmark h1, #s-setup h1, .group-head, .rules > summary,
 .cd-disc b, .chips.getal > .chip, .roundcard b, .ho-count span, .mini-score b,
 .secs-left, .gain, .cardword, .kijk-grid small,
-.pv small, .tally .sr b, .tally .num, .btn-plain, .cb-index button {
+.pv small, .tally .sr b, .tally .num, .btn-plain, .cb-index button, .st-tal {
   font-family: var(--font-display);
 }
 
@@ -405,7 +405,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    schaduw in. Wie een knop toevoegt, zet hem in deze lijst. */
 button.btn-go, button.btn-good, button.btn-skip,
 button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain,
-button.ho-count, .cb-index button, button.mk-sluiter {
+button.ho-count, .cb-index button, button.mk-sluiter, button.stapel {
   transition: transform calc(var(--t-los) * var(--dur)) var(--e-los),
               box-shadow calc(var(--t-los) * var(--dur)) var(--e-los);
 }
@@ -416,7 +416,7 @@ button.ho-count, .cb-index button, button.mk-sluiter {
 button.btn-go:active, button.btn-good:active, button.btn-skip:active,
 button.btn-icon:active, button.btn-danger:active, button.chip:active,
 button.pv:active, button.btn-plain:active, button.ho-count:active,
-.cb-index button:active, button.mk-sluiter:active {
+.cb-index button:active, button.mk-sluiter:active, button.stapel:active {
   transition-duration: calc(var(--t-press) * var(--dur));
   transition-timing-function: var(--e-uit);
 }
@@ -428,7 +428,7 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
    terugkoppeling die deze knop nodig heeft. Passen hoort hier en niet bij
    --lift-2: het is de mindere keuze naast geraden. */
 .btn-icon:active, .btn-danger:active, .chip:active, .pv:active, .btn-skip:active,
-.btn-plain:active {
+.btn-plain:active, .stapel:active {
   transform: translate(var(--lift-1), var(--lift-1));
   box-shadow: 0 0 0 var(--ink);
 }
@@ -856,7 +856,7 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
    kaartenbak een kolom in: vier bredere tegels in plaats van vijf, en er komt
    geen tegel meer onder de knop. */
 @media (max-width: 592px) and (max-height: 559px) {
-  .cb-body .cards { margin-right: calc(var(--corner) + var(--tap) - var(--s-4) + var(--s-2)); }
+  .lade .cards, .stapels { margin-right: calc(var(--corner) + var(--tap) - var(--s-4) + var(--s-2)); }
 }
 .field { margin: 0; border: 0; padding: 0; min-width: 0; }
 /* Drie lagen tekst, niet vier: hoofdletters zijn voor de titel en de
@@ -938,7 +938,7 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 }
 .rules[open] > summary::before { content: "−"; }
 /* Lucht tussen de kop en de tekst pas als hij openstaat, net als
-   .cb-body -- dichtgeklapt is er niets om lucht van te houden. */
+   een lade -- dichtgeklapt is er niets om lucht van te houden. */
 .rules[open] > summary { margin-bottom: var(--s-3); }
 .rules ol {
   margin: 0 0 var(--s-2); padding-left: 1.4em;
@@ -973,40 +973,95 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 .chips.getal > .chip { font-size: var(--fs-4); }
 
 /* ============================================================
-   DE KAARTENBAK — alle kaarten waar een potje uit getrokken kan worden.
-   Dichtgeklapt één regel met een telling; open de volledige bak,
-   alfabetisch, om kaarten weg te leggen en terug te zetten. Dezelfde
-   plus-wordt-min als de regeluitleg, en de typografie van een veldkop:
-   dit ís een veld, tussen Moeilijkheid en Kaarten per potje.
+   DE KAARTENBAK — alle kaarten waar een potje uit getrokken kan worden,
+   als twee stapels: de gewone kaarten van deze stand en de eigen. Twee
+   gelijke tegels met hun bovenste kaarten en hun getal; wie er een
+   aantikt, ziet hem inzakken en zijn kaarten in de lade eronder. Zo heeft
+   elke rij in Spel dezelfde vorm: een rij gelijke stukken.
    ============================================================ */
-.cardbox { margin: 0; }
-/* De bak hoort bij de moeilijkheid erboven: hij zit er dicht onder, en de
-   tikhoogte van zijn vouwregel geeft de lucht naar het volgende veld. */
-.field-group > .cardbox { margin-top: var(--s-2); }
-.field-group > .cardbox + * { margin-top: var(--s-3); }
-.cardbox > summary {
-  list-style: none; cursor: pointer;
-  display: flex; align-items: center; flex-wrap: wrap; gap: 2px var(--s-2);
-  min-height: var(--tap);
-  font-size: var(--fs-2); font-weight: 700; color: var(--ink);
+/* flex en geen raster van twee: zonder IndexedDB valt Eigen weg en neemt
+   Gewone de hele breedte. */
+.stapels { display: flex; gap: var(--s-3); }
+.stapel {
+  flex: 1 1 0; min-width: 0; min-height: 112px;
+  position: relative;
+  display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: 1fr auto;
+  align-items: end; column-gap: var(--s-3); row-gap: 2px;
+  padding: var(--s-2) var(--s-3);
+  border: var(--line-2) solid var(--ink); background: var(--paper);
+  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
+  text-align: left; color: var(--ink);
 }
-.cardbox > summary::-webkit-details-marker { display: none; }
-.cardbox > summary::before {
-  content: "+";
-  font-weight: 900; font-size: var(--fs-3); line-height: 1;
-  width: 1.1em; text-align: center;
+/* Open is ingedrukt: de stapel blijft in zijn schaduw liggen zolang zijn
+   lade openstaat, op --paper-2 zoals een putje. Geen goud: dat is op dit
+   scherm "gekozen", en een open lade kiest niets. */
+.stapel[aria-expanded="true"] {
+  transform: translate(var(--lift-1), var(--lift-1));
+  box-shadow: 0 0 0 var(--ink); background: var(--paper-2);
 }
-.cardbox[open] > summary::before { content: "−"; }
-/* De telling is een uitkomst, geen kop: bijschriftmaat, direct achter de kop,
-   links. Rechts uitgelijnd verdween ze achter het zwevende huisje;
-   rechtsboven is van de uitgang. */
+/* De waaier: drie kaartjes schuin onder elkaar, recht van hoek. Alleen de
+   bovenste toont haar teken; de twee eronder zijn de dikte van de stapel. */
+.waaier { grid-row: 1 / 3; align-self: center; position: relative; width: 58px; height: 84px; }
+.waaier i {
+  position: absolute; width: 46px; height: 62px;
+  border: var(--line-2) solid var(--ink); background: var(--paper);
+  display: grid; place-items: center; overflow: hidden;
+  font-style: normal; font-size: 26px; line-height: 1;
+}
+.waaier i:nth-child(1) { left: 12px; top: 0; }
+.waaier i:nth-child(2) { left: 6px;  top: 11px; }
+.waaier i:nth-child(3) { left: 0;    top: 22px; }
+.waaier img { width: 36px; height: 36px; object-fit: cover; display: block; }
+.waaier svg { width: 30px; height: 30px; }
+.st-naam { font-size: var(--fs-3); font-weight: 700; align-self: end; }
+.st-tal {
+  font-size: var(--fs-5); line-height: 1;
+  align-self: start; display: flex; align-items: baseline; gap: var(--s-1);
+  font-variant-numeric: tabular-nums;
+}
+/* "uit" staat er in woorden bij, en de waaier wijkt terug: twee kanalen. */
+.st-tal small { font-family: inherit; font-size: var(--fs-1); color: var(--ink-2); }
+.stapel.uit .waaier { opacity: .4; }
+/* Leeg: een plek op het bord waar nog niets ligt, gestippeld en plat zoals
+   de plus. Ze zakt niet in; een druk kleurt het putje. */
+.stapel.leeg { border-style: dashed; box-shadow: none; background: transparent; }
+.stapel.leeg:active { transform: none; background: var(--paper-2); }
+.stapel.leeg .waaier i { border-style: dashed; background: transparent; }
+/* Eén lege kaart met de plus: er ligt nog geen stapel. */
+.stapel.leeg .waaier i:not(:last-child) { display: none; }
+.stapel.leeg .waaier i:last-child { left: 6px; top: 11px; }
+
+/* Op 320 px is een stapel 138 breed: een kleinere waaier, anders loopt
+   "Gewone" over de rand. */
+@media (max-width: 379px) {
+  .stapel { padding: var(--s-2); column-gap: var(--s-2); }
+  .waaier { width: 40px; height: 64px; }
+  .waaier i { width: 32px; height: 44px; font-size: 19px; }
+  .waaier i:nth-child(1) { left: 8px; }
+  .waaier i:nth-child(2) { left: 4px; top: 8px; }
+  .waaier i:nth-child(3) { top: 16px; }
+  .stapel.leeg .waaier i:last-child { left: 4px; top: 8px; }
+  .waaier img { width: 26px; height: 26px; }
+  .waaier svg { width: 22px; height: 22px; }
+  .st-naam { font-size: var(--fs-2); }
+}
+
+.lade { margin-top: var(--s-4); }
+.lade .hint { margin-top: 0; margin-bottom: var(--s-3); }
+/* De kopregel van de eigen lade zoals Geluid: naam links, Aan en Uit
+   rechts. */
+.lade-kop {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-2);
+  margin-bottom: var(--s-3); font-size: var(--fs-3); font-weight: 700;
+}
+.lade-kop .chips { flex-wrap: nowrap; }
+.lade-kop .chips > .chip { flex: 0 0 auto; width: 76px; min-height: var(--tap); padding: 0; }
+/* De telling als zin, voor de schermlezer; zie paintCardCounts(). */
 .cb-count {
   font-size: var(--fs-1); font-weight: 700; letter-spacing: 0;
   text-transform: none; color: var(--ink-2);
   font-variant-numeric: tabular-nums;
 }
-.cb-body { padding-top: var(--s-2); }
-.cb-body .hint { margin-top: 0; margin-bottom: var(--s-3); }
 /* De hint en "Alles terugleggen" delen één rastervak: de sleuf is altijd zo
    hoog als de hoogste van de twee, dus het raster eronder verschuift geen
    pixel als er een kaart weg gaat (anders zakt de tegel onder je vinger mee).
@@ -1095,14 +1150,9 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 /* ============================================================
    EIGEN KAARTEN — het veld in Instellingen en de maker.
    ============================================================ */
-/* Eén rij tegels die opzij schuift, met de plus vooraan: veertig kaarten
-   onder elkaar zouden Voorkeuren een scherm ver wegduwen. Ruimte rechts en
-   onder voor de slagschaduw, zoals .cb-index. */
-.eigen-rij {
-  display: flex; gap: var(--s-2); overflow-x: auto; overscroll-behavior-x: contain;
-  padding: 0 var(--lift-1) var(--lift-1) 0;
-}
-.eigen-rij .pv { flex: 0 0 84px; min-height: 100px; justify-content: center; }
+/* Hetzelfde raster als de gewone kaarten (.cards), met de plus vooraan:
+   veertig kaarten lopen naar beneden door, niet opzij uit beeld. */
+.eigen-rij .pv { justify-content: center; }
 .eigen-rij .pv img { display: block; width: 60px; height: 60px; object-fit: cover; }
 /* Uit: de kaarten wijken terug; de gekozen Uit op de kopregel zegt het ook. */
 .eigen-rij.uit .eigen-tegel img { opacity: .4; }
@@ -1113,16 +1163,6 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 .eigen-rij .eigen-plus { border-style: dashed; box-shadow: none; }
 .eigen-rij .eigen-plus:active { transform: none; background: var(--paper-2); }
 .eigen-plus svg { width: 34px; height: 34px; }
-/* De kopregel zoals Geluid: naam links, Aan en Uit rechts; de rij eronder. */
-.field.eigen { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; row-gap: var(--s-3); }
-.field.eigen > legend { float: left; margin: 0; min-height: var(--tap); display: flex; align-items: center; }
-.field.eigen > .chips { flex-wrap: nowrap; }
-.field.eigen > .chips > .chip { flex: 0 0 auto; width: 76px; min-height: var(--tap); padding: 0; }
-.field.eigen > .eigen-rij { flex: 1 0 100%; min-width: 0; }
-.field.eigen legend .cb-count { margin-left: var(--s-1); }
-/* Op 320 px passen naam, aantal en Aan/Uit niet op één regel; de tegels
-   tellen dan zelf. */
-@media (max-width: 379px) { .field.eigen legend .cb-count { display: none; } }
 
 /* Het beeld op de kaart: zo groot als een emoji tekent (die is breder dan
    haar lettergrootte, zie sizeCard()), vierkant. Een tekening houdt de
@@ -2792,23 +2832,37 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
         </div>
       </fieldset>
 
-      <!-- De bak zelf: alle kaarten waar uit getrokken kan worden, met de
-           telling in de vouwregel. De greep van een potje bestaat pas bij de
-           start (newGame), dus wat je hier ziet kan niet verouderen.
-           Dichtgeklapt, want het zijn 90 tot 275 tegels. -->
-      <details class="cardbox" id="cardBox">
-        <summary>
-          Alle kaarten
-          <span class="cb-count" id="cbCount"></span>
-        </summary>
-        <div class="cb-body">
+      <!-- De kaartenbak: alles waar een potje uit getrokken kan worden, als
+           twee stapels naast elkaar -- de gewone kaarten van deze
+           moeilijkheid en jullie eigen kaarten. Eén vorm en één plek voor
+           het getal, zodat het één ding leest. Een tik op een stapel laat
+           hem inzakken en legt zijn kaarten in de lade eronder; één lade
+           tegelijk. De greep van een potje bestaat pas bij de start
+           (newGame), dus wat je hier ziet kan niet verouderen. -->
+      <fieldset class="field bak" id="bakVeld">
+        <legend>Kaartenbak</legend>
+        <div class="stapels">
+          <button class="stapel" id="stGewoon" aria-expanded="false" aria-controls="ladeGewoon">
+            <span class="waaier" id="waaierGewoon" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="st-naam">Gewone</span>
+            <span class="st-tal" id="cbCount"></span>
+          </button>
+          <!-- Zonder eigen kaarten is dit een lege plek (.leeg, gestippeld en
+               plat, zoals de plus) en opent een tik meteen de maker. -->
+          <button class="stapel" id="stEigen" aria-expanded="false" aria-controls="ladeEigen">
+            <span class="waaier" id="waaierEigen" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="st-naam">Eigen</span>
+            <span class="st-tal" id="eigenTel"></span>
+          </button>
+        </div>
+
+        <div class="lade" id="ladeGewoon" hidden>
           <!-- Eén sleuf, twee bewoners: de zin die belooft dat het terug kan,
                en de knop die dat doet. Zie .cb-slot -- de knop mag hier géén
                hidden dragen, en paintCardCounts() mag hem er ook niet op
                zetten; de klasse op de sleuf schakelt. -->
           <div class="cb-slot" id="cbSlot">
-            <p class="hint">Tik op een kaart om ze weg te leggen: dan komt ze in geen
-              enkel potje meer terug. Nog een tik legt ze terug.</p>
+            <p class="hint">Tik op een kaart om ze weg te leggen. Nog een tik legt ze terug.</p>
             <button class="btn-plain" id="btnRestoreAll">Alles terugleggen</button>
           </div>
           <!-- De weigering bij de ondergrens, met een regel die zegt waarom:
@@ -2819,28 +2873,27 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
           <div class="cb-index" id="cbIndex" role="group" aria-label="Spring naar een letter"></div>
           <div class="cards" id="cbAll"></div>
         </div>
-      </details>
-      <!-- Eigen kaarten: een foto van oma, de hond of de knuffel, met het
-           woord eronder. Een rij tegels met de plus vooraan, open en niet
-           ingeklapt: dit is het enige veld dat het spel van jullie maakt,
-           en een lege rij zegt meteen dat er nog niets in zit. Een tik op
-           een tegel opent dezelfde maker om haar aan te passen. -->
-      <fieldset class="field eigen" id="eigenVeld">
-        <legend>Eigen kaarten <span class="cb-count" id="eigenTel"></span></legend>
-        <!-- Uit als er bezoek is: "Bobby" zegt een vriendje niets. Op de
-             kopregel, zoals Geluid; pas als er een kaart is. -->
-        <div class="chips" id="eigenAanChips" role="radiogroup" aria-label="Eigen kaarten in het spel" hidden>
-          <button class="chip" role="radio" aria-checked="false" data-aan="1">Aan
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-          <button class="chip" role="radio" aria-checked="false" data-aan="0">Uit
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-        </div>
-        <!-- Eén ingang: een lege kaart met een plus, vooraan de rij. Foto of
-             tekening kies je in de maker. -->
-        <div class="eigen-rij" id="eigenRij">
-          <button class="pv eigen-plus" id="btnEigenNieuw" aria-label="Nieuwe kaart">
-            <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-plus"/></svg><small>Nieuw</small>
-          </button>
+
+        <!-- Eigen kaarten: een foto van oma, de hond of de knuffel, met het
+             woord eronder. In hetzelfde raster als de gewone kaarten, met de
+             plus vooraan: veertig kaarten lopen naar beneden door, niet
+             opzij uit beeld. Een tik op een tegel opent dezelfde maker. -->
+        <div class="lade" id="ladeEigen" hidden>
+          <!-- Uit als er bezoek is: "Bobby" zegt een vriendje niets. -->
+          <div class="lade-kop">
+            <span id="eigenAanNaam">In elk potje</span>
+            <div class="chips" id="eigenAanChips" role="radiogroup" aria-labelledby="eigenAanNaam">
+              <button class="chip" role="radio" aria-checked="false" data-aan="1">Aan
+                <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+              <button class="chip" role="radio" aria-checked="false" data-aan="0">Uit
+                <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+            </div>
+          </div>
+          <div class="cards eigen-rij" id="eigenRij">
+            <button class="pv eigen-plus" id="btnEigenNieuw" aria-label="Nieuwe kaart">
+              <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-plus"/></svg><small>Nieuw</small>
+            </button>
+          </div>
         </div>
       </fieldset>
 
@@ -3857,10 +3910,11 @@ let settings = {
   /* De regeluitleg staat open tot je één keer een spel gestart hebt. Daarna
      klapt ze dicht en blijft dat, tenzij iemand haar zelf weer openzet. */
   rulesOpen: true,
-  /* De kaartenbak begint dichtgeklapt -- 90 tot 275 tegeltjes zijn niets
-     wat je elke avond langs wil scrollen -- maar wie hem openzet, vindt
-     hem de volgende keer open. Zelfde afspraak als bij de regeluitleg. */
-  cardsOpen: false,
+  /* Welke lade van de kaartenbak openstaat: null, "gewoon" of "eigen".
+     Dicht om te beginnen -- 90 tot 275 tegeltjes zijn niets wat je elke
+     avond langs wil scrollen -- maar wie er een opent, vindt haar de
+     volgende keer open. Zelfde afspraak als bij de regeluitleg. */
+  lade: null,
   /* Weggelegde kaarten, op het woord en niet op de emoji: een betere tekening
      voor hetzelfde woord houdt de keuze van de volwassene. Eén lijst voor
      alle standen. */
@@ -3885,6 +3939,13 @@ function load() {
   // opslag kan er van alles in gezet hebben. Alles wat geen lijst van
   // woorden is, telt als "niets weggelegd".
   if (!Array.isArray(settings.hidden)) settings.hidden = [];
+  // De bak was een vouwregel (cardsOpen); open is nu de lade met gewone
+  // kaarten.
+  if ("cardsOpen" in settings) {
+    if (settings.cardsOpen && settings.lade == null) settings.lade = "gewoon";
+    delete settings.cardsOpen;
+  }
+  if (settings.lade !== "gewoon" && settings.lade !== "eigen") settings.lade = null;
   settings.hidden = settings.hidden.filter(w => typeof w === "string");
   // De tijd kiest uit vier knoppen. Een waarde ertussenin (van de schuif
   // die er vroeger stond, of een kapotte opslag) gaat naar de dichtstbijzijnde.
@@ -4020,24 +4081,24 @@ function paintSetup() {
   $$("#secsChips .chip").forEach(c =>
     c.setAttribute("aria-checked", String(Number(c.dataset.secs) === settings.secs)));
   $("#rules").open = !!settings.rulesOpen;
-  $("#cardBox").open = !!settings.cardsOpen;
   paintCards();
   paintEigen();
 }
 
 /* ==============================================================
    DE KAARTENBAK
-   buildCards() bouwt het raster opnieuw op, alleen bij een andere
-   stand of de eerste keer openen: anders springt de tegel onder je
-   vinger weg. paintCardCounts() zet de getallen bij, elke keer, ook
-   dichtgeklapt. Wegleggen en terugleggen zetten één klasse om; de
+   Twee stapels, één lade tegelijk (zetLade, paintLade). buildCards()
+   bouwt het raster opnieuw op, alleen bij een andere stand of de
+   eerste keer openen: anders springt de tegel onder je vinger weg.
+   paintCardCounts() zet de getallen en de waaier bij, elke keer, ook
+   dicht. Wegleggen en terugleggen zetten één klasse om; de
    tegel blijft op haar plek in het alfabet.
    ============================================================== */
 let cardsBuilt = null;    // voor welke stand het raster nu klaarstaat
 
 function paintCards() {
   paintCardCounts();
-  if (!$("#cardBox").open) return;
+  if (settings.lade !== "gewoon") return;
   if (cardsBuilt !== settings.tier) { buildCards(); cardsBuilt = settings.tier; }
 }
 
@@ -4123,9 +4184,13 @@ function paintCardCounts() {
   const bak = pool.filter(c => !weg.has(c[1])).length;
   const hier = pool.length - bak;
 
-  $("#cbCount").textContent = hier
-    ? bak + " in het spel · " + hier + " weggelegd"
-    : bak + " in het spel";
+  $("#cbCount").textContent = bak;
+  $("#stGewoon").setAttribute("aria-label", "Gewone kaarten: " + bak + " in de bak" +
+    (hier ? ", " + hier + " weggelegd" : ""));
+  /* Op de stapel ligt de eerste kaart van deze stand: wie Moeilijkheid
+     omzet, ziet de stapel eronder meeveranderen. */
+  const boven = DECKS[settings.tier].find(c => !weg.has(c[1]));
+  $("#waaierGewoon i:last-child").textContent = boven ? boven[0] : "";
 
   /* De knop hoort bij deze stand, niet bij de hele lijst: hij verschijnt
      alleen als er in dít lijstje iets weg ligt, en legt alleen dit lijstje
@@ -4177,13 +4242,32 @@ $("#btnRestoreAll").addEventListener("click", () => {
   paintCardCounts();
   // De knop die je net indrukte verdwijnt; zonder dit valt de focus terug
   // op <body> en is wie met een toetsenbord werkt zijn plek kwijt.
-  $("#cardBox > summary").focus();
+  $("#stGewoon").focus();
 });
 
-$("#cardBox").addEventListener("toggle", () => {
-  const open = $("#cardBox").open;
-  if (open !== !!settings.cardsOpen) { settings.cardsOpen = open; saveSettings(); }
-  if (open) paintCards();
+/* Eén lade tegelijk: een tik op de open stapel sluit haar, een tik op de
+   andere wisselt. De eigen lade bestaat pas als er een eigen kaart is;
+   tot dan opent de lege stapel meteen de maker. */
+function eigenLade() { return !eigenStuk && eigen.kaarten.length > 0; }
+function zetLade(l) {
+  if (l === "eigen" && !eigenLade()) l = null;
+  if (settings.lade !== l) { settings.lade = l; saveSettings(); }
+  paintLade();
+}
+function paintLade() {
+  let l = settings.lade;
+  if (l === "eigen" && !eigenLade()) l = null;
+  $("#stGewoon").setAttribute("aria-expanded", String(l === "gewoon"));
+  $("#stEigen").setAttribute("aria-expanded", String(l === "eigen"));
+  $("#ladeGewoon").hidden = l !== "gewoon";
+  $("#ladeEigen").hidden = l !== "eigen";
+  if (l === "gewoon") paintCards();
+}
+$("#stGewoon").addEventListener("click", () =>
+  zetLade(settings.lade === "gewoon" ? null : "gewoon"));
+$("#stEigen").addEventListener("click", () => {
+  if (!eigenLade()) { openMaker(null); return; }
+  zetLade(settings.lade === "eigen" ? null : "eigen");
 });
 
 /* ==============================================================
@@ -4297,9 +4381,8 @@ function zetTeken(el, kaart) {
 
 /* ---- het veld in Instellingen ---- */
 function paintEigen() {
-  const veld = $("#eigenVeld");
-  veld.hidden = eigenStuk;
-  if (eigenStuk) return;
+  $("#stEigen").hidden = eigenStuk;
+  if (eigenStuk) { paintLade(); return; }
   const rij = $("#eigenRij");
   rij.querySelectorAll(".eigen-tegel").forEach(b => b.remove());
   eigen.kaarten.forEach(k => {
@@ -4314,11 +4397,33 @@ function paintEigen() {
   });
   const n = eigen.kaarten.length;
   $("#btnEigenNieuw").hidden = n >= EIGEN_MAX;
-  $("#eigenTel").textContent = !n ? "" : n + (n === 1 ? " kaart" : " kaarten");
-  $("#eigenAanChips").hidden = !n;
   $("#eigenRij").classList.toggle("uit", !eigen.aan);
   $$("#eigenAanChips .chip").forEach(c =>
     c.setAttribute("aria-checked", String((c.dataset.aan === "1") === eigen.aan)));
+
+  /* De stapel: leeg een gestippelde plek met de plus, anders de eerste
+     kaart bovenop, het getal, en "uit" als ze niet meedoen. */
+  const st = $("#stEigen");
+  const uit = n > 0 && !eigen.aan;
+  st.classList.toggle("leeg", !n);
+  st.classList.toggle("uit", uit);
+  st.setAttribute("aria-label", n
+    ? "Eigen kaarten: " + n + (uit ? ", uit" : "")
+    : "Nieuwe eigen kaart");
+  const tal = $("#eigenTel");
+  tal.textContent = n;
+  if (uit) { const s = document.createElement("small"); s.textContent = "uit"; tal.appendChild(s); }
+  const voor = $("#waaierEigen i:last-child");
+  voor.textContent = "";
+  if (!n) {
+    voor.innerHTML = '<svg viewBox="0 0 100 100"><use href="#i-plus"/></svg>';
+  } else {
+    const img = document.createElement("img");
+    img.alt = ""; img.draggable = false;
+    img.src = beelden.get(eigen.kaarten[0].id) || "";
+    voor.appendChild(img);
+  }
+  paintLade();
 }
 
 $("#eigenAanChips").addEventListener("click", e => {
@@ -4955,6 +5060,8 @@ $("#mkBewaar").addEventListener("click", async () => {
   }
   mk = null;            // bewaard: geen klad
   sluitMaker();
+  // De lade gaat open op de kaart die je net maakte.
+  settings.lade = "eigen"; saveSettings();
   paintEigen();
   const tegel = $(`#eigenRij .eigen-tegel[data-id="${id}"]`);
   if (tegel) {
@@ -4982,7 +5089,7 @@ $("#mkWeg").addEventListener("click", () => {
   mk = null;
   sluitMaker();
   paintEigen();
-  $("#btnEigenNieuw").focus({ preventScroll: true });
+  (eigenLade() ? $("#btnEigenNieuw") : $("#stEigen")).focus({ preventScroll: true });
 });
 $("#mkDicht").addEventListener("click", sluitMaker);
 /* Het waas naast het paneel sluit ook, zoals bij terugkijken. */
