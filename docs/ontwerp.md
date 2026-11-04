@@ -200,10 +200,11 @@ tel je de scheve kaarten van de stapel mee en lijkt elke hoek een trap.
 
 ## De klok windt af
 
-Er zijn twee voortgangsmeters in deze app: de rand om de kaart en de
-stilstaande wijzerplaat in het pauzepaneel (`#pauseRect`). De aftelschijf had
-er ook een (`#cdArc`); die is weg, zie "Eén taal voor een druk". Ze rekenen
-allebei met `perim * (1 - p)`, en dat betekent
+Er is één voortgangsmeter in deze app: de rand om de kaart. De aftelschijf
+had er ook een (`#cdArc`); die is weg, zie "Eén taal voor een druk". En het
+pauzepaneel had een stilstaande wijzerplaat (`#pauseRect`); die is weg sinds
+de pauze de kaart omdraait en haar eigen band overneemt (zie "Pauze draait
+de kaart om"). De band rekent met `perim * (1 - p)`, en dat betekent
 dat de inkt aan haar beginpunt vast blijft zitten terwijl het vrije uiteinde
 zich terugtrekt. De band windt dus af, tegen de wijzers in, zoals een
 keukenwekker die je hebt opgedraaid.
@@ -1080,6 +1081,46 @@ is de kaart die zegt wat er nu komt.
   winnaar). Bij gelijkspel blijft het papier.
 - Bij beperkte beweging gebeurt alles meteen.
 
+## Pauze draait de kaart om
+
+Het pauzepaneel lag als tweede vel papier midden op de kaart. Haar randen en
+haar gouden band staken eromheen uit, en op 320 bij 568 vielen de twee bijna
+samen, zodat het op een misdruk leek: drie randen waar er twee horen. Liggend
+was het woord onder de tekening door de sluier van 82% nog te lezen, dus wie
+pauzeerde kon spieken. Op het paneel stond een vierkante wijzerplaat, een
+kleine kopie van de band die er pal achter lag, en twee pauzebalken naast
+de pauzetegel die rechtsboven al staat. Drie versies in de echte app
+gefotografeerd; Max koos deze.
+
+Nu draait pauze de kaart om, met dezelfde twee helften als elk einde:
+`draaiPauze()` maakt de kaart smal (`OMDRAAI`) en laat het paneel op
+dezelfde plek breed worden (180 ms, `--e-uit`). Het paneel ligt op de
+gemeten plek van de kaart (`legPaneel()`, `--kx/--ky/--kw/--kh`), met
+dezelfde contour en schaduw, en zijn rand is een kopie van haar band: pad,
+`viewBox`, streepjes en `data-time` worden overgenomen, dus ook de dikkere
+band en het warme papier onder vijf tellen. Erop: de stand en de twee
+deuren. Verder draait de kaart weer om (`kaartBoven()`): het paneel is
+meteen weg, zoals altijd, en de kaart wordt op haar plek weer breed.
+
+- **De maat komt uit de opmaak.** De kaart staat tijdens de pauze op
+  `scaleX(0)`, dus `legPaneel()` neemt `offsetWidth`/`offsetHeight` en
+  alleen het midden uit `getBoundingClientRect()`. Draaien met het paneel
+  open legt het opnieuw (via `remeasure()`).
+- **De haast gaat eraf.** `.cardslot.hurry` wiebelt de kaart in de laatste
+  vijf tellen; onder een paneel dat precies op haar past, staken de hoeken
+  dan om de beurt uit. `openPause()` haalt de klasse weg, `runClock()` zet
+  hem bij verder terug.
+- **Past het niet, dan een los paneel.** Liggend op 568 bij 320 is de kaart
+  nog geen 60 px; dan meet `legPaneel()` overloop en valt terug op het
+  paneel in het midden.
+- **Op de overdracht draait de opdrachtkaart om** (`#hoRoundCard`), op
+  Max' vraag om overal hetzelfde gedrag. Daar loopt geen klok, dus de
+  achterkant heeft geen band (`#pauze.klok` staat alleen tijdens een beurt)
+  en geen stand: die staat op de voorkant, en het paneel draagt alleen de
+  twee deuren. De startknop blijft verborgen zolang het paneel openstaat,
+  anders staan er twee gouden speeltekens.
+- Bij beperkte beweging draait er niets; het paneel ligt er meteen.
+
 ## Vertrekken mag, als er niets achter wacht
 
 De ladder in `index.html` zegt "geen vertrekanimaties", en de reden erbij is
@@ -1143,7 +1184,7 @@ Wat er níet bij komt: een aftelling bij hervatten. Die is geopperd -- de
 klok begint immers op de tik -- maar het aftellen bestaat om een strijkende
 vinger tijdens het doorgeven op te vangen, en bij hervatten gaat het toestel
 niet van hand. Je hebt het paneel zelf opengedaan en de stilstaande
-wijzerplaat staat erin; je weet waar je staat.
+band staat op de achterkant van de kaart; je weet waar je staat.
 
 ## Eén pen voor tekening en mascotte
 

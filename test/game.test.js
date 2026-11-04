@@ -314,7 +314,18 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   await startTurn();
   await page.waitForTimeout(300);
   await page.click('#btnPauze');
-  await page.waitForTimeout(250);
+  await page.waitForTimeout(450);
+
+  // De pauze draait de kaart om: het paneel ligt precies op haar plek, en
+  // dekt dus ook het woord af.
+  const dekt = await page.evaluate(() => {
+    const k = document.querySelector('#card'), p = document.querySelector('#pauze .panel');
+    const kr = k.getBoundingClientRect(), pr = p.getBoundingClientRect();
+    const kx = kr.left + kr.width / 2, ky = kr.top + kr.height / 2;
+    return Math.abs(pr.width - k.offsetWidth) < 1.5 && Math.abs(pr.height - k.offsetHeight) < 1.5 &&
+           Math.abs(pr.left + pr.width / 2 - kx) < 1.5 && Math.abs(pr.top + pr.height / 2 - ky) < 1.5;
+  });
+  ok(dekt, 'het pauzepaneel ligt niet als achterkant op de kaart');
 
   // --- de achtergrond mag dicht terwijl het paneel openstaat ---
   // Eerst het toestel zelf: inert maakt de speelknop niet meer focusbaar,
@@ -337,12 +348,14 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   // Dezelfde tweede laag voor de pauzeknop zelf: een herhaalde aanroep mag
   // de bevroren tijd niet opnieuw bemonsteren, anders eet elke seconde die
   // er zo bijkomt een seconde van de beurt (zie openPause()).
-  const dial = await page.textContent('#pauseSecs');
+  // De achterkant van de kaart neemt de bevroren band over bij het openen.
+  const band = sel => page.evaluate(s => document.querySelector(s).style.strokeDashoffset, sel);
+  const dial = await band('#pauseBand');
   await page.waitForTimeout(1200);
   await page.evaluate(() =>
     document.querySelector('#btnPauze').dispatchEvent(new MouseEvent('click', { bubbles: true })));
   await page.waitForTimeout(150);
-  ok(await page.textContent('#pauseSecs') === dial,
+  ok(await band('#pauseBand') === dial,
      'een herhaalde pauze-tik eet tijd van de beurt');
 
   await hold(page, '#btnStop', 1400);
@@ -432,12 +445,12 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   await page.waitForTimeout(300);
   await zicht('hidden');
   ok(await paneelOpen(), 'wegklikken tijdens een beurt opent het pauzepaneel niet');
-  const bevroren = await page.textContent('#pauseSecs');
+  const bevroren = await page.evaluate(() => document.querySelector('#timerBand').style.strokeDashoffset);
   await page.waitForTimeout(400);
   await zicht('visible');
   await page.waitForTimeout(1200);
   ok(await paneelOpen(), 'bij terugkomst is het pauzepaneel alweer dicht');
-  ok(await page.textContent('#pauseSecs') === bevroren,
+  ok(await page.evaluate(() => document.querySelector('#timerBand').style.strokeDashoffset) === bevroren,
      'de klok loopt weer zonder dat iemand op verder tikte');
   // Voorwaardelijk, zodat een paneel dat nooit openging hierboven een
   // melding geeft en niet een time-out op een knop die er niet is.

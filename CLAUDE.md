@@ -138,8 +138,9 @@ het silhouet, met de stapel eronder weggehaald (`.cardslot .under` op
 gouden plaat als schaduw naar rechtsonder. Een contour die je niet wilt is
 `border: 0`, geen kleur die toevallig wegvalt.
 
-**De klok windt af.** Beide meters (kaartrand, `#pauseRect`) rekenen met `perim * (1 - p)` en zijn verankerd
-op twaalf uur. Kies bij een nieuwe meter het ankerpunt bewust. De band blijft
+**De klok windt af.** De meter is de rand om de kaart: hij rekent met
+`perim * (1 - p)` en is verankerd op twaalf uur. De pauze toont geen eigen
+klok maar neemt die band over (`legPaneel()`). Kies bij een nieuwe meter het ankerpunt bewust. De band blijft
 in één stuk, zonder inkepingen.
 
 **Vorm zegt wat het is, diepte hoe zwaar.** Eén cirkel op tapmaat per scherm,
@@ -227,7 +228,7 @@ de schijf die op nul opengaat (`.countdown.open`; `cdOut` bij beperkte
 beweging), de opdrachtkaart die op het aftellen in de grond zakt
 (`.cd-kaart`), het oplossen van de pauzesluier bij hervatten (`.uit`; alleen
 de sluier, `.overlay::before`, het paneel vervaagt nooit), de eerste helft
-van het omdraaien (`draaiOm()`), het scherm onder de titelcirkel
+van het omdraaien (`draaiOm()`, `draaiPauze()`), het scherm onder de titelcirkel
 (`naarTitel()`) en de kopie
 van de kaart die naar de teller krimpt of onder de stapel zakt
 (`kaartSpook()`): de volgende kaart ligt er dan al onder. `hidden` gaat
@@ -254,6 +255,13 @@ klassenaam pakt (`.bar` bestond al).
 in de balk tijdens het spelen. Het vliegende punt draagt dezelfde huid, gaat
 via Web Animations, en het getal plus de wip horen bij de landing
 (`landFly()`), ook bij een schermwissel.
+
+**Pauze draait de kaart om.** Tijdens een beurt ligt het pauzepaneel als
+achterkant op de gemeten plek van de kaart (`legPaneel()`), met haar eigen
+stilstaande band als rand en de stand en de twee deuren erop. Geen tweede
+klok, geen pauzebalken, en het woord ligt afgedekt. Verder draait haar weer
+om (`kaartBoven()`). Op de overdracht draait de opdrachtkaart zo om, met
+alleen de deuren. Past de achterkant niet op de kaart, dan een los paneel.
 
 **Eén stand, twee schermen.** `buildTally()` bouwt de stand voor
 `#hoTally` en `#pauseTally`. Ook de stijlen staan in één selectorlijst met
