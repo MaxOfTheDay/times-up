@@ -379,7 +379,7 @@ knop wisselt met `visibility`, nooit met `hidden`.
 - Elk teken op een kaart gaat door `zetTeken()`. Een foto ligt kaal op het
   papier (`.kaal`, geen inktlijn: om een vierkant is dat een derde rand);
   een tekening houdt de pen van `.glyph`.
-- Het veld begint met één lege kaart met een plus (`#btnEigenNieuw`). Foto
+- Het veld begint met één lege kaart met een plus (`#btnEigenNieuw`), gestippeld en plat. Foto
   of tekening kies je in de kop van de maker (`#mkSoort`, `wisselSoort()`):
   het woord gaat mee, wat er al was blijft als klad, en een nieuwe kaart
   opent in de soort van de vorige keer (`tijdisom.soort`). Een bestaande
@@ -395,10 +395,15 @@ knop wisselt met `visibility`, nooit met `hidden`.
   krijgt de pen van `.glyph`, geen kader.
 
 **Toveren.** De toverstaf vraagt een tekening aan een Cloudflare Worker
-(`worker/tover.mjs`, uitgerold door `.github/workflows/worker.yml`). Het is
-de enige plek waar de app het net op gaat, alleen op een tik van de
-volwassene, en alleen met het woord. Zonder net, of als het dagbudget op is,
-werkt alles behalve de staf.
+(`worker/tover.mjs`, uitgerold door `.github/workflows/worker.yml`, adres in
+`TOVER_URL`; leeg is geen staf). Het is de enige plek waar de app het net op
+gaat, alleen op een tik van de volwassene, en alleen met het woord. Zonder
+net, of als het dagbudget op is, werkt alles behalve de staf.
+
+- De staf ligt midden op het lege vel van Tekenen (`#mkStaf`), daarna in het
+  gereedschap (`#mkStafRij`); er is geen derde soort kaart.
+- Een getoverde tekening is één actie in `mk.acties` (`{ beeld }`) die het
+  vel vervangt, met de achtergrond weggeknipt (`knipUit()`).
 
 ## Tests
 

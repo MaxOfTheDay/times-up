@@ -2470,7 +2470,11 @@ code: een foto of tekening en het woord, in Instellingen.
 - **Een rij die opzij schuift, met één lege kaart vooraan.** Veertig tegels
   onder elkaar zouden Voorkeuren een scherm ver wegduwen. Vooraan staat een
   lege kaart met een stippelrand en een plus, ook als de rij leeg is: ze
-  leest als "kaart erbij" en staat altijd op dezelfde plek. Twee tegels
+  leest als "kaart erbij" en staat altijd op dezelfde plek. Ze ligt plat,
+  zonder schaduw: stippelrand en slagschaduw samen zeiden "lege plek" en
+  "stuk dat hier ligt" tegelijk. Een druk kleurt haar `--paper-2`, zoals een
+  putje. Een volle tegel met een plus verloor de lege plek, een tegel in de
+  stippelrand gaf een rechthoek in een rechthoek. Twee tegels
   (camera en potlood) zonder naam stonden tussen de kaarten, zagen eruit als
   kaarten, en lieten je in de maker vastzitten in de soort waarop je had
   getikt; een derde voor toveren zou niemand meer raden.
@@ -2577,6 +2581,23 @@ toveren); de afwegingen staan hieronder.
   alleen `op` krijgt een eigen teken.
 - **Getoetst** in `test/tover.test.js` met een nagebootste Workers AI. Of de
   tekening mooi is, ziet alleen een mens: daarvoor is het proefvel.
+- **De staf zit in Tekenen, niet in een derde soort.** Een getoverde kaart ís
+  een tekening: daarna kun je bijkleuren en gummen. Een derde knop "Toveren"
+  naast Foto en Tekenen was een weg te veel. Een gouden tegel naast het
+  woord las als "OK"; midden op het lege vel zegt de staf "hier komt het",
+  zoals het album in het lege fotovak. Grijs en gestippeld zonder woord (een
+  tik wijst de woordregel aan), goud met woord; "Klaar" op het toetsenbord
+  tovert ook. Staat er iets op het vel, dan staat de staf in het gereedschap,
+  voor nog een.
+- **Een getoverde tekening is een stap.** Ze komt als één actie in
+  `mk.acties` die het vel vervangt; stap terug haalt de vorige terug, de
+  prullenbak alles. De crème achtergrond knipt de telefoon weg (`knipUit()`,
+  vanaf de randen, met een halve rand), zodat ze doorzichtig is zoals een
+  getekende en de pen van `.glyph` krijgt.
+- **Wachten is rastertoon.** Terwijl Workers AI tekent (twee tot vijf tellen)
+  zwellen de punten van het vel, geen draaiend wieltje. Zonder net een
+  wifi-teken op de staf, met het dagbudget op de zandloper (`#i-glass`);
+  een afgekeurd woord of een andere fout laat de staf schudden.
 
 ## Weggaan kost niets
 

@@ -30,15 +30,17 @@ const MAX_WOORD = 14;            // zoals het woordveld in de maker
    Klein gehouden: het taalmodel is het eigenlijke slot, dit is de vangrail. */
 const NOOIT = /\b(seks|sex|naakt|bloot|porno|lul|kut|tiet|pik|neuk|dood|lijk|bloed|moord|wapen|pistool|geweer|mes|bom|drugs|nazi|hitler)\b/i;
 
-const STIJL = 'A cute flat sticker illustration of {X} for a children\'s card game, ' +
-  'centered, the whole subject visible, thick bold black outline, ' +
-  'three or four flat colours, no shading, no gradient, no text, no letters, ' +
-  'plain flat cream background, simple shapes a four-year-old recognises.';
+/* Geen woorden als "game", "card" of "no text" in de stijl: FLUX schnell
+   kent geen ontkenning en schreef ze er als letters bij ("Flat game", "4"). */
+const STIJL = '{X}, cute flat sticker illustration, centered, the whole subject ' +
+  'visible, thick bold black outline, few flat bright colours, simple shapes, ' +
+  'isolated on a plain flat cream background.';
 
 const VRAAG = 'You translate one Dutch word or short phrase, typed by a parent for a ' +
   'party game with young children, into a short English noun phrase that names ' +
   'the same thing (for example: "luiaard" -> "a sloth", "brandweerauto" -> ' +
-  '"a fire engine", "oma" -> "a grandmother"). Answer with JSON only: ' +
+  '"a fire engine", "oma" -> "a grandmother", "bank" -> "a sofa"). Pick the meaning a ' +
+  'young child would mean. Answer with JSON only: ' +
   '{"en": "<english>", "ok": true} if it is a concrete, harmless thing a young ' +
   'child could draw, or {"en": "", "ok": false} if it is violent, sexual, ' +
   'scary, hateful, a brand, a real famous person, or not a thing at all.';
@@ -49,15 +51,27 @@ function antwoord(data, status, herkomst) {
   return new Response(JSON.stringify(data), { status: status || 200, headers: h });
 }
 
-/* Het eerste JSON-object uit een antwoord dat er meer omheen kan zetten. */
+/* Het eerste JSON-object uit een antwoord dat er meer omheen kan zetten.
+   Workers AI geeft een antwoord dat zelf JSON is soms al ontleed terug. */
 export function leesOordeel(tekst) {
-  const m = String(tekst || '').match(/\{[\s\S]*?\}/);
-  if (!m) return null;
+  let o = tekst && typeof tekst === 'object' ? tekst : null;
+  if (!o) {
+    const m = String(tekst || '').match(/\{[\s\S]*?\}/);
+    if (!m) return null;
+    try { o = JSON.parse(m[0]); } catch (e) { return null; }
+  }
   try {
-    const o = JSON.parse(m[0]);
     const en = typeof o.en === 'string' ? o.en.trim().slice(0, 60) : '';
     return { ok: o.ok === true && !!en, en: en };
   } catch (e) { return null; }
+}
+
+/* Een fout van Workers AI over het dagbudget heet anders dan een gewone.
+   Bij "stuk" zegt waarom kort welke stap het was: zonder logging is dat de
+   enige weg om het te zien. Het bevat nooit het woord. */
+function stuk(stap, e) {
+  const fout = soortFout(e);
+  return fout === 'op' ? { fout } : { fout, waarom: (stap + ': ' + String(e && (e.message || e))).slice(0, 160) };
 }
 
 /* Een fout van Workers AI over het dagbudget heet anders dan een gewone. */
@@ -74,7 +88,7 @@ async function base64(beeld) {
   return btoa(s);
 }
 
-export async function teken(woord, env, rnd) {
+export async function teken(woord, env) {
   woord = String(woord || '').trim().toLocaleLowerCase('nl');
   if (!woord || woord.length > MAX_WOORD || NOOIT.test(woord)) return { fout: 'nee' };
   let oordeel;
@@ -84,18 +98,17 @@ export async function teken(woord, env, rnd) {
       max_tokens: 40, temperature: 0
     });
     oordeel = leesOordeel(r && r.response);
-  } catch (e) { return { fout: soortFout(e) }; }
-  if (!oordeel) return { fout: 'stuk' };
+    if (!oordeel) return { fout: 'stuk', waarom: 'oordeel: ' + typeof (r && r.response) };
+  } catch (e) { return stuk('taal', e); }
   if (!oordeel.ok) return { fout: 'nee' };
   try {
     const r = await env.AI.run(TEKENAAR, {
       prompt: STIJL.replace('{X}', oordeel.en),
-      steps: 4,
-      seed: Math.floor((rnd || Math.random)() * 2147483647)
+      steps: 4   // FLUX.1 schnell kent geen seed: elke vraag tekent al anders
     });
-    if (!r || !r.image) return { fout: 'stuk' };
+    if (!r || !r.image) return { fout: 'stuk', waarom: 'teken: geen beeld' };
     return { beeld: 'data:image/jpeg;base64,' + await base64(r.image), en: oordeel.en };
-  } catch (e) { return { fout: soortFout(e) }; }
+  } catch (e) { return stuk('teken', e); }
 }
 
 export default {

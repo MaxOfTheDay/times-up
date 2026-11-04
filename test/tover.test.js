@@ -76,9 +76,10 @@ const { pathToFileURL } = require('node:url');
     let r = await Worker.fetch(vraag('kameel', THUIS), { AI: nepAI('', '4006: you have used up your daily free allocation of 10,000 neurons') });
     assert.equal(r.status, 503); assert.deepEqual(await r.json(), { fout: 'op' });
     r = await Worker.fetch(vraag('kameel', THUIS), { AI: nepAI('', 'internal error') });
-    assert.equal(r.status, 502); assert.deepEqual(await r.json(), { fout: 'stuk' });
+    assert.equal(r.status, 502); assert.equal((await r.json()).fout, 'stuk');
     r = await Worker.fetch(vraag('kameel', THUIS), { AI: nepAI('ik weet het niet') });
-    assert.deepEqual(await r.json(), { fout: 'stuk' });
+    const j = await r.json();
+    assert.equal(j.fout, 'stuk'); assert.ok(!/kameel/.test(j.waarom), 'het woord staat in waarom');
   });
 
   await t('de limiet per adres geeft "druk"', async () => {
@@ -96,6 +97,8 @@ const { pathToFileURL } = require('node:url');
     assert.equal(W.leesOordeel('niets'), null);
     assert.deepEqual(W.leesOordeel('{"en":"a dog","ok":"true"}'), { ok: false, en: 'a dog' });
     assert.deepEqual(W.leesOordeel('{"en":"","ok":true}'), { ok: false, en: '' });
+    // Workers AI ontleedt een JSON-antwoord soms zelf.
+    assert.deepEqual(W.leesOordeel({ en: 'a camel', ok: true }), { ok: true, en: 'a camel' });
   });
 
   console.log(`toverstaf in orde (${n} toetsen)`);
