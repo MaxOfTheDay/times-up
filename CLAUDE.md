@@ -218,16 +218,21 @@ die kleur in de adem weg naar papier (`#s-play.over`, `.leeg`), zodat de
 overdracht vanaf papier volstroomt; nooit rechtstreeks naar de andere
 ploeg, want dat mengt door paars. Bij beperkte
 beweging geen vloed. De rasterpunten op die grond zijn papier op lage
-dekking (16%), geen eigen kleur, op één stilstaand raster van 12 px, getekend
+dekking, per ploeg op hetzelfde contrast (`STIP_PAPIER`: 23% op rood, 16%
+op blauw), geen eigen kleur, op één stilstaand raster van 12 px, getekend
 op één canvas per grond (`stipveld()`). Wat beweegt is rastertoon: een punt
 groeit, hij licht niet alleen op. Ze lopen van rand tot rand, zonder
 uitsparing: de stukken liggen erop (`opt.masker` is een haak, geen
 standaard). Ze bewegen alleen als iets ze indrukt (geen deining): een tik op de grond geeft een rimpel die de
 punten opzij duwt en terug laat veren: 12 px opzij en een punt tot ruim het
-dubbele, want minder leest op een telefoon als niets. Ze staan op de
-overdracht, het aftellen, de eindstand van wie won (in de ploegkleur, met
-de stralen als papier) en de titel, die van allebei de ploegen is en dus
-inkt op papier krijgt (11%, `inkt: true`); op het aftellen gaat bij elke tel
+dubbele, want minder leest op een telefoon als niets; in het dal achter de
+kam krimpen ze. Het canvas tekent tot 3x. Ze staan op de
+overdracht, het aftellen, de eindstand (in de ploegkleur van wie won, bij
+gelijkspel inkt op papier) en de titel, die van allebei de ploegen is en dus
+inkt op papier krijgt (12%, `inkt: true`). De stralen van de eindstand
+zitten ín de punten: groter binnen twaalf stralen, die rond blijven draaien
+zolang het feest in beeld is (`veldWn.stralen()`), het enige dat buiten de
+dieren uit zichzelf beweegt; op het aftellen gaat bij elke tel
 een ring vanuit de schijf (`telGolf()`), op de eindstand barst het vuurwerk
 in de punten (`vuurwerk()`). Er loopt alleen een lus zolang er iets beweegt; bij beperkte
 beweging één stilstaand beeld.

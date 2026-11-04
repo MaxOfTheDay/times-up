@@ -1912,9 +1912,9 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
    10. WINNAAR
    ============================================================ */
 /* De grond van wie won: dezelfde ploegkleur met rasterpunten als op de
-   overdracht, met de stralen als papier erop. Een tint van de ploegkleur gaf
-   roze en grijsblauw, de enige kleuren in de app buiten het palet. Bij
-   gelijkspel blijft het papier, met gouden stralen. De stand staat op een
+   overdracht, en de stralen ín die punten (zie stipveld()). Een tint van de
+   ploegkleur gaf roze en grijsblauw, de enige kleuren in de app buiten het
+   palet. Bij gelijkspel blijft het papier, met inkten punten. De stand staat op een
    papieren kaart, dus er komt geen tekst op de ploegkleur. */
 #s-winner {
   justify-content: center; align-items: center; gap: 2vh; overflow: hidden;
@@ -1923,12 +1923,6 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
      de kaart staat vanaf het eerste beeld (zie landOm()). */
   transition: background-color calc(var(--t-kom) * var(--dur)) var(--e-uit);
 }
-.rays {
-  position: absolute; inset: -30%; z-index: -1;
-  display: grid; place-items: center;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.rays svg { width: 160%; height: 160%; animation: spin calc(26s / max(var(--dur), .001)) linear infinite; }
 @keyframes cheer { 0%,100% { transform: scale(1) rotate(-2deg); } 50% { transform: scale(1.07) rotate(2deg); } }
 /* Er stonden twee dezelfde mascottes op dit scherm: een grote juichende
    bovenaan en een kleine gekroonde in de stand eronder. Nu groeit de
@@ -1949,7 +1943,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 #s-winner[data-draw="1"] .tally .mascot-sm { width: min(34vw, 12vh, 130px); }
 
 @keyframes rain { to { transform: translateY(115vh) rotate(540deg); } }
-/* Achter de stand, niet erover: in het winnaarsscherm zelf, na .rays, op
+/* Achter de stand, niet erover: in het winnaarsscherm zelf, na het stipveld, op
    z-index -1. .screen opent een eigen stapelcontext, dus -1 zakt tot achter
    de inhoud van dít scherm. Anders valt er een snipper over het gezicht van
    de verliezer. */
@@ -2872,11 +2866,6 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 <!-- ========================== WINNAAR =========================== -->
 <section class="screen" id="s-winner">
   <canvas class="stipveld" id="wnVeld" aria-hidden="true"></canvas>
-  <div class="rays">
-    <svg viewBox="-100 -100 200 200" aria-hidden="true">
-      <g id="rayGroup"></g>
-    </svg>
-  </div>
   <!-- Hier en niet aan de body: zo valt ze binnen de stapelcontext van dit
        scherm en kan ze met z-index: -1 achter de stand zakken. Zie
        .confetti. -->
@@ -4953,24 +4942,33 @@ function balkMascotte() { return $("#plMascot"); }
    een ronde knop, de klok van het aftellen of de fanfare.
    - Rimpel: een golfpakket vanaf de vinger (of de schijf), twee ringen die
      uitdempen. De punten worden naar buiten geduwd en veren terug naar hun
-     plek, zoals een steentje in water. Het veld rust nooit langer dan de
-     golf duurt.
+     plek, zoals een steentje in water: op de kam groeien ze, in het dal
+     erachter krimpen ze. Het veld rust nooit langer dan de golf duurt.
+   - Stralen (alleen de eindstand): binnen twaalf stralen vanuit het midden
+     zijn de punten groter, en de stralen draaien rond zolang het feest in
+     beeld is. Het is het feest, dus het enige dat hier uit zichzelf loopt.
    Er loopt alleen een animatielus zolang er iets beweegt en de grond in
    beeld is; in rust staat er één getekend beeld. Bij beperkte beweging
    alleen dat beeld. */
+/* Papier op de ploegkleur, per ploeg: Vos rood, Uil blauw. */
+const STIP_PAPIER = [.23, .16];
 function stipveld(cv, opt) {
-  /* Op ploegkleur papier op 16%; op papier (de titel, de worp) inkt op 11%.
-     Per punt, want tijdens het onthullen ligt de grens midden in het veld.
-     De laatste waarde is hoeveel lichter een punt wordt in de rimpel. */
-  const INKT = [.11, "20, 17, 15", .16], PAPIER = [.16, "244, 235, 218", .45];
+  /* Op ploegkleur papier, op papier (de titel, de worp) inkt op 12%. Per
+     punt, want tijdens het onthullen ligt de grens midden in het veld. De
+     laatste waarde is hoeveel lichter een punt wordt in de rimpel. Papier
+     valt op rood minder op dan op blauw; STIP_PAPIER geeft per ploeg
+     hetzelfde contrast (1,27 en 1,28 tegen 1). */
+  const INKT = [.12, "20, 17, 15", .16], PAPIER = [.16, "244, 235, 218", .45];
   const CEL = 12, R0 = 2, LEEF = 2100;
+  const STRAAL_RONDE = 26000, STRALEN = 12;
   const cx = cv.getContext("2d");
   let W = 0, H = 0, punten = [], rimpels = [], raf = 0;
-  let inkt = !!opt.inkt, onthul = null;
+  let inkt = !!opt.inkt, onthul = null, stralen = -1;
   function maat() {
     const r = cv.getBoundingClientRect();
     if (!r.width || !r.height) return false;
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    /* Tot 3: op een scherm van 3x is een punt op 2x zacht aan de rand. */
+    const dpr = Math.min(3, window.devicePixelRatio || 1);
     if (r.width !== W || r.height !== H || cv.width !== Math.round(r.width * dpr)) {
       W = r.width; H = r.height;
       cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
@@ -4988,7 +4986,7 @@ function stipveld(cv, opt) {
     return true;
   }
   function actief(nu) {
-    return rimpels.some(r => nu - r.t < LEEF) || !!onthul;
+    return rimpels.some(r => nu - r.t < LEEF) || !!onthul || stralen >= 0;
   }
   /* Onthullen: de ploegkleur groeit als een cirkel uit de knop, en binnen die
      cirkel worden de punten papier. Klaar: de kleur staat op het scherm zelf,
@@ -5009,9 +5007,13 @@ function stipveld(cv, opt) {
       cx.fillStyle = onthul.kleur;
       cx.beginPath(); cx.arc(onthul.x, onthul.y, straal, 0, 6.2832); cx.fill();
     }
+    const ploeg = opt.ploeg ? opt.ploeg() : null;
+    const papierA = ploeg === null || ploeg === undefined ? PAPIER[0] : STIP_PAPIER[ploeg];
+    const draai = stralen < 0 ? 0 : (stilAan() ? 0 : (nu - stralen) / STRAAL_RONDE * 6.2832);
+    const vak = 6.2832 / STRALEN;
     for (const p of punten) {
       const m = p.m;
-      let golf = 0, ex = 0, ey = 0;
+      let golf = 0, dal = 0, ex = 0, ey = 0;
       /* De rimpel moet je zien als antwoord op je tik: 12 px opzij, een punt
          tot ruim het dubbele. Met 4,5 px las hij op een telefoon als niets. */
       for (const r of rimpels) {
@@ -5022,12 +5024,22 @@ function stipveld(cv, opt) {
         const duw = pak * demp * 12;
         ex += (p.x - r.x) / d * duw; ey += (p.y - r.y) / d * duw;
         golf = Math.max(golf, Math.min(1.6, Math.max(0, pak) * demp));
+        dal = Math.max(dal, Math.min(1, Math.max(0, -pak) * demp));
       }
       const papier = !inkt || (straal >= 0 && Math.hypot(p.x - onthul.x, p.y - onthul.y) < straal);
-      const [A0, KLEUR, LICHT_R] = papier ? PAPIER : INKT;
+      let [A0, KLEUR, LICHT_R] = papier ? PAPIER : INKT;
+      if (papier) A0 = papierA;
+      /* In een straal is de punt groter en iets voller: toon uit het raster,
+         geen vlak eroverheen. */
+      let r0 = R0;
+      if (stralen >= 0) {
+        const hoek = Math.atan2(p.y - H / 2, p.x - W / 2) - draai;
+        if ((((hoek % vak) + vak) % vak) < vak / 2) { r0 = R0 * 1.75; A0 *= 1.25; }
+      }
       const a = Math.min(1, (A0 + golf * LICHT_R) * m);
       cx.fillStyle = `rgba(${KLEUR}, ${a.toFixed(3)})`;
-      cx.beginPath(); cx.arc(p.x + ex, p.y + ey, R0 + golf * 3, 0, 6.2832); cx.fill();
+      const rad = Math.max(.5, r0 + golf * 3 - dal * r0 * .8);
+      cx.beginPath(); cx.arc(p.x + ex, p.y + ey, rad, 0, 6.2832); cx.fill();
     }
   }
   function stap(nu) {
@@ -5052,6 +5064,8 @@ function stipveld(cv, opt) {
     },
     /* Inkt op papier (de titel, de worp) of papier op ploegkleur. */
     inkt(aan) { eindOnthul(); inkt = !!aan; wek(); },
+    /* De stralen van de eindstand: aan (ze draaien vanaf nu) of uit. */
+    stralen(aan) { stralen = aan ? performance.now() : -1; wek(); },
     /* De ploegkleur groeit vanaf (x, y), vanaf straal van, tot over de
        verste hoek; daarna roept hij klaar(). */
     onthul(x, y, van, kleur, ms, klaar) {
@@ -5073,13 +5087,20 @@ const veldTi = stipveld($("#tiVeld"), {
   zichtbaar: () => $("#s-title").classList.contains("on")
 });
 const veldHo = stipveld($("#hoVeld"), {
-  zichtbaar: () => $("#s-handoff").classList.contains("on")
+  zichtbaar: () => $("#s-handoff").classList.contains("on"),
+  ploeg: () => G ? G.team : null
 });
+/* De eindstand: de grond van wie won, met de stralen in de punten. Bij
+   gelijkspel blijft het papier en worden het inkten punten, zoals op de
+   titel: van allebei de ploegen. */
+let wnPloeg = null;
 const veldWn = stipveld($("#wnVeld"), {
-  zichtbaar: () => $("#s-winner").classList.contains("on")
+  zichtbaar: () => $("#s-winner").classList.contains("on"),
+  ploeg: () => wnPloeg
 });
 const veldCd = stipveld($("#cdVeld"), {
-  zichtbaar: () => !$("#countdown").hidden
+  zichtbaar: () => !$("#countdown").hidden,
+  ploeg: () => G ? G.team : null
 });
 
 /* De rimpel op de grond van de overdracht. Alleen een tik op de grond zelf,
@@ -5590,7 +5611,9 @@ function winner() {
   const vloed = win !== null && current !== "winner" && !stilAan();
   if (win === null) scherm.style.removeProperty("--wn-grond");
   else scherm.style.setProperty("--wn-grond", vloed ? "var(--paper)" : TEAMS[win].color);
-  rays(win === null ? "#F2B705" : "#F4EBDA");
+  wnPloeg = win;
+  veldWn.inkt(win === null);
+  veldWn.stralen(true);
   /* Uitgespeeld, maar de eindstand blijft bewaard tot je het scherm verlaat:
      een herlaadbeurt of een toestel dat de app opruimt toont haar opnieuw,
      in plaats van de uitslag van de avond te wissen. Huisje, terug en
@@ -5641,20 +5664,6 @@ function winner() {
     else setTimeout(() => { if (current === "winner") feest(); }, 300);
   };
   requestAnimationFrame(stap);
-}
-
-function rays(hex) {
-  const g = $("#rayGroup");
-  g.textContent = "";
-  for (let i = 0; i < 24; i += 2) {
-    const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    const a1 = (i / 24) * 2 * Math.PI, a2 = ((i + 1) / 24) * 2 * Math.PI;
-    p.setAttribute("d",
-      `M0 0 L${Math.cos(a1) * 140} ${Math.sin(a1) * 140} L${Math.cos(a2) * 140} ${Math.sin(a2) * 140} Z`);
-    p.setAttribute("fill", hex);
-    p.setAttribute("opacity", ".16");
-    g.appendChild(p);
-  }
 }
 
 function confetti(colors) {
