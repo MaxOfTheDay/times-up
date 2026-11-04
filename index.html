@@ -229,7 +229,7 @@
   --t-kom:   .28s;   /* iets komt binnen: een scherm, een vak, een paneel */
   --t-groot: .45s;   /* een groot moment: de schijf gaat open, de kroon valt */
   --t-card:  .18s;
-  --t-fly:   .22s;   /* het "+1" van de kaart naar de teller (zie flyGain) */
+  --t-fly:   .22s;   /* de geraden kaart naar de teller (zie vliegKaart) */
   --e-uit:   cubic-bezier(.2, .6, .3, 1);    /* indrukken, binnenkomen en tot rust komen */
   --e-los:   cubic-bezier(.3, 1.6, .5, 1);   /* veren: loslaten en ploppen */
   --e-weg:   cubic-bezier(.45, 0, .8, .6);   /* vertrekken: versnelt weg */
@@ -1743,17 +1743,6 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 .turn-gain { font-size: var(--fs-3); line-height: 1.3; padding: 0 7px; }
 @keyframes gainPop { from { transform: scale(.62); } to { transform: scale(1); } }
 .turn-gain.pop { animation: gainPop calc(var(--t-kom) / max(var(--dur), .001)) var(--e-los); }
-
-/* Het punt dat van de kaart naar de teller vliegt, zodat die kaart en die
-   teller zichtbaar verbonden zijn. Het draagt exact de huid van zijn
-   bestemming (.gain en .turn-gain, ook de maat), zodat het leest als "dit
-   wordt dat". Het krimpen onderweg zit in de schaal die flyGain() animeert.
-   Aan de body en niet aan het scherm: een transform op een voorouder maakt
-   position: fixed relatief aan dat vlak. */
-.fly-gain {
-  position: fixed; left: 0; top: 0; z-index: 40;
-  pointer-events: none; will-change: transform;
-}
 
 /* ---- de kaart ----
    De kaart is zo groot als de plek waar ze in ligt, en het teken zo groot als
@@ -5438,55 +5427,31 @@ function popTurnScore() {
   box.classList.add("pop");
 }
 
-/* Het punt van de kaart naar de teller (zie .fly-gain). Eén hergebruikt
-   element: tikken liggen minstens 280 ms uit elkaar en de vlucht duurt 220.
-   Komt er toch een tweede overheen, dan landt de eerste alsnog -- de teller
-   mist nooit een punt.
+/* De geraden kaart vliegt naar de teller, en alleen zij: zij is wat de
+   ploeg wint, en terugnemen (kaartTerug) haalt dezelfde kaart weer uit het
+   vak. Geen apart "+1" ernaast; het getal gaat omhoog als de kaart landt.
+   Eén vlucht tegelijk: tikken liggen minstens 280 ms uit elkaar en de vlucht
+   duurt 220. Komt er toch een tweede overheen, dan landt de eerste alsnog --
+   de teller mist nooit een punt.
 
    Web Animations en geen CSS-animatie: bij beperkte beweging ligt er
    animation: none !important over alles, en dan zou de landing nooit afgaan.
-   Beperkte beweging wordt hier zelf gelezen; het punt komt dan meteen aan. */
-let flyEl = null, flyAnim = null;
-function flyGain(from, to) {
-  const stil = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  /* Geen vlucht, dus ook niets om op te wachten: het getal komt hier
-     meteen te staan. Zonder deze regel zou de teller bij beperkte beweging
-     op de vorige stand blijven hangen -- landFly() is dan degene die
-     schildert, en die gaat hier nooit af. */
-  if (stil || !from || !to || !document.body.animate) {
-    paintTurnScore(); popTurnScore(); return;
-  }
-
+   Zonder vlucht (beperkte beweging, geen maat) staat het getal meteen. */
+let flyAnim = null;
+function vliegKaart(naar) {
   landFly();                                   // een vorige vlucht komt eerst aan
-  if (!flyEl) {
-    flyEl = document.createElement("b");
-    flyEl.className = "gain turn-gain fly-gain";
-    flyEl.setAttribute("aria-hidden", "true");
-    flyEl.textContent = "+1";
-    document.body.appendChild(flyEl);
-  }
-  flyEl.hidden = false;
-
-  /* Groot bij de kaart, op de maat van de teller bij aankomst. Een bescheiden
-     boog, en naar onderen: een boog omhoog schoot op een smalle telefoon
-     door de balk en over het rondetegeltje heen voordat hij landde. */
-  const dx = to.x - from.x, dy = to.y - from.y;
-  flyEl.style.transform = `translate(${from.x}px, ${from.y}px) translate(-50%, -50%) scale(1.9)`;
-  flyAnim = flyEl.animate([
-    { transform: `translate(${from.x}px, ${from.y}px) translate(-50%, -50%) scale(1.9)` },
-    { transform: `translate(${from.x + dx * .5}px, ${from.y + dy * .5 + Math.abs(dx) * .08}px) `
-               + `translate(-50%, -50%) scale(1.45)`, offset: .5 },
-    { transform: `translate(${to.x}px, ${to.y}px) translate(-50%, -50%) scale(1)` }
-  ], { duration: vlucht(), easing: curve("vloei"), fill: "forwards" });
-
-  flyAnim.onfinish = landFly;
+  const a = kaartSpook("goed", naar);
+  if (!a) { paintTurnScore(); popTurnScore(); return; }
+  flyAnim = a;
+  a.onfinish = landFly;
 }
 
-/* Laten aankomen: het punt verdwijnt, het getal gaat omhoog, de teller wipt.
+/* Laten aankomen: de kaart verdwijnt, het getal gaat omhoog, de teller wipt.
    Aangeroepen als de vlucht klaar is, als er een tweede overheen komt, en als
-   het scherm wisselt (anders vliegt het punt over het volgende scherm). De
-   handler gaat eerst los, zodat afbreken hier niet nog eens uitkomt. Het
-   getal hoort bij de aankomst: het punt komt het brengen. Eerst schilderen,
+   het scherm wisselt (anders vliegt de kaart over het volgende scherm). De
+   handler gaat eerst los, zodat afbreken hier niet nog eens uitkomt; afbreken
+   ruimt de kopie op (kaartSpook). Het getal hoort bij de aankomst: de kaart
+   komt het brengen. Eerst schilderen,
    dan wippen, want popTurnScore() slaat een verborgen label over. */
 function landFly() {
   const a = flyAnim;
@@ -5494,7 +5459,6 @@ function landFly() {
   if (!a) return;
   a.onfinish = null;
   if (a.playState !== "finished") a.cancel();
-  if (flyEl) flyEl.hidden = true;
   paintTurnScore();
   popTurnScore();
   if (current === "play" && G) mascotte(balkMascotte(), "wip", G.gained);
@@ -5525,13 +5489,13 @@ function meetTurnScore() {
 
 /* Het midden van een element in venstercoördinaten, of null als het er
    niet staat. position:fixed rekent tegen het venster, dus dit is meteen
-   de plek waar het vliegende punt heen moet. */
+   de plek waar de vliegende kaart heen moet. */
 function midden(sel) {
   const el = $(sel);
   if (!el || el.hidden) return null;
   const r = el.getBoundingClientRect();
   if (!r.width && !r.height) return null;
-  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2, h: r.height };
 }
 
 $("#btnGoed").addEventListener("click", () => {
@@ -5541,19 +5505,16 @@ $("#btnGoed").addEventListener("click", () => {
   Snd.goed(G.gained);
   Tril.tik();
   const { leeg } = Spel.geraden(G);
-  /* Het getal zelf gaat pas omhoog als het punt aankomt (zie landFly).
+  /* Het getal zelf gaat pas omhoog als de kaart aankomt (zie landFly).
      Meten moet wél op de nieuwe stand, dus meetTurnScore() schildert even
      vooruit en zet meteen terug. */
-  const from = midden("#card");
-  const naar = meetTurnScore();
-  kaartSpook("goed", naar);
-  flyGain(from, naar);
+  vliegKaart(meetTurnScore());
   if (!leeg) openTerug();
   if (leeg) {
     sluitTerug();
     /* De laatste kaart: G.card staat nu op null, dezelfde vlag waar acts()
        en openPause() op letten, zodat er niets tussen kan komen terwijl het
-       punt onderweg is. De klok gaat hier al stil: liep de tijd tijdens de
+       kaart onderweg is. De klok gaat hier al stil: liep de tijd tijdens de
        vlucht af, dan kwamen er anders twee eindes voor één beurt. */
     stopClock();
     if (flyAnim) flyAnim.onfinish = () => { landFly(); endRound(); };
@@ -5970,8 +5931,9 @@ function draaiGlas() {
 /* De kaart als losse kopie, voor ze plaatsmaakt voor de volgende. Ze blijft
    dekkend: een kopie die doorschijnend wordt, legt twee tekeningen over
    elkaar (een appel door een paraplu), en dat leest als vuil.
-   - goed: ze vliegt naar de teller, versnellend, en lost pas op het laatste
-     stuk op, als ze al klein is;
+   - goed: ze vliegt naar de teller, versnellend, krimpt tot de hoogte van
+     het vak en lost pas op het laatste stuk op, als ze er al bijna is. Deze
+     vlucht is de landing: vliegKaart() hangt het getal aan haar einde;
    - pas (en de kaart die plaatsmaakt bij terugnemen): ze schuift ónder de
      stapel, achter de nieuwe kaart en de randen eronder, en piept er even
      onderuit voor ze weg is. */
@@ -5992,10 +5954,11 @@ function kaartSpook(soort, naar) {
                              width: r.width + "px", height: r.height + "px" });
     document.body.appendChild(k);
     const dx = naar.x - (r.left + r.width / 2), dy = naar.y - (r.top + r.height / 2);
+    const eind = Math.min(1, (naar.h || r.height * .1) / r.height);
     frames = [
       { transform: "translate(0, 0) scale(1)", opacity: 1 },
-      { opacity: 1, offset: .7 },
-      { transform: `translate(${dx}px, ${dy}px) scale(.1)`, opacity: 0 }
+      { opacity: 1, offset: .8 },
+      { transform: `translate(${dx}px, ${dy}px) scale(${eind})`, opacity: 0 }
     ];
     opties = { duration: vlucht(), easing: curve("weg") };
   } else {
@@ -6009,7 +5972,10 @@ function kaartSpook(soort, naar) {
     opties = { duration: 280, easing: curve("uit") };
   }
   const a = k.animate(frames, { ...opties, fill: "forwards" });
-  a.onfinish = a.oncancel = () => k.remove();
+  /* Luisteraars, geen onfinish: die is voor wie op de landing wacht. */
+  a.addEventListener("finish", () => k.remove());
+  a.addEventListener("cancel", () => k.remove());
+  return a;
 }
 
 /* Terugnemen is geraden achterstevoren: de kaart die net naar de teller

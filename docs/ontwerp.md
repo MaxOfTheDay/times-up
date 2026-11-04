@@ -556,8 +556,8 @@ het winnaarsscherm: dáár doet de vraag ertoe. Ze bestaat daar nog, gebouwd doo
 doorlopend commentaar.
 
 Het "+N" zei wat de vorige beurt opleverde. Dat is tijdens het spelen al
-verteld, en luider: het label in de balk telt per kaart op, het vliegende punt
-landt erop, en `Snd.goed()` gaat er een halve toon bij omhoog. Wie scoorde
+verteld, en luider: het label in de balk telt per kaart op, de geraden kaart
+vliegt erin, en `Snd.goed()` gaat er een halve toon bij omhoog. Wie scoorde
 heeft het gezien én gehoord. Het hier nog eens stil herhalen is de zwakste van
 de twee vertoningen -- en het was ook het element dat de rij scheeftrok: het
 schoof het cijfer van de ene ploeg opzij en dat van de andere niet, zodat twee
@@ -1460,39 +1460,52 @@ label wél hoort, bij de ploeg die scoort, op het moment dat ze scoort.
 Groen en niet de ploegkleur: dit zijn geraden kaarten, en geraden is
 `--good`. De ploeg staat al in de mascotte ernaast.
 
-Bij een goede tik vliegt dat label ook echt van de kaart naar de teller. Er
+Bij een goede tik vliegt de kaart zelf van haar plek naar de teller. Er
 was niets dat díe kaart met díe teller verbond: twee gebeurtenissen op twee
 plekken, alleen gelijktijdig — de kaart verdween en ergens ver linksboven
 sprong een getal, en het kind moest zelf bedenken dat het ene het andere
-veroorzaakte. Het vliegende punt draagt daarom exact de huid van zijn
-bestemming (`.gain`, plus `.turn-gain` voor de maat), zodat het als "dit
-wórdt dat" leest en niet als een los effectje. Krimpt onderweg van 1,9 naar
-1: van ver en groot naar dichtbij en klein.
+veroorzaakte.
+
+Eerst vlogen er twee dingen: de kaart (versnellend, `--e-weg`, krimpend tot
+10%) en een groen `+1` in de huid van de teller (`--e-vloei`, van 1,9 naar
+1), naar hetzelfde doel, even lang. Ze zeiden twee keer hetzelfde op twee
+curves, en het label begon groot bovenop de tekening, net op het moment dat
+de volgende kaart eronder verscheen. Uit een mock-up met beide, alleen de
+kaart en alleen het label, koos Max alleen de kaart:
+
+- **De kaart is wat je wint.** Een vliegend `+1` alleen zegt het getal maar
+  niet wélke kaart het opleverde; de kaart zegt allebei, want het vak telt
+  kaarten.
+- **Terugnemen is het spiegelbeeld.** `kaartTerug()` haalde al alleen de
+  kaart uit het vak terug, zonder `-1`. Raden en terugnemen zijn nu
+  dezelfde vlucht, heen en terug.
+- **Ze krimpt tot de hoogte van het vak**, niet tot 10%, en blijft dekkend
+  tot 80% van de vlucht: ze lijkt het vak in te schuiven in plaats van
+  ervoor te vervagen.
 
 Drie dingen die daarbij vastzitten:
 
 - **Het getal én de wip horen bij het aankomen**, niet bij het aantikken:
-  het punt komt het getal brengen. Hier stond alleen de wip, en dat was de
-  halve maatregel — `popTurnScore()` verhuisde naar de landing, maar
-  `paintTurnScore()` bleef bij de tik staan omdat de meting hem daar nodig
-  had. Gevolg: de teller sprong 230 ms voordat het punt aankwam, en op de
-  eerste kaart van een beurt stonden er twee `+1`'en tegelijk in beeld — de
-  vliegende en de aangekomene, terwijl de vlucht juist moet zeggen dat het
-  er één is. Beide gebeuren nu in `landFly()`. Wat de meting nodig had is
-  niet vervallen maar apart gezet: `meetTurnScore()` schildert vooruit,
-  meet, en zet meteen terug. De volgorde bij aankomst is schilderen dan
-  wippen, want `popTurnScore()` slaat een verborgen label over.
+  de kaart komt het getal brengen. Bij de tik springen schuift de teller
+  230 ms vóór de landing omhoog, en op de eerste kaart stonden er dan twee
+  dingen voor één punt in beeld. Beide gebeuren in `landFly()`, aan het
+  einde van de vlucht van de kopie (`vliegKaart()` hangt hem aan de
+  animatie die `kaartSpook()` teruggeeft). Wat de meting nodig had staat
+  apart: `meetTurnScore()` schildert vooruit, meet, en zet meteen terug. De
+  volgorde bij aankomst is schilderen dan wippen, want `popTurnScore()` slaat
+  een verborgen label over. Op de laatste kaart wacht `endRound()` op
+  dezelfde landing.
 - **Web Animations, geen CSS-animatie**, om dezelfde reden als
   `holdButton()`: bij `prefers-reduced-motion` ligt er een
   `animation: none !important` over alles heen, en dan zou de landing — en
-  dus de wip — nooit afgaan. Beperkte beweging wordt daarom expliciet
-  gelezen en de vlucht overgeslagen; het punt komt dan meteen aan.
+  dus de wip — nooit afgaan. Bij beperkte beweging maakt `kaartSpook()` geen
+  kopie, en zonder vlucht staat het getal meteen.
 - **Een vlucht die nog loopt als het scherm wisselt, landt alsnog**
-  (`landFly()` in `show()`). Het punt hangt aan de `body` en niet aan het
-  spelscherm — dat moet, want `.screen` krijgt bij binnenkomst een transform
-  en een `position: fixed` nakomeling rekent dan tegen dát vlak in plaats van
-  tegen het venster — dus zonder dat bleef het over het overdrachtscherm heen
-  vliegen.
+  (`landFly()` in `show()`): hij breekt de animatie af, en afbreken ruimt
+  de kopie op. De kopie hangt aan de `body` en niet aan het spelscherm, want
+  een transform op een voorouder laat een `position: fixed` nakomeling tegen
+  dát vlak rekenen in plaats van tegen het venster; zonder de landing bleef
+  ze over het overdrachtscherm heen vliegen.
 
 Hetzelfde stijgt hoorbaar mee: `Snd.goed(i)` gaat een halve toon omhoog per
 geraden kaart van deze beurt, tot zeven. Een reeks klinkt dan als klimmen,
