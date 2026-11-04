@@ -897,9 +897,9 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 .field-group + .rules, .rules + .field-group { margin-top: var(--s-4); }
 /* Vier groepen, elk één vraag:
      Potje -- hoe lang een potje loopt: aantal kaarten, tijd per beurt.
-     Kaarten -- welke kaarten erin kunnen: moeilijkheid, dan Gewone en
-       Eigen als lijst (met In elk potje bij Eigen); hun kaarten staan op
-       #s-kaarten.
+     Kaarten -- welke kaarten erin kunnen: Gewone en Eigen als lijst (met
+       In elk potje bij Eigen); hun kaarten staan op #s-kaarten, met de
+       moeilijkheid bovenaan Gewone.
      Deze telefoon -- geluid, trilling en installeren.
      Zo speel je -- de regels, met de vouwregel als groepskop.
 
@@ -1053,8 +1053,7 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 #kaartTabs .chip { flex-direction: row; gap: var(--s-2); }
 #kaartTabs .chip b { font-size: var(--fs-4); }
 .lade .hint { margin-top: 0; margin-bottom: var(--s-3); }
-.lade-kop { margin: 0 0 var(--s-3); font-size: var(--fs-2); color: var(--ink-2); }
-.lade-kop b { color: var(--ink); }
+.lade-tier { margin: 0 0 var(--s-4); }
 /* De telling als zin, voor de schermlezer; zie paintCardCounts(). */
 .cb-count {
   font-size: var(--fs-1); font-weight: 700; letter-spacing: 0;
@@ -2880,24 +2879,10 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
     <div class="field-group">
       <h2 class="group-head">Kaarten</h2>
 
-      <fieldset class="field">
-        <legend>Moeilijkheid</legend>
-        <!-- De labels zeggen hoe moeilijk, niet hoe groot ("Klein" las als
-             een kleine stapel). De sleutels blijven klein/midden/groot, zodat
-             opgeslagen keuzes blijven werken. -->
-        <div class="chips" id="tierChips" role="radiogroup" aria-label="Moeilijkheid van de kaarten">
-          <button class="chip" role="radio" aria-checked="false" data-tier="klein">Makkelijk<small>3+ jaar</small>
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-          <button class="chip" role="radio" aria-checked="false" data-tier="midden">Medium<small>6+ jaar</small>
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-          <button class="chip" role="radio" aria-checked="false" data-tier="groot">Moeilijk<small>9+ jaar</small>
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-        </div>
-      </fieldset>
-
       <!-- De bak als lijst: Gewone en Eigen, elk met het getal dat in de bak
-           ligt, en een pijl naar hun kaarten op #s-kaarten. Moeilijkheid staat
-           erboven en verandert Gewone (90, 183, 275). Hoeveel eigen kaarten er
+           ligt, en een pijl naar hun kaarten op #s-kaarten. Onder de naam van
+           Gewone staat de moeilijkheid; je zet haar om bovenaan haar kaarten,
+           want ze verandert alleen Gewone (90, 183, 275). Hoeveel eigen kaarten er
            in een potje gaan, staat in de rij van Eigen zelf: één blok voor
            alles over je eigen kaarten, en 0 voor bezoek blijft één tik. -->
       <div class="lijst" id="bakLijst">
@@ -3041,8 +3026,24 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
     </div>
 
     <div class="lade" id="ladeGewoon">
-      <!-- Welke lijst je ziet: de moeilijkheid is een plafond (poolFor). -->
-      <p class="lade-kop" id="gewKop"></p>
+      <!-- De moeilijkheid staat boven de lijst die ze verandert: een plafond
+           (poolFor), dus het raster eronder groeit mee. Op Instellingen zegt
+           de rij van Gewone welke stand het is. -->
+      <fieldset class="field lade-tier">
+        <legend>Moeilijkheid</legend>
+        <!-- De labels zeggen hoe moeilijk, niet hoe groot ("Klein" las als
+             een kleine stapel). De sleutels blijven klein/midden/groot, zodat
+             opgeslagen keuzes blijven werken. -->
+        <div class="chips" id="tierChips" role="radiogroup" aria-label="Moeilijkheid van de kaarten">
+          <button class="chip" role="radio" aria-checked="false" data-tier="klein">Makkelijk<small>3+ jaar</small>
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-tier="midden">Medium<small>6+ jaar</small>
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-tier="groot">Moeilijk<small>9+ jaar</small>
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+        </div>
+      </fieldset>
+
           <!-- Eén sleuf, twee bewoners: de zin die belooft dat het terug kan,
                en de knop die dat doet. Zie .cb-slot -- de knop mag hier géén
                hidden dragen, en paintCardCounts() mag hem er ook niet op
@@ -4196,14 +4197,8 @@ $("#eigenDeelChips").addEventListener("click", e => {
    tegel blijft op haar plek in het alfabet.
    ============================================================== */
 let cardsBuilt = null;    // voor welke stand het raster nu klaarstaat
-/* Hoe de stand heet op de rij van Gewone en bovenaan haar kaarten. Een
-   stand is een plafond (poolFor): wat eronder ligt doet mee. */
+/* Hoe de stand heet op de rij van Gewone. */
 const TIER_NAAM = { klein: "Makkelijk", midden: "Medium", groot: "Moeilijk" };
-const TIER_UITLEG = {
-  klein: "de kaarten vanaf 3 jaar.",
-  midden: "de makkelijke kaarten en die vanaf 6 jaar.",
-  groot: "alle kaarten, tot die vanaf 9 jaar."
-};
 
 function paintCards() {
   paintCardCounts();
@@ -4301,7 +4296,6 @@ function paintCardCounts() {
      kaart van deze stand: wie Moeilijkheid omzet, ziet de rij eronder
      meeveranderen. */
   $("#gewSub").textContent = TIER_NAAM[settings.tier] + (hier ? " · " + hier + " weg" : "");
-  $("#gewKop").innerHTML = "<b>" + TIER_NAAM[settings.tier] + "</b>: " + TIER_UITLEG[settings.tier];
   const boven = DECKS[settings.tier].find(c => !weg.has(c[1]));
   $("#kaartGewoon").textContent = boven ? boven[0] : "";
 

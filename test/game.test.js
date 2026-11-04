@@ -45,7 +45,13 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     await page.click('#btnGear');
     await page.waitForTimeout(150);
     if (await screen() !== 'setup') throw new Error('instellingenscherm ging niet open');
+    // De moeilijkheid staat bovenaan de gewone kaarten, op #s-kaarten.
+    await page.click('#rijGewoon');
+    await page.waitForTimeout(150);
+    if (await screen() !== 'kaarten') throw new Error('de rij Gewone opende de kaarten niet');
     await page.click(`#tierChips .chip[data-tier="${tier}"]`);
+    await page.click('#btnKaartenTerug');
+    await page.waitForTimeout(150);
     await page.click(`#sizeChips .chip[data-size="${size}"]`);
     await page.click(`#secsChips .chip[data-secs="${secs}"]`);
     await page.click('#btnBack');

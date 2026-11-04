@@ -338,16 +338,16 @@ zakt niet in en er komt geen rimpel.
 
 **Het instellingenscherm.** Vier groepen, elk één vraag: Potje (hoe lang
 een potje loopt: Aantal kaarten met de telling van de menging op de regel
-van de naam, Tijd per beurt), Kaarten (welke kaarten erin kunnen:
-Moeilijkheid, dan een lijst met Gewone en Eigen, en "In elk potje" in de rij
-van Eigen), Deze telefoon (Geluid en Trilling als schakelaars in een lijst,
+van de naam, Tijd per beurt), Kaarten (welke kaarten erin kunnen: een
+lijst met Gewone en Eigen, de stand onder de naam van Gewone en "In elk
+potje" in de rij van Eigen), Deze telefoon (Geluid en Trilling als schakelaars in een lijst,
 installeren), Zo speel je (de vouwregel is de groepskop). Een veldnaam
 herhaalt zijn groepskop niet. De lange lijsten staan op hun eigen scherm,
 `#s-kaarten`, met bovenaan Gewone of Eigen als keuzeknoppen en de uitgang
-rechtsboven; terug brengt je op Instellingen (`terug()`). Twee soorten
-stukken, elk één betekenis: een rij keuzeknoppen kiest er één, een rij in
-een `.lijst` gaat naar een scherm (de pijl) of schakelt (`.knop`, goud is
-aan). Een rij zakt niet in; een druk kleurt hem. De keuzes zijn rijen
+rechtsboven, en Moeilijkheid bovenaan Gewone; terug brengt je op
+Instellingen (`terug()`). Twee soorten stukken, elk één betekenis: een rij
+keuzeknoppen kiest er één, een rij in een `.lijst` gaat naar een scherm (de
+pijl) of schakelt (`.knop`, goud is aan). Een rij zakt niet in; een druk kleurt hem. De keuzes zijn rijen
 keuzeknoppen, geen schuif. Drie lagen tekst: hoofdletters alleen voor de
 titel en de groepskoppen (klein, in `--ink-2`); veldnamen in inkt het luidst
 na de titel; keuzeknoppen op `--line-2`, getallen erin in Fredoka

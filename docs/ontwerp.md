@@ -2115,8 +2115,9 @@ Wie het tandwiel aantikt komt iets bijstellen voor het volgende potje. Vier
 groepen, elk één vraag:
 
 - **Potje**: hoe lang een potje loopt. Aantal kaarten, Tijd per beurt.
-- **Kaarten**: welke kaarten erin kunnen. Moeilijkheid, dan de lijst met
-  Gewone en Eigen, en "In elk potje" in de rij van Eigen.
+- **Kaarten**: welke kaarten erin kunnen. De lijst met Gewone en Eigen,
+  met de moeilijkheid onder de naam van Gewone en "In elk potje" in de rij
+  van Eigen.
 - **Deze telefoon**: Geluid, Trilling, installeren.
 - **Zo speel je**.
 
@@ -2127,9 +2128,16 @@ zijn instellingen. Nu staan de kaarten op `#s-kaarten`: Instellingen is elke
 avond even kort, en de lijsten mogen daar lang zijn. Het kost één tik meer
 naar de kaarten, en een tweede scherm met zijn eigen terug.
 
-**Moeilijkheid bij de kaarten.** Ze verandert wat Gewone is (90, 183, 275),
-en staat dus boven die rij, in dezelfde groep. Een potje is dan wat er
-overblijft: hoeveel kaarten en hoe lang een beurt.
+**Moeilijkheid bij de gewone kaarten.** Ze verandert alleen wat Gewone is
+(90, 183, 275), en staat dus bovenaan die kaarten, op `#s-kaarten`, met het
+raster eronder dat meegroeit. Op Instellingen zegt de rij van Gewone welke
+stand het is ("Moeilijk"). Een potje is dan wat er overblijft: hoeveel
+kaarten en hoe lang een beurt. Ook gewogen: de keuzeknoppen als eigen veld
+boven de lijst (las als een derde ding naast Gewone en Eigen) en klein in
+de rij van Gewone, zoals "In elk potje" bij Eigen (één tik, maar een
+tweede rij getallen en woorden in één vak). De pagina wint: het
+hoofdscherm blijft het rustigst, en wie de stand omzet wil meestal ook zien
+welke kaarten dat zijn. Het kost één tik meer.
 
 **Eigen kaarten als één blok.** Hoeveel je er hebt en hoeveel er in een
 potje gaan staan samen, in de rij van Eigen: "In elk potje 0 3 6 12",
