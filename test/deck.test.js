@@ -196,6 +196,19 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     leeg: document.querySelector('#stEigen').classList.contains('leeg') }));
   ok(stapel.lade && stapel.tal === '1' && !stapel.leeg,
     `na bewaren staat de eigen lade niet open op de nieuwe kaart (${JSON.stringify(stapel)})`);
+  // Het potje: de knoppen van "Eigen kaarten erin" tellen voor deze maat,
+  // en de strook toont de ene eigen kaart vooraan.
+  const potje = await page.evaluate(() => {
+    window.__tijd.settings.size = 24;
+    document.querySelector('#sizeChips [data-size="24"]').click();
+    return {
+      zichtbaar: !document.querySelector('#eigenDeelVeld').hidden,
+      knoppen: [...document.querySelectorAll('#eigenDeelChips .chip .n')].map(n => n.textContent).join(','),
+      vakken: document.querySelectorAll('#strook i').length,
+      eigen: document.querySelectorAll('#strook i.eigen').length };
+  });
+  ok(potje.zichtbaar && potje.knoppen === '0,3,6,12' && potje.vakken === 24 && potje.eigen === 1,
+    `het potje klopt niet met één eigen kaart bij 24 (${JSON.stringify(potje)})`);
   const eigen = await page.evaluate(() => {
     const T = window.__tijd;
     const out = { lijst: T.eigen.kaarten.length, beeld: T.beelden.size, inPotje: 0, gewoneHond: 0 };
@@ -204,9 +217,9 @@ const ok = (c, m) => { if (!c) fails.push(m); };
       if (greep.some(c => T.Spel.eigenId(c) !== null)) out.inPotje++;
       if (greep.some(c => c[0] === '🐶')) out.gewoneHond++;
     }
-    T.eigen.aan = false;
+    T.settings.eigenDeel = 0;
     out.uit = T.drawDeck('klein', 16).some(c => T.Spel.eigenId(c) !== null);
-    T.eigen.aan = true;
+    T.settings.eigenDeel = 1 / 4;
     return out;
   });
   ok(eigen.lijst === 1 && eigen.beeld === 1, 'de bewaarde eigen kaart staat niet in de lijst of heeft geen beeld');

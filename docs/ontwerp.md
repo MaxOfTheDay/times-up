@@ -1967,7 +1967,7 @@ tekening draagt. De plaat krijgt géén eigen schaduw en géén contour -- ze
 ligt ín een knop die haar lift al draagt, en reliëf op reliëf leest als een
 knop op een knop.
 
-### Het veld staat onderaan, als vierde groep
+### Het veld staat in Deze telefoon
 
 Het stond bovenaan, als eerste blok onder de titel, met een eigen marge van
 48 om het van de regeluitleg los te maken -- "een eenmalige handeling is
@@ -1979,8 +1979,8 @@ avond.
 
 Wie het tandwiel aantikt komt de moeilijkheid of de tijd bijstellen, of een
 kaart wegleggen. Installeren is nooit de boodschap en delen al helemaal
-niet. Het is nu de laatste groep, met `DEZE APP` als kop, ná de regels (zie
-"Het instellingenscherm").
+niet. Het staat in `DEZE TELEFOON`, onder Geluid en Trilling (zie "Het
+instellingenscherm").
 
 Gemeten op 390x844 met de regels dichtgeklapt -- de gewone avond -- stond de
 eerste keuzeknop op 38% van het eerste scherm en staat hij nu op 22%. Met de
@@ -1995,13 +1995,11 @@ staat die knop in alle vijf de standen op dezelfde plek.
 
 Drie dingen die eraan vastzitten:
 
-- **De kop hoort ín de groep, niet ernaast.** Er zijn standen waarin hier
-  niets staat, en `toonInstall()` verbergt daarom `#appGroup` en niet
-  `#installField`. Anders blijft `DEZE APP` als lege regel
-  onder Voorkeuren hangen. (Dat `hidden` het wint van `display: flex` van
-  `.field-group` komt door de `[hidden] { display: none !important }`
-  bovenaan het bestand -- de regel die er staat omdat deze val hier al drie
-  keer eerder toesloeg.)
+- **Verberg het veld, niet de groep.** In de stand `weg` staat hier niets,
+  en `toonInstall()` verbergt dan `#installField`. De kop blijft, want
+  Geluid staat er altijd. (Dat `hidden` het wint van `display: flex` komt
+  door de `[hidden] { display: none !important }` bovenaan het bestand --
+  de regel die er staat omdat deze val hier al drie keer eerder toesloeg.)
 - **De eigen marge van 48 moest weg.** Die verzon een groepsgrens die er
   toen niet was; nu levert `.field-group + .field-group` dezelfde 48 al, en
   allebei geeft 72.
@@ -2100,10 +2098,41 @@ terugveeg.
 
 ## Het instellingenscherm
 
-Wie het tandwiel aantikt komt iets bijstellen voor het volgende potje. Dus
-staat dat bovenaan, in één groep **Spel**: moeilijkheid, de kaartenbak
-(gewone en eigen kaarten), kaarten per potje, tijd per beurt. Daarna
-**Voorkeuren**, dan **Zo speel je**, dan **Deze app**.
+Wie het tandwiel aantikt komt iets bijstellen voor het volgende potje. Vier
+groepen, elk één vraag:
+
+- **Potje**: hoe één potje gedeeld wordt. Kaarten per potje (met de strook),
+  Eigen kaarten erin, Tijd per beurt.
+- **Kaarten**: welke kaarten er bestaan. Moeilijkheid, met de kaartenbak
+  (Gewone, Eigen) eronder.
+- **Deze telefoon**: Geluid, Trilling, installeren.
+- **Zo speel je**.
+
+**Bak of potje.** Alles stond eerst onder één kop, Spel, en daarna als
+Kaarten boven Potje. De toets die het oploste: verandert een veld wat er in
+de bak zit, of wat er in het potje van vanavond komt? Moeilijkheid filtert
+de bak (het plafond van de gewone kaarten), dus staat ze boven de stapel die
+ze verandert: tik Medium en Gewone wordt 183. "Eigen kaarten erin" haalt
+geen kaart weg en legt er geen bij; het is de menging van de greep, net als
+24 kaarten, en staat onder de strook die ze tekent. Potje gaat voor: het
+heeft een vaste hoogte, en de lange laden van de bak liggen zo onderaan en
+duwen alleen Deze telefoon weg. Moeilijkheid staat op 390x844 nog in het
+eerste scherm.
+
+Ook gewogen: Moeilijkheid in de lade van Gewone, met het niveau op de
+stapel. Logisch, maar een keuze die per avond verandert (wie speelt er mee)
+moet één tik zijn en als keuze te zien; achter een stapel leest "Gewone 90"
+als een telling, en elke wissel rolt 90 tot 275 kaarten uit. Eigen kaarten
+erin in de eigen lade: dan toont de strook een menging die je daar niet kunt
+veranderen.
+
+**Drie regels minder.** De telling van het potje staat op de regel van
+"Kaarten per potje" in plaats van eronder. De bak heeft geen eigen veldnaam:
+de groepskop zegt Kaarten en de stapels noemen zichzelf. Geluid en Trilling
+zijn twee schakelaars op één rij (`role="switch"`, goud met een vinkje is
+aan) in plaats van twee regels met Aan en Uit; Installeren staat eronder als
+gewone knop, en alleen als er iets te installeren is. Voorkeuren en Deze app
+waren allebei over het toestel en stonden aan weerskanten van de regels.
 
 Eerder stonden de regels bovenaan, open bij het eerste bezoek, en waren de
 spelknoppen verdeeld over "Welke kaarten" en "Hoe lang". Die grens ("wat
@@ -2448,9 +2477,9 @@ keuzeknoppen), en wie Moeilijkheid omzet ziet de stapel eronder meegaan
   plus, met één lege kaart en het getal 0. Een tik opent meteen de maker;
   een lade met alleen een plus erin is een tik voor niets. Na bewaren gaat
   de lade open op de nieuwe kaart.
-- Aan en Uit van de eigen kaarten staan in hun lade ("In elk potje"), zodat
-  het veld niet van vorm verandert bij de eerste kaart. Op de stapel zelf
-  zegt "uit" het, en wijkt de waaier terug.
+- In de eigen lade staat alleen de zin dat ze op deze telefoon blijven,
+  dan de kaarten. Hoeveel er meedoen staat bij Potje; bij 0 zegt "uit" het
+  op de stapel, en wijkt de waaier terug.
 - Ook getest: twee gelijke vouwregels onder elkaar (dezelfde vorm, maar een
   formulier zonder beeld), en alles in één rij die opzij schuift (de stapel
   gewone kaarten leek er één kaart meer tussen, en Aan/Uit kwam en ging nog).
@@ -2462,19 +2491,26 @@ code gezet. Dat het spel van jullie is, is wat kinderen het hardst laat
 gieren: oma uitbeelden, of de hond. Eigen kaarten maken dat mogelijk zonder
 code: een foto of tekening en het woord, in Instellingen.
 
-- **Een kwart van het potje, de langst niet getrokken eerst.** Met de helft
-  zat na drie avonden steeds hetzelfde gezicht in elk potje en was oma geen
-  verrassing meer. Los erdoor schudden was het andere uiterste: bij 275
+- **Een deel van het potje, de langst niet getrokken eerst.** Je kiest 0,
+  ⅛, ¼ of ½ ("Eigen kaarten erin"), standaard ¼. Een deel en geen vast
+  aantal: 4 van 16 is een kwart, 4 van 32 een achtste, en dan komt oma bij
+  het grote potje half zo vaak. Op de knoppen staat wel het aantal dat het
+  deel bij deze maat geeft (16: 0, 2, 4, 8; 24: 0, 3, 6, 12), en de strook
+  erboven toont het. Een knop die meer vraagt dan er zijn ligt verzonken,
+  behalve de eerste die ze allemaal neemt. Niet hoger dan de helft: met de
+  helft zat na drie avonden steeds hetzelfde gezicht in elk potje en was oma
+  geen verrassing meer. Los erdoor schudden was het andere uiterste: bij 275
   kaarten komt een eigen kaart dan bijna nooit, en daar maakte je haar niet
   voor. `laatst` wordt gezet als de kaart getrokken wordt (`newGame`), dus
   elke kaart komt aan de beurt.
-- **Aan en uit.** "Bobby" zegt een vriendje niets, en in ronde 2 en 3 kan
+- **Nul is uit.** "Bobby" zegt een vriendje niets, en in ronde 2 en 3 kan
   het die kaart niet raden. Dit is de enige plek waar het spel de regel
   "één betekenis los van context" bewust loslaat, dus moet je die keuze
-  kunnen terugdraaien. Aan en Uit staan in de eigen lade van de kaartenbak,
-  op een kopregel zoals Geluid; bij Uit wijken de beelden in de tegels en op
+  kunnen terugdraaien: 0 bij "Eigen kaarten erin". Een aparte Aan/Uit
+  stond in de lade, ver van de vraag die er echt toe doet (hoeveel), en een
+  oude Uit wordt bij het laden 0. Bij 0 wijken de beelden in de tegels en op
   de stapel terug, en staat "uit" bij het getal. Dat de kaarten op de
-  telefoon blijven, staat bij Zo speel je, niet als zin onder het veld.
+  telefoon blijven, staat in de eigen lade, bij de kaarten zelf.
 - **Het woord wint van een gewone kaart.** Een foto van je eigen hond heet
   "hond"; weigeren voelde als een fout van de app. De gewone kaart met dat
   woord blijft uit het potje zolang de eigen bestaat. Twee eigen kaarten met

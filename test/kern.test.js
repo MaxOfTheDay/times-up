@@ -352,6 +352,24 @@ test('eigen kaarten: hoogstens een kwart van de greep', () => {
   assert.equal(weinig.length, 24);
 });
 
+test('eigen kaarten: het gekozen deel van de greep, afgerond, nooit meer dan er zijn', () => {
+  const tel = g => g.filter(c => Spel.eigenId(c) !== null).length;
+  const verwacht = { 16: [0, 2, 4, 8], 24: [0, 3, 6, 12], 32: [0, 4, 8, 16] };
+  for (const size of [16, 24, 32]) {
+    Spel.EIGEN_DELEN.forEach((deel, i) => {
+      assert.equal(Spel.eigenAantal(size, deel), verwacht[size][i]);
+      const greep = Spel.drawDeck(DECKS, 'klein', size, [], rng(7), eigenVan(20), deel);
+      assert.equal(greep.length, size, 'de greep blijft even groot');
+      assert.equal(tel(greep), verwacht[size][i], `deel ${deel} bij ${size}`);
+    });
+  }
+  // Minder eigen kaarten dan het deel vraagt: allemaal, de rest gewone.
+  assert.equal(tel(Spel.drawDeck(DECKS, 'klein', 24, [], rng(7), eigenVan(5), 1 / 2)), 5);
+  // Geen deel of een onbekend deel: het kwart van altijd.
+  assert.equal(tel(Spel.drawDeck(DECKS, 'klein', 24, [], rng(7), eigenVan(20))), 6);
+  assert.equal(tel(Spel.drawDeck(DECKS, 'klein', 24, [], rng(7), eigenVan(20), 0.3)), 6);
+});
+
 test('eigen kaarten: wie het langst niet kwam, gaat voor', () => {
   // f0..f5 net gespeeld, f6..f9 nooit of lang geleden.
   const eigen = eigenVan(10, i => (i < 6 ? 1000 + i : i - 6));
