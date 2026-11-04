@@ -2667,7 +2667,9 @@ toveren); de afwegingen staan hieronder.
   zoals het album in het lege fotovak. Grijs en gestippeld zonder woord (een
   tik wijst de woordregel aan), goud met woord; "Klaar" op het toetsenbord
   tovert ook. Staat er iets op het vel, dan staat de staf in het gereedschap,
-  voor nog een.
+  voor nog een. Op het lege vel is hij rond, met `--lift-2`: de fiche van
+  Tekenen, zoals de sluiter die van Foto, want toveren is dan waar het vel
+  voor is.
 - **Een getoverde tekening is een stap.** Ze komt als één actie in
   `mk.acties` die het vel vervangt; stap terug haalt de vorige terug, de
   prullenbak alles. De crème achtergrond knipt de telefoon weg (`knipUit()`,
@@ -2682,9 +2684,31 @@ toveren); de afwegingen staan hieronder.
   (`getoverd`); wie op een getoverde kaart bijtekent, houdt haar kaal. De
   stijl noemt geen "sticker" meer: dat woord gaf de snijrand en de schaduw.
 - **Wachten is rastertoon.** Terwijl Workers AI tekent (twee tot vijf tellen)
-  zwellen de punten van het vel, geen draaiend wieltje. Zonder net een
+  liggen er punten op het vel (`stipveld()`, inkt op papier zoals de titel)
+  en blijft de staf ingedrukt; om de 0,9 tel (`TOVER_TEL`) drukt hij een ring
+  door de punten vanaf zijn rand (`toverGolf()`), zoals de klok elke tel bij
+  het aftellen. Geen draaiend wieltje, geen ring bij de landing, geen
+  trilling. Eerst zwollen alle punten samen aan en af; dat was beweging
+  zonder dat iets drukte, en de staf zelf deed niets. Zonder net een
   wifi-teken op de staf, met het dagbudget op de zandloper (`#i-glass`);
   een afgekeurd woord of een andere fout laat de staf schudden.
+
+## Al in het spel
+
+Wie een eigen kaart maakt met een woord dat al een gewone kaart is, ziet
+onder het woord het teken van die kaart en "Staat al in het spel. Jouw kaart
+neemt haar plaats in." (`#mkAl`, `gewoneKaart()`). Bewaren blijft mogen: een
+eigen kaart verdringt de gewone met hetzelfde woord, en dat is vaak precies
+de bedoeling (jullie eigen hond). Vergeleken over alle standen, zonder
+accenten ("pinguin" is "pinguïn").
+
+- **Een regel, geen kaartje en geen spook.** Uit drie versies: een kaartje
+  naast het woord zonder zin liet raden wat het betekende, en het teken vaag
+  op het lege vel botste met de staf en las als "teken dit na". De maker is
+  voor de volwassene, dus een zin mag.
+- **Geen vaste beeldbank.** Een zoekfunctie over emoji of OpenMoji zou vooral
+  kaarten vinden die al in het spel zitten; eigen kaarten zijn voor wat geen
+  beeldbank heeft (de camera) en wat er tussenin valt (de staf).
 
 ## Weggaan kost niets
 
