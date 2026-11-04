@@ -115,8 +115,12 @@ const ok = (c, m) => { if (!c) fails.push(m); };
         v[r - 1].querySelector('svg') !== null && v[r - 1].querySelector('use') === null;
     }, round, { timeout: 2000 }).then(() => true, () => false);
     ok(schijfOk, `ronde ${round}: de schijf staat niet op de ronde van nu`);
-    ok((await page.textContent('#hoRoundCard p')).trim() !== '',
-       `ronde ${round}: de regel staat niet in de kaart`);
+    // Geen regelzin op de kaart: de tekening zegt de regel. Wie luistert
+    // krijgt hem in de aria-label.
+    ok(await page.$('#hoRoundCard > p') === null,
+       `ronde ${round}: er staat een regelzin op de kaart`);
+    ok((await page.getAttribute('#hoRoundCard', 'aria-label')).includes('van 3'),
+       `ronde ${round}: de aria-label noemt de ronde niet`);
 
     // Een gewone tik; het aftellen erna houdt een losse aanraking tegen.
     // Afbreken zet je terug op het overdrachtscherm, zonder begonnen beurt.
@@ -255,15 +259,12 @@ const ok = (c, m) => { if (!c) fails.push(m); };
        const other = document.querySelector('#hoSide' + (t === 0 ? 'B' : 'A'));
        return up.classList.contains('up') && !other.classList.contains('up');
      }), 'de ploeg die aan zet is wordt niet opgetild in de stand');
-  // Een beurtwissel is dezelfde kaart als een rondewissel -- één maat, altijd
-  // de regel erin. De compacte variant bestond omdat de kaart het antwoord op
+  // Een beurtwissel is dezelfde kaart als een rondewissel -- één maat. De compacte variant bestond omdat de kaart het antwoord op
   // "wie is er nu" overstemde; sinds de stand ín de kaart staat is er niets
   // meer te overstemmen. Wat de twee standen onderscheidt is beweging, niet
   // meetkunde, en dat is hier niet te meten.
   ok(await page.$('#hoRoundCard.big') !== null,
      'de opdrachtkaart heeft niet haar enige maat bij een beurtwissel');
-  ok((await page.textContent('#hoRoundCard p')).trim() !== '',
-     'de regel ontbreekt bij een gewone beurtwissel');
 
   // --- herladen midden in een beurt komt terug, met de punten ---
   // Er is nog steeds geen "verder spelen"-knop: de app komt gewoon terug

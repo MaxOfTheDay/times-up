@@ -445,10 +445,13 @@ niets nieuws zeiden:
 - **De seconden** (`#hoSecs`) waren een hele avond dezelfde 30. Ze staan er
   nu alleen als een onderbroken beurt met haar resttijd verdergaat
   (`G.pendingMs` kleiner dan een volle beurt): dan zeggen ze iets.
-- **De regel van de ronde** (de `p` onder het rondewoord) staat er alleen
-  als de ronde nieuw is. Bij een beurtwissel in dezelfde ronde hebben beide
-  ploegen hem net gezien; hij gaat op `visibility: hidden`
-  (`.zelfde-ronde`), zodat de kaart bij beide wissels even groot blijft.
+- **De regel van de ronde** (een zin onder het rondewoord) staat er niet
+  meer. De tekening zegt de regel al (veel woorden, één woord, geen
+  woorden), en het woord noemt de ronde voor wie voorleest; de zin herhaalde
+  dat in een vorm die de spelers niet kunnen lezen, en liep in ronde 1 over
+  twee regels. Zo zijn beurt- en rondewissel ook dezelfde kaart; alleen de
+  schijf die doorschuift onderscheidt ze. De volledige regels staan bij de
+  instellingen ("Zo speel je"), en `ROUND_HOW` blijft in de aria-label.
 
 De eerste twee zitten inmiddels op hetzelfde vlak. De stand stond ernaast, in
 een eigen omrand kaartje op de ploegkleur, en dat gaf het scherm drie vlakken
@@ -507,11 +510,11 @@ Wat er níet meer staat, en waarom:
   geworden.
 
 De ronde komt in drie maten in beeld -- alleen het teken, teken plus woord,
-en de tekening met de regel. Ze werden op drie plekken los bijgewerkt en
+en de tekening met het woord. Ze werden op drie plekken los bijgewerkt en
 lazen alle drie dezelfde rijtjes zelf uit; één plek die je vergeet en de
 ronde staat op twee opeenvolgende schermen anders. `paintRound(ico, size,
 host)` doet ze nu alle drie, met `size` op `"teken"`, `"chip"` of `"kaart"`.
-`ROUND_HOW` staat alleen in de `"kaart"`-tak, en dus één keer per ronde.
+`ROUND_HOW` staat alleen in de aria-label van de `"kaart"`-tak.
 
 `"chip"` zet het woord alleen als de host er een `<b>` voor heeft -- en de
 balk tijdens het spelen heeft er sindsdien geen meer. Hier stond dat die
