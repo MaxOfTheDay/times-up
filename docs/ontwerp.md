@@ -1082,6 +1082,29 @@ Bij het nalopen van het volle bord, live naast elkaar gezet:
 Bekeken en gehouden: de worp, de snelheid en maat van de rimpel, de ring per
 tel op het aftellen, het vuurwerk, en het vlakke spelscherm.
 
+### Een knop die glijdt, neemt zijn golf mee
+
+Vier keer glijdt de gouden knop over de punten naar een nieuwe plek: van
+Spelen op de titel, van Opnieuw op de eindstand en van `#cdBack` naar de
+startknop van de overdracht (`rimpelDoor()`), en van die startknop naar de
+schijf van het aftellen. Er was alleen de rimpel van de druk; onderweg en
+bij aankomst deed de grond niets, alsof de knop boven het bord zweefde.
+
+Bekeken in een live mock-up:
+
+- **Een rimpel bij de landing.** Las als twee rimpels na elkaar, niet als
+  één beweging. Afgewezen.
+- **Een rasterschaduw** die met de knop meeschuift en bij aankomst sluit.
+- **Een deuk die meeloopt**, met de knop ingedrukt tijdens de glijvlucht.
+- **De golf meenemen.** Zolang de knop onderweg is, vertrekt er om de 34 ms
+  een zwakke ring (0,28, tegen 1,2 voor de druk) vanaf zijn rand, waar hij
+  op dat moment is. Voor de knop dringen de ringen samen, erachter waaieren
+  ze uit, zoals de boeggolf van een bootje.
+
+Max koos de golf (`golfMee()`), voorlopig. Bij beperkte beweging valt hij
+weg, zoals elke rimpel. Wat in de lucht beweegt (sprongen, de vliegende
+kaart, snippers) duwt de punten niet.
+
 ## Het titelscherm heeft twee dingen
 
 Het merk en de knop. Vos en Uil stonden eerst klein naast de knop, op de

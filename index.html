@@ -5387,6 +5387,7 @@ function countdown(done) {
         disc.style.width = natW + "px";
         disc.style.height = natW + "px";
       });
+      golfMee(veldCd, disc, el, 340);
     }
   }
 
@@ -6063,6 +6064,26 @@ function knopRimpel(knop, veld) {
 }
 knopRimpel($("#btnStart"), veldTi);
 knopRimpel($("#btnAgain"), veldWn);
+/* Een knop die over de punten glijdt, neemt zijn golf mee: zolang hij
+   onderweg is, vertrekt er om de 34 ms een zwakke ring (0,28) vanaf zijn
+   rand, waar hij op dat moment is. Voor hem dringen de ringen samen, achter
+   hem waaieren ze uit, zoals de boeggolf van een bootje. De ring van de druk
+   zelf blijft de sterke (1,2); bij de landing komt er niets bij. */
+function golfMee(veld, el, host, ms) {
+  if (stilAan()) return;
+  const t0 = performance.now();
+  let laatst = -1e9;
+  const stap = nu => {
+    if (nu - t0 > ms) return;
+    if (nu - laatst >= 34) {
+      laatst = nu;
+      const k = el.getBoundingClientRect(), s = host.getBoundingClientRect();
+      if (k.width) veld.rimpel(k.left + k.width / 2 - s.left, k.top + k.height / 2 - s.top, .28, k.width / 2);
+    }
+    requestAnimationFrame(stap);
+  };
+  requestAnimationFrame(stap);
+}
 function rimpelDoor(k) {
   if (current !== "handoff" || !k) return;
   const s = $("#s-handoff").getBoundingClientRect();
@@ -6077,6 +6098,7 @@ function rimpelDoor(k) {
   const dx = (k.left + k.width / 2) - (n.left + n.width / 2), dy = (k.top + k.height / 2) - (n.top + n.height / 2);
   knop.animate([{ transform: `translate(${dx}px, ${dy}px) scale(${k.width / n.width})` }, { transform: "none" }],
     { duration: 340, easing: curve("los") });
+  golfMee(veldHo, knop, $("#s-handoff"), 340);
   $("#hoRoundCard").animate([{ transform: "translateY(24px)", opacity: 0 }, { transform: "none", opacity: 1 }],
     { duration: 280, easing: curve("uit") });
 }
