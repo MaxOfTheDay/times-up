@@ -270,12 +270,24 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   const vel = await page.evaluate(() => {
     const g = document.querySelector('#mkDoek').getContext('2d');
     return { hoek: g.getImageData(4, 4, 1, 1).data[3], midden: g.getImageData(256, 256, 1, 1).data[3],
+             rand: g.getImageData(30, 256, 1, 1).data[3],
              bewaar: !document.querySelector('#mkBewaar').disabled };
   });
+  ok(vel.rand > 0, 'de getoverde tekening is niet bijgesneden tot de rand van het vel');
   ok(vragen === 1, `de staf vroeg ${vragen} tekeningen in plaats van één`);
   ok(vel.hoek === 0, 'de crème achtergrond van de getoverde tekening is niet weggeknipt');
   ok(vel.midden === 255, 'de getoverde tekening staat niet op het vel');
   ok(vel.bewaar, 'Bewaren gaat niet aan na toveren');
+  // Bewaard is ze kaal: haar eigen lijn, geen pen van .glyph erom.
+  await page.click('#mkBewaar');
+  await page.waitForFunction(() => document.querySelector('#maker').hidden);
+  const getoverd = await page.evaluate(() => JSON.parse(localStorage.getItem('tijdisom.eigen')).kaarten.find(k => k.woord === 'zon'));
+  ok(getoverd && getoverd.getoverd === true, 'een getoverde kaart onthoudt niet dat ze getoverd is');
+  await page.click('#btnEigenNieuw');
+  await page.click('#mkSoort [data-soort="tekening"]');
+  await page.fill('#mkWoord', 'maan');
+  await page.click('#mkStaf');
+  await page.waitForFunction(() => document.querySelector('#mkStaf').hidden && !document.querySelector('#mkStafRij').hidden);
   await page.click('#mkStap');
   ok(await page.evaluate(() => !document.querySelector('#mkStaf').hidden), 'stap terug haalt de getoverde tekening niet weg');
   antwoord = { fout: 'op' };

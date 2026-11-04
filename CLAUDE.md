@@ -393,7 +393,7 @@ knop wisselt met `visibility`, nooit met `hidden`.
   wacht daarom op `eigenKlaar`.
 - Elk teken op een kaart gaat door `zetTeken()`. Een foto ligt kaal op het
   papier (`.kaal`, geen inktlijn: om een vierkant is dat een derde rand);
-  een tekening houdt de pen van `.glyph`.
+  een tekening houdt de pen van `.glyph`, behalve een getoverde.
 - Zonder eigen kaarten heeft de rij Eigen een gestippelde plus en opent
   ze meteen de maker; na bewaren staat `#s-kaarten` open op Eigen. Daar
   staan de kaarten in hetzelfde raster als de gewone, met vooraan één lege kaart met een plus (`#btnEigenNieuw`),
@@ -422,7 +422,9 @@ net, of als het dagbudget op is, werkt alles behalve de staf.
 - De staf ligt midden op het lege vel van Tekenen (`#mkStaf`), daarna in het
   gereedschap (`#mkStafRij`); er is geen derde soort kaart.
 - Een getoverde tekening is één actie in `mk.acties` (`{ beeld }`) die het
-  vel vervangt, met de achtergrond weggeknipt (`knipUit()`).
+  vel vervangt, met de achtergrond weggeknipt (`knipUit()`) en bijgesneden
+  tot de tekening (`snijBij()`). Ze heeft haar eigen zwarte lijn en ligt
+  dus kaal, zonder de pen van `.glyph` (`getoverd` op de kaart).
 
 ## Tests
 
