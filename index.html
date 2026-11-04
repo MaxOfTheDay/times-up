@@ -245,7 +245,7 @@
    kaart en de knoppen in hoofdletters. De chips en veldnamen niet; dat is
    zin-tekst voor de volwassene. */
 .wordmark h1, #s-setup h1, .group-head, .rules > summary,
-.cd-disc b, .secs, .roundcard b, .ho-count span, .mini-score b,
+.cd-disc b, .chips.getal > .chip, .roundcard b, .ho-count span, .mini-score b,
 .paused-clock .dial b, .secs-left, .gain, .cardword, .kijk-grid small,
 .pv small, .tally .sr b, .tally .num, .btn-plain, .cb-index button {
   font-family: var(--font-display);
@@ -782,7 +782,6 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   .setup-scroll > h1,
   .setup-scroll .group-head,
   .setup-scroll legend,
-  .setup-scroll .legend-label,
   .setup-scroll .hint,
   .setup-scroll .handmatig,
   .setup-scroll summary,
@@ -830,7 +829,6 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   .setup-scroll > h1,
   .setup-scroll .group-head,
   .setup-scroll legend,
-  .setup-scroll .legend-label,
   .setup-scroll .hint,
   .setup-scroll .handmatig,
   .setup-scroll summary,
@@ -865,9 +863,9 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 /* Drie lagen tekst, niet vier: hoofdletters zijn voor de titel en de
    groepskoppen. Een veldnaam is gewone zin-tekst in inkt, zodat hij niet
    met zijn eigen groepskop wedijvert. */
-.field legend, .legend-label {
+.field legend {
   display: block;
-  font-size: var(--fs-3); font-weight: 800; letter-spacing: 0;
+  font-size: var(--fs-3); font-weight: 700; letter-spacing: 0;
   margin: 0 0 10px; padding: 0; color: var(--ink);
 }
 /* Een aan/uit is één regel: de naam links, twee kleine knoppen rechts. Zo
@@ -955,7 +953,7 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   position: relative;
   border: var(--line-2) solid var(--ink); background: var(--paper);
   box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
-  font-weight: 800; font-size: var(--fs-3); line-height: 1.2;
+  font-weight: 700; font-size: var(--fs-3); line-height: 1.2;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
 /* Gelijke delen, ook op 320 px: met flex op inhoudsbreedte sprong
@@ -971,22 +969,9 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 .chip .tick { display: none; position: absolute; bottom: var(--s-1); right: var(--s-1); width: 12px; height: 12px; }
 .chip[aria-checked="true"] .tick { display: block; }
 
-.veldkop { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3); }
-.veldkop .legend-label { margin-bottom: 0; }
-input[type=range] {
-  display: block; width: 100%; margin: 0; height: var(--tap); -webkit-appearance: none; appearance: none; background: none;
-}
-input[type=range]::-webkit-slider-runnable-track { height: 10px; background: var(--paper-2); border: var(--line-2) solid var(--ink); }
-input[type=range]::-moz-range-track { height: 10px; background: var(--paper-2); border: var(--line-2) solid var(--ink); }
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 34px; height: 34px; margin-top: -15px;
-  background: var(--go); border: var(--line) solid var(--ink); border-radius: 50%;
-}
-input[type=range]::-moz-range-thumb {
-  width: 34px; height: 34px; background: var(--go);
-  border: var(--line) solid var(--ink); border-radius: 50%;
-}
-.secs { font-weight: 900; font-size: var(--fs-4); text-align: right; font-variant-numeric: tabular-nums; }
+/* Getallen in een keuzeknop staan in Fredoka, zoals elk ander getal in de
+   app; de woorden op dit scherm blijven de systeemletter. */
+.chips.getal > .chip { font-size: var(--fs-4); }
 
 /* ============================================================
    DE KAARTENBAK — alle kaarten waar een potje uit getrokken kan worden.
@@ -1004,7 +989,7 @@ input[type=range]::-moz-range-thumb {
   list-style: none; cursor: pointer;
   display: flex; align-items: center; flex-wrap: wrap; gap: 2px var(--s-2);
   min-height: var(--tap);
-  font-size: var(--fs-2); font-weight: 800; color: var(--ink);
+  font-size: var(--fs-2); font-weight: 700; color: var(--ink);
 }
 .cardbox > summary::-webkit-details-marker { display: none; }
 .cardbox > summary::before {
@@ -1106,7 +1091,7 @@ input[type=range]::-moz-range-thumb {
   font-weight: 900; text-transform: uppercase; letter-spacing: var(--track-caps); font-size: var(--fs-2);
   color: var(--ink);
 }
-.hint { text-wrap: pretty; font-size: var(--type-note); color: var(--ink-2); margin: var(--s-2) 0 0; line-height: 1.45; }
+.hint { text-wrap: pretty; font-size: var(--fs-2); color: var(--ink-2); margin: var(--s-2) 0 0; line-height: 1.45; }
 
 /* ---- Installeren ------------------------------------------------------
    De plaat op de knop is de belofte zelf: dít vlak komt op het beginscherm te
@@ -1125,7 +1110,7 @@ input[type=range]::-moz-range-thumb {
    .hint, want de plaat is de mededeling en de zin het bijschrift. */
 .handmatig {
   display: flex; align-items: center; gap: var(--s-3);
-  margin: 0; font-size: var(--type-note); line-height: 1.45; color: var(--ink-2);
+  margin: 0; font-size: var(--fs-2); line-height: 1.45; color: var(--ink-2);
 }
 .handmatig .plaat { width: 40px; height: 40px; padding: 3px; }
 .handmatig b { color: var(--ink); font-weight: 900; }
@@ -2581,7 +2566,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
         <!-- "Per potje", niet "Aantal kaarten": de bak erboven telt ook
              kaarten (90 tot 275), en dit is de greep (16, 24 of 32). -->
         <legend>Kaarten per potje</legend>
-        <div class="chips" id="sizeChips" role="radiogroup" aria-label="Kaarten per potje">
+        <div class="chips getal" id="sizeChips" role="radiogroup" aria-label="Kaarten per potje">
           <button class="chip" role="radio" aria-checked="false" data-size="16">16
             <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
           <button class="chip" role="radio" aria-checked="false" data-size="24">24
@@ -2591,15 +2576,21 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
         </div>
       </fieldset>
 
-      <!-- De waarde staat op de regel van de naam, zoals een keuze: de schuif
-           eronder krijgt de volle breedte. -->
-      <div class="field">
-        <div class="veldkop">
-          <label class="legend-label" for="secs">Tijd per beurt</label>
-          <span class="secs" id="secsOut" aria-live="polite">30s</span>
+      <!-- Dezelfde knoppen als de twee velden erboven: één tik, geen schuif.
+           Een bewaarde waarde ertussenin gaat naar de dichtstbijzijnde (load). -->
+      <fieldset class="field">
+        <legend>Tijd per beurt</legend>
+        <div class="chips getal" id="secsChips" role="radiogroup" aria-label="Seconden per beurt">
+          <button class="chip" role="radio" aria-checked="false" data-secs="20">20s
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-secs="30">30s
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-secs="45">45s
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-secs="60">60s
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
         </div>
-        <input type="range" id="secs" min="20" max="60" step="5" value="30">
-      </div>
+      </fieldset>
     </div>
 
     <div class="field-group">
@@ -3458,6 +3449,7 @@ const TEAMS = [
 ];
 const ROUNDS = Spel.ROUNDS;
 const KEY_SET  = "tijdisom.settings";
+const TIJDEN   = [20, 30, 45, 60];   // de knoppen van "Tijd per beurt"
 const KEY_GAME = "tijdisom.game";
 
 let settings = {
@@ -3500,6 +3492,10 @@ function load() {
   // woorden is, telt als "niets weggelegd".
   if (!Array.isArray(settings.hidden)) settings.hidden = [];
   settings.hidden = settings.hidden.filter(w => typeof w === "string");
+  // De tijd kiest uit vier knoppen. Een waarde ertussenin (van de schuif
+  // die er vroeger stond, of een kapotte opslag) gaat naar de dichtstbijzijnde.
+  const t = Number(settings.secs) || 30;
+  settings.secs = TIJDEN.reduce((a, b) => Math.abs(b - t) < Math.abs(a - t) ? b : a);
 }
 function saveSettings() {
   try { localStorage.setItem(KEY_SET, JSON.stringify(settings)); } catch (e) {}
@@ -3626,8 +3622,8 @@ function paintSetup() {
     c.setAttribute("aria-checked", String(c.dataset.tier === settings.tier)));
   $$("#sizeChips .chip").forEach(c =>
     c.setAttribute("aria-checked", String(Number(c.dataset.size) === settings.size)));
-  $("#secs").value = settings.secs;
-  $("#secsOut").textContent = settings.secs + "s";
+  $$("#secsChips .chip").forEach(c =>
+    c.setAttribute("aria-checked", String(Number(c.dataset.secs) === settings.secs)));
   $("#rules").open = !!settings.rulesOpen;
   $("#cardBox").open = !!settings.cardsOpen;
   paintCards();
@@ -3802,10 +3798,9 @@ $("#sizeChips").addEventListener("click", e => {
   const c = e.target.closest(".chip"); if (!c) return;
   settings.size = Number(c.dataset.size); saveSettings(); paintSetup();
 });
-$("#secs").addEventListener("input", e => {
-  settings.secs = Number(e.target.value);
-  $("#secsOut").textContent = settings.secs + "s";
-  saveSettings();
+$("#secsChips").addEventListener("click", e => {
+  const c = e.target.closest(".chip"); if (!c) return;
+  settings.secs = Number(c.dataset.secs); saveSettings(); paintSetup();
 });
 $("#soundChips").addEventListener("click", e => {
   const c = e.target.closest(".chip"); if (!c) return;
