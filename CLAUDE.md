@@ -376,6 +376,9 @@ knop wisselt met `visibility`, nooit met `hidden`.
   van `.glyph` als rand.
 - Weggooien kost twee tikken; een niet bewaarde nieuwe kaart blijft als
   klad liggen.
+- Een nieuwe kaart opent op de camera in het vierkant (`startCam()`), met
+  het album als terugval. De camera gaat uit bij afdrukken, sluiten en
+  verbergen (`stopCam()`); de voorcamera spiegelt alleen in de zoeker.
 
 ## Tests
 

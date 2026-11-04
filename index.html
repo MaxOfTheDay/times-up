@@ -405,7 +405,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    schaduw in. Wie een knop toevoegt, zet hem in deze lijst. */
 button.btn-go, button.btn-good, button.btn-skip,
 button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain,
-button.ho-count, .cb-index button {
+button.ho-count, .cb-index button, button.mk-sluiter {
   transition: transform calc(var(--t-los) * var(--dur)) var(--e-los),
               box-shadow calc(var(--t-los) * var(--dur)) var(--e-los);
 }
@@ -416,11 +416,11 @@ button.ho-count, .cb-index button {
 button.btn-go:active, button.btn-good:active, button.btn-skip:active,
 button.btn-icon:active, button.btn-danger:active, button.chip:active,
 button.pv:active, button.btn-plain:active, button.ho-count:active,
-.cb-index button:active {
+.cb-index button:active, button.mk-sluiter:active {
   transition-duration: calc(var(--t-press) * var(--dur));
   transition-timing-function: var(--e-uit);
 }
-.btn-go:active, .btn-good:active {
+.btn-go:active, .btn-good:active, .mk-sluiter:active {
   transform: translate(var(--lift-2), var(--lift-2));
   box-shadow: 0 0 0 var(--ink);
 }
@@ -1166,6 +1166,25 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 .mk-woord::placeholder { color: var(--ink-2); opacity: 1; }
 .mk-woord:focus { outline: none; border-bottom-style: solid; }
 .mk-rest { width: var(--mk); display: flex; flex-direction: column; gap: var(--s-3); }
+/* De zoeker vult het vierkant zoals de foto het straks doet (cover). De
+   voorcamera spiegelt in de zoeker, zoals je dat van een spiegel verwacht;
+   de foto zelf niet (zie afdrukken()). */
+.mk-vak video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.mk-vak video.spiegel { transform: scaleX(-1); }
+.mk-vak.live { border: 0; outline: 4px solid var(--ink); background: var(--ink); }
+.mk-vak.live .mk-leeg { display: none; }
+.mk-camrij { display: flex; align-items: center; justify-content: center; gap: var(--s-5); }
+.mk-sluiter {
+  position: relative; width: 72px; height: 72px; border-radius: 50%; padding: 0;
+  background: var(--go); border: var(--line) solid var(--ink);
+  box-shadow: var(--lift-2) var(--lift-2) 0 var(--ink);
+}
+/* De binnenring: de lens van een fototoestel, geen tweede knop. */
+.mk-sluiter::after {
+  content: ""; position: absolute; inset: 12px; border-radius: 50%;
+  border: var(--line-2) solid var(--ink);
+}
+.mk-tg[hidden] { display: none; }
 .mk-gereedschap { display: flex; justify-content: center; gap: var(--s-3); }
 .mk-tg { width: var(--tap); padding: 0; justify-content: center; }
 .mk-tg svg { width: 22px; }
@@ -2472,6 +2491,18 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   <symbol id="i-min" viewBox="0 0 100 100">
     <path d="M18 50 H82" stroke="#14110F" stroke-width="12" stroke-linecap="round"/>
   </symbol>
+  <!-- De camera (terug naar de zoeker) en omdraaien (voor- of
+       achtercamera): twee pijlen in een kring. -->
+  <symbol id="i-camera" viewBox="0 0 100 100">
+    <path d="M10 32 H30 L37 20 H63 L70 32 H90 V82 H10 Z" fill="none" stroke="#14110F" stroke-width="8" stroke-linejoin="round"/>
+    <circle cx="50" cy="56" r="15" fill="none" stroke="#14110F" stroke-width="8"/>
+  </symbol>
+  <symbol id="i-draai" viewBox="0 0 100 100">
+    <path d="M20 44 A31 31 0 0 1 76 30" fill="none" stroke="#14110F" stroke-width="8" stroke-linecap="round"/>
+    <path d="M80 14 L78 34 L58 31" fill="none" stroke="#14110F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M80 56 A31 31 0 0 1 24 70" fill="none" stroke="#14110F" stroke-width="8" stroke-linecap="round"/>
+    <path d="M20 86 L22 66 L42 69" fill="none" stroke="#14110F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
   <symbol id="i-kruis" viewBox="0 0 100 100">
     <path d="M24 24 L76 76 M76 24 L24 76" stroke="#14110F" stroke-width="12" stroke-linecap="round"/>
   </symbol>
@@ -3042,13 +3073,23 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
       <div class="mk-vak" id="mkVak" role="button" tabindex="0" aria-label="Foto kiezen">
         <svg class="mk-leeg" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-album"/></svg>
         <img id="mkFoto" alt="" hidden draggable="false">
+        <video id="mkZoeker" playsinline muted hidden></video>
       </div>
       <input class="mk-woord" id="mkWoord" maxlength="14" placeholder="woord"
              autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="done"
              aria-label="Het woord op de kaart">
     </div>
     <div class="mk-rest">
+      <!-- Zolang de camera loopt: album, afdrukken, omdraaien. De sluiter is
+           de enige cirkel op dit paneel, want afdrukken is dan waar het
+           paneel voor is. -->
+      <div class="mk-camrij" id="mkCamRij" hidden>
+        <button class="btn-plain mk-tg" id="mkCamAlbum" aria-label="Uit het album"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-album"/></svg></button>
+        <button class="mk-sluiter" id="mkSluiter" aria-label="Foto nemen"></button>
+        <button class="btn-plain mk-tg" id="mkDraai" aria-label="Camera omdraaien"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-draai"/></svg></button>
+      </div>
       <div class="mk-gereedschap" id="mkGereedschap" hidden>
+        <button class="btn-plain mk-tg" id="mkOpnieuw" aria-label="Nieuwe foto nemen"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-camera"/></svg></button>
         <button class="btn-plain mk-tg" id="mkKleiner" aria-label="Kleiner"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-min"/></svg></button>
         <button class="btn-plain mk-tg" id="mkGroter" aria-label="Groter"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-plus"/></svg></button>
         <button class="btn-plain mk-tg" id="mkAlbum" aria-label="Andere foto"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-album"/></svg></button>
@@ -4165,6 +4206,7 @@ $("#eigenRij").addEventListener("click", e => {
 
 /* ---- de maker ----
    mk: { kaart (null bij een nieuwe), img, nieuw (het beeld is veranderd),
+         live (de camera loopt in het vierkant),
          zoom, x, y, s (px op het scherm per px van de foto) } */
 let mk = null;
 let klad = null;           // een niet bewaarde nieuwe kaart, voor de volgende tik op +
@@ -4174,9 +4216,9 @@ const ZOOM_MAX = 4;
 function makerOpen() { return !$("#maker").hidden; }
 
 function openMaker(kaart) {
-  if (!kaart && klad) { mk = klad; klad = null; }
+  if (!kaart && klad) { mk = klad; klad = null; if (!mk.img) mk.live = camKan(); }
   else mk = { kaart: kaart, img: null, nieuw: false, zoom: 1, x: 0, y: 0, s: 1,
-              woord: kaart ? kaart.woord : "" };
+              woord: kaart ? kaart.woord : "", live: !kaart && camKan() };
   $("#mkKop").textContent = kaart ? "Kaart aanpassen" : "Nieuwe kaart";
   $("#mkWoord").value = mk.woord;
   const weg = $("#mkWeg");
@@ -4191,6 +4233,7 @@ function openMaker(kaart) {
   }
   tekenMaker();
   if (mk.img) plaats(false);
+  if (mk.live) startCam();
   $(mk.img ? "#mkWoord" : "#mkVak").focus({ preventScroll: true });
 }
 
@@ -4200,7 +4243,9 @@ function sluitMaker() {
     mk.woord = $("#mkWoord").value;
     klad = mk;
   }
+  if (klad) klad.live = false;
   mk = null;
+  stopCam();
   $("#maker").hidden = true;
   screensInert(false);
   if (makerTerug && makerTerug.isConnected) makerTerug.focus({ preventScroll: true });
@@ -4239,13 +4284,19 @@ function zoomOm(cx, cy, zoom) {
 }
 
 function tekenMaker() {
-  const heeft = !!(mk && mk.img);
+  const live = !!(mk && mk.live);
+  const heeft = !live && !!(mk && mk.img);
   const vak = $("#mkVak"), foto = $("#mkFoto");
   vak.classList.toggle("vol", heeft);
-  vak.setAttribute("aria-label", heeft ? "De foto: schuif om te verplaatsen" : "Foto kiezen");
+  vak.classList.toggle("live", live);
+  vak.setAttribute("aria-label", live ? "Foto nemen" :
+    heeft ? "De foto: schuif om te verplaatsen" : "Foto kiezen");
   foto.hidden = !heeft;
+  $("#mkZoeker").hidden = !live;
   if (heeft && foto.src !== mk.img.src) foto.src = mk.img.src;
+  $("#mkCamRij").hidden = !live;
   $("#mkGereedschap").hidden = !heeft;
+  $("#mkOpnieuw").hidden = !camKan();
   keurMaker();
 }
 
@@ -4257,7 +4308,7 @@ function keurMaker() {
   const dubbel = !!w && eigen.kaarten.some(k =>
     k !== mk.kaart && k.woord.toLocaleLowerCase("nl") === w);
   const knop = $("#mkBewaar");
-  knop.disabled = !(mk.img && w && !dubbel);
+  knop.disabled = !(mk.img && !mk.live && w && !dubbel);
   knop.textContent = dubbel ? "Dat woord bestaat al" : "Bewaren";
 }
 $("#mkWoord").addEventListener("input", keurMaker);
@@ -4274,7 +4325,9 @@ $("#mkGroter").addEventListener("click", () => {
   const v = vakMaat(); zoomOm(v / 2, v / 2, mk.zoom * 1.25);
 });
 $("#mkVak").addEventListener("keydown", e => {
-  if ((e.key === "Enter" || e.key === " ") && mk && !mk.img) { e.preventDefault(); kiesFoto(); }
+  if (!(e.key === "Enter" || e.key === " ") || !mk) return;
+  if (mk.live) { e.preventDefault(); afdrukken(); }
+  else if (!mk.img) { e.preventDefault(); kiesFoto(); }
 });
 
 /* Een foto uit het album, of van de camera: op een telefoon biedt dezelfde
@@ -4290,6 +4343,7 @@ $("#mkBestand").addEventListener("change", e => {
   i.onload = () => {
     if (!mk) { URL.revokeObjectURL(url); return; }
     mk.img = i; mk.nieuw = true; mk.zoom = 1;
+    if (mk.live) { mk.live = false; stopCam(); }
     tekenMaker(); plaats(true);
     if (!$("#mkWoord").value.trim()) $("#mkWoord").focus({ preventScroll: true });
   };
@@ -4301,12 +4355,13 @@ $("#mkBestand").addEventListener("change", e => {
 const wijzers = new Map();
 $("#mkVak").addEventListener("pointerdown", e => {
   if (!mk) return;
+  if (mk.live) { afdrukken(); return; }
   if (!mk.img) { kiesFoto(); return; }
   e.currentTarget.setPointerCapture(e.pointerId);
   wijzers.set(e.pointerId, { x: e.clientX, y: e.clientY });
 });
 $("#mkVak").addEventListener("pointermove", e => {
-  if (!mk || !mk.img || !wijzers.has(e.pointerId)) return;
+  if (!mk || !mk.img || mk.live || !wijzers.has(e.pointerId)) return;
   const r = e.currentTarget.getBoundingClientRect();
   const oud = [...wijzers.values()].map(p => ({ ...p }));
   wijzers.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -4324,6 +4379,90 @@ $("#mkVak").addEventListener("pointermove", e => {
 const losWijzer = e => wijzers.delete(e.pointerId);
 $("#mkVak").addEventListener("pointerup", losWijzer);
 $("#mkVak").addEventListener("pointercancel", losWijzer);
+
+/* ---- de camera in de kaart ----
+   Het vierkant ís de zoeker: wat je ziet is precies wat er op de kaart komt.
+   Kan het toestel het niet, of zegt iemand nee, dan valt de maker terug op
+   het album, waar de telefoon zelf ook zijn camera aanbiedt. Een nee wordt
+   onthouden tot de app sluit: niet bij elke kaart opnieuw vragen. Op een
+   iPhone vraagt een geïnstalleerde app bij elke start opnieuw; dat is
+   WebKit. */
+const Cam = { stream: null, facing: "environment", nee: false, poging: 0 };
+function camKan() {
+  return !Cam.nee && window.isSecureContext !== false &&
+    !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+}
+function stopCam() {
+  Cam.poging++;
+  if (Cam.stream) { Cam.stream.getTracks().forEach(tr => tr.stop()); Cam.stream = null; }
+  const v = $("#mkZoeker");
+  v.pause(); v.srcObject = null;
+}
+async function startCam() {
+  stopCam();
+  const deze = Cam.poging;
+  const v = $("#mkZoeker");
+  try {
+    const s = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { facingMode: Cam.facing, width: { ideal: 1280 }, height: { ideal: 1280 } }
+    });
+    /* Intussen gesloten, gedraaid of afgedrukt: deze stroom is te laat. */
+    if (deze !== Cam.poging || !mk || !mk.live) { s.getTracks().forEach(tr => tr.stop()); return; }
+    Cam.stream = s;
+    v.classList.toggle("spiegel", Cam.facing === "user");
+    v.srcObject = s;
+    await v.play();
+    /* Omdraaien alleen als er iets om naar te draaien is. */
+    const toestellen = await navigator.mediaDevices.enumerateDevices().catch(() => []);
+    /* visibility en niet hidden: de sluiter blijft dan in het midden. */
+    $("#mkDraai").style.visibility =
+      toestellen.filter(d => d.kind === "videoinput").length < 2 ? "hidden" : "";
+  } catch (e) {
+    if (deze !== Cam.poging) return;
+    if (e && (e.name === "NotAllowedError" || e.name === "SecurityError" ||
+              e.name === "NotFoundError" || e.name === "OverconstrainedError")) Cam.nee = true;
+    if (mk) { mk.live = false; tekenMaker(); }
+  }
+}
+/* Afdrukken: het vierkant uit het midden van het beeld, zoals de zoeker het
+   toont. De voorcamera wordt níet gespiegeld bewaard: een spiegel in de
+   zoeker, de echte wereld op de kaart, zoals de camera van de telefoon. */
+function afdrukken() {
+  const v = $("#mkZoeker");
+  if (!mk || !mk.live || !v.videoWidth) return;
+  const z = Math.min(v.videoWidth, v.videoHeight), n = Math.min(z, 1024);
+  const c = document.createElement("canvas");
+  c.width = c.height = n;
+  c.getContext("2d").drawImage(v, (v.videoWidth - z) / 2, (v.videoHeight - z) / 2, z, z, 0, 0, n, n);
+  const i = new Image();
+  i.onload = () => {
+    if (!mk) return;
+    mk.img = i; mk.nieuw = true; mk.zoom = 1; mk.live = false;
+    tekenMaker(); plaats(true);
+    if (!$("#mkWoord").value.trim()) $("#mkWoord").focus({ preventScroll: true });
+  };
+  i.src = c.toDataURL("image/jpeg", .92);
+  stopCam();
+}
+$("#mkSluiter").addEventListener("click", afdrukken);
+$("#mkCamAlbum").addEventListener("click", () => $("#mkBestand").click());
+$("#mkDraai").addEventListener("click", () => {
+  Cam.facing = Cam.facing === "user" ? "environment" : "user";
+  startCam();
+});
+$("#mkOpnieuw").addEventListener("click", () => {
+  if (!mk || !camKan()) return;
+  mk.live = true; tekenMaker(); startCam();
+  $("#mkVak").focus({ preventScroll: true });
+});
+/* Weg uit beeld: de camera uit, anders blijft het lampje branden. Terug:
+   weer aan, als de maker nog op de zoeker stond. */
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) stopCam();
+  else if (mk && mk.live && makerOpen()) startCam();
+});
+addEventListener("pagehide", stopCam);
 
 /* Het vierkant zoals het er nu uitziet, als JPEG van 512 px. */
 function snijFoto() {

@@ -2428,10 +2428,28 @@ code: een foto en het woord, in Instellingen.
   eerste bewaarbeurt `navigator.storage.persist()`. Een geïnstalleerde app
   heeft daar geen last van. Zonder IndexedDB (een privévenster) staat het
   veld er niet.
-- **Album en camera in één keuze.** `<input type="file" accept="image/*">`
-  biedt op een telefoon zowel het album als de camera aan. Wat de browser
-  niet kan lezen (HEIC op Android) wordt geweigerd zoals overal: het vierkant
-  schudt.
+- **De camera zit in de kaart.** Een nieuwe kaart opent op de zoeker: het
+  vierkant toont de camera precies zoals de foto op de kaart komt, en eronder
+  liggen het album, de sluiter en omdraaien. De keuze van de telefoon zelf
+  (`<input type="file">`) haalde je uit de app naar een ander scherm met
+  andere knoppen; zo blijft alles op de kaart. De sluiter is de enige cirkel
+  op het paneel en heeft `--lift-2`, want afdrukken is zolang de camera
+  loopt waar het paneel voor is; een tik op de zoeker zelf drukt ook af.
+  Omdraaien staat er alleen als er twee camera's zijn, en houdt dan zijn
+  plek (`visibility`), zodat de sluiter in het midden blijft.
+- **Een spiegel in de zoeker, niet op de kaart.** De voorcamera spiegelt in
+  de zoeker, zoals je jezelf verwacht te zien; de foto wordt ongespiegeld
+  bewaard, zoals de camera van de telefoon dat doet.
+- **Zonder camera het album.** Geen `getUserMedia`, geen toestemming of geen
+  camera: dan is het vierkant leeg met het albumteken, en een tik opent de
+  keuze van de telefoon, die daar ook zijn eigen camera aanbiedt. Een nee
+  wordt onthouden tot de app sluit, zodat niet elke kaart opnieuw vraagt.
+  Een iPhone vraagt in een geïnstalleerde app bij elke start opnieuw; dat is
+  WebKit en niet te omzeilen. Wat de browser niet kan lezen (HEIC op
+  Android) wordt geweigerd zoals overal: het vierkant schudt.
+- **De camera gaat uit** bij afdrukken, sluiten, `visibilitychange` en
+  `pagehide`, anders blijft het lampje branden. Komt de app terug terwijl de
+  zoeker openstond, dan gaat hij weer aan.
 
 ## Weggaan kost niets
 
