@@ -3928,7 +3928,9 @@ const Tril = (() => {
     doe()   { buzz(50); },                    // lange druk voltooid
     om()    { buzz([60, 70, 60]); },          // tijd om
     leeg()  { buzz([20, 50, 20, 50, 40]); },  // stapel leeg
-    feest() { buzz([40, 60, 40, 60, 90]); }   // gewonnen
+    /* Gewonnen: een puls op elke uitbarsting van het vuurwerk (de noten
+       van de fanfare, 130 ms uit elkaar) en een lange op de slotring (550). */
+    feest() { buzz([40, 90, 40, 90, 40, 90, 40, 120, 120]); }
   };
 })();
 
