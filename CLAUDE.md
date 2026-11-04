@@ -208,7 +208,12 @@ aftellen houdt de grond (`handoff(..., zelfdeGrond)`).
 
 **De grond stroomt, het scherm vervaagt niet.** `#s-handoff`, `#s-play` en
 `#s-winner` hebben geen `screenIn`: op de overdracht stroomt alleen de grond van papier
-naar ploegkleur, en het spelscherm verandert van grond niet. Bij beperkte
+naar ploegkleur, en het spelscherm verandert van grond niet: het is de
+ploegkleur, vlak, zonder punten (een cirkel op punten rimpelt, en "goed"
+wordt tien keer per beurt ingedrukt). Als de beurt of de ronde om is, trekt
+die kleur in de adem weg naar papier (`#s-play.over`, `.leeg`), zodat de
+overdracht vanaf papier volstroomt; nooit rechtstreeks naar de andere
+ploeg, want dat mengt door paars. Bij beperkte
 beweging geen vloed. De rasterpunten op die grond zijn papier op lage
 dekking (16%), geen eigen kleur, op één stilstaand raster van 12 px, getekend
 op één canvas per grond (`stipveld()`). Wat beweegt is rastertoon: een punt
@@ -256,6 +261,15 @@ klassenaam pakt (`.bar` bestond al).
 in de balk tijdens het spelen. Het vliegende punt draagt dezelfde huid, gaat
 via Web Animations, en het getal plus de wip horen bij de landing
 (`landFly()`), ook bij een schermwissel.
+
+**De balk heeft drie stukken.** Wie (`.who`: mascotte | buit), hoe (het
+rondeteken, alleen, in het midden) en de klok (`.klokknop`: seconden |
+pauze), allemaal `--balk` hoog, in die volgorde. Twee vakken in één stuk
+scheidt een inktlijn; niets ligt over een ander stuk heen. Alleen de
+klokknop heeft lift. Het aftellen legt `.cd-team`, `.cd-round` en `#cdBack`
+op de gemeten plek van die drie, dus de balk verschuift niet als de schijf
+opengaat. Tekst in de balk staat op papier of op het groen, nooit op de
+ploegkleur.
 
 **Pauze draait de kaart om.** Tijdens een beurt ligt het pauzepaneel als
 achterkant op de gemeten plek van de kaart (`legPaneel()`), met haar eigen
