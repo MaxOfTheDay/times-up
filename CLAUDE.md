@@ -313,8 +313,10 @@ klassenaam pakt (`.bar` bestond al).
 
 **Eén label voor "wat er bij komt".** Het groene `+N` (`.gain`) staat alleen
 in de balk tijdens het spelen. Bij goed vliegt alleen de kaart erin
-(`vliegKaart()`), geen los `+1`: ze krimpt tot de hoogte van het vak, en
-terugnemen (`kaartTerug()`) is dezelfde vlucht achterstevoren. Via Web
+(`vliegKaart()`), geen los `+1`: op `--e-vloei`, dekkend tot ze er is,
+en ze krimpt tot precies de hoogte van het vak. De kaart eronder ligt er al
+en beweegt niet (alleen na pas komt ze van onder de stapel). Terugnemen
+(`kaartTerug()`) is dezelfde vlucht achterstevoren. Via Web
 Animations; het getal plus de wip horen bij de landing (`landFly()`), ook
 bij een schermwissel.
 
