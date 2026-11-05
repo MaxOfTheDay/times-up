@@ -380,7 +380,9 @@ hem draait. Kijk bij twijfel op het oudste toestel in huis.
 in Instellingen twee rijen (Gewone, Eigen), elk met haar getal; een tik
 opent haar kaarten op `#s-kaarten`, één lijst tegelijk (`settings.lade`,
 `openKaarten()`). De greep (16, 24 of 32) bestaat pas als je op Beginnen tikt (`drawDeck` in
-`newGame`). Trek nooit vooruit. `settings.hidden` gaat op het woord, één lijst
+`newGame`). Trek nooit vooruit. Wat in de greep gaat, komt eerst uit de
+kaarten die het langst niet kwamen (`tijdisom.gezien`, per woord, ook voor
+eigen kaarten via `laatst`), zodat Nog een keer andere kaarten deelt. `settings.hidden` gaat op het woord, één lijst
 voor alle standen; alles op het paneel gaat over de stand die je voor je
 hebt. `MIN_BAK` (40) geldt over alle drie de standen. De sleuf van hint en
 knop wisselt met `visibility`, nooit met `hidden`.
