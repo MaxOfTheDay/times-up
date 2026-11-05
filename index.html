@@ -6135,10 +6135,16 @@ function countdown(done) {
   goKaart = null;
   if (kopie && kopie.animate) {
     el.querySelector(".stipveld").after(kopie);
+    /* Ze zakt achter haar eigen onderrand weg, zoals de dieren achter de
+       rand van de kaart: de knip blijft op de plek van die rand (plus de
+       schaduw) terwijl de kaart erdoor zakt, tot ook de dieren erachter
+       zijn. Niet vervagen: op de ploegkleur mengt dat kleuren buiten het
+       palet (olijfgoud, een paarse vos). */
+    const h = parseFloat(kopie.style.height) || 200, D = h + 110;
     const a = kopie.animate([
-      { transform: "translateY(0) scale(1)", opacity: 1 },
-      { transform: "translateY(10px) scale(.94)", opacity: 0 }
-    ], { duration: 450, easing: curve("uit"), fill: "forwards" });
+      { transform: "translateY(0)", clipPath: "inset(-200px -40px -12px -40px)" },
+      { transform: `translateY(${D}px)`, clipPath: `inset(-200px -40px ${D - 12}px -40px)` }
+    ], { duration: 450, easing: curve("weg"), fill: "forwards" });
     a.onfinish = a.oncancel = () => kopie.remove();
   }
   veldCd.aan();
