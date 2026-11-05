@@ -4,8 +4,9 @@
  * Speelt een volledig potje in een echte browser: drie rondes over hetzelfde
  * deck, passen, de klok die afloopt, de ploegen die wisselen, de resterende
  * tijd die meegaat naar de volgende ronde, dat een herlaadbeurt midden in een
- * beurt het potje terugbrengt op de grens ervoor, dat de terugveeg het
- * pauzepaneel opent, dat stoppen het potje wél weggooit, dat de laatste
+ * beurt het potje terugbrengt op de grens ervoor, dat de terugveeg op de
+ * overdracht niets weggooit, dat stoppen het potje wél weggooit (ook via het
+ * huisje op de overdracht), dat de laatste
  * kaart geraden op de bel precies één einde oplevert, en dat wegklikken het
  * pauzepaneel opent (of het aftellen afbreekt).
  *
@@ -309,13 +310,23 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(await page.evaluate(() => history.length) === invoerVoor,
      'herladen legt een extra invoer in de geschiedenis');
 
-  // --- de terugveeg opent het pauzepaneel in plaats van de app te verlaten ---
+  // --- de terugveeg op de overdracht verlaat de app niet en gooit niets weg ---
+  // Er is hier geen pauze: het huisje in de hoek doet de druk voor.
   await page.goBack();
   await page.waitForTimeout(300);
-  ok(await page.evaluate(() => !document.querySelector('#pauze').hidden),
-     'de terugveeg opent het pauzepaneel niet');
-  await page.click('#btnResume');
-  await page.waitForTimeout(200);
+  ok(await page.evaluate(() => document.querySelector('#pauze').hidden),
+     'de terugveeg op de overdracht opent een pauzepaneel');
+  ok(await screen() === 'handoff' && await game(() => !!window.__tijd.G),
+     'de terugveeg op de overdracht verlaat het potje');
+  ok(await page.evaluate(() => /scaleY\(0\.[1-9]/.test(document.querySelector('#btnStopHo i').style.transform)),
+     'de terugveeg op de overdracht doet de druk op het huisje niet voor');
+  await page.waitForTimeout(1300);
+
+  // --- een tik op het huisje doet de druk voor, maar stopt niet ---
+  await page.click('#btnStopHo');
+  await page.waitForTimeout(1300);
+  ok(await screen() === 'handoff' && await page.evaluate(() => document.querySelector('#pauze').hidden),
+     'een tik op het huisje van de overdracht stopt het potje of opent een paneel');
 
   // --- stoppen gooit het potje wél weg ---
   // Bewaren mag nooit betekenen dat iets wat je met opzet weggooit terugkomt.
@@ -486,6 +497,12 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   await page.waitForTimeout(300);
   ok(await screen() === 'handoff', 'wegklikken tijdens het aftellen gaat niet terug naar de overdracht');
   ok(await game(() => window.__tijd.G.card) === null, 'wegklikken tijdens het aftellen begon toch een beurt');
+
+  // --- het huisje op de overdracht vasthouden stopt het potje ---
+  await hold(page, '#btnStopHo', 1400);
+  await page.waitForTimeout(250);
+  ok(await screen() === 'title', 'het huisje op de overdracht vasthouden komt niet op de titel uit');
+  ok(!await game(() => !!window.__tijd.G), 'het huisje op de overdracht gooit het potje niet weg');
 
   ok(!errs.length, 'consolefouten: ' + errs.join(' | '));
 

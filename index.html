@@ -140,7 +140,7 @@
      Goud is "dit, nu": de knop om nu in te drukken, de keuze die geldt, de
      ronde waarin je zit, de kroon van wie won, de plaat onder het merk. Groen
      is "geraden", en alleen dat. Stoppen heeft geen eigen kleur: het is inkt,
-     met een vorm (huisje, stippellijn, vloed). Het enige andere is de hitte
+     met een vorm (huisje, vloed). Het enige andere is de hitte
      van de klok hieronder. */
   --go:       #F2B705;  /* "dit, nu"                                (inkt erop, 10,3:1) */
   --good:     #2E9E5B;  /* vlak van de geraden-knop                (inkt erop,  5,5:1) */
@@ -445,11 +445,6 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 .nudge { animation: nudge calc(var(--t-groot) / max(var(--dur), .001)) var(--e-vloei); }
 .refuse { outline: var(--line-2) solid var(--ink); outline-offset: 4px; }
 
-/* Wat je vast moet houden draagt een stippellijn, en dat is nog precies één
-   knop: stoppen. Een regel ín de knop, op volle dekking en volle breedte in
-   inkt -- niet de contour. Een gestippelde omtrek maakte haar het enige
-   vlak zonder inkt-rand, en las buiten deze app als "uitgeschakeld". */
-
 /* ---- de grote ronde "verder"-knop ----
    Titel, overdracht (vasthouden), opnieuw, verder na pauze: allemaal
    dezelfde knop. */
@@ -555,10 +550,8 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 /* Ingedrukt blijven: dit staat stil, nog niet of niet meer. Het stuk zakt
    zijn schaduw in en blijft liggen op --paper-2, zonder dat er een vinger
    op staat. Tijdens het aftellen (goed en pas wachten), in de pauze (de
-   klok, goed en pas; op de overdracht het huisje en start) en bij tijd om
-   (#s-play.over). Loslaten veert terug met de overgang uit 3. KNOPPEN.
-   Zo heeft de pauze geen sluier nodig, en is er op de overdracht maar één
-   gouden speelteken in beeld: "verder". */
+   klok, goed en pas) en bij tijd om (#s-play.over). Loslaten veert terug
+   met de overgang uit 3. KNOPPEN. Zo heeft de pauze geen sluier nodig. */
 .btn-go.neer, .btn-good.neer, .btn-icon.neer, .btn-skip.neer {
   pointer-events: none; background: var(--paper-2); box-shadow: 0 0 0 var(--ink);
   transition: transform calc(var(--t-press) * var(--dur)) var(--e-uit),
@@ -567,45 +560,39 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 .btn-go.neer, .btn-good.neer { transform: translate(var(--lift-2), var(--lift-2)); }
 .btn-icon.neer, .btn-skip.neer { transform: translate(var(--lift-1), var(--lift-1)); }
 
-/* ---- vasthouden om te stoppen ----
-   Dezelfde huid als pauze, huisje en terug (papier, inkt-rand, --lift-1).
-   Drie eigen tekens:
-   - in rust de gestippelde regel: de knop die je vast moet houden, het enige
-     gestippelde in de app;
+/* ---- vasthouden om te stoppen (.btn-houd) ----
+   Het huisje dat je vasthoudt: in de hoek van de overdracht (#btnStopHo) en
+   op de achterkant van de speelkaart (#btnStop). Dezelfde huid als pauze,
+   huisje en terug (papier, inkt-rand, --lift-1), en in rust niets eigens:
+   de knop leert het zelf, want een losse tik doet de druk voor (de vloed
+   loopt een kwart op, de vinger drukt). Twee tekens onderweg:
    - tijdens het houden loopt de inkt van onder naar boven vol, per frame
      getekend door holdButton();
    - halverwege haalt die vloed het teken in en keert het om naar papier: het
      enige ijkpunt onderweg.
 
    Alles in inkt, geen eigen kleur: een donkerrood las naast Vos als een
-   vuile Vos, en de knop zegt al drie keer wat hij is (huisje, stippellijn,
-   vloed). De regel is volle breedte, volle dekking, drie pixels dik. De
-   streepjes komen uit een repeating-linear-gradient en niet uit border-style:
-   dashed, dat ze per maat anders verdeelt. */
+   vuile Vos. */
 .btn-danger {
-  position: relative; overflow: hidden;
   width: 68px; height: 68px; display: grid; place-items: center;
   border: var(--line-2) solid var(--ink); background: var(--paper-2);
   box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
-  color: var(--ink);
 }
-.btn-danger .mark { width: 32px; position: relative; z-index: 1; }
-.btn-danger .hold-rule {
-  position: absolute; left: 8px; right: 8px; bottom: 7px; height: 3px; z-index: 1;
-  background: repeating-linear-gradient(to right,
-    var(--ink) 0 9px, transparent 9px 16px);
-}
-.btn-danger i {
+.btn-houd { overflow: hidden; color: var(--ink); }
+.btn-danger { position: relative; }
+.btn-houd .mark { width: 22px; position: relative; z-index: 1; }
+.btn-danger .mark { width: 32px; }
+.btn-houd i {
   position: absolute; inset: 0; background: var(--ink);
   transform: scaleY(0); transform-origin: bottom;
 }
 /* Het teken staat in currentColor, dus het keert om naar papier zodra de
    inkt eronder staat (15,9:1). */
-.btn-danger.flooded { color: var(--paper); }
+.btn-houd.flooded { color: var(--paper); }
 /* De vinger die bij een losse tik de lange druk voordoet: de top van de
    vinger op het hart van het huisje. Alleen via Web Animations zichtbaar
    (zie holdButton()); in rust onzichtbaar. */
-.btn-danger .vinger {
+.btn-houd .vinger {
   position: absolute; z-index: 2; width: 36px; opacity: 0; pointer-events: none;
   left: calc(50% - 15px); top: calc(50% - 4px);
 }
@@ -1744,9 +1731,8 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
    liggend nog te lezen) en staat de klok waar hij altijd staat, in plaats
    van als tweede wijzerplaat op een tweede vel. De stilstand zegt zich door
    het omdraaien, de sluier en de band die niet meer afwindt; geen
-   pauzebalken erbij, die staan al rechtsboven. Op de overdracht loopt er
-   geen klok en ligt er geen kaart: daar blijft het een los paneel met de
-   twee deuren. */
+   pauzebalken erbij, die staan al rechtsboven. Op de overdracht is er geen
+   pauze: daar loopt geen klok, en het huisje in de hoek is de uitgang. */
 #pauze .panel > .timerframe { display: none; }
 #pauze.kaart.klok .panel > .timerframe { display: block; }
 #pauze.kaart .panel {
@@ -2673,8 +2659,8 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
           fill="none" stroke="#14110F" stroke-width="10" stroke-linejoin="round"/>
   </symbol>
 
-  <!-- Stoppen: het huisje, want daar brengt het je, en het is het huisje dat
-       op de overdracht dit paneel opende. Geen kruis: een kruis op een paneel
+  <!-- Stoppen: het huisje, want daar brengt het je, en het is het huisje in
+       de hoek van de overdracht. Geen kruis: een kruis op een paneel
        betekent "sluit dit", en wie dat dacht wilde juist verder spelen.
        Dikker dan #i-huis, omdat het kleiner staat. currentColor, zodat het
        teken kan omkeren naar papier zodra het rood van de vasthoud-vloed
@@ -3147,10 +3133,13 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 
   <!-- Een huisje en geen pauzeteken: op dit scherm loopt er geen klok, dus
        valt er niets te pauzeren. De enige reden om hier te tikken is
-       weggaan -- wat het huisje op het winnaarsscherm ook betekent. Het
-       paneel erachter blijft wel hetzelfde. -->
-  <button class="btn-icon" id="btnPauzeHo" aria-label="Verder spelen of stoppen">
-    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-huis"/></svg>
+       weggaan, en dat doet het huisje zelf: vasthouden, net als het huisje
+       op de achterkant van de speelkaart (zie holdButton()). Geen paneel
+       ertussen; dat gaf een huisje dat een tweede huisje opende. -->
+  <button class="btn-icon btn-houd" id="btnStopHo" aria-label="Spel stoppen — houd ingedrukt">
+    <i></i>
+    <svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-stop"/></svg>
+    <svg class="vinger" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vinger"/></svg>
   </button>
 
   <!-- 3. START. Dezelfde knop als op het titelscherm: één tik. Een losse
@@ -3374,12 +3363,11 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
          rechtsboven, waar elke uitgang staat, en "verder" alleen in het
          midden: naast elkaar woog een vierkant van 68 tegen een gouden
          cirkel van 112, en dat stond scheef. Als los paneel (de kaart is te
-         klein, of er ligt er geen) staan ze naast elkaar. -->
+         klein) staan ze naast elkaar. -->
 
     <div class="doors">
-      <button class="btn-danger" id="btnStop" aria-label="Spel stoppen — houd ingedrukt">
+      <button class="btn-danger btn-houd" id="btnStop" aria-label="Spel stoppen — houd ingedrukt">
         <i></i>
-        <span class="hold-rule" aria-hidden="true"></span>
         <svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-stop"/></svg>
         <svg class="vinger" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vinger"/></svg>
       </button>
@@ -5433,20 +5421,23 @@ function holdButton(el, ms, run, paint) {
   function cancel() {
     if (raf === null) return;
     cancelAnimationFrame(raf); raf = null;
-    if (performance.now() - druk < TIK_MS) {
-      loop(.28, 300, () => setTimeout(() => { if (raf === null) loop(0, 600); }, 250));
-      if (vinger && vinger.animate) {
-        const s = stilAan();
-        vinger.animate(s
-          ? [{ opacity: 0 }, { opacity: 1, offset: .15 }, { opacity: 1, offset: .8 }, { opacity: 0 }]
-          : [{ opacity: 0, transform: "translate(6px, -10px)" },
-             { opacity: 1, transform: "translate(0, 0)", offset: .25 },
-             { opacity: 1, transform: "translate(0, 0) scale(.9)", offset: .45 },
-             { opacity: 1, transform: "translate(0, 0) scale(.9)", offset: .8 },
-             { opacity: 0, transform: "translate(0, 0) scale(.9)" }],
-          { duration: 1100, easing: curve("uit") });
-      }
-    } else loop(0, 300);
+    if (performance.now() - druk < TIK_MS) voordoen();
+    else loop(0, 300);
+  }
+  function voordoen() {
+    if (raf !== null) return;
+    loop(.28, 300, () => setTimeout(() => { if (raf === null) loop(0, 600); }, 250));
+    if (vinger && vinger.animate) {
+      const s = stilAan();
+      vinger.animate(s
+        ? [{ opacity: 0 }, { opacity: 1, offset: .15 }, { opacity: 1, offset: .8 }, { opacity: 0 }]
+        : [{ opacity: 0, transform: "translate(6px, -10px)" },
+           { opacity: 1, transform: "translate(0, 0)", offset: .25 },
+           { opacity: 1, transform: "translate(0, 0) scale(.9)", offset: .45 },
+           { opacity: 1, transform: "translate(0, 0) scale(.9)", offset: .8 },
+           { opacity: 0, transform: "translate(0, 0) scale(.9)" }],
+        { duration: 1100, easing: curve("uit") });
+    }
   }
 
   /* Een lange druk opent op een tablet het eigen menu van het toestel
@@ -5463,6 +5454,9 @@ function holdButton(el, ms, run, paint) {
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); Snd.unlock(); start(); }
   });
   ["keyup", "blur"].forEach(ev => el.addEventListener(ev, cancel));
+  /* Hetzelfde voordoen als een losse tik, voor wie de knop niet aanraakte
+     maar wel zocht: de terugveeg op de overdracht (zie terug()). */
+  return { voordoen };
 }
 
 /* Een vulling die van onder naar boven loopt: stoppen. Halverwege haalt ze
@@ -5648,7 +5642,7 @@ function zetOpRand(team) {
 function handoff(mode, freshA, freshB, zelfdeGrond) {
   const round = mode === "round";
   /* Wat in een pauze ingedrukt bleef (zie PAUZE_NEER), ligt hier weer op. */
-  ["#btnPauzeHo", "#btnStartTurn", "#btnPauze"].forEach(sel => $(sel).classList.remove("neer"));
+  ["#btnStartTurn", "#btnPauze"].forEach(sel => $(sel).classList.remove("neer"));
   handoffMode = round ? "round" : "turn";
   const t = TEAMS[G.team], r = G.round - 1;
   $("#s-handoff").classList.toggle("mode-round", round);
@@ -7326,10 +7320,7 @@ $("#btnHome").addEventListener("click", () => {
 function naarTitel(k, sluier) {
   const van = $(".screen.on");
   show("title");
-  /* Op de overdracht houdt .paneel het paneel op zijn plek tot de titel
-     rond is. */
-  const klaar = () => $("#s-handoff").classList.remove("paneel");
-  if (stilAan() || !k || !k.width || !van || van.id === "s-title" || !document.body.animate) { klaar(); return; }
+  if (stilAan() || !k || !k.width || !van || van.id === "s-title" || !document.body.animate) return;
   const ti = $("#s-title");
   van.classList.add("blijft");
   if (sluier) sluier.classList.add("blijft");
@@ -7342,7 +7333,6 @@ function naarTitel(k, sluier) {
   ], { duration: 450, easing: curve("uit") });
   a.onfinish = a.oncancel = () => {
     van.classList.remove("blijft");
-    klaar();
     if (sluier) sluier.classList.remove("blijft");
     ti.classList.remove("groei");
   };
@@ -7383,34 +7373,24 @@ function openPause() {
   /* De adempauze na tijd-om (zie timeUp()) heeft geen paneel nodig: er
      loopt dan al niets meer, en een paneel erover zou middenin die adem
      opengaan en het overdrachtscherm er zo weer onder wisselen. */
-  if (current === "play" && (!G || G.card === null)) return;
-  const opKaart = current === "play";
-  if (opKaart) {
-    pauseMs = remaining();
-    stopClock();
-    releaseWake();
-    /* De kaart precies op de bevroren stand, zodat de achterkant dezelfde
-       band krijgt; en de haast eraf, anders wiebelen haar randen onder het
-       paneel uit. runClock() zet die er bij verder weer op. */
-    paintClock(pauseMs, G.secs * 1000);
-    $("#cardslot").classList.remove("hurry");
-  }
-  /* De kaart die je voor je hebt draait om: tijdens een beurt de speelkaart
-     (met haar klok), op de overdracht de opdrachtkaart (alleen de deuren). */
+  /* Pauze is er alleen tijdens een beurt: op de overdracht loopt geen klok,
+     en daar is het huisje zelf de uitgang (#btnStopHo). */
+  if (current !== "play" || !G || G.card === null) return;
+  pauseMs = remaining();
+  stopClock();
+  releaseWake();
+  /* De kaart precies op de bevroren stand, zodat de achterkant dezelfde
+     band krijgt; en de haast eraf, anders wiebelen haar randen onder het
+     paneel uit. runClock() zet die er bij verder weer op. */
+  paintClock(pauseMs, G.secs * 1000);
+  $("#cardslot").classList.remove("hurry");
+  /* De speelkaart draait om, met haar klok op de achterkant. */
   $("#pauze").classList.remove("kaart");
-  $("#pauze").classList.toggle("klok", opKaart);
-  pauzeKaart = opKaart ? $("#card") : current === "handoff" ? $("#hoRoundCard") : null;
-  /* De achterkant dekt de voorkant af, dus de stand en de ronde staan er
-     ook op de overdracht op. De startknop eronder is net zo'n gouden cirkel
-     met een speelteken als "verder": die is even weg zolang het paneel
-     open is. */
-  $("#pauseTally").hidden = !G;
-  if (G) paintRound($("#pauseRonde"), "teken");
-  $("#s-handoff").classList.toggle("paneel", current === "handoff");
-  /* Wat stilstaat, blijft ingedrukt (zie .neer): tijdens een beurt de
-     klokknop, goed en pas; op de overdracht het huisje en start. */
-  (opKaart ? PAUZE_NEER.spel : current === "handoff" ? PAUZE_NEER.overdracht : [])
-    .forEach(sel => $(sel).classList.add("neer"));
+  $("#pauze").classList.add("klok");
+  pauzeKaart = $("#card");
+  paintRound($("#pauseRonde"), "teken");
+  /* Wat stilstaat, blijft ingedrukt (zie .neer): de klokknop, goed en pas. */
+  PAUZE_NEER.forEach(sel => $(sel).classList.add("neer"));
   paintPauseScore();
 
   pauseReturn = document.activeElement;
@@ -7482,14 +7462,12 @@ function kaartBoven(draai) {
     { duration: 180, easing: curve("uit") });
 }
 
-const PAUZE_NEER = { spel: ["#btnPauze", "#btnGoed", "#btnPas"],
-                     overdracht: ["#btnPauzeHo", "#btnStartTurn"] };
+const PAUZE_NEER = ["#btnPauze", "#btnGoed", "#btnPas"];
 function closePause() {
   const el = $("#pauze");
   el.hidden = true;
   /* Wat ingedrukt lag, veert terug (de overgang uit 3. KNOPPEN). */
-  [...PAUZE_NEER.spel, ...PAUZE_NEER.overdracht].forEach(sel => $(sel).classList.remove("neer"));
-  $("#s-handoff").classList.remove("paneel");
+  PAUZE_NEER.forEach(sel => $(sel).classList.remove("neer"));
   screensInert(false);
   kaartBoven(true);     // het paneel is meteen weg; de kaart komt weer boven
   if (pauseReturn && pauseReturn.isConnected) pauseReturn.focus({ preventScroll: true });
@@ -7513,10 +7491,9 @@ function closePause() {
   }
 }
 
-/* Pauze staat op elk scherm van het spel, rechtsboven, even groot (op de
-   overdracht als huisje). */
-["#btnPauze", "#btnPauzeHo"]
-  .forEach(sel => $(sel).addEventListener("click", () => { Snd.unlock(); openPause(); }));
+/* Pauze staat rechtsboven tijdens een beurt; op de overdracht staat daar
+   het huisje (#btnStopHo). */
+$("#btnPauze").addEventListener("click", () => { Snd.unlock(); openPause(); });
 
 $("#btnResume").addEventListener("click", closePause);
 
@@ -7557,18 +7534,28 @@ document.addEventListener("keydown", e => {
   if (e.key === "Escape" && !$("#pauze").hidden) { e.preventDefault(); closePause(); }
 });
 
-holdButton($("#btnStop"), 1100, () => {
-  const k = $("#btnStop").getBoundingClientRect();   // vóór het paneel verdwijnt
+/* Stoppen gooit het lopende potje weg en gaat naar de titel, die groeit uit
+   het huisje dat je vasthield (k, gemeten vóór het paneel verdwijnt). Twee
+   plekken: de achterkant van de speelkaart en de hoek van de overdracht. */
+function stopPotje(knop) {
+  const k = knop.getBoundingClientRect();
+  const paneel = !$("#pauze").hidden;
   pauseMs = 0; pauseReturn = null;
   stopClock(); releaseWake();
-  $("#pauze").hidden = true;
-  kaartBoven(false);
-  screensInert(false);        // niet via closePause(): dat zou de klok van
+  if (paneel) {
+    $("#pauze").hidden = true;
+    kaartBoven(false);
+    screensInert(false);      // niet via closePause(): dat zou de klok van
                                // een spel dat we net weggooien weer starten
+  }
   G = null;
   clearGame();          // met opzet weggegooid: niet stilletjes terugbrengen
-  naarTitel(k, $("#pauze"));
-}, fillY($("#btnStop i"), $("#btnStop")));
+  naarTitel(k, paneel ? $("#pauze") : null);
+}
+holdButton($("#btnStop"), 1100, () => stopPotje($("#btnStop")),
+  fillY($("#btnStop i"), $("#btnStop")));
+const stopHo = holdButton($("#btnStopHo"), 1100, () => stopPotje($("#btnStopHo")),
+  fillY($("#btnStopHo i"), $("#btnStopHo")));
 
 /* ==============================================================
    6b. DE TERUGVEEG — één invoer in de geschiedenis als vangnet
@@ -7652,7 +7639,10 @@ function terug() {
   // Aftellen: dezelfde uitweg als een tik op het vlak, en als het teken
   // rechtsboven dat die tik aankondigt.
   if (countRaf !== null) { stopCountdown(); releaseWake(); handoff(handoffMode); return; }
-  openPause();            // spelen en overdracht: allebei het pauzeteken
+  /* Overdracht: het huisje doet de druk voor. Een veeg gooit geen potje weg,
+     maar wijst wel de uitgang aan. */
+  if (current === "handoff") { stopHo.voordoen(); return; }
+  openPause();
 }
 
 /* ==============================================================
