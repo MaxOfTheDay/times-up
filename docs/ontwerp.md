@@ -1458,6 +1458,9 @@ is de kaart die zegt wat er nu komt.
   zoals de overdracht (`--wn-grond` eerst papier, twee beelden later de
   winnaar). Bij gelijkspel blijft het papier.
 - Bij beperkte beweging gebeurt alles meteen.
+- Bij Nog een keer blijft de eindstand onder de groeiende cirkel staan
+  (`groeiUit()`). Haar kaart vouwt pas weer open als die cirkel rond is;
+  meteen terugzetten liet de volle kaart een beeld lang terugkomen.
 
 ## Pauze legt het spel weg en draait de kaart om, zonder sluier
 
@@ -1745,6 +1748,20 @@ meer" is een vorm, geen tint, zoals bij stoppen. De buit groeide tegelijk tot
 tegel twee keer op haar eigen plek. Een groter groen vak zou boven en onder
 uit zijn tegel steken.
 
+**Pas die niet meer kan, ligt ook ingedrukt.** Bij de laatste kaart stond
+pas nog op 38% dekking: papier op de ploegkleur werd roze of staalblauw.
+Na een lege stapel hield hij die stand bovendien het hele aftellen van de
+volgende beurt, terwijl hij na tijd om gewoon ingedrukt lag. Nu zakt hij in
+en blijft hij dekkend op `--paper-2` liggen, met de streep erdoor: "niet
+meer". In het aftellen ligt er nog geen kaart en geen streep: "nog niet",
+net als goed. Het indrukken gaat op `translate`, zodat `nudge()` hem op zijn
+ingedrukte plek schudt.
+
+**De stapel draait mee om.** Bij tijd om werd de kaart smal boven een volle
+stapel die bleef liggen, en dan las het omdraaien als wegschuiven. Nu
+draaien de kaarten eronder mee (`draaiOm()`, op `scale`, want `transform`
+draagt hun scheve stand).
+
 **De lege stapel is leeg papier.** Bij de laatste geraden kaart vloog de
 kopie naar de teller, maar de kaart zelf bleef met hetzelfde teken en woord
 liggen: de kaart stond er twee keer, en het vinkje viel op een kaart die al
@@ -1792,6 +1809,18 @@ met de stralen in de punten (zie "Rastertoon, afgewerkt"). De stand blijft
 op papier, dus er komt geen tekst op de ploegkleur. De confetti is papier en
 goud, want snippers in de ploegkleur verdwijnen in de grond. Bij gelijkspel
 is er geen ploeg: papier met inkten punten, zoals de titel.
+
+**Vos en Uil op de rand.** Op het merk en de overdracht zitten ze op de
+bovenrand van de kaart; op de eindstand stonden ze als enige ín de kaart,
+los boven hun getal, met ruimte bovenin voor de kroon. Nu zitten ze ook hier
+op de rand, met dezelfde knip als op de overdracht (een kwart in de inktrand,
+onder een eigen strook inkt). Wie won gluurt tijdens het optellen en komt
+overeind als de kroon valt, juichend en lachend; de ander gluurt tot de
+ogen, zoals wie op de overdracht niet aan zet is. Bij gelijkspel staan ze
+allebei rechtop, even groot. In de kaart staan alleen nog de totalen en de
+rondes, dus ze is lager en de knop staat waar hij op de overdracht staat.
+Een verliezer die meejuicht is bekeken en weggelaten: dan zegt niets meer
+wie won.
 
 Let op de klassenaam als je hier ooit tóch iets bijtekent: `.bar` bestond
 al -- dat is de streep door de pas-knop als de stapel op is. Een tweede
@@ -2481,6 +2510,17 @@ terugveeg.
   kijken spieken. De knop staat er dan uit (`disabled`) en ligt ingedrukt.
 - **Geen kaders om de plaatjes.** Het zijn geen knoppen; met een rand om
   elk plaatje kwamen er tientallen rechthoeken op één paneel.
+- **De achterkant van de opdrachtkaart, zonder sluier.** Het paneel lag
+  onder een sluier van 82% inkt: rood werd bruin, blauw marine, en het
+  paneel stak half over de kaart met de stand als donkere strook erboven.
+  Precies wat de pauze al kwijt was. Nu draait de opdrachtkaart om
+  (`legKijk()`): smal tot een rand, en op haar plek wordt de achterkant met
+  de plaatjes breed, zo breed als zij. Liggend is ze daarvoor te smal; daar
+  wordt de achterkant zo breed als het losse paneel, op haar midden. Te hoog
+  voor haar plek schuift ze omhoog, en pas als het scherm vol is scrolt ze.
+  De startknop zakt achter de onderrand, zoals bij Start: zolang je kijkt
+  valt er niets te beginnen. Een tik draait haar terug (`sluitKijk()`) en
+  de knop veert op.
 
 ## Het instellingenscherm
 

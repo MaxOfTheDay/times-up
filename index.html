@@ -527,10 +527,22 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 .btn-skip svg { width: 44px; }
 /* Bij de laatste kaart valt er niets te passen. Niet uitgeschakeld -- een
    uitgeschakelde knop kan niet antwoorden en het toestel lijkt bevroren --
-   maar levend: hij schudt, en een streep toont de toestand ook zonder kleur. */
-.btn-skip[data-spent="1"] { opacity: .38; }
+   maar levend: hij schudt, en een streep toont de toestand ook zonder kleur.
+   Hij blijft ingedrukt liggen ("niet meer"), dekkend: een doorzichtige knop
+   op de ploegkleur werd roze of staalblauw, twee tinten buiten het palet. */
+/* Op `translate` en niet op `transform`: zo schudt nudge() hem op zijn
+   ingedrukte plek. Ligt hij al neer (aftellen, tijd om), dan niet nog eens. */
+#s-play:not(.over):not(.leeg) .btn-skip[data-spent="1"]:not(.neer) {
+  box-shadow: 0 0 0 var(--ink); translate: var(--lift-1) var(--lift-1);
+  transition: translate calc(var(--t-press) * var(--dur)) var(--e-uit),
+              box-shadow calc(var(--t-press) * var(--dur)) var(--e-uit);
+}
+#s-play:not(.over):not(.leeg) .btn-skip[data-spent="1"]:not(.neer):active { transform: none; }
 .btn-skip[data-spent="1"] .bar { display: block; }
 .btn-skip .bar { display: none; }
+/* Tijdens het aftellen ("nog niet") ligt er nog geen kaart, ook niet na een
+   lege stapel: dan geen streep, net als goed ernaast. */
+.btn-skip.neer .bar { display: none; }
 
 /* ---- hulpknop (pauze, huisje, tandwiel) ----
    Eén formaat, één plek rechtsboven, op elk scherm. Het tandwiel hoort erbij:
@@ -1477,6 +1489,19 @@ button.ho-count:enabled:active {
   width: min(92vw, 560px); max-height: 84vh; overflow-y: auto;
   padding: var(--s-4); cursor: pointer;
 }
+/* Op de overdracht is het de achterkant van de opdrachtkaart: de kaart
+   draait om (legKijk()) en het paneel ligt op haar plek, zo breed als zij
+   (liggend, waar ze smal is, zo breed als het losse paneel), zonder sluier.
+   De grond blijft van de ploeg; een sluier van 82% inkt maakte rood bruin
+   en blauw marine. Te hoog voor haar plek schuift het omhoog, en pas als het
+   scherm vol is scrolt het. */
+#kijk.kaart::before { background: none; }
+#kijk.kaart .panel {
+  position: fixed; margin: 0; box-sizing: border-box;
+  left: var(--kx); top: var(--ky); width: var(--kw); min-height: var(--kh);
+  max-height: calc(100dvh - 2 * var(--s-4));
+  min-width: 0; animation: none;
+}
 .kijk-grid {
   width: 100%; display: grid; gap: var(--s-3) var(--s-1);
   grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
@@ -2195,6 +2220,53 @@ button.ho-count:enabled:active {
 }
 /* Bij gelijkspel juichen ze allebei, even groot. */
 #s-winner[data-draw="1"] .tally .mascot-sm { width: min(34vw, 12vh, 130px); }
+/* Vos en Uil zitten op de bovenrand van de eindkaart, zoals op het merk en
+   op de overdracht (.gluur, #hoTally): wie won rechtop, juichend en met de
+   kroon, de ander gluurt tot de ogen. In de kaart staan alleen de totalen
+   en de drie rondes, dus de kaart is lager en de knop staat waar hij op de
+   overdracht staat. Dezelfde knip als daar: een kwart in de inktrand, onder
+   een eigen strook inkt (zie #hoTally .side::after). Bij gelijkspel staan ze
+   allebei rechtop, even groot. */
+#wnPiles.wn-kaart {
+  --wn-pt: max(18px, min(3vh, 26px));
+  --rand-uit: clamp(56px, 19vw, 80px);
+  --rand-win: clamp(84px, 30vw, 132px);
+  padding-top: var(--wn-pt);
+  margin-top: calc(var(--rand-win) * .8);
+}
+#wnPiles .tally { position: relative; --rand: var(--rand-uit); --zak: calc(var(--rand) * .24); }
+#wnPiles .tally.winner { --rand: var(--rand-win); }
+#s-winner[data-draw="1"] #wnPiles .tally { --rand: calc((var(--rand-uit) + var(--rand-win)) / 2); }
+#wnPiles .tally .head {
+  position: absolute; left: calc(50% - var(--rand) / 2);
+  width: var(--rand); aspect-ratio: 1;
+  bottom: calc(100% + var(--wn-pt) + var(--line) - var(--zak));
+  clip-path: inset(-120% -60% calc(var(--zak) - var(--line) / 4) -60%);
+}
+#wnPiles .tally::after {
+  content: ""; position: absolute; z-index: 1;
+  left: calc(50% - var(--rand) * .58); width: calc(var(--rand) * 1.16);
+  bottom: calc(100% + var(--wn-pt) + var(--line) / 4); height: calc(var(--line) * .75);
+  background: var(--ink);
+}
+#wnPiles .tally .mascot-sm {
+  width: 100%; height: 100%;
+  rotate: 7deg; transform-origin: 50% 76%; translate: 0 34%;
+  animation: none;
+}
+/* De vos heeft zijn ogen lager in de kop: hij zakt minder ver. */
+#wnPiles .tally[data-team="0"]:not(.winner) .mascot-sm { rotate: -8deg; translate: 0 24%; }
+#wnPiles .tally.winner .mascot-sm {
+  rotate: 0deg; translate: 0 0;
+  animation: cheer calc(.9s / max(var(--dur), .001)) var(--e-vloei) infinite;
+}
+#wnPiles .tally .crown { top: calc(var(--rand) * -.22); width: calc(var(--rand) * .46); }
+@media (max-height: 520px) {
+  #wnPiles.wn-kaart { --wn-pt: 16px; --rand-uit: min(15vh, 60px); --rand-win: min(23vh, 92px); }
+}
+@media (min-width: 700px) and (min-height: 700px) {
+  #wnPiles.wn-kaart { --rand-uit: 92px; --rand-win: 150px; }
+}
 
 @keyframes rain { to { transform: translateY(115vh) rotate(540deg); } }
 /* Achter de stand, niet erover: in het winnaarsscherm zelf, na het stipveld, op
@@ -2270,7 +2342,7 @@ button.ho-count:enabled:active {
      knop naar een tweede regel en viel het scherm in losse eilanden uiteen
      met een lege band ertussen. */
   .side-by-side { width: min(38vw, 300px); gap: var(--s-1) var(--s-2); }
-  #wnPiles.wn-kaart { width: min(46vw, 340px); padding: 30px var(--s-3) var(--s-2); }
+  #wnPiles.wn-kaart { width: min(46vw, 340px); padding: var(--wn-pt) var(--s-3) var(--s-2); }
   .tally { width: min(17vw, 132px); }
   .tally .crown { width: 32px; top: -20px; }
   .tally .mascot-sm { width: min(52px, 13vh); }
@@ -6944,11 +7016,16 @@ function draaiOm(verder) {
   if (stilAan() || !kaart.animate || !p.width) { verder(null); return; }
   const a = kaart.animate([{ transform: "scaleX(1)" }, { transform: "scaleX(0)" }],
     { duration: OMDRAAI, easing: curve("weg"), fill: "forwards" });
+  /* De stapel eronder draait mee om, op `scale`: transform draagt de
+     scheve stand van elke kaart. Bleef ze liggen, dan werd de kaart smal
+     boven een volle stapel en las het omdraaien als wegschuiven. */
+  const onder = $$("#cardslot .under").map(u => u.animate([{ scale: "1 1" }, { scale: "0 1" }],
+    { duration: OMDRAAI, easing: curve("weg"), fill: "forwards" }));
   /* Eerst de vouw los, dan verder: landOm() meet zijn doel, en bij de
      speelkaart op nul is dat dezelfde kaart. Nog gevouwen is ze 0 breed en
      sloeg de landing zichzelf over. Het scherm wisselt binnen dezelfde taak,
      dus de ongevouwen kaart komt nooit in beeld. */
-  a.onfinish = () => { a.cancel(); verder(p); };
+  a.onfinish = () => { a.cancel(); onder.forEach(o => o.cancel()); verder(p); };
 }
 function landOm(doel, p, ms) {
   if (!p || !doel || stilAan() || !doel.animate) return;
@@ -7230,6 +7307,7 @@ document.querySelectorAll('svg > use[href^="#m-"], svg > use[href^="#r-"]')
 function tallyNode(t) {
   const wrap = document.createElement("div");
   wrap.className = "tally";
+  wrap.dataset.team = t;
 
   const head = document.createElement("div");
   head.className = "head";
@@ -7332,6 +7410,14 @@ function winner() {
     c.classList.add("later");
     c.style.setProperty("--kroon", OPTEL + "ms");
   });
+  /* Wie won gluurt tijdens het optellen nog over de rand, en komt overeind
+     als de kroon valt. */
+  $$("#wnPiles .tally.winner .head").forEach(h => {
+    const dy = h.getBoundingClientRect().height * .34;
+    h.querySelectorAll(".mascot-sm, .crown").forEach(m => m.animate(
+      [{ translate: "0 " + dy + "px" }, { translate: "0 0" }],
+      { duration: 450, delay: OPTEL, easing: curve("los"), fill: "backwards" }));
+  });
   nums.forEach(n => { n.textContent = "0"; });
   const t0 = performance.now();
   let vorig = -1;
@@ -7397,9 +7483,12 @@ $("#btnAgain").addEventListener("click", () => {
     vertrekt = false;
     const van = $("#s-winner");
     newGame();
-    groeiUit($("#s-handoff"), van, k);
+    const cirkel = groeiUit($("#s-handoff"), van, k);
     rimpelDoor(k, m.width ? m : null);
-    zetTerug([stand]);
+    /* De eindstand blijft onder de cirkel staan tot die rond is; vouw de
+       kaart pas dan terug open, anders stond ze daar weer even heel. */
+    if (cirkel) cirkel.finished.catch(() => {}).then(() => zetTerug([stand]));
+    else zetTerug([stand]);
   };
   if (stilAan() || !m.width) { verder(); return; }
   vertrekt = true;
@@ -7439,6 +7528,7 @@ function groeiUit(ti, van, k, sluier) {
     if (sluier) sluier.classList.remove("blijft");
     ti.classList.remove("groei");
   };
+  return a;
 }
 
 /* ==============================================================
@@ -7666,11 +7756,61 @@ $("#hoCards").addEventListener("click", () => {
   kijkReturn = document.activeElement;
   screensInert(true);
   $("#kijk").hidden = false;
+  legKijk();
   $("#kijk").focus({ preventScroll: true });
 });
+/* Terugkijken draait de opdrachtkaart om, zoals de pauze de speelkaart: de
+   kaart wordt smal tot een rand (draaiWeg()) en de achterkant met de kaarten
+   die nog liggen wordt op haar plek breed. De startknop zakt achter de
+   onderrand: nu valt er niets te beginnen. Een tik waar dan ook draait haar
+   terug. Bij beperkte beweging ligt alles er meteen. */
+const KIJK_WEG = ["#hoRoundCard", "#btnStartTurn"];
+let kijkDicht = null;
+function legKijk() {
+  const el = $("#kijk"), pn = $("#kijk .panel");
+  const kaart = $("#hoRoundCard"), k = kaart.getBoundingClientRect();
+  el.classList.toggle("kaart", k.width > 0);
+  if (!k.width) return;
+  const marge = 16;
+  const w = k.width >= 280 ? k.width : Math.min(innerWidth * .92, 560);
+  pn.style.setProperty("--kw", w + "px");
+  pn.style.setProperty("--kh", k.height + "px");
+  pn.style.setProperty("--kx", (k.left + k.width / 2 - w / 2) + "px");
+  pn.style.setProperty("--ky", k.top + "px");
+  const h = Math.min(Math.max(pn.scrollHeight, k.height), innerHeight - 2 * marge);
+  const y = Math.max(marge, Math.min(k.top, innerHeight - marge - h));
+  pn.style.setProperty("--ky", y + "px");
+  if (stilAan() || !pn.animate) return;
+  draaiWeg([kaart], OMDRAAI);
+  pn.animate([{ transform: "scaleX(0)" }, { transform: "none" }],
+    { duration: 180, delay: OMDRAAI, easing: curve("uit"), fill: "backwards" });
+  const knop = $("#btnStartTurn"), kn = knop.getBoundingClientRect();
+  knop.animate([{ translate: "0 0" }, { translate: "0 " + (innerHeight - kn.top + 20) + "px" }],
+    { duration: KAART_GROEI, easing: curve("weg"), fill: "forwards" });
+}
 function sluitKijk() {
+  const el = $("#kijk"), pn = $("#kijk .panel");
+  if (el.hidden || kijkDicht) return;
+  if (el.classList.contains("kaart") && !stilAan() && pn.animate) {
+    kijkDicht = pn.animate([{ transform: "none" }, { transform: "scaleX(0)" }],
+      { duration: OMDRAAI, easing: curve("weg"), fill: "forwards" });
+    kijkDicht.onfinish = () => { kijkDicht.cancel(); kijkDicht = null; kijkWeg(true); };
+    return;
+  }
+  kijkWeg(false);
+}
+function kijkWeg(draai) {
   $("#kijk").hidden = true;
   screensInert(false);
+  const kaart = $("#hoRoundCard"), knop = $("#btnStartTurn");
+  const dy = getComputedStyle(knop).translate;
+  zetTerug(KIJK_WEG.map(s => $(s)));
+  if (draai) {
+    kaart.animate([{ transform: "scaleX(0)" }, { transform: "none" }],
+      { duration: 180, easing: curve("uit") });
+    if (dy && dy !== "none") knop.animate([{ translate: dy }, { translate: "0 0" }],
+      { duration: KAART_GROEI, delay: 120, easing: curve("los"), fill: "backwards" });
+  }
   if (kijkReturn && kijkReturn.isConnected) kijkReturn.focus({ preventScroll: true });
   kijkReturn = null;
 }
