@@ -1534,7 +1534,24 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 #s-handoff #hoTally .side .head {
   position: absolute; left: 0; width: 100%; aspect-ratio: 1;
   bottom: calc(100% + var(--pt) + var(--line) - var(--zak));
-  clip-path: inset(-120% -60% var(--zak) -60%);
+  clip-path: inset(-120% -60% calc(var(--zak) - var(--line) / 4) -60%);
+}
+/* De knip ligt ín de inktrand, onder een eigen strook inkt op precies de
+   plek van die rand. De browser lijnt de rand van de kaart uit op hele
+   schermpixels, de knip niet: lag de knip op de buitenkant van de rand, dan
+   bleef er onder elk dier een haarlijn grond (blauw onder de vos, rood onder
+   de uil). De strook dekt de bovenste drie kwart van de rand, lijnt op
+   dezelfde manier uit en valt erop weg; de knip ligt een kwart diep, ruim
+   binnen de strook. Valt de knip op een rand van de strook, dan komt de
+   haarlijn daar terug; een strook zo dik als de hele rand steekt aan de
+   binnenkant een schermpixel uit. Zo breed als het dier en een beetje: op
+   de smalle kaart van liggend stak een bredere strook buiten de kaart. De
+   strook hangt aan .side, niet aan .head: de knip van .head zou haar
+   meeknippen. */
+#s-handoff #hoTally .side::after {
+  content: ""; position: absolute; left: -8%; right: -8%; z-index: 1;
+  bottom: calc(100% + var(--pt) + var(--line) / 4); height: calc(var(--line) * .75);
+  background: var(--ink);
 }
 #s-handoff #hoTally .side .head > svg {
   width: 100%; height: 100%;
