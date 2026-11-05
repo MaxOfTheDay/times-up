@@ -243,10 +243,10 @@
 /* Alles wat in Fredoka staat, op één plek: cijfers, koppen, het woord op de
    kaart en de knoppen in hoofdletters. De chips en veldnamen niet; dat is
    zin-tekst voor de volwassene. */
-.wordmark h1, #s-setup h1, #s-kaarten h1, #s-regels h1, .group-head,
+.wordmark h1, #s-setup h1, #s-kaarten h1, #s-regels h1, .group-head, .cb-tal b, .cb-index button,
 .cd-disc b, .chips.getal > .chip, .roundcard b, .ho-count span, .mini-score b,
 .secs-left, .gain, .cardword, .kijk-grid small,
-.pv small, .tally .sr b, .tally .num, .btn-plain, .cb-index button, .st-tal {
+.pv small, .tally .sr b, .tally .num, .btn-plain, .st-tal {
   font-family: var(--font-display);
 }
 
@@ -405,7 +405,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    schaduw in. Wie een knop toevoegt, zet hem in deze lijst. */
 button.btn-go, button.btn-good, button.btn-skip,
 button.btn-icon, button.btn-danger, button.chip, button.pv, button.btn-plain,
-button.ho-count, .cb-index button, button.mk-sluiter {
+button.ho-count, button.mk-sluiter {
   transition: transform calc(var(--t-los) * var(--dur)) var(--e-los),
               box-shadow calc(var(--t-los) * var(--dur)) var(--e-los);
 }
@@ -416,7 +416,7 @@ button.ho-count, .cb-index button, button.mk-sluiter {
 button.btn-go:active, button.btn-good:active, button.btn-skip:active,
 button.btn-icon:active, button.btn-danger:active, button.chip:active,
 button.pv:active, button.btn-plain:active, button.ho-count:active,
-.cb-index button:active, button.mk-sluiter:active, button.mk-staf.klaar:active {
+button.mk-sluiter:active, button.mk-staf.klaar:active {
   transition-duration: calc(var(--t-press) * var(--dur));
   transition-timing-function: var(--e-uit);
 }
@@ -787,9 +787,6 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
        kolom eindigt op --s-4 (16). Plus --s-2 lucht. */
     padding-right: calc(var(--corner) + var(--tap) - var(--s-4) + var(--s-2));
   }
-  /* Dezelfde 64 px als marge en niet als binnenmarge: de letterbalk schuift
-     zijdelings, en met binnenmarge rolden de letters onder het huisje door. */
-  .cb-index { margin-right: calc(var(--corner) + var(--tap) - var(--s-4) + var(--s-2)); }
 }
 
 /* Onderaan --corner: het einde van een lijst blijft staan, en dan liggen er
@@ -804,6 +801,12 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 #s-setup h1, #s-kaarten h1, #s-regels h1 {
   font-size: var(--fs-5); font-weight: 900; text-transform: uppercase;
   letter-spacing: var(--track-caps); margin: var(--s-2) 0 0;
+}
+/* "GEWONE KAARTEN" past op --fs-5 pas vanaf 390 px naast de uitgang; smaller
+   zou hij over twee regels breken en de titelband 34 px hoger maken. Eén
+   trede lager past tot 320. */
+@media (max-width: 389px) {
+  #s-kaarten h1 { font-size: var(--fs-4); }
 }
 
 /* De plakkende titelband: de uitgang ligt op papier in plaats van op de
@@ -828,7 +831,6 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   .setup-scroll legend,
   .setup-scroll .hint,
   .setup-scroll .regel-zin { padding-right: 0; }
-  .cb-index { margin-right: 0; }
 
   .setup-scroll { padding-top: 0; }
   #s-setup .setup-scroll > h1, #s-kaarten .setup-scroll > h1, #s-regels .setup-scroll > h1 {
@@ -872,7 +874,7 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 }
 .potje-tal { font-size: var(--fs-2); font-weight: 700; color: var(--ink-2); white-space: nowrap; }
 .potje-tal b { font-family: var(--font-display); color: var(--ink); }
-.rij-tal, #kaartTabs .chip b { font-family: var(--font-display); }
+.rij-tal { font-family: var(--font-display); }
 /* Een keuze die meer vraagt dan er is: verzonken, zoals een weggelegde
    kaart, en een tik schudt (nudge). */
 .chip.op {
@@ -1012,8 +1014,6 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 .rij[aria-checked="true"] .knop::after { transform: translateX(22px); }
 
 /* Het kaartenscherm: bovenaan Gewone of Eigen, met het getal in Fredoka. */
-#kaartTabs .chip { flex-direction: row; gap: var(--s-2); }
-#kaartTabs .chip b { font-size: var(--fs-4); }
 .lade .hint { margin-top: 0; margin-bottom: var(--s-3); }
 .lade-tier { margin: 0 0 var(--s-4); }
 /* De telling als zin, voor de schermlezer; zie paintCardCounts(). */
@@ -1037,30 +1037,44 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 .cb-slot > .btn-plain { justify-self: start; align-self: start; visibility: hidden; }
 .cb-slot.weg > .hint      { visibility: hidden; }
 .cb-slot.weg > .btn-plain { visibility: visible; }
-/* De letterbalk. De bak is tot 275 tegels, op alfabet, en je komt hier voor
-   één kaart: de letter is de manier om haar te vinden. Eén regel die
-   zijdelings schuift, zoals een toetsenbordrij; omgevouwen zou de balk meer
-   hoogte nemen dan de kaarten. De achtste letter staat half in beeld: het
-   teken dat er meer is. Verder een gewone chip, zonder gekozen-toestand. */
+/* De regel boven het raster: het getal in Fredoka links, rechts de sleuf. */
+.cb-regel {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--s-3); min-height: var(--tap); margin-bottom: var(--s-3);
+}
+.cb-tal { font-size: var(--fs-2); font-weight: 700; color: var(--ink-2); white-space: nowrap; }
+.cb-tal b { font-size: var(--fs-4); color: var(--ink); margin-right: 2px; }
+.cb-regel .cb-slot { margin: 0; justify-items: end; }
+.cb-regel .cb-slot > .hint { align-self: center; text-align: right; }
+.cb-regel .cb-slot > .btn-plain { justify-self: end; align-self: center; }
+
+/* De letterstrook. De bak is tot 275 tegels, op alfabet, en je komt hier
+   voor één kaart: de letter is de manier om haar te vinden. Een smalle
+   strook rechts van het raster die meeloopt (sticky), zoals in een
+   adresboek: alle letters tegelijk in beeld, niets dat opzij uit beeld
+   schuift, en geen hoogte boven het raster. Tik of veeg erlangs
+   (buildIndex). De strook begint onder de hoek van de uitgang, ook waar de
+   titelband niet plakt. Plat: het is een liniaal, geen rij knoppen; een
+   letter onder de vinger kleurt, zoals een rij. */
+.cb-raster { display: flex; align-items: flex-start; gap: var(--s-2); }
+.cb-raster > .cards { flex: 1 1 auto; min-width: 0; }
 .cb-index {
-  /* Het gat moet groter zijn dan de slagschaduw (--lift-1, 4 px), anders valt
-     de schaduw op de buurman en wordt de rij één zwarte balk. 8 px laat 4 px
-     papier over. */
-  display: flex; gap: var(--s-2); overflow-x: auto; overscroll-behavior-x: contain;
-  /* Ruimte voor de slagschaduw van de onderste rand; zonder deze marge
-     knipt het rolgebied hem eraf. */
-  padding: 0 var(--lift-1) var(--lift-1) 0;
-  margin-bottom: var(--s-3);
+  flex: none; width: 28px; box-sizing: border-box;
+  position: sticky;
+  top: calc(env(safe-area-inset-top, 0px) + var(--corner) + var(--tap) + var(--lift-1) + var(--s-2));
+  height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+               - var(--corner) * 2 - var(--tap) - var(--lift-1) - var(--s-2));
+  max-height: calc(23 * 28px);
+  display: flex; flex-direction: column;
+  border: 2px solid var(--rule); background: var(--paper);
+  touch-action: none; user-select: none; -webkit-user-select: none;
 }
 .cb-index button {
-  flex: 0 0 auto; width: 32px; height: 44px;
-  border: var(--line-2) solid var(--ink); background: var(--paper);
-  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
-  font-weight: 900; font-size: var(--fs-2); color: var(--ink);
+  flex: 1 1 0; min-height: 0; width: 100%; padding: 0;
+  border: 0; background: transparent; color: var(--ink);
+  font-size: var(--fs-1); line-height: 1;
 }
-.cb-index button:active {
-  transform: translate(var(--lift-1), var(--lift-1)); box-shadow: none;
-}
+.cb-index button.nu { background: var(--ink); color: var(--paper); }
 /* Geen eigen rolgebied binnen een scherm dat zelf al rolt: dat maakte van
    de kaartenlijst een kijkgaatje van twee rijen hoog. */
 /* Minstens 96 px: drie kolommen van 114 px op een telefoon, zodat bijna elk
@@ -2978,13 +2992,9 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
      keuzeknoppen als overal. -->
 <section class="screen" id="s-kaarten">
   <div class="setup-scroll">
-    <h1>Kaarten</h1>
-    <div class="chips" id="kaartTabs" role="radiogroup" aria-label="Welke kaarten">
-      <button class="chip" role="radio" aria-checked="true" data-lade="gewoon">Gewone <b id="tabGewoon"></b>
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-      <button class="chip" role="radio" aria-checked="false" data-lade="eigen">Eigen <b id="tabEigen"></b>
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-    </div>
+    <!-- Je komt binnen via de rij Gewone of Eigen op Instellingen; de titel
+         zegt welke, en er is geen tweede keuze hier (paintLade). -->
+    <h1 id="kaartenKop">Gewone kaarten</h1>
 
     <div class="lade" id="ladeGewoon">
       <!-- De moeilijkheid staat boven de lijst die ze verandert: een plafond
@@ -3005,21 +3015,29 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
         </div>
       </fieldset>
 
-          <!-- Eén sleuf, twee bewoners: de zin die belooft dat het terug kan,
-               en de knop die dat doet. Zie .cb-slot -- de knop mag hier géén
-               hidden dragen, en paintCardCounts() mag hem er ook niet op
-               zetten; de klasse op de sleuf schakelt. -->
-          <div class="cb-slot" id="cbSlot">
-            <p class="hint">Tik op een kaart om ze weg te leggen. Nog een tik legt ze terug.</p>
-            <button class="btn-plain" id="btnRestoreAll">Alles terugleggen</button>
+          <!-- Eén regel: links hoeveel er in de bak liggen, rechts één sleuf met
+               twee bewoners: de zin die zegt wat een tik doet, en de knop die
+               alles terugzet. Zie .cb-slot -- de knop mag hier géén hidden
+               dragen, en paintCardCounts() mag hem er ook niet op zetten; de
+               klasse op de sleuf schakelt. -->
+          <div class="cb-regel">
+            <span class="cb-tal"><b id="cbTal"></b> in de bak</span>
+            <div class="cb-slot" id="cbSlot">
+              <p class="hint">Tik om weg te leggen</p>
+              <button class="btn-plain" id="btnRestoreAll">Alles terug</button>
+            </div>
           </div>
           <!-- De weigering bij de ondergrens, met een regel die zegt waarom:
                een schud alleen laat de app stuk lijken in plaats van vol. Je
                bereikt hem pas na een tik of vijftig. -->
           <p class="hint" id="cbVol" hidden></p>
-          <!-- Springen naar een letter; zie .cb-index en buildCards(). -->
-          <div class="cb-index" id="cbIndex" role="group" aria-label="Spring naar een letter"></div>
-          <div class="cards" id="cbAll"></div>
+          <!-- Het raster met rechts de letters als strook die meeloopt: tik of
+               veeg erlangs om naar een letter te springen. Zie .cb-index en
+               buildIndex(). -->
+          <div class="cb-raster">
+            <div class="cards" id="cbAll"></div>
+            <div class="cb-index" id="cbIndex" role="group" aria-label="Spring naar een letter"></div>
+          </div>
     </div>
 
     <!-- Eigen kaarten: een foto van oma, de hond of de knuffel, met het
@@ -4235,7 +4253,7 @@ function buildCards() {
   const box = $("#cbAll");
   const weg = new Set(settings.hidden);
   const frag = document.createDocumentFragment();
-  /* De eerste tegel van elke letter, zodat de letterbalk weet waarheen. Op
+  /* De eerste tegel van elke letter, zodat de letterstrook weet waarheen. Op
      de tegel zelf en niet op een teller: bij een andere stand wordt deze
      lijst opnieuw opgebouwd en zijn de plekken andere. */
   const eerste = new Map();
@@ -4273,15 +4291,42 @@ function buildIndex(eerste) {
     b.type = "button";
     b.textContent = letter;
     b.setAttribute("aria-label", "Spring naar de " + letter);
-    b.addEventListener("click", () => springNaar(tegel));
+    b.addEventListener("click", () => springNaar(tegel, true));
+    b._tegel = tegel;
     bar.appendChild(b);
   });
 }
+/* Vegen langs de strook: de letter onder de vinger springt meteen, zonder
+   glijden, zodat het raster de vinger volgt. Loslaten haalt de markering
+   weg. De klik daarna (bij een tik) springt nog eens, zacht, naar dezelfde
+   plek. */
+(() => {
+  const bar = $("#cbIndex");
+  let laatst = null;
+  const onder = e => {
+    const r = bar.getBoundingClientRect();
+    const el = document.elementFromPoint(r.left + r.width / 2, e.clientY);
+    return el && el.parentNode === bar ? el : null;
+  };
+  const volg = e => {
+    const b = onder(e);
+    if (!b || b === laatst) return;
+    if (laatst) laatst.classList.remove("nu");
+    b.classList.add("nu");
+    laatst = b;
+    springNaar(b._tegel, false);
+  };
+  const los = () => { if (laatst) laatst.classList.remove("nu"); laatst = null; };
+  bar.addEventListener("pointerdown", e => { bar.setPointerCapture(e.pointerId); volg(e); });
+  bar.addEventListener("pointermove", e => { if (bar.hasPointerCapture(e.pointerId)) volg(e); });
+  bar.addEventListener("pointerup", los);
+  bar.addEventListener("pointercancel", los);
+})();
 
 /* Het scherm rolt, niet de bak. Verschuif het scherm tot de tegel bovenaan
    staat -- onder de titelband, waar die plakt, anders verdwijnt de tegel er
    net onder. */
-function springNaar(tegel) {
+function springNaar(tegel, zacht) {
   const sc = $("#s-kaarten .setup-scroll");
   if (!sc || !tegel) return;
   const kop = $("#s-kaarten h1");
@@ -4289,7 +4334,7 @@ function springNaar(tegel) {
     ? kop.getBoundingClientRect().bottom
     : sc.getBoundingClientRect().top;
   const d = tegel.getBoundingClientRect().top - anker;
-  sc.scrollBy({ top: d - 8, behavior: "smooth" });
+  sc.scrollBy({ top: d - 8, behavior: zacht ? "smooth" : "auto" });
 }
 
 /* De toestand van één tegel, op drie kanalen tegelijk: de bleke huid, de
@@ -4312,7 +4357,7 @@ function paintCardCounts() {
   const hier = pool.length - bak;
 
   $("#cbCount").textContent = bak;
-  $("#tabGewoon").textContent = bak;
+  $("#cbTal").textContent = bak;
   $("#rijGewoon").setAttribute("aria-label", "Gewone kaarten: " + bak + " in de bak" +
     (hier ? ", " + hier + " weggelegd" : ""));
   /* Onder de naam de stand en wat je weglegde; op het kaartje de eerste
@@ -4372,7 +4417,7 @@ $("#btnRestoreAll").addEventListener("click", () => {
   paintCardCounts();
   // De knop die je net indrukte verdwijnt; zonder dit valt de focus terug
   // op <body> en is wie met een toetsenbord werkt zijn plek kwijt.
-  $('#kaartTabs [data-lade="gewoon"]').focus();
+  $("#btnKaartenTerug").focus();
 });
 
 /* Het kaartenscherm toont één lijst tegelijk, Gewone of Eigen
@@ -4385,8 +4430,7 @@ function zetLade(l) {
 }
 function paintLade() {
   const l = kaartLade();
-  $$("#kaartTabs .chip").forEach(c => c.setAttribute("aria-checked", String(c.dataset.lade === l)));
-  $('#kaartTabs [data-lade="eigen"]').hidden = eigenStuk;
+  $("#kaartenKop").textContent = l === "eigen" ? "Eigen kaarten" : "Gewone kaarten";
   $("#ladeGewoon").hidden = l !== "gewoon";
   $("#ladeEigen").hidden = l !== "eigen";
   if (l === "gewoon") paintCards();
@@ -4396,11 +4440,6 @@ function openKaarten(l) {
   $("#s-kaarten .setup-scroll").scrollTop = 0;
   show("kaarten");
 }
-$("#kaartTabs").addEventListener("click", e => {
-  const c = e.target.closest(".chip"); if (!c) return;
-  zetLade(c.dataset.lade);
-  $("#s-kaarten .setup-scroll").scrollTop = 0;
-});
 $("#rijGewoon").addEventListener("click", () => openKaarten("gewoon"));
 $("#rijEigen").addEventListener("click", () => {
   if (!eigen.kaarten.length) { openMaker(null); return; }
@@ -4553,7 +4592,6 @@ function paintEigen() {
     ? "Eigen kaarten: " + n + (uit ? ", uit" : "")
     : "Nieuwe eigen kaart");
   $("#eigenTel").textContent = n;
-  $("#tabEigen").textContent = n;
   $("#eigSub").textContent = !n ? "Maak je eerste kaart" : uit ? "uit" : eigenAantal() + " in elk potje";
   const voor = $("#kaartEigen");
   voor.textContent = "";

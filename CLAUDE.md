@@ -347,9 +347,12 @@ moeilijkheid, en hoeveel eigen kaarten er in elk potje gaan), Deze telefoon (Gel
 en de rij om te installeren of te delen), Zo speel je (één rij naar
 `#s-regels`). Een veldnaam
 herhaalt zijn groepskop niet. De lange lijsten staan op hun eigen scherm,
-`#s-kaarten`, met bovenaan Gewone of Eigen als keuzeknoppen en de uitgang
-rechtsboven, Moeilijkheid bovenaan Gewone en "In elk potje" bovenaan Eigen; terug brengt je op
-Instellingen (`terug()`). Twee soorten stukken, elk één betekenis: een rij
+`#s-kaarten`, één lijst per bezoek: de titel zegt welke ("Gewone kaarten",
+"Eigen kaarten"), zonder tabbladen, met de uitgang rechtsboven, Moeilijkheid
+bovenaan Gewone en "In elk potje" bovenaan Eigen; terug brengt je op
+Instellingen (`terug()`). Onder Gewone één regel (het aantal in de bak, de
+sleuf), en de letters als strook die rechts van het raster meeloopt: tik of
+veeg (`buildIndex()`), nooit een rij die opzij schuift. Twee soorten stukken, elk één betekenis: een rij
 keuzeknoppen kiest er één, een rij in een `.lijst` gaat naar een scherm (de
 pijl) of schakelt (`.knop`, goud is aan). Een rij zakt niet in; een druk kleurt hem. De keuzes zijn rijen
 keuzeknoppen, geen schuif. Drie lagen tekst: hoofdletters alleen voor de
