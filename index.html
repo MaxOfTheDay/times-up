@@ -243,7 +243,7 @@
 /* Alles wat in Fredoka staat, op één plek: cijfers, koppen, het woord op de
    kaart en de knoppen in hoofdletters. De chips en veldnamen niet; dat is
    zin-tekst voor de volwassene. */
-.wordmark h1, #s-setup h1, #s-kaarten h1, #s-regels h1, .group-head, .cb-tal b, .cb-index button,
+.wordmark h1, #s-setup h1, #s-kaarten h1, #s-regels h1, #s-maker h1, .group-head, .cb-tal b, .cb-bel,
 .cd-disc b, .chips.getal > .chip, .roundcard b, .ho-count span, .mini-score b,
 .secs-left, .gain, .cardword, .kijk-grid small,
 .pv small, .tally .sr b, .tally .num, .btn-plain, .st-tal {
@@ -764,11 +764,11 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 /* ============================================================
    5. INSTELLINGEN — het enige scherm met tekst. Voor de volwassene.
    ============================================================ */
-#s-setup, #s-kaarten, #s-regels { padding: 0; }
+#s-setup, #s-kaarten, #s-regels, #s-maker { padding: 0; }
 /* De kolom is overal even breed, ook op een liggende telefoon (breed maar
    niet hoog): anders rekken de keuzeknoppen uit tot platte balken en wordt de
    uitleg 105 tekens breed. */
-#s-setup.screen, #s-kaarten.screen, #s-regels.screen { align-items: center; }
+#s-setup.screen, #s-kaarten.screen, #s-regels.screen, #s-maker.screen { align-items: center; }
 .setup-scroll { width: 100%; max-width: 560px; }
 
 /* Tekst blijft uit de kolom van het zwevende huisje. Een omrand vlak onder de
@@ -798,15 +798,15 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
   padding: calc(env(safe-area-inset-top, 0px) + var(--s-4)) var(--s-4)
            calc(env(safe-area-inset-bottom, 0px) + var(--corner));
 }
-#s-setup h1, #s-kaarten h1, #s-regels h1 {
+#s-setup h1, #s-kaarten h1, #s-regels h1, #s-maker h1 {
   font-size: var(--fs-5); font-weight: 900; text-transform: uppercase;
   letter-spacing: var(--track-caps); margin: var(--s-2) 0 0;
 }
-/* "GEWONE KAARTEN" past op --fs-5 pas vanaf 390 px naast de uitgang; smaller
-   zou hij over twee regels breken en de titelband 34 px hoger maken. Eén
-   trede lager past tot 320. */
+/* "GEWONE KAARTEN" en "KAART AANPASSEN" passen op --fs-5 pas vanaf 390 px
+   naast de uitgang; smaller zouden ze over twee regels breken en de
+   titelband 34 px hoger maken. Eén trede lager past tot 320. */
 @media (max-width: 389px) {
-  #s-kaarten h1 { font-size: var(--fs-4); }
+  #s-kaarten h1, #s-maker h1 { font-size: var(--fs-4); }
 }
 
 /* De plakkende titelband: de uitgang ligt op papier in plaats van op de
@@ -833,7 +833,8 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
   .setup-scroll .regel-zin { padding-right: 0; }
 
   .setup-scroll { padding-top: 0; }
-  #s-setup .setup-scroll > h1, #s-kaarten .setup-scroll > h1, #s-regels .setup-scroll > h1 {
+  #s-setup .setup-scroll > h1, #s-kaarten .setup-scroll > h1, #s-regels .setup-scroll > h1,
+  #s-maker .setup-scroll > h1 {
     position: sticky; top: 0; z-index: 2;
     box-sizing: border-box; display: flex; align-items: center;
     min-height: calc(env(safe-area-inset-top, 0px)
@@ -848,7 +849,8 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
      strepen vlak boven elkaar. Een schaduw en geen rand, zodat er niets
      verspringt als hij komt. */
   #s-setup .setup-scroll.geschoven > h1, #s-kaarten .setup-scroll.geschoven > h1,
-  #s-regels .setup-scroll.geschoven > h1 { box-shadow: 0 var(--line-2) 0 var(--rule); }
+  #s-regels .setup-scroll.geschoven > h1,
+  #s-maker .setup-scroll.geschoven > h1 { box-shadow: 0 var(--line-2) 0 var(--rule); }
 }
 
 /* Waar de band niet past (onder 592 breed én onder 560 hoog), levert de
@@ -1048,33 +1050,43 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 .cb-regel .cb-slot > .hint { align-self: center; text-align: right; }
 .cb-regel .cb-slot > .btn-plain { justify-self: end; align-self: center; }
 
-/* De letterstrook. De bak is tot 275 tegels, op alfabet, en je komt hier
-   voor één kaart: de letter is de manier om haar te vinden. Een smalle
-   strook rechts van het raster die meeloopt (sticky), zoals in een
-   adresboek: alle letters tegelijk in beeld, niets dat opzij uit beeld
-   schuift, en geen hoogte boven het raster. Tik of veeg erlangs
-   (buildIndex). De strook begint onder de hoek van de uitgang, ook waar de
-   titelband niet plakt. Plat: het is een liniaal, geen rij knoppen; een
-   letter onder de vinger kleurt, zoals een rij. */
-.cb-raster { display: flex; align-items: flex-start; gap: var(--s-2); }
-.cb-raster > .cards { flex: 1 1 auto; min-width: 0; }
-.cb-index {
-  flex: none; width: 28px; box-sizing: border-box;
-  position: sticky;
-  top: calc(env(safe-area-inset-top, 0px) + var(--corner) + var(--tap) + var(--lift-1) + var(--s-2));
-  height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
-               - var(--corner) * 2 - var(--tap) - var(--lift-1) - var(--s-2));
-  max-height: calc(23 * 28px);
-  display: flex; flex-direction: column;
-  border: 2px solid var(--rule); background: var(--paper);
-  touch-action: none; user-select: none; -webkit-user-select: none;
+/* De greep. De bak is tot 275 tegels, op alfabet, en je komt hier voor
+   één kaart: de letter is de manier om haar te vinden. Zoals in een
+   contactenlijst: in rust staat er niets naast het raster; zodra je scrollt
+   schuift rechts een kleine tegel in, op de hoogte die zegt hoe ver je in de
+   lijst bent. Pak hem en sleep: de lijst volgt, en ernaast staat groot de
+   letter waar je bent (.cb-bel). Een tel na het scrollen is hij meteen weg
+   (geen vertrekanimatie). De baan begint onder de hoek van de uitgang en
+   eindigt op --corner van de onderrand; plaatsGreep() rekent hem uit. */
+.cb-greep {
+  position: absolute; z-index: 3; right: calc(env(safe-area-inset-right, 0px) + var(--s-1));
+  width: 28px; height: var(--tap); box-sizing: border-box;
+  display: grid; place-items: center;
+  border: var(--line-2) solid var(--ink); background: var(--paper-2);
+  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
+  touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab;
+  visibility: hidden; opacity: 0; transform: translateX(var(--s-3));
 }
-.cb-index button {
-  flex: 1 1 0; min-height: 0; width: 100%; padding: 0;
-  border: 0; background: transparent; color: var(--ink);
-  font-size: var(--fs-1); line-height: 1;
+.cb-greep.aan {
+  visibility: visible; opacity: 1; transform: none;
+  transition: opacity calc(var(--t-kom) * var(--dur)) var(--e-uit),
+              transform calc(var(--t-kom) * var(--dur)) var(--e-uit);
 }
-.cb-index button.nu { background: var(--ink); color: var(--paper); }
+/* Vast in de hand: ingedrukt, zoals elk stuk onder de vinger. */
+.cb-greep.aan.vast {
+  transform: translate(var(--lift-1), var(--lift-1)); box-shadow: none;
+  transition-duration: calc(var(--t-press) * var(--dur));
+}
+.cb-greep svg { width: 16px; }
+.cb-bel {
+  position: absolute; z-index: 3; right: calc(env(safe-area-inset-right, 0px) + var(--s-1) + 28px + var(--s-3));
+  width: 80px; height: 80px; box-sizing: border-box;
+  display: grid; place-items: center;
+  border: var(--line-2) solid var(--ink); background: var(--paper);
+  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
+  font-size: var(--fs-6); line-height: 1; color: var(--ink);
+  pointer-events: none;
+}
 /* Geen eigen rolgebied binnen een scherm dat zelf al rolt: dat maakte van
    de kaartenlijst een kijkgaatje van twee rijen hoog. */
 /* Minstens 96 px: drie kolommen van 114 px op een telefoon, zodat bijna elk
@@ -1150,28 +1162,20 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 }
 .kijk-grid span.foto img { display: block; width: 40px; height: 40px; object-fit: cover; }
 
-/* De maker: het paneel is de kaart. --mk is de zijde van het vierkant. */
-#maker { --mk: min(70vw, 42vh, 300px); }
-#maker .panel.maker {
-  width: auto; max-height: calc(100dvh - 2 * var(--s-4)); overflow-y: auto;
-  gap: var(--s-3); padding: var(--s-4) var(--s-4) var(--s-5);
+/* De maker: een scherm in de kolom van Instellingen. --mk is de zijde van
+   het vierkant: zo breed als de kolom, maar staand nooit zo hoog dat Bewaren
+   op een gewone telefoon onder de rand valt; op een kleine rol je even. */
+#s-maker {
+  --mk: min(100vw - 2 * var(--s-4), 440px,
+            max(240px, 100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 470px));
 }
-.mk-top { align-self: stretch; display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); }
-.mk-kop {
-  margin: 0; font-family: var(--font-display); font-size: var(--fs-4); font-weight: 700;
-  text-transform: uppercase; letter-spacing: var(--track-caps); color: var(--ink);
-}
-/* Bij een nieuwe kaart staat de keuze Foto | Tekenen in de kop, en de kop
-   zelf alleen voor de schermlezer. */
-.mk-kop.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.mk-soort { flex: 1 1 auto; flex-wrap: nowrap; gap: var(--s-2); }
+#s-maker .maker { align-items: center; gap: var(--s-3); }
+#s-maker .maker > h1 { align-self: stretch; }
+.mk-soort { width: var(--mk); flex-wrap: nowrap; gap: var(--s-3); }
 .mk-soort > .chip { min-height: var(--tap); padding-block: var(--s-1); font-size: var(--fs-2); gap: 2px; }
 .mk-sicoon { width: 22px; height: 22px; }
 /* Het vinkje rechtsboven: onderaan liep "Tekenen" er op 320 px in. */
 .mk-soort > .chip .tick { top: var(--s-1); bottom: auto; }
-/* Op het paneel en niet in de hoek van het scherm: daar viel hij op een
-   smalle telefoon over de kaart. */
-#maker .btn-icon { position: static; flex: 0 0 auto; }
 .mk-kaart { display: flex; flex-direction: column; align-items: center; gap: var(--s-2); }
 /* Leeg: een gestippeld vak met het albumteken, en een tik erop kiest een
    foto. Vol: de foto met de inktrand, zoals in het spel, en schuiven en
@@ -1304,16 +1308,20 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 .mk-weg { justify-content: center; background: transparent; border-color: transparent; box-shadow: none; text-decoration: underline; }
 .mk-weg.zeker { background: var(--ink); color: var(--paper); text-decoration: none; }
 
-/* Liggend past het niet onder elkaar: de kaart links, de rest rechts. */
+/* Liggend past het niet onder elkaar: de titel bovenaan, de kaart links,
+   de rest rechts. */
 @media (orientation: landscape) and (max-height: 560px) {
-  #maker { --mk: min(52vh, 240px); }
-  #maker .panel.maker {
-    display: grid; grid-template-columns: auto auto; grid-template-rows: auto 1fr;
-    align-items: start; column-gap: var(--s-5);
+  #s-maker { --mk: min(100dvh - 150px, 280px); }
+  #s-maker .setup-scroll.maker {
+    max-width: 640px;
+    display: grid; grid-template-columns: auto 256px; justify-content: center;
+    grid-template-areas: "kop kop" "kaart soort" "kaart rest";
+    align-items: start; align-content: start; column-gap: var(--s-5); row-gap: var(--s-3);
   }
-  .mk-kaart { grid-column: 1; grid-row: 1 / span 2; }
-  .mk-top { grid-column: 2; grid-row: 1; }
-  .mk-rest { grid-column: 2; grid-row: 2; width: 256px; }
+  #s-maker .maker > h1 { grid-area: kop; }
+  .mk-kaart { grid-area: kaart; }
+  .mk-soort { grid-area: soort; width: 256px; }
+  .mk-rest { grid-area: rest; width: 256px; }
 }
 
 /* ---- Installeren ------------------------------------------------------
@@ -3031,13 +3039,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
                een schud alleen laat de app stuk lijken in plaats van vol. Je
                bereikt hem pas na een tik of vijftig. -->
           <p class="hint" id="cbVol" hidden></p>
-          <!-- Het raster met rechts de letters als strook die meeloopt: tik of
-               veeg erlangs om naar een letter te springen. Zie .cb-index en
-               buildIndex(). -->
-          <div class="cb-raster">
-            <div class="cards" id="cbAll"></div>
-            <div class="cb-index" id="cbIndex" role="group" aria-label="Spring naar een letter"></div>
-          </div>
+          <div class="cards" id="cbAll"></div>
     </div>
 
     <!-- Eigen kaarten: een foto van oma, de hond of de knuffel, met het
@@ -3061,7 +3063,6 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
             <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
         </div>
       </fieldset>
-          <p class="hint">Tik op een kaart om ze aan te passen. Ze blijven op deze telefoon.</p>
           <div class="cards eigen-rij" id="eigenRij">
             <button class="pv eigen-plus" id="btnEigenNieuw" aria-label="Nieuwe kaart">
               <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-plus"/></svg><small>Nieuw</small>
@@ -3070,6 +3071,13 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
     </div>
   </div>
 
+  <!-- De greep die bij het scrollen inschuift, met de letter ernaast; zie
+       .cb-greep en volgGreep(). Alleen voor de vinger: met het toetsenbord
+       rol je gewoon. -->
+  <div class="cb-greep" id="cbGreep" aria-hidden="true">
+    <svg viewBox="0 0 100 100"><path d="M22 34h56M22 50h56M22 66h56" stroke="currentColor" stroke-width="10" fill="none"/></svg>
+  </div>
+  <div class="cb-bel" id="cbBel" aria-hidden="true" hidden></div>
   <!-- Rechtsboven, waar elke uitgang zit; terug naar Instellingen, net als
        de terugveeg (terug()). -->
   <button class="btn-icon" id="btnKaartenTerug" aria-label="Terug naar Instellingen">
@@ -3272,28 +3280,23 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   </button>
 </section>
 
-<!-- Een eigen kaart maken of aanpassen. Het paneel ís de kaart zoals ze in
-     het spel komt: het beeld in het vierkant, het woord eronder. Het kruis
-     rechtsboven op het paneel sluit het (op het scherm zelf zou het op een
-     smalle telefoon over het paneel vallen); wat niet bewaard is blijft als klad
-     liggen tot de volgende tik op de plus. -->
-<div class="overlay" id="maker" role="dialog" aria-modal="true" aria-labelledby="mkKop" hidden>
-  <div class="panel surface maker">
-    <div class="mk-top">
-      <h2 class="mk-kop" id="mkKop">Nieuwe kaart</h2>
-      <!-- Foto of tekening, bij een nieuwe kaart. Wisselen houdt het woord en
-           een klad per soort; een bestaande kaart blijft wat ze is. -->
-      <div class="chips mk-soort" id="mkSoort" role="radiogroup" aria-label="Soort kaart">
-        <button class="chip" role="radio" aria-checked="true" data-soort="foto">
-          <svg class="mk-sicoon" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-camera"/></svg>Foto
-          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-        <button class="chip" role="radio" aria-checked="false" data-soort="tekening">
-          <svg class="mk-sicoon" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-potlood"/></svg>Tekenen
-          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-      </div>
-      <button class="btn-icon" id="mkDicht" aria-label="Sluiten">
-        <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-kruis"/></svg>
-      </button>
+<!-- ========================= EEN EIGEN KAART ========================= -->
+<!-- Een eigen kaart maken of aanpassen, op een eigen scherm zoals Kaarten en
+     Zo speel je: de titel, de uitgang rechtsboven, terugvegen. Het vierkant
+     is de kaart zoals ze in het spel komt: het beeld, het woord eronder. Wat
+     niet bewaard is blijft als klad liggen tot de volgende tik op de plus. -->
+<section class="screen" id="s-maker" aria-labelledby="mkKop">
+  <div class="setup-scroll maker">
+    <h1 id="mkKop">Nieuwe kaart</h1>
+    <!-- Foto of tekening, bij een nieuwe kaart. Wisselen houdt het woord en
+         een klad per soort; een bestaande kaart blijft wat ze is. -->
+    <div class="chips mk-soort" id="mkSoort" role="radiogroup" aria-label="Soort kaart">
+      <button class="chip" role="radio" aria-checked="true" data-soort="foto">
+        <svg class="mk-sicoon" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-camera"/></svg>Foto
+        <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+      <button class="chip" role="radio" aria-checked="false" data-soort="tekening">
+        <svg class="mk-sicoon" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-potlood"/></svg>Tekenen
+        <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
     </div>
     <div class="mk-kaart">
       <div class="mk-vak" id="mkVak" role="button" tabindex="0" aria-label="Foto kiezen">
@@ -3327,8 +3330,6 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
       </div>
       <div class="mk-gereedschap" id="mkGereedschap" hidden>
         <button class="btn-plain mk-tg" id="mkOpnieuw" aria-label="Nieuwe foto nemen"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-camera"/></svg></button>
-        <button class="btn-plain mk-tg" id="mkKleiner" aria-label="Kleiner"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-min"/></svg></button>
-        <button class="btn-plain mk-tg" id="mkGroter" aria-label="Groter"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-plus"/></svg></button>
         <button class="btn-plain mk-tg" id="mkAlbum" aria-label="Andere foto"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-album"/></svg></button>
       </div>
       <!-- Tekenen: een doos van zes kleuren, en een rij gereedschap. Alleen
@@ -3352,7 +3353,12 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
     </div>
     <input type="file" id="mkBestand" accept="image/*" hidden>
   </div>
-</div>
+  <!-- Rechtsboven, waar elke uitgang zit: terug naar waar je vandaan kwam,
+       net als de terugveeg (terug()). -->
+  <button class="btn-icon" id="mkDicht" aria-label="Terug">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vorig"/></svg>
+  </button>
+</section>
 
 <!-- Pauze: de klok staat stil. Verder spelen is één tik; stoppen moet je
      vasthouden, want dat gooit het lopende spel weg. -->
@@ -4118,6 +4124,7 @@ let current = "title";
    de instellingen het huisje: het enige dat er altijd staat. */
 const PRIMARY = {
   title: "#btnStart", setup: "#btnBack", kaarten: "#btnKaartenTerug", regels: "#btnRegelsTerug",
+  maker: "#mkDicht",
   handoff: "#btnStartTurn", play: "#btnGoed", winner: "#btnAgain"
 };
 
@@ -4253,9 +4260,9 @@ function buildCards() {
   const box = $("#cbAll");
   const weg = new Set(settings.hidden);
   const frag = document.createDocumentFragment();
-  /* De eerste tegel van elke letter, zodat de letterstrook weet waarheen. Op
-     de tegel zelf en niet op een teller: bij een andere stand wordt deze
-     lijst opnieuw opgebouwd en zijn de plekken andere. */
+  /* De eerste tegel van elke letter, zodat de greep weet welke letter hij
+     toont. Op de tegel zelf en niet op een teller: bij een andere stand wordt
+     deze lijst opnieuw opgebouwd en zijn de plekken andere. */
   const eerste = new Map();
   poolFor(settings.tier)
     .slice()
@@ -4269,73 +4276,88 @@ function buildCards() {
       b.querySelector("small").textContent = w;
       markCard(b, weg.has(w));
       /* Op de letter van het gesorteerde woord, met dezelfde locale als de
-         sortering -- anders wijst de balk naar een plek die er niet is. */
+         sortering -- anders noemt de greep een letter die hier niet staat. */
       const letter = w[0].toLocaleUpperCase("nl");
       if (!eerste.has(letter)) eerste.set(letter, b);
       frag.appendChild(b);
     });
   box.textContent = "";
   box.appendChild(frag);
-  buildIndex(eerste);
+  letterTegels = [...eerste];
 }
 
-/* Alleen de letters die in déze stand voorkomen. Een letter die nergens
-   heen wijst is erger dan geen letter: hij belooft kaarten die er niet
-   zijn. Zelfde regel als bij de knop "Alles terugleggen" -- alles op dit
-   paneel gaat over de stand die je voor je hebt. */
-function buildIndex(eerste) {
-  const bar = $("#cbIndex");
-  bar.textContent = "";
-  eerste.forEach((tegel, letter) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.textContent = letter;
-    b.setAttribute("aria-label", "Spring naar de " + letter);
-    b.addEventListener("click", () => springNaar(tegel, true));
-    b._tegel = tegel;
-    bar.appendChild(b);
-  });
-}
-/* Vegen langs de strook: de letter onder de vinger springt meteen, zonder
-   glijden, zodat het raster de vinger volgt. Loslaten haalt de markering
-   weg. De klik daarna (bij een tik) springt nog eens, zacht, naar dezelfde
-   plek. */
+/* De greep: zie .cb-greep. letterTegels zijn [letter, eerste tegel] van de
+   stand die je voor je hebt. */
+let letterTegels = [];
+let verbergGreep = () => {};
 (() => {
-  const bar = $("#cbIndex");
-  let laatst = null;
-  const onder = e => {
-    const r = bar.getBoundingClientRect();
-    const el = document.elementFromPoint(r.left + r.width / 2, e.clientY);
-    return el && el.parentNode === bar ? el : null;
-  };
-  const volg = e => {
-    const b = onder(e);
-    if (!b || b === laatst) return;
-    if (laatst) laatst.classList.remove("nu");
-    b.classList.add("nu");
-    laatst = b;
-    springNaar(b._tegel, false);
-  };
-  const los = () => { if (laatst) laatst.classList.remove("nu"); laatst = null; };
-  bar.addEventListener("pointerdown", e => { bar.setPointerCapture(e.pointerId); volg(e); });
-  bar.addEventListener("pointermove", e => { if (bar.hasPointerCapture(e.pointerId)) volg(e); });
-  bar.addEventListener("pointerup", los);
-  bar.addEventListener("pointercancel", los);
-})();
-
-/* Het scherm rolt, niet de bak. Verschuif het scherm tot de tegel bovenaan
-   staat -- onder de titelband, waar die plakt, anders verdwijnt de tegel er
-   net onder. */
-function springNaar(tegel, zacht) {
   const sc = $("#s-kaarten .setup-scroll");
-  if (!sc || !tegel) return;
-  const kop = $("#s-kaarten h1");
-  const anker = kop && getComputedStyle(kop).position === "sticky"
-    ? kop.getBoundingClientRect().bottom
-    : sc.getBoundingClientRect().top;
-  const d = tegel.getBoundingClientRect().top - anker;
-  sc.scrollBy({ top: d - 8, behavior: zacht ? "smooth" : "auto" });
-}
+  const greep = $("#cbGreep"), bel = $("#cbBel");
+  const RUST = 1200;                 // ms na het laatste scrollen
+  let weg = null, vast = null;       // vast: { dy } zolang de vinger hem houdt
+  /* De baan in px van de bovenkant van het scherm: onder de schaduw van de
+     uitgang, tot --corner boven de onderrand (die zit in de padding). */
+  const baan = () => {
+    const scr = $("#s-kaarten").getBoundingClientRect();
+    const knop = $("#btnKaartenTerug").getBoundingClientRect();
+    const boven = knop.bottom - scr.top + 4 + 8;
+    const onder = scr.height - parseFloat(getComputedStyle(sc).paddingBottom);
+    return { boven, lengte: Math.max(0, onder - boven - greep.offsetHeight) };
+  };
+  const max = () => sc.scrollHeight - sc.clientHeight;
+  const gewoon = () => kaartLade() === "gewoon" && max() > sc.clientHeight / 2;
+  /* De letter van de eerste tegel die onder de titelband (of de bovenrand)
+     staat: dat is waar je bent. */
+  const letterNu = () => {
+    const kop = $("#s-kaarten h1");
+    const anker = (kop && getComputedStyle(kop).position === "sticky"
+      ? kop.getBoundingClientRect().bottom : sc.getBoundingClientRect().top) + 12;
+    let l = letterTegels.length ? letterTegels[0][0] : "";
+    for (const [k, t] of letterTegels) { if (t.getBoundingClientRect().top <= anker) l = k; else break; }
+    return l;
+  };
+  const plaats = () => {
+    const b = baan();
+    const y = b.boven + (max() ? sc.scrollTop / max() : 0) * b.lengte;
+    greep.style.top = y + "px";
+    bel.style.top = (y + greep.offsetHeight / 2 - 40) + "px";
+  };
+  const verberg = () => {
+    clearTimeout(weg); weg = null;
+    greep.classList.remove("aan", "vast"); bel.hidden = true; vast = null;
+  };
+  const rust = () => { clearTimeout(weg); weg = setTimeout(() => { if (!vast) verberg(); }, RUST); };
+  sc.addEventListener("scroll", () => {
+    if (!gewoon()) { verberg(); return; }
+    plaats();
+    if (vast) { bel.textContent = letterNu(); return; }
+    if (!greep.classList.contains("aan")) greep.classList.add("aan");
+    rust();
+  }, { passive: true });
+  greep.addEventListener("pointerdown", e => {
+    if (!greep.classList.contains("aan")) return;
+    e.preventDefault();
+    greep.setPointerCapture(e.pointerId);
+    clearTimeout(weg);
+    vast = { dy: e.clientY - greep.getBoundingClientRect().top };
+    greep.classList.add("vast");
+    bel.textContent = letterNu(); bel.hidden = false;
+  });
+  greep.addEventListener("pointermove", e => {
+    if (!vast) return;
+    const b = baan(), scr = $("#s-kaarten").getBoundingClientRect();
+    const f = b.lengte ? (e.clientY - scr.top - vast.dy - b.boven) / b.lengte : 0;
+    sc.scrollTop = Math.min(1, Math.max(0, f)) * max();
+  });
+  const los = () => {
+    if (!vast) return;
+    vast = null; greep.classList.remove("vast"); bel.hidden = true; rust();
+  };
+  greep.addEventListener("pointerup", los);
+  greep.addEventListener("pointercancel", los);
+  /* Een andere lade of een ander scherm: de greep hoort bij dít rollen. */
+  verbergGreep = verberg;
+})();
 
 /* De toestand van één tegel, op drie kanalen tegelijk: de bleke huid, de
    streep door het woord (allebei in de stijlen) en de naam die een
@@ -4430,6 +4452,7 @@ function zetLade(l) {
 }
 function paintLade() {
   const l = kaartLade();
+  verbergGreep();
   $("#kaartenKop").textContent = l === "eigen" ? "Eigen kaarten" : "Gewone kaarten";
   $("#ladeGewoon").hidden = l !== "gewoon";
   $("#ladeEigen").hidden = l !== "eigen";
@@ -4625,7 +4648,8 @@ const klad = {};           // per soort een niet bewaarde nieuwe kaart, voor de 
 let makerTerug = null;     // waar de focus heen gaat na het sluiten
 const ZOOM_MAX = 4;
 
-function makerOpen() { return !$("#maker").hidden; }
+function makerOpen() { return current === "maker"; }
+let makerVan = "kaarten";  // het scherm waar terug heen gaat
 
 /* Een nieuwe kaart opent in de soort van de vorige keer (de eerste keer de
    foto); een bestaande in haar eigen soort. */
@@ -4663,13 +4687,13 @@ function toonMk() {
 function openMaker(kaart) {
   zetMk(kaart, kaart ? kaart.soort || "foto" : vorigeSoort(), null);
   $("#mkKop").textContent = kaart ? "Kaart aanpassen" : "Nieuwe kaart";
-  $("#mkKop").classList.toggle("vh", !kaart);
   $("#mkSoort").hidden = !!kaart;
   const weg = $("#mkWeg");
   weg.hidden = !kaart; weg.classList.remove("zeker"); weg.textContent = "Kaart weggooien";
   makerTerug = document.activeElement;
-  screensInert(true);
-  $("#maker").hidden = false;
+  if (current !== "maker") makerVan = current;
+  $("#s-maker .setup-scroll").scrollTop = 0;
+  show("maker");
   if (kaart && !mk.img && !mk.basis && beelden.has(kaart.id)) {
     const i = new Image();
     i.onload = () => {
@@ -4845,8 +4869,7 @@ function sluitMaker() {
   }
   mk = null;
   stopCam();
-  $("#maker").hidden = true;
-  screensInert(false);
+  show(makerVan);
   if (makerTerug && makerTerug.isConnected) makerTerug.focus({ preventScroll: true });
 }
 
@@ -4943,12 +4966,6 @@ $("#mkWoord").addEventListener("keydown", e => {
 
 const kiesFoto = () => $("#mkBestand").click();
 $("#mkAlbum").addEventListener("click", kiesFoto);
-$("#mkKleiner").addEventListener("click", () => {
-  const v = vakMaat(); zoomOm(v / 2, v / 2, mk.zoom / 1.25);
-});
-$("#mkGroter").addEventListener("click", () => {
-  const v = vakMaat(); zoomOm(v / 2, v / 2, mk.zoom * 1.25);
-});
 $("#mkVak").addEventListener("keydown", e => {
   if (!(e.key === "Enter" || e.key === " ") || !mk || mk.soort === "tekening") return;
   if (mk.live) { e.preventDefault(); afdrukken(); }
@@ -5324,8 +5341,6 @@ $("#mkWeg").addEventListener("click", () => {
   (current === "kaarten" ? $("#btnEigenNieuw") : $("#rijEigen")).focus({ preventScroll: true });
 });
 $("#mkDicht").addEventListener("click", sluitMaker);
-/* Het waas naast het paneel sluit ook, zoals bij terugkijken. */
-$("#maker").addEventListener("click", e => { if (e.target === $("#maker")) sluitMaker(); });
 
 $("#tierChips").addEventListener("click", e => {
   const c = e.target.closest(".chip"); if (!c) return;

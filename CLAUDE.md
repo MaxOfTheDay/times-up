@@ -351,8 +351,9 @@ herhaalt zijn groepskop niet. De lange lijsten staan op hun eigen scherm,
 "Eigen kaarten"), zonder tabbladen, met de uitgang rechtsboven, Moeilijkheid
 bovenaan Gewone en "In elk potje" bovenaan Eigen; terug brengt je op
 Instellingen (`terug()`). Onder Gewone één regel (het aantal in de bak, de
-sleuf), en de letters als strook die rechts van het raster meeloopt: tik of
-veeg (`buildIndex()`), nooit een rij die opzij schuift. Twee soorten stukken, elk één betekenis: een rij
+sleuf), en bij het scrollen een greep rechts die je sleept, met de letter
+groot ernaast (`.cb-greep`, `.cb-bel`); in rust staat er niets naast het
+raster. Twee soorten stukken, elk één betekenis: een rij
 keuzeknoppen kiest er één, een rij in een `.lijst` gaat naar een scherm (de
 pijl) of schakelt (`.knop`, goud is aan). Een rij zakt niet in; een druk kleurt hem. De keuzes zijn rijen
 keuzeknoppen, geen schuif. Drie lagen tekst: hoofdletters alleen voor de
@@ -385,7 +386,8 @@ hebt. `MIN_BAK` (40) geldt over alle drie de standen. De sleuf van hint en
 knop wisselt met `visibility`, nooit met `hidden`.
 
 **Eigen kaarten.** Een foto of tekening met het woord dat telt, gemaakt in Instellingen
-(`openMaker()`). De lijst staat in `tijdisom.eigen`, de beelden in IndexedDB
+op een eigen scherm (`openMaker()`, `#s-maker`, terug brengt je waar je
+vandaan kwam). De lijst staat in `tijdisom.eigen`, de beelden in IndexedDB
 (`Beeld`), niets verlaat de telefoon. In de greep is een eigen kaart
 `[Spel.EIGEN + id, woord]`.
 
@@ -408,7 +410,7 @@ knop wisselt met `visibility`, nooit met `hidden`.
   ze meteen de maker; na bewaren staat `#s-kaarten` open op Eigen. Daar
   staan de kaarten in hetzelfde raster als de gewone, met vooraan één lege kaart met een plus (`#btnEigenNieuw`),
   gestippeld en plat; nooit een rij die opzij schuift.
-  Foto of tekening kies je in de kop van de maker (`#mkSoort`, `wisselSoort()`):
+  Foto of tekening kies je onder de titel van de maker (`#mkSoort`, `wisselSoort()`):
   het woord gaat mee, wat er al was blijft als klad, en een nieuwe kaart
   opent in de soort van de vorige keer (`tijdisom.soort`). Een bestaande
   kaart heeft die keuze niet. Er is geen Aan/Uit: 0 bij "In elk potje"
