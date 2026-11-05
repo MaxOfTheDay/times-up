@@ -2510,6 +2510,12 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 /* De stapel is leeg: er ligt niets meer onder de kaart, het groene stempel
    valt erop, en de knoppen worden ingedrukt zoals bij tijd-om. */
 #s-play.leeg .cardslot .under { visibility: hidden; }
+/* Ook op de kaart zelf ligt niets meer: de laatste geraden kaart vliegt als
+   kopie naar de teller (kaartSpook), en eronder bleef ze anders gewoon
+   liggen, zodat het stempel op een kaart viel die al weg was. Leeg papier,
+   met het vinkje erop. */
+#s-play.leeg .card .glyph,
+#s-play.leeg .card .cardword { visibility: hidden; }
 
 /* De kaart die je net raadde of oversloeg, als losse kopie boven de nieuwe:
    geraden krimpt ze naar de teller, overgeslagen zakt ze onder de stapel.
