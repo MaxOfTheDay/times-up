@@ -584,7 +584,10 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
   border: var(--line-2) solid var(--ink); background: var(--paper-2);
   box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
 }
-.btn-houd { overflow: hidden; color: var(--ink); }
+/* Geen overflow: hidden. De vloed (i) blijft vanzelf binnen de rand (inset 0,
+   scaleY tot 1), en de vinger die de druk voordoet steekt over de onderrand:
+   afgeknipt leek hij een halve hand. */
+.btn-houd { color: var(--ink); }
 .btn-danger { position: relative; }
 .btn-houd .mark { width: 22px; position: relative; z-index: 1; }
 .btn-danger .mark { width: 32px; }
