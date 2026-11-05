@@ -197,7 +197,10 @@ opdrachtkaart. Beurtwissel en rondewissel hebben dezelfde maat en
 verschillen in beweging (`.mode-round`): bij een beurtwissel duikt wie net
 speelde achter de rand en komt de ander op (`RAND_WEG`, `RAND_OP`, op de
 ploegklank; zijn landing rimpelt de punten), bij een rondewissel krimpt de gouden schijf tot tegel en groeit de
-volgende ronde tot schijf (`.ronderij`, `paintRij()`). De drie rondes staan
+volgende ronde tot schijf (`.ronderij`, `paintRij()`). Wat de kaart draagt
+(stand, ronde, wat er nog ligt) scheidt lucht, geen lijn: de cijfers
+groot onder hun dier, en wat er nog ligt als een stapeltje met het getal
+(`#hoCards`), ingedrukt in ronde 1. De drie rondes staan
 als één rij: nu is de schijf, de andere zijn gelijke papieren tegels, en de
 plek links of rechts zegt geweest of nog te komen. Geen kroon, geen "+N", geen
 fiche per punt op dit scherm. Vos en Uil zitten op de bovenrand van de
@@ -209,7 +212,7 @@ elk onder zijn dier. De wake lock blijft hier aan, begrensd op
 **Eén pen voor tekening en mascotte.** Het teken op de kaart (en in
 `#kijk`) krijgt de inktlijn van Vos en Uil: vier `drop-shadow`s zonder
 vervaging, 4 px (2 px op de kleine plaatjes). Niet vlakker maken met een
-filter. De mascottes, de rondetekens en `#i-kaarten` nemen voor hun lijn
+filter. De mascottes en de rondetekens nemen voor hun lijn
 `max(eigen dikte, min(var(--pen), plafond))`; `penLijn()` zet `--pen` per
 svg, zodat geen lijn dunner wordt dan 2,3 px op het scherm. Een nieuw
 gebruik buiten `svgUse()` meld je daar aan.
