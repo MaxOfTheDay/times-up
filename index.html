@@ -352,6 +352,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .screen.blijft { display: flex; z-index: 0; pointer-events: none; }
 .overlay[hidden].blijft { display: grid !important; pointer-events: none; }
 #s-title.groei { z-index: 9; background: var(--paper); }
+#s-handoff.groei { z-index: 9; }
 
 /* EEN VLAK IN EEN KETEN VERVAAGT MAAR OP ÉÉN PLEK.
    Opacity van ouder en kind vermenigvuldigen; een kind dat ook vervaagt komt
@@ -481,10 +482,13 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
    vlak: een kind dat enthousiast meetikt op "drie, twee, een" brak anders
    de beurt af. Een strijkende vinger bij het doorgeven vangen de tik op
    start en het aftellen zelf al op. Zelfde tegel, hoek én teken als de
-   pauzeknop: countdown() legt hem op de gemeten plek van de klokknop, die
-   zolang onzichtbaar is. */
+   pauzeknop: countdown() legt hem op de gemeten plek van het pauzeteken.
+   De klokknop zelf blijft staan, met de seconden van de beurt die komt:
+   alleen zijn pauzeteken ligt onder #cdBack, zodat er op nul niets
+   verspringt. Hij is zolang niet aan te raken (zie countdown()). */
 #s-play .countdown .cd-back { position: absolute; z-index: 3; pointer-events: auto; }
-#s-play.telt .klokknop { visibility: hidden; }
+#s-play.telt .klokknop { pointer-events: none; }
+#s-play.telt .klokknop svg { visibility: hidden; }
 /* Na nul ligt de grond nog een halve tel onder het wegtrekken; de tegel niet. */
 #s-play:not(.telt) .cd-back { visibility: hidden; }
 /* Het cijfer staat alleen op de kaart, groot en in inkt, zoals straks het
@@ -1592,16 +1596,32 @@ button.ho-count:enabled:active {
    aftellen: als de schijf opengaat verandert er niets behalve de kaart die
    verschijnt. Vlak, zonder punten: "goed" is een cirkel, en op een
    stippengrond zou elke geraden kaart rimpelen, tien keer per beurt naast de
-   kaart. Als de beurt of de ronde om is, trekt de kleur weg naar papier
-   (#s-play.over, #s-play.leeg), zodat de overdracht vanaf papier volstroomt
-   zoals altijd. Rechtstreeks naar de volgende ploeg mengt door paars, en paars
-   is al "nog vijf tellen". De overgang staat alleen op die toestand: terug
-   naar de ploegkleur gaat in één beeld, onder het aftellen. */
-#s-play { background: var(--team); }
-#s-play.over, #s-play.leeg {
-  background: var(--paper);
-  transition: background-color calc(var(--t-groot) * var(--dur)) var(--e-vloei);
+   kaart. Als de beurt of de ronde om is, groeit het papier als cirkel uit
+   de kaart over de ploegkleur (#s-play.over, #s-play.leeg, papierUitKaart()),
+   zodat de overdracht vanaf papier volstroomt zoals altijd. Een cirkel en
+   geen vervaging: daartussen stonden grijsblauw en zalmroze, tinten buiten
+   het palet. Rechtstreeks naar de volgende ploeg mengt door paars, en paars
+   is al "nog vijf tellen". Terug naar de ploegkleur gaat in één beeld,
+   onder het aftellen. Het papier is een eigen laag onder de stukken
+   (isolation, z-index -1), net als de punten van het aftellen. */
+#s-play { background: var(--team); isolation: isolate; }
+/* De punten van het aftellen blijven de hele beurt liggen, stil: hetzelfde
+   raster van 12 px, op het midden uitgelijnd, dezelfde punt van 2 px en
+   dezelfde dekking als stipveld() (--stip uit STIP_PAPIER, gezet in
+   startTurn()). Geen canvas: niets beweegt hier, en goed en pas rimpelen
+   niet (tien keer per beurt naast de kaart). Zolang het canvas van het
+   aftellen in beeld is, tekent dat ze. Het papier van tijd om
+   (#plVloed) ligt erover. */
+#s-play:has(.countdown[hidden]) {
+  background:
+    radial-gradient(circle, rgb(244 235 218 / var(--stip, .2)) 1.5px, transparent 2.3px) center / 12px 12px,
+    var(--team);
 }
+#s-play .grondvloed {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: var(--paper); clip-path: circle(0 at 50% 50%);
+}
+#s-play.over .grondvloed, #s-play.leeg .grondvloed { clip-path: none; }
 
 /* Drie stukken, elk met één betekenis, en in de volgorde waarin je ze leest:
    - links wie er speelt en wat die ploeg deze beurt binnenhaalde, als één
@@ -1855,10 +1875,22 @@ button.ho-count:enabled:active {
 .cardslot {
   position: relative; display: grid; place-items: center;
   aspect-ratio: 1; max-width: 100%; max-height: 100%;
-  /* Alleen voor het inzakken als de beurt om is (zie #s-play.over). De klop
-     van .hurry is een animatie en gaat hier dus voor. */
+  /* Alleen voor het inzakken als de beurt om is (zie #s-play.over). De
+     wiebel van .hurry is een animatie en gaat hier dus voor. */
   transition: transform calc(var(--t-los) * var(--dur)) var(--e-uit);
 }
+/* De laatste vijf tellen wiebelt de klok de stapel: heen en terug, één
+   keer per seconde, zodat elke zwaai op een hele seconde valt (de klasse
+   komt precies op vijf, dus de maat loopt gelijk met het cijfer). Klein en
+   symmetrisch, rond het midden, met een lichte groei op de uitslag: haast,
+   geen schudden. */
+@keyframes hurry {
+  0%, 50%, 100% { transform: none; }
+  25% { transform: scale(1.015) rotate(-.7deg); }
+  75% { transform: scale(1.015) rotate(.7deg); }
+}
+.cardslot.hurry { animation: hurry calc(1s / max(var(--dur), .001)) var(--e-vloei) infinite; }
+
 /* Geen ploegkleur op de kaart: de rand is de klok en verkleurt van goud naar
    pruim, en rood op rood maakt die onleesbaar. De kaart is het neutrale
    toneel; de ploeg staat in de balk. */
@@ -1900,8 +1932,6 @@ button.ho-count:enabled:active {
 }
 /* De laatste seconden is er van de rand haast niets meer over, juist op het
    moment dat de haast het hoogst is. Daarom klopt de kaart zelf mee. */
-@keyframes hurry { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02) rotate(-.4deg); } }
-.cardslot.hurry { animation: hurry calc(.5s / max(var(--dur), .001)) var(--e-vloei) infinite; }
 /* Twee lagen op precies hetzelfde pad: één ring in twee toestanden, geen twee
    ringen. Wijkt er één een pixel af of krijgt er één een contour, dan heeft
    de kaart een rand erbij.
@@ -3245,6 +3275,8 @@ button.ho-count:enabled:active {
        beurt, en het is de tel waarin je je klaarzet. De kaart zelf telt (zie
        .cd-cijfer); dit is alleen de grond met punten eronder, en de tegel
        rechtsboven die afbreekt. -->
+  <!-- Na de punten in de opmaak: het papier van tijd-om bedekt ze. -->
+  <i class="grondvloed" id="plVloed" aria-hidden="true"></i>
   <div class="countdown" id="countdown" hidden role="timer" aria-label="Aftellen">
     <canvas class="stipveld" id="cdVeld" aria-hidden="true"></canvas>
     <button class="btn-icon cd-back" id="cdBack" aria-label="Terug, nog niet beginnen">
@@ -5500,6 +5532,11 @@ const fillY = (el, btn) => p => {
 /* Eén tik: instellingen openen is niets onomkeerbaars, en het tandwiel
    bestaat alleen op dit scherm. */
 $("#btnGear").addEventListener("click", () => { Snd.unlock(); openSetup(); });
+/* Het geluid wordt wakker bij het neerzetten van de vinger, niet pas bij de
+   klik: de eerste keer kost dat op een telefoon tientallen ms, en tijdens de
+   klik stond dan het volgende scherm een paar beelden leeg. De klik roept
+   unlock() nog een keer aan, voor een browser die alleen een klik telt. */
+addEventListener("pointerdown", () => Snd.unlock(), { capture: true, passive: true });
 
 /* Te vroeg losgelaten: schudden, én de rand even in waarschuwingskleur.
    Dat tweede is er voor wie beperkte beweging aan heeft: daar valt de
@@ -5515,8 +5552,7 @@ function nudge(el) {
 }
 
 function openSetup() {
-  paintSetup();
-  show("setup");
+  show("setup");             // show() tekent het scherm al (paintSetup)
 }
 
 /* ==============================================================
@@ -5761,14 +5797,9 @@ function handoff(mode, freshA, freshB, zelfdeGrond) {
     const k = $("#hoRoundCard").getBoundingClientRect(), v = $("#hoVeld").getBoundingClientRect();
     if (k.width) veldHo.toon(k.left + k.width / 2 - v.left, k.top + k.height / 2 - v.top, false, 700);
   }
-  /* Twee beeldjes: het eerste zet display op flex, pas het tweede heeft een
-     beginwaarde om vandaan te lopen. De getBoundingClientRect() ervoor
-     dwingt de opmaak af, zodat papier ook echt geschilderd is. */
-  if (vloed) {
-    $("#s-handoff").getBoundingClientRect();
-    requestAnimationFrame(() => requestAnimationFrame(() =>
-      $("#s-handoff").style.setProperty("--team", t.color)));
-  }
+  /* De kleur groeit als cirkel uit de kaart die hier landt. */
+  if (vloed) kleurUitKaart($("#s-handoff"), veldHo, $("#hoVeld"), $("#hoRoundCard"), t.hex,
+    () => $("#s-handoff").style.setProperty("--team", t.color));
   if (wissel) setTimeout(() => {
     if (!G) return;
     $("#hoRondes").classList.add("wissel");
@@ -5961,6 +5992,7 @@ function startTurn() {
   $("#plMascot").firstElementChild.setAttribute("href", t.mascot);
   paintRound($("#plRoundChip .ico"), "chip", $("#plRoundChip"));
   $("#s-play").style.setProperty("--team", t.color);
+  $("#s-play").style.setProperty("--stip", STIP_PAPIER[G.team]);
   $("#glyph").textContent = "";   // leeg tot nul: niemand leest de kaart vooraf
   // Het punt achter de vórige beurt weer weghalen (zie timeUp en
   // #s-play.over). Hier en niet in turnEnd(): daar staat het scherm nog in
@@ -5986,6 +6018,7 @@ function startTurn() {
    begin. Tikken op het vlak breekt niet af; alleen #cdBack. countRaf is
    niet null zolang er geteld wordt (bewaarBeurt() en terug() lezen dat). */
 const TEL_MAAT = 800, TEL_EERST = 460;
+const NA_NUL = 1000;   // zo lang na nul ligt het canvas nog, zie handOffCountdown()
 let telTimers = [];
 function telLater(ms, f) { telTimers.push(setTimeout(f, ms)); }
 
@@ -6039,6 +6072,7 @@ function countdown(done) {
     terugK.style.top = (kk.top - o.top) + "px";
   }
   terugK.focus({ preventScroll: true });
+  $("#btnPauze").inert = true;
   veldCd.aan();
   const vanKaart = goKaart;
   goKaart = null;
@@ -6072,29 +6106,32 @@ function stopCountdown() {
   telTimers.forEach(clearTimeout); telTimers = [];
   countRaf = null;
   $("#s-play").classList.remove("telt");
+  $("#btnPauze").inert = false;
   $("#btnGoed").classList.remove("neer");
   $("#btnPas").classList.remove("neer");
   $("#countdown").hidden = true;
 }
 
-/* Uitgeteld: de kaart draait om naar het eerste woord, de punten trekken
-   vanuit haar weg, en goed en pas veren omhoog. Hier valt ook het
+/* Uitgeteld: de kaart draait om naar het eerste woord, en goed en pas veren
+   omhoog. De punten blijven: de hele beurt ligt het spel op hetzelfde bord. Hier valt ook het
    startsein. done() deelt de eerste kaart op het moment dat de kaart op
    haar rand staat. */
 function handOffCountdown(done) {
   telTimers = [];
   Snd.go();
   Tril.go();
-  const k = kaartIn();
-  veldCd.toon(k.x + k.width / 2, k.y + k.height / 2, true, 520);
   draaiOm(p => {
     countRaf = null;
     $("#s-play").classList.remove("telt");
+    $("#btnPauze").inert = false;
     $("#btnGoed").classList.remove("neer");
     $("#btnPas").classList.remove("neer");
     done();
     if (p) landOm($("#card"), p);
-    setTimeout(() => { if (countRaf === null) $("#countdown").hidden = true; }, stilAan() ? 0 : 520);
+    /* De punten blijven liggen. Het canvas van het aftellen houdt ze nog
+       even, tot de golf van de laatste tel is uitgedempt; dan nemen de
+       stille punten van het spelscherm het over, op dezelfde plekken. */
+    setTimeout(() => { if (countRaf === null) $("#countdown").hidden = true; }, stilAan() ? 0 : NA_NUL);
   });
 }
 
@@ -6914,7 +6951,11 @@ function draaiOm(verder) {
   if (stilAan() || !kaart.animate || !p.width) { verder(null); return; }
   const a = kaart.animate([{ transform: "scaleX(1)" }, { transform: "scaleX(0)" }],
     { duration: OMDRAAI, easing: curve("weg"), fill: "forwards" });
-  a.onfinish = () => { verder(p); a.cancel(); };
+  /* Eerst de vouw los, dan verder: landOm() meet zijn doel, en bij de
+     speelkaart op nul is dat dezelfde kaart. Nog gevouwen is ze 0 breed en
+     sloeg de landing zichzelf over. Het scherm wisselt binnen dezelfde taak,
+     dus de ongevouwen kaart komt nooit in beeld. */
+  a.onfinish = () => { a.cancel(); verder(p); };
 }
 function landOm(doel, p, ms) {
   if (!p || !doel || stilAan() || !doel.animate) return;
@@ -6927,6 +6968,41 @@ function landOm(doel, p, ms) {
     { transform: "none" }
   ], { duration: ms || 180, easing: curve("uit") });
 }
+/* Een grond verandert als cirkel uit een stuk: hier groeit het papier uit
+   de kaart, waar de beurt gebeurde, over de ploegkleur. De straal begint op
+   de halve kaart, want daaronder ligt de kaart zelf. */
+function papierUitKaart() {
+  const v = $("#plVloed");
+  if (stilAan() || !v.animate) return;
+  const k = $("#card").getBoundingClientRect(), s = $("#s-play").getBoundingClientRect();
+  if (!k.width) return;
+  const x = k.left + k.width / 2 - s.left, y = k.top + k.height / 2 - s.top;
+  const R = Math.hypot(Math.max(x, s.width - x), Math.max(y, s.height - y));
+  const r0 = Math.min(k.width, k.height) / 2;
+  v.animate([
+    { clipPath: `circle(${r0}px at ${x}px ${y}px)` },
+    { clipPath: `circle(${R}px at ${x}px ${y}px)` }
+  ], { duration: 450, easing: curve("uit") });
+}
+/* En de ploegkleur groeit op de overdracht en de eindstand uit de kaart die
+   net landde, op het canvas van die grond (onthul()); daarna staat ze op
+   het scherm zelf, zonder overgang. */
+/* Een cirkel die niet af kwam (het scherm ging eerder weg), maakt het veld
+   pas af bij de volgende; dan hoort zijn kleur er niet meer bij. */
+let vloedNr = 0;
+function kleurUitKaart(scherm, veld, cv, kaart, hex, zet) {
+  const k = kaart.getBoundingClientRect(), v = cv.getBoundingClientRect();
+  if (!k.width || !v.width) { zet(); return; }
+  const nr = ++vloedNr;
+  veld.onthul(k.left + k.width / 2 - v.left, k.top + k.height / 2 - v.top,
+    Math.min(k.width, k.height) / 2, hex, 450, () => {
+      if (nr !== vloedNr) return;
+      scherm.style.transition = "none";
+      zet();
+      scherm.getBoundingClientRect();
+      scherm.style.transition = "";
+    });
+}
 function timeUp() {
   stopClock(); releaseWake();
   Snd.timeUp();
@@ -6936,6 +7012,7 @@ function timeUp() {
   /* Het punt achter de beurt (zie #s-play.over). startTurn() haalt de klasse
      er weer af. */
   $("#s-play").classList.add("over");
+  papierUitKaart();
   mascotte(balkMascotte(), "schrik");
   /* Even laten staan: de tafel roept nog, en de ploeg die speelde krijgt
      haar stempel en haar buit nog te zien (zie #s-play.over). Er valt niets
@@ -7106,6 +7183,7 @@ function endRound() {
   if (!uit) Snd.leeg();
   Tril.leeg();
   $("#s-play").classList.add("leeg");
+  papierUitKaart();
   mascotte(balkMascotte(), "juich");
   setTimeout(() => {
     if (!G || current !== "play") { $("#s-play").classList.remove("leeg"); return; }
@@ -7238,11 +7316,8 @@ function winner() {
   G = null;
   show("winner");
   veldWn.aan();
-  if (vloed) {
-    scherm.getBoundingClientRect();
-    requestAnimationFrame(() => requestAnimationFrame(() =>
-      scherm.style.setProperty("--wn-grond", TEAMS[win].color)));
-  }
+  if (vloed) kleurUitKaart(scherm, veldWn, $("#wnVeld"), $("#wnPiles"), TEAMS[win].hex,
+    () => scherm.style.setProperty("--wn-grond", TEAMS[win].color));
 
   /* De onthulling: de totalen tellen samen op, dan valt de kroon en pas dán
      het feest. Bij beperkte beweging staat alles er meteen. */
@@ -7323,7 +7398,16 @@ $("#btnAgain").addEventListener("click", () => {
   const k = $("#btnAgain").getBoundingClientRect();
   const stand = $("#wnPiles"), m = stand.getBoundingClientRect();
   clearConfetti(); Snd.unlock();
-  const verder = () => { vertrekt = false; newGame(); rimpelDoor(k, m.width ? m : null); zetTerug([stand]); };
+  /* De grond van de worp (papier met inkten punten) groeit als cirkel uit
+     de knop over de eindstand, zoals de titel uit het huisje. */
+  const verder = () => {
+    vertrekt = false;
+    const van = $("#s-winner");
+    newGame();
+    groeiUit($("#s-handoff"), van, k);
+    rimpelDoor(k, m.width ? m : null);
+    zetTerug([stand]);
+  };
   if (stilAan() || !m.width) { verder(); return; }
   vertrekt = true;
   draaiWeg([stand], OMDRAAI);
@@ -7342,8 +7426,12 @@ $("#btnHome").addEventListener("click", () => {
 function naarTitel(k, sluier) {
   const van = $(".screen.on");
   show("title");
-  if (stilAan() || !k || !k.width || !van || van.id === "s-title" || !document.body.animate) return;
-  const ti = $("#s-title");
+  groeiUit($("#s-title"), van, k, sluier);
+}
+/* Het scherm naar (al getoond) groeit als cirkel uit knop k over het scherm
+   van, dat zolang blijft staan. */
+function groeiUit(ti, van, k, sluier) {
+  if (stilAan() || !k || !k.width || !van || van === ti || !document.body.animate) return;
   van.classList.add("blijft");
   if (sluier) sluier.classList.add("blijft");
   ti.classList.add("groei");

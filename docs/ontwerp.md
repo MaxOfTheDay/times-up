@@ -762,8 +762,8 @@ Nu is de opdrachtkaart de achterkant van de speelkaart:
   straks de tekening komt (`.cd-cijfer`, `--glyph` maal 1,05), met een
   kleine klop per tel. Het woord onder de tekening ligt zolang verborgen.
 - **Op nul draait de kaart om** naar het eerste woord (`draaiOm()`,
-  `landOm()`), trekken de punten vanuit de kaart weg (`veldCd.toon()`, zie
-  "Punten komen en gaan vanuit de kaart") en veren goed en pas op. De band
+  `landOm()`) en veren goed en pas op; de punten blijven liggen (zie "De
+  punten blijven de hele beurt"). De band
   staat dan vol: hij is opgewonden, en begint af te lopen.
 - **Afbreken draait terug.** `#cdBack` meet de speelkaart, gaat naar de
   overdracht met dezelfde grond (`handoff(..., zelfdeGrond)`), en de
@@ -935,16 +935,16 @@ aftellen in de ploegkleur stonden. De schijf ging dus open op crème, en op
 het enige scherm waar de tafel echt moet zien wie er speelt, stond de ploeg
 alleen nog in een mascotte van 48 px. De zin hierboven ("daar verandert de
 grond helemaal niet") klopte daardoor niet meer. Nu is de grond
-`var(--team)`, vlak (zie "Rasterpunten op de grond" voor waarom zonder
-punten), en is die zin weer waar: door het gat van de schijf zie je dezelfde
+`var(--team)` (eerst vlak; zie "De punten blijven de hele beurt" voor
+waarom er nu stille punten op liggen), en is die zin weer waar: door het gat van de schijf zie je dezelfde
 kleur, met alleen de kaart erbij.
 
 Het einde moest daarvoor mee. De overdracht stroomt vol vanaf papier; vanaf
 een rode grond zou ze in één beeld naar papier springen. Rechtstreeks van
 rood naar blauw laten lopen is bekeken en afgewezen: de tussentint is paars,
-en paars (`--time-1`) betekent al "nog vijf tellen". Daarom trekt de kleur
-weg zodra het stempel valt (`#s-play.over` bij tijd om, `.leeg` bij een lege
-stapel): `--t-groot` lang, binnen de adem van `BEURT_ADEM`, en dan draait de
+en paars (`--time-1`) betekent al "nog vijf tellen". Daarom maakt de grond plaats voor papier
+zodra het stempel valt (`#s-play.over` bij tijd om, `.leeg` bij een lege
+stapel; hoe, staat onder "Elke grond verandert als cirkel"): `--t-groot` lang, binnen de adem van `BEURT_ADEM`, en dan draait de
 kaart om zoals altijd. Het geeft de ploeg die klaar is ook haar eigen
 moment: de hele tafel ziet het vel leeglopen, ook wie niet naar de kaart
 kijkt. De overgang staat alleen op die eindtoestand; terug naar de
@@ -1212,6 +1212,99 @@ weg terwijl de kaart omdraait, zodat het vlakke spelscherm begint waar je
 keek. Na een beurt of ronde groeien ze in 700 ms terug vanuit de
 opdrachtkaart terwijl de kleur volstroomt. Bij beperkte beweging staat de
 eindstand er meteen.
+
+### Elke grond verandert als cirkel
+
+Gefilmd op drie maten (5 november, zo'n 6000 beelden per potje) veranderde
+de grond op drie manieren. De worp en naar huis: een cirkel uit de knop.
+Tijd om, ronde om, elke overdracht na een beurt en de eindstand: een
+vervaging van `background-color`. Nog een keer: een knip, halverwege het
+omdraaien van rood naar papier in één beeld. De vervagingen liepen door
+tinten die het palet niet kent: blauw via grijsblauw en beige naar papier,
+papier via zalmroze naar rood. "Een tint op een stromende grond mengt
+kleuren buiten het palet" stond al bij de beloning; hier gebeurde het vier
+keer per potje.
+
+Nu is er één vorm. Bij tijd om en een lege stapel groeit het papier als
+cirkel uit de kaart over de ploegkleur (`papierUitKaart()`: een laag
+`#plVloed` onder de stukken, met `clip-path` van de halve kaart tot over de
+verste hoek, 450 ms `--e-uit`). Op de overdracht en de eindstand groeit de
+ploegkleur uit de kaart die daar net landt, op het canvas van die grond
+(`kleurUitKaart()`, met `onthul()` van de worp), en staat daarna zonder
+overgang op het scherm zelf. Nog een keer laat de grond van de worp uit
+zijn knop groeien over de eindstand (`groeiUit()`, dezelfde als
+`naarTitel()`). De kaart is de bron omdat daar iedereen kijkt en omdat zij
+het stuk van de klok is: de kleur komt van waar de beurt gebeurde. Halftoon
+als overgang (punten die groeien tot ze samenvallen) is ook bekeken: het
+meest gedrukt, maar drukker, en het zou naast de rimpels staan die de
+punten al gebruiken.
+
+Een cirkel die niet af kwam (je tikte op start voor ze rond was), maakt
+het veld pas af bij de volgende; `vloedNr` zorgt dat zijn kleur dan niet
+alsnog op het scherm gezet wordt.
+
+### De punten blijven de hele beurt
+
+Het spelscherm was vlak: "goed" is een cirkel, en een cirkel op punten
+rimpelt, tien keer per beurt naast de kaart. Op nul trokken de punten
+daarom vanuit de kaart weg, en na de beurt groeiden ze op de overdracht
+terug. Max wilde ze houden. Ze blijven nu liggen, stil: het canvas van het
+aftellen (`veldCd`) blijft tot `NA_NUL` na nul staan, zodat de laatste
+rimpel uitloopt, en daaronder ligt hetzelfde raster als CSS-achtergrond van
+`#s-play` (`--stip`, per ploeg `STIP_PAPIER`). Een tweede canvas dat de hele
+beurt meeliep, gaf in de opnames haperende beelden; een stilstaand raster
+kost niets. Goed en pas rimpelen er
+niet in; dat is de enige uitzondering op "een cirkel op punten rimpelt", en
+om dezelfde reden als eerst het vlakke scherm. De kaart is dekkend, dus de
+tekening staat nooit op punten. Het scheelt een grondwissel per beurt: van
+overdracht tot tijd om ligt het spel op hetzelfde bord, en het papier van
+tijd om bedekt kleur en punten in één cirkel (`#plVloed`). Op nul draagt het omdraaien en het startsein het
+begin. De pauze legt de stukken weg, niet het bord: de punten blijven ook
+daar.
+
+### Op nul landt de kaart
+
+Op nul vouwde de kaart tot een rand en stond de eerste kaart daarna in één
+beeld vol: de tweede helft van het omdraaien ontbrak. `draaiOm()` liet zijn
+vouw (`fill: forwards`) staan tot na `verder()`, en `landOm()` meet zijn
+doel. Op elk einde is dat een ander stuk (de opdrachtkaart, de eindstand),
+maar op nul is het dezelfde kaart, nog 0 breed, en dan slaat de landing
+zichzelf over. Nu laat `draaiOm()` de vouw eerst los; het scherm wisselt in
+dezelfde taak, dus de ongevouwen kaart komt nooit in beeld.
+
+Afbreken knipt nog: de speelkaart en goed en pas zijn in één beeld weg.
+Een spiegelbeeld van start (vouwen, wegzakken, landen) is geprobeerd, maar
+elke vertraagde wissel gaf in de opnames een kwart seconde zonder kaart en
+zakte naar 25 beelden per seconde. Daarom staat het nog niet in.
+
+Op nul werd de klokknop ook in één beeld twee keer zo breed: tijdens het
+aftellen stond alleen `#cdBack`, een losse tegel met het pauzeteken. Nu
+staat de klokknop er het hele aftellen, met de seconden van de beurt die
+komt, en ligt `#cdBack` alleen op zijn pauzeteken (de knop zelf is zolang
+`inert`). Op nul verdwijnt `#cdBack` en ligt daar hetzelfde teken.
+
+De druk op start rimpelt op de overdracht, en de golf wordt na 130 ms
+afgeknipt als het spelscherm verschijnt. De golf doorgeven aan het canvas
+van het aftellen is geprobeerd en gaf hetzelfde haperen als het
+spiegelbeeld van afbreken; ook dat staat nog niet in.
+
+### Instellingen openen zonder leeg beeld
+
+De eerste tik van de avond op het tandwiel gaf zo'n 130 ms leeg papier.
+Gemeten: `Snd.unlock()` maakte de AudioContext (51 ms) en `paintSetup()`
+liep twee keer (in `openSetup()` en in `show()`). Het geluid wordt nu wakker
+bij het neerzetten van de vinger (`pointerdown`, vangt elke eerste tik), en
+`openSetup()` tekent niet meer zelf.
+
+### De laatste vijf tellen wiebelt de kaart
+
+Onder vijf seconden wiebelde de kaart: schaal en een halve graad, twee keer
+per seconde, los van de tik. Een druk per seconde in plaats daarvan
+(`drukKaart()`, zoals het opwinden) leek op het indrukken van pas, en Max
+wilde de wiebel houden. Hij is bijgeschaafd: één heen-en-weer per seconde,
+zodat elke zwaai op een tik valt, symmetrisch (-0,7° en +0,7°, schaal 1,015)
+met `--e-vloei`, en hij begint precies op vijf. De hittekleuren en het
+tikken blijven.
 
 ### Een knop die glijdt, neemt zijn golf mee
 
