@@ -113,10 +113,24 @@ bij één ervan. Toets een nieuw onderdeel eerst aan deze vier.
    ook (het aftellen, de zandloper). Alleen de dieren bewegen uit zichzelf:
    knipperen, ademen, juichen, rek en klets. Elke beweging pakt een lengte
    en een curve uit `:root` (`--t-press/los/kom/groot`, `--e-uit/los/weg/vloei`).
-   (De klok, Vasthouden, Aftellen, Worp, Grond, Vertrekken, Beloning, Eén label)
+   (De klok, Vasthouden, Eén kaart twee kanten, Worp, Grond, Vertrekken, Beloning, Eén label)
 4. **Stem: één betekenis per kleur, klank en trilling, nooit één kanaal.**
    Rood is Vos, blauw is Uil, goud is "dit, nu", groen is geraden. Geen
    woorden voor de spelers. (De harde eis, Kleur, Geluid en trilling)
+
+Elke beweging is een van **zeven werkwoorden**, elk met één betekenis.
+Past een nieuwe beweging in geen van de zeven, dan is ze waarschijnlijk
+overbodig; anders krijgt ze hier een achtste regel. (Zeven werkwoorden)
+
+| Werkwoord | Betekent | Zo ziet het eruit |
+|---|---|---|
+| Drukken | een vinger of de klok doet iets | het stuk zakt zijn schaduw in (`--t-press`) en veert terug (`--e-los`) |
+| Ingedrukt blijven | dit staat stil: nog niet, of niet meer | ingezakt op `--paper-2` (`.neer`, `#s-play.over`) |
+| Rimpelen | de druk raakt het bord | een golf door de punten in de vorm van wat drukte, alleen op een grond met punten |
+| Omdraaien | wat nu komt staat op de achterkant | smal tot een rand en breed op de plek (`draaiOm()`/`draaiWeg()`, `landOm()`) |
+| Stromen | wiens beurt het is | de ploegkleur groeit uit wat je aanraakte, trekt weg naar papier |
+| Vliegen | dit is binnen | de geraden kaart naar de buit (`vliegKaart()`) |
+| Leven | alleen Vos en Uil | ademen, knipperen, wippen, juichen, schrikken, duiken en gluren |
 
 ## Ontwerpregels
 
@@ -199,21 +213,28 @@ gebruik buiten `svgUse()` meld je daar aan.
 **De ronde in drie maten** komt altijd uit `paintRound(ico, size, host)`
 (`"teken"`, `"chip"`, `"kaart"`), nooit los bijgewerkt.
 
-**Het aftellen draagt allebei de feiten**: de ronde en de ploeg (`.cd-team`
-op papier). Beide tegels en de gouden schijf liggen op de gemeten plek van
-hun tegenhanger, niet in CSS nagerekend. Meet de startknop in de
-klik-handler. De schijf ís die startknop: ze houdt `--lift-2`, en elke tel
-drukt de klok haar in (`telDruk`, dezelfde in en uit als een vinger), met
-de ring door de punten bij het terugveren. Geen ring om de schijf: één
-ritme, per tel.
+**Eén kaart, twee kanten.** De opdrachtkaart is de achterkant van de
+speelkaart. Start draait haar om (`draaiWeg()`) en de startknop zakt achter
+de onderrand weg; op het spelscherm wordt de speelkaart breed vanaf de
+gemeten opdrachtkaart (`landOm(..., KAART_GROEI)`; meet in de klik-handler).
+De balk staat er dan al (wie, de ronde, de klok; `#cdBack` op de plek van
+het pauzeteken), goed en pas wachten ingedrukt. Het aftellen is de klok die
+zich opwindt: drie rukken op één maat (`TEL_EERST`, `TEL_MAAT`), elk een
+derde band (`rukBand()`), de kaart die haar schaduw inzakt (`drukKaart()`),
+het volgende cijfer groot in inkt op de kaart (`.cd-cijfer`, geen goud en
+geen raster) en een rimpel in de vorm van de kaart (`rimpelRand()`), elke
+tel iets sterker. Op nul draait de kaart om naar het eerste woord, trekken
+de punten vanuit haar weg (`veldCd.toon()`) en veren goed en pas op.
 
 **De worp verklapt zichzelf niet.** Zolang er geloot wordt is de grond die
 van de titel (papier, inkten punten); de ploegkleur groeit als een cirkel uit
 de startknop als de worp landt (`veldHo.onthul()`). Laat de achtergrond niet
 meeflikkeren. Een druk die de grond verandert, laat de nieuwe grond uit die
-knop groeien; de knop zelf glijdt mee (`rimpelDoor()`). Naar huis ook: de
-titel groeit als cirkel uit de knop (`naarTitel()`). Afbreken op het
-aftellen houdt de grond (`handoff(..., zelfdeGrond)`).
+knop groeien; de knop zelf glijdt mee (`rimpelDoor()`), en de kaart die je
+zag (het merk, de eindstand) draait om naar de eerste opdracht. Naar huis
+ook: de titel groeit als cirkel uit de knop (`naarTitel()`). Afbreken op
+het aftellen houdt de grond (`handoff(..., zelfdeGrond)`) en draait de kaart
+terug naar de opdracht (`terugNaarOpdracht()`).
 
 **De grond stroomt, het scherm vervaagt niet.** `#s-handoff`, `#s-play` en
 `#s-winner` hebben geen `screenIn`: op de overdracht stroomt alleen de grond van papier
@@ -239,17 +260,18 @@ inkt op papier krijgt (12%, `inkt: true`). De stralen van de eindstand
 zitten ín de punten: groter binnen twaalf stralen, die rond blijven draaien
 zolang het feest in beeld is (`veldWn.stralen()`), het enige dat buiten de
 dieren uit zichzelf beweegt; op het aftellen gaat bij elke tel
-een ring vanuit de schijf (`telGolf()`), op de eindstand barst het vuurwerk
-in de punten (`vuurwerk()`). Er loopt alleen een lus zolang er iets beweegt; bij beperkte
+een golf vanuit de rand van de kaart, in haar vorm (`rimpelRand()`), op de
+eindstand barst het vuurwerk in de punten (`vuurwerk()`). Punten komen en
+gaan als rastertoon vanuit de kaart (`toon()`): op nul trekken ze weg, na
+een beurt groeien ze terug op de overdracht. Er loopt alleen een lus zolang er iets beweegt; bij beperkte
 beweging één stilstaand beeld.
 
 **Vertrekken mag, als er niets achter wacht.** Geen vertrekanimaties, behalve
-de schijf die op nul opengaat (`.countdown.open`; `cdOut` bij beperkte
-beweging), de opdrachtkaart die op het aftellen in de grond zakt
-(`.cd-kaart`), het oplossen van de pauzesluier bij hervatten (`.uit`; alleen
-de sluier, `.overlay::before`, het paneel vervaagt nooit), de eerste helft
-van het omdraaien (`draaiOm()`, `draaiPauze()`), het scherm onder de titelcirkel
-(`naarTitel()`) en de kopie
+de startknop die na zijn tik achter de onderrand wegzakt, het oplossen van
+de sluier van het losse pauzepaneel bij hervatten (`.uit`; alleen de
+sluier, `.overlay::before`, het paneel vervaagt nooit), de eerste helft
+van het omdraaien (`draaiOm()`, `draaiWeg()`, `draaiPauze()`), het scherm
+onder de titelcirkel (`naarTitel()`) en de kopie
 van de kaart die naar de teller krimpt of onder de stapel zakt
 (`kaartSpook()`): de volgende kaart ligt er dan al onder. `hidden` gaat
 meteen aan; `inert` pas na het verzetten van de focus.
@@ -285,12 +307,14 @@ bij een schermwissel.
 rondeteken, alleen, in het midden) en de klok (`.klokknop`: seconden |
 pauze), allemaal `--balk` hoog, in die volgorde. Twee vakken in één stuk
 scheidt een inktlijn; niets ligt over een ander stuk heen. Alleen de
-klokknop heeft lift. Het aftellen legt `.cd-team`, `.cd-round` en `#cdBack`
-op de gemeten plek van die drie, dus de balk verschuift niet als de schijf
-opengaat. Tekst in de balk staat op papier of op het groen, nooit op de
+klokknop heeft lift. Op het aftellen staat de balk er al; alleen ligt
+`#cdBack` dan op de gemeten plek van de klokknop. Tekst in de balk staat op papier of op het groen, nooit op de
 ploegkleur.
 
-**Pauze draait de kaart om.** Tijdens een beurt ligt het pauzepaneel als
+**Pauze draait de kaart om, zonder sluier.** Wat stilstaat blijft
+ingedrukt (`PAUZE_NEER`: de klokknop, goed en pas; op de overdracht het
+huisje en start); een sluier van inkt over de ploegkleur gaf bruin en
+marine. Alleen het losse paneel houdt de sluier. Tijdens een beurt ligt het pauzepaneel als
 achterkant op de gemeten plek van de kaart (`legPaneel()`), met haar eigen
 stilstaande band als rand. Erop: bovenaan de stand met het huisje in de hoek
 rechtsboven, daaronder het rondeteken (`#pauseRonde`) en "verder" alleen in

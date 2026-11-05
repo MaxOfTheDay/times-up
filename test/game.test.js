@@ -28,9 +28,12 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   const screen = () => page.evaluate(() => window.__tijd.screen);
   const game = fn => page.evaluate(fn);
 
-  // Tikken en het aftellen uitzitten: pas daarna loopt de klok.
+  // Tikken en het aftellen uitzitten: pas daarna loopt de klok. De tik draait
+  // eerst de opdrachtkaart om (OMDRAAI); pas daarna begint het aftellen.
   async function startTurn() {
     await page.click('#btnStartTurn');
+    await page.waitForFunction(
+      () => !document.querySelector('#countdown').hidden, null, { timeout: 5000 });
     await page.waitForFunction(
       () => document.querySelector('#countdown').hidden, null, { timeout: 10000 });
     await page.waitForTimeout(150);
@@ -58,7 +61,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     await page.waitForTimeout(150);
     if (await screen() !== 'title') throw new Error('het huisje kwam niet op de titel uit');
     await page.click('#btnStart');
-    await page.waitForTimeout(150);
+    await page.waitForTimeout(300);           // het merk draait eerst om
   }
 
   await page.goto(APP_URL);
@@ -131,7 +134,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     // Een gewone tik; het aftellen erna houdt een losse aanraking tegen.
     // Afbreken zet je terug op het overdrachtscherm, zonder begonnen beurt.
     await page.click('#btnStartTurn');
-    await page.waitForTimeout(120);
+    await page.waitForTimeout(300);           // de opdrachtkaart draait eerst om
     ok(await screen() === 'play', `ronde ${round}: aftellen begint niet`);
     ok(await page.getAttribute('#countdown', 'hidden') === null,
        `ronde ${round}: er wordt niet afgeteld`);
@@ -373,7 +376,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(await screen() === 'title', 'een gestopt potje komt na een herlaadbeurt terug');
   ok(!await game(() => !!window.__tijd.G), 'een gestopt potje leeft na een herlaadbeurt nog');
   await page.click('#btnStart');
-  await page.waitForTimeout(150);
+  await page.waitForTimeout(300);
   ok(await screen() === 'handoff', 'de titelknop begint geen vers spel');
   ok(await page.textContent('#hoScoreA') === '0' && await page.textContent('#hoScoreB') === '0',
      'een vers spel begint niet op 0 - 0');
@@ -445,7 +448,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   const paneelOpen = () => page.evaluate(() => !document.querySelector('#pauze').hidden);
 
   await page.click('#btnAgain');
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(400);
   await startTurn();
   await page.waitForTimeout(300);
   await zicht('hidden');
@@ -473,9 +476,9 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   await hold(page, '#btnStop', 1400);
   await page.waitForTimeout(250);
   await page.click('#btnStart');
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(400);
   await page.click('#btnStartTurn');
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(400);
   ok(await page.getAttribute('#countdown', 'hidden') === null, 'het aftellen begon niet');
   await zicht('hidden');
   await page.waitForTimeout(3500);

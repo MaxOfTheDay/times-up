@@ -34,8 +34,8 @@ Wat er bij die audit niet bij het thema paste, en is aangepast:
 - acht lettermaten op het grote scherm stonden buiten de trap.
 
 Wat erbij paste en bleef: de sluier van 82% bij pauze (een gedrukt
-raster in plaats daarvan was druk en trok het oog weg van het paneel), de
-papieren tegel om de mascotte op het aftellen (blauw op blauw verdwijnt),
+raster in plaats daarvan was druk en trok het oog weg van het paneel; sinds
+"Pauze draait de kaart om, zonder sluier" alleen nog op het losse paneel),
 en de hitte van de klok als enige eigen kleurtrap.
 
 ### Vier lengtes, vier curves
@@ -51,7 +51,7 @@ Web Animations lezen geen `var()`, dus halen ze hun curve met `curve()` uit
 
 Buiten de trap blijven, met reden: `--t-card` (180 ms) en `--t-fly`
 (220 ms), gemeten voor een speellus waarin een snelle ploeg om de twee
-tellen scoort; `telDruk` (220 ms, precies één druk plus terugveren); en
+tellen scoort; `drukKaart()` (220 ms, precies één druk plus terugveren); en
 de lussen die leven of een gevoel dragen (ademen, juichen, de zandloper,
 de stralen, de val snippers), die hun eigen, lange tijd hebben. De
 `--e-pop` van vroeger is opgegaan in `--e-los`; het verschil was niet te
@@ -62,6 +62,38 @@ geschoven: 18 en 19 px naar `--fs-4`, 24 naar `--fs-5`, 34 tot 46 naar
 `--fs-6`. Het rondewoord op de overdracht wordt daarmee iets kleiner (46
 naar 40 px) en blijft het grootste woord op het scherm; een eigen trede van
 56 px was niet nodig.
+
+## Zeven werkwoorden
+
+De vier regels zeggen waar een beweging vandaan mag komen, niet wat ze
+betekent. Bij een tweede, diepere review van de hele speelronde bleek dat
+dezelfde beweging op twee plekken iets anders zei: de opdrachtkaart zakte
+op het aftellen in de grond (vertrekken), terwijl elke andere kaart
+omdraaide; de pauze legde een sluier van inkt over de ploegkleur (dat gaf
+bruin en marine), terwijl stilstand elders "ingedrukt" was; de punten
+verdwenen op nul door een gat in een schijf die verder nergens voorkwam.
+Daarom staat er nu een lijst van zeven werkwoorden in `CLAUDE.md`, elk met
+één betekenis: drukken, ingedrukt blijven, rimpelen, omdraaien, stromen,
+vliegen en leven. Max keurde de lijst goed, samen met de vier wijzigingen
+die eruit volgden (zie "Eén kaart, twee kanten", "Pauze draait de kaart
+om, zonder sluier" en "Punten komen en gaan vanuit de kaart").
+
+Hoe je hem gebruikt: zoek bij een nieuwe beweging eerst het werkwoord. Past
+ze in geen van de zeven, dan zegt ze waarschijnlijk niets wat de tafel moet
+weten, en dan is ze overbodig. Zegt ze wél iets nieuws, dan krijgt ze een
+achtste regel in de tabel, met haar ene betekenis.
+
+- **Drukken** is van de vinger en de klok. De klok drukt de kaart in bij
+  elke tel van het aftellen, precies zoals een vinger een knop indrukt.
+- **Ingedrukt blijven** is stilstand: goed en pas tijdens het aftellen
+  (nog niet) en na het stempel (niet meer), en alles wat stilstaat in de
+  pauze. Nooit vervagen; een tint op een stromende grond mengt kleuren
+  buiten het palet.
+- **Rimpelen** heeft de vorm van wat drukte: een cirkel vanaf de rand van
+  een knop, een rechthoek vanaf de rand van de kaart.
+- **Omdraaien** is "wat nu komt staat op de achterkant": elk einde, de
+  pauze, de start van een beurt, het merk en de eindstand naar de eerste
+  opdracht.
 
 ## De harde eis
 
@@ -199,8 +231,8 @@ tel je de scheve kaarten van de stapel mee en lijkt elke hoek een trap.
 
 ## De klok windt af
 
-Er is één voortgangsmeter in deze app: de rand om de kaart. De aftelschijf
-had er ook een (`#cdArc`); die is weg, zie "Eén taal voor een druk". En het
+Er is één voortgangsmeter in deze app: de rand om de kaart. Het aftellen
+windt die band op (zie "Eén kaart, twee kanten"). En het
 pauzepaneel had een stilstaande wijzerplaat (`#pauseRect`); die is weg sinds
 de pauze de kaart omdraait en haar eigen band overneemt (zie "Pauze draait
 de kaart om"). De band rekent met `perim * (1 - p)`, en dat betekent
@@ -644,56 +676,66 @@ Let op de `visibilitychange`-handler: die keerde terug tenzij `current` op
 raakt, dus zonder een eigen tak voor de overdracht komt hij daar nooit meer
 terug -- en valt het scherm alsnog uit op precies het verkeerde moment.
 
-## Het aftellen draagt allebei de feiten
+## Eén kaart, twee kanten
 
-Die drie tellen zijn het moment waarop het toestel fysiek van hand gaat, en
-wie hem aanneemt kijkt dan voor het eerst. Er stond alleen het rondetegeltje
-op -- van wie de beurt was, stond er enkel in de achtergrondkleur, en dat is
-het ene kanaal dat in deze app nooit alleen mag staan.
+Op de overdracht kijkt het kind naar de opdrachtkaart. Daarna kwam het
+aftellen: de kaart zakte in de grond, een gouden schijf rees uit de
+startknop met een cijfer, en op nul ging de schijf open tot een gat waar
+het spelscherm door lag. Drie dingen die nergens anders in het spel
+voorkwamen (vertrekken, een tweede fiche, een gat), op het moment dat het
+toestel van hand gaat. Bij elke andere wissel draait de kaart om. Max
+keurde het voorstel goed en koos daarna voor de kaart alleen het cijfer, in
+inkt.
 
-Er staat nu ook een mascotte (`.cd-team`). Waarom er papier onder moet: de
-mascotte draagt de ploegkleur en dit vlak ook, dus zonder achtergrond wordt ze
-een uitgesneden silhouet. Dat is precies het bezwaar waarop het optillen van
-de hele bovenbalk ooit sneuvelde -- maar dat bezwaar gold de bálk (met haar
-pauzeknop en haar woord op ploegkleur), niet een mascotte op papier.
+Nu is de opdrachtkaart de achterkant van de speelkaart:
 
-Allebei de tegels worden op de gemeten plek van hun tegenhanger op de balk
-gelegd, niet in CSS nagerekend: nagerekend klopt het staand op een telefoon
-en staat het liggend 45 px mis. Bij het rondetegeltje ligt het papier eronder,
-bij de mascotte eromheen -- de mascotte krijgt precies de gemeten maat en
-plek, zodat ze bij het oplossen blijft staan waar ze staat en het spelscherm
-eronder haar daar al heeft. Nagemeten op 390 bij 844: 48 bij 48 op (32, 32),
-aan allebei de kanten van de wissel.
+- **Start draait haar om.** De tik rimpelt nog op de overdracht, de kaart
+  (en de stand erin) wordt smal tot een rand (`draaiWeg()`, `OMDRAAI`), en
+  de startknop zakt achter de onderrand weg: zijn werk is gedaan, er wacht
+  niets achter. Op het spelscherm wordt de speelkaart breed vanaf de plek en
+  maat van de opdrachtkaart (`landOm(#cardslot, ..., KAART_GROEI)`, 280 ms;
+  de stapel eronder groeit mee, anders stond die er eerder dan de kaart).
+  Gemeten wordt in de klik-handler (`goKaart`), want een tel later is de
+  opdrachtkaart weg.
+- **De balk staat er al.** Wie, de ronde en de klok liggen op hun plek;
+  alleen staat `#cdBack` (het pauzeteken) waar het pauzeteken van de
+  klokknop staat. Goed en pas komen ingedrukt van onder het scherm op en
+  blijven ingedrukt tot nul: nog niet.
+- **Het aftellen is de klok die zich opwindt.** Drie rukken op één maat
+  (`TEL_EERST` 460 ms, dan elke `TEL_MAAT` 800 ms). Elke ruk trekt de band
+  een derde om de kaart, als een ratel net voorbij de inkeping en terug
+  (`rukBand()`, 180 ms); de kaart zakt haar schaduw in zoals onder een vinger
+  (`drukKaart()`); het cijfer staat groot in inkt op de kaart; en 60 ms
+  later, bij het terugveren, gaat een rimpel door de punten in de vorm van de
+  kaart (`rimpelRand()`), elke tel iets sterker (0,7, 0,85, 1,0). Een
+  ratelende wekker is de klok die je opdraait voor hij afloopt: dezelfde band
+  die daarna aftelt.
+- **Het cijfer is inkt, geen goud en geen raster.** Goud is "druk hier",
+  en op de kaart valt niets te drukken. Een cijfer in rasterpunten oogde in
+  de mock-up als een tweede grond. Groot in Fredoka op het papier, waar
+  straks de tekening komt (`.cd-cijfer`, `--glyph` maal 1,05), met een
+  kleine klop per tel. Het woord onder de tekening ligt zolang verborgen.
+- **Op nul draait de kaart om** naar het eerste woord (`draaiOm()`,
+  `landOm()`), trekken de punten vanuit de kaart weg (`veldCd.toon()`, zie
+  "Punten komen en gaan vanuit de kaart") en veren goed en pas op. De band
+  staat dan vol: hij is opgewonden, en begint af te lopen.
+- **Afbreken draait terug.** `#cdBack` meet de speelkaart, gaat naar de
+  overdracht met dezelfde grond (`handoff(..., zelfdeGrond)`), en de
+  opdrachtkaart wordt daar breed vanaf de speelkaart
+  (`terugNaarOpdracht()`), terwijl de startknop van onder het scherm
+  terugkomt.
+- **De band bij het begin.** De `ResizeObserver` tekent de klok opnieuw
+  zodra het spelscherm verschijnt, en zette de band daarmee vol vóór de
+  eerste ruk. `zetBand()` onthoudt daarom de stand (`bandNu`), en
+  `remeasure()` zet hem terug zolang er geteld wordt.
+- Bij beperkte beweging draait en zakt er niets: de kaart staat er, het
+  cijfer verspringt per tel, de band springt per derde.
 
-En de gouden schijf begint op de plek van de knop die je net indrukte. Die
-twee waren al hetzelfde ding -- 177 tegen 179 px, allebei goud, allebei op
-cx 195 -- alleen lagen ze 225 px uit elkaar. Ze stijgt daarna in 340 ms naar
-haar eigen midden: de verbinding wordt in de eerste beeldjes gelegd, en
-daarna hoort het cijfer in het midden, want daar kijkt iemand die het toestel
-net aangereikt krijgt. Bij beperkte beweging blijft ze op de knop staan, en
-dat is nog steeds de goede plek.
-
-De schijf heeft een ondergrens (`max(120px, ...)`): liggend kromp ze op
-24vh tot 94 px, kleiner dan de knop waar ze uit kwam. Elke tel klopt ze één
-keer naar binnen (`.klop`, 0,88 naar 1 met `--e-pop`) en vertrekt de ring
-(`#cdGolf`) van haar rand in plaats van uit het midden; uit het midden liep
-hij het eerste vijfde van de tel onzichtbaar onder de schijf, en kwam hij
-pas na het tikje te voorschijn. Naar buiten kloppen raakte de inktboog
-eromheen, die 6 px vrij ligt.
-
-**Let op de coördinatenval, want die kostte twee pogingen.** `.cd-round` en
-`.cd-team` trekken twee punten binnen hétzelfde vervormde vlak van elkaar af
-(de tegel op de balk min de oorsprong van het aftelvlak), en dat verschil is
-transform-invariant -- ze overleven dus de binnenkomst-animatie van het
-spelscherm, ook al wordt er middenin gemeten. De rechthoek van de startknop
-komt van het vórige scherm en heeft die bescherming niet. Verschuiven op een
-mid-animatie meting klopte zolang de animatie liep en zat er zes pixels naast
-zodra ze stilviel; een tweede correctieslag corrigeerde alleen naar hetzelfde
-bewegende doel. Wat wél opgaat: het aftelvlak ligt met `inset: 0` op de
-opvulbox van `.screen`, en die begint op (0, 0) van het venster -- lokale
-coördinaten zijn hier vensters-coördinaten, dus de gemeten rechthoek kan er
-rechtstreeks in. Meten moet in de klik-handler; een tel later is het
-overdrachtscherm weg en heeft de knop geen rechthoek meer.
+Wat vervallen is: de gouden schijf (`.cd-disc`), haar ring en haar gat, de
+kopie van de opdrachtkaart die in de grond zakte (`.cd-kaart`, met
+`bevries()`), en de tegels die de mascotte en de ronde over de balk legden
+(`.cd-team`, `.cd-round`): de balk zelf staat er nu. Wat bleef: drie tellen,
+alleen afbreken via de tegel rechtsboven, de klank en de trilling per tel.
 
 ## De worp verklapt zichzelf niet
 
@@ -730,8 +772,9 @@ versie.
 - De worp loopt op de grond van de titel: papier met inkten punten op 11%
   (`veldHo.inkt(true)`). Ook bij Nog een keer.
 - De knop glijdt van waar je hem indrukte naar zijn plek op de overdracht
-  (`rimpelDoor()`, met `--e-los`), zoals de startknop overgaat in de schijf
-  van het aftellen. De kaart komt eronder vandaan 24 px omhoog.
+  (`rimpelDoor()`, met `--e-los`). De kaart die je zag (het merk, of de
+  eindstand bij Nog een keer) draait om: ze wordt smal (`draaiWeg()`), en de
+  opdrachtkaart wordt op de overdracht breed vanaf haar maat.
 - Als de worp landt, groeit de ploegkleur als een cirkel uit de startknop
   (`veldHo.onthul()`, 450 ms), en worden de punten papier waar de cirkel
   langskomt. Daarna staat de kleur op het scherm zelf, zonder overgang, anders
@@ -763,8 +806,8 @@ Wie tijdens het aftellen op de tegel in de hoek tikt, ging van de
 ploegkleur naar kaal papier en daarna weer naar dezelfde ploegkleur:
 `handoff()` dacht dat het van een ander scherm kwam (`current` is dan
 `"play"`) en liet de kleur vanaf papier stromen. Nu krijgt het
-`zelfdeGrond` mee, en glijdt de schijf terug in de startknop
-(`rimpelDoor()` met de gemeten schijf), zoals ze eruit kwam.
+`zelfdeGrond` mee, en draait de speelkaart terug naar de opdracht
+(`terugNaarOpdracht()`).
 
 ## De grond stroomt, het scherm vervaagt niet
 
@@ -924,6 +967,9 @@ aftellen duurt hij 0,95 s, zodat hij weg is vóór de volgende tel.
 
 ### Eén grond, van knop tot kaart
 
+(Wat hier over het aftellen staat, de kaart die in de grond zakt en de
+schijf die opengaat, is vervangen; zie "Eén kaart, twee kanten".)
+
 Uit drie live versies (alleen een rimpel; één grond; één grond plus de weg
 terug) koos Max de middelste. Elke schermwissel komt nu voort uit wat je net
 aanraakte:
@@ -955,6 +1001,9 @@ Bij beperkte beweging is er geen kopie, geen vloeien en geen gat; dan blijft
 het `cdOut`.
 
 ### Eén taal voor een druk
+
+(De schijf van het aftellen bestaat niet meer; haar druk per tel is de
+kaart geworden, `drukKaart()`. Zie "Eén kaart, twee kanten".)
 
 Max vroeg of het aftellen "nog klopte" en wilde daarna één taal voor alle
 knoppen. Wat niet klopte: de inktring om de schijf liep vloeiend af over drie
@@ -1105,6 +1154,18 @@ Bij het nalopen van het volle bord, live naast elkaar gezet:
 
 Bekeken en gehouden: de worp, de snelheid en maat van de rimpel, de ring per
 tel op het aftellen, het vuurwerk, en het vlakke spelscherm.
+
+### Punten komen en gaan vanuit de kaart
+
+Op nul verdwenen de punten door het gat van de schijf; na een beurt
+stonden ze op de overdracht er in één beeld weer. Nu komen en gaan ze als
+rastertoon vanuit de kaart (`toon(x, y, weg, ms)`): een rand die vanaf het
+midden van de kaart naar buiten loopt, met een band van 120 px waarin elke
+punt krimpt tot niets of groeit tot zijn maat. Op nul trekken ze in 520 ms
+weg terwijl de kaart omdraait, zodat het vlakke spelscherm begint waar je
+keek. Na een beurt of ronde groeien ze in 700 ms terug vanuit de
+opdrachtkaart terwijl de kleur volstroomt. Bij beperkte beweging staat de
+eindstand er meteen.
 
 ### Een knop die glijdt, neemt zijn golf mee
 
@@ -1259,7 +1320,17 @@ is de kaart die zegt wat er nu komt.
   winnaar). Bij gelijkspel blijft het papier.
 - Bij beperkte beweging gebeurt alles meteen.
 
-## Pauze draait de kaart om
+## Pauze draait de kaart om, zonder sluier
+
+Achter de omgedraaide kaart lag eerst nog een sluier van 82% inkt over het
+hele scherm. Op de ploegkleur gaf dat bruin (op rood) en marine (op blauw):
+twee kleuren buiten het palet, op een scherm waar de kaart de pauze al
+zegt. Nu is er geen sluier; wat stilstaat blijft ingedrukt (`.neer`, lijst
+`PAUZE_NEER`): tijdens een beurt de klokknop, goed en pas, op de overdracht
+het huisje en de startknop. Ze zakken hun schaduw in en liggen op
+`--paper-2`, en veren bij verder terug. Het losse paneel (de kaart is te
+klein, liggend op de overdracht of op 568 bij 320) houdt de sluier: daar
+dekt geen kaart iets af.
 
 Het pauzepaneel lag als tweede vel papier midden op de kaart. Haar randen en
 haar gouden band staken eromheen uit, en op 320 bij 568 vielen de twee bijna
@@ -1294,8 +1365,8 @@ meteen weg, zoals altijd, en de kaart wordt op haar plek weer breed.
 - **Op de overdracht draait de opdrachtkaart om** (`#hoRoundCard`), op
   Max' vraag om overal hetzelfde gedrag. Daar loopt geen klok, dus de
   achterkant heeft geen band (`#pauze.klok` staat alleen tijdens een beurt).
-  De startknop blijft verborgen zolang het paneel openstaat, anders staan er
-  twee gouden speeltekens.
+  De startknop blijft ingedrukt op `--paper-2` zolang het paneel openstaat,
+  dus er staan geen twee gouden speeltekens.
 
 Wat er op de achterkant staat. Eerst lagen de stand en de twee deuren klein
 in het midden van een grote kaart: leeg, zei Max, en het huisje (een
@@ -1329,9 +1400,11 @@ wachten voel je in een spel dat je doorgeeft."* Lees die reden, niet alleen
 de regel. Er zijn twee plekken waar geen volgend scherm staat te wachten, en
 daar mag het dus wel.
 
-`cdOut` was de eerste (nu `.countdown.open`, de schijf die opengaat, met
-`cdOut` alleen nog bij beperkte beweging): de aftellaag lost op boven een kaart die al gedeeld
-wordt, en `done()` draait meteen. De tweede is de pauzesluier. Het
+De eerste is de startknop van de overdracht: na zijn tik zakt hij achter
+de onderrand weg terwijl de opdrachtkaart omdraait. Er staat geen scherm
+achter te wachten; het aftellen begint pas als de kaart op haar rand staat,
+en die eerste helft van het omdraaien duurt toch al `OMDRAAI`. De tweede is
+de sluier van het losse pauzepaneel. Het
 spelscherm is nooit weggeweest -- het ligt eronder, met dezelfde kaart -- en
 `closePause()` zet de klok meteen weer aan. Alleen de pixels blijven nog
 0,18 s hangen. Zonder dat was hervatten de laatste harde knip in de app: één
@@ -1375,7 +1448,7 @@ stapel. Eerst werd ze opnieuw gedeeld zoals elke nieuwe kaart, en dan zag
 je niet dat dít de kaart was die je net had weggegeven.
 
 Twee meer, om dezelfde reden. De eerste helft van het omdraaien
-(`draaiOm()`): het spel wacht die 140 ms af, maar er staat geen scherm te
+(`draaiOm()`, `draaiWeg()`): het spel wacht die 140 ms af, maar er staat geen scherm te
 wachten, alleen de achterkant van dezelfde kaart. En het scherm dat je
 verlaat als je naar huis gaat (`naarTitel()`): het blijft liggen terwijl de
 titel eroverheen groeit, en is weg als de cirkel rond is.
@@ -1640,11 +1713,9 @@ en stilzetten gaan over dezelfde klok.
 - **De buit aan het eind groeit als hele tegel** (`buit` op `.who`, vanuit
   de linkerbovenhoek). Groeide alleen het groene vak, dan stak het boven en
   onder uit zijn tegel.
-- **Het aftellen ligt eronder.** `.cd-team` krijgt de gemeten rechthoek van
-  `.who` (waar de buit dan op nul staat), `.cd-round` die van het
-  rondeteken, en `#cdBack` staat op de hoek waar het pauzeteken van de
-  klokknop uitkomt. Als de schijf opengaat blijft alles liggen; alleen de
-  seconden verschijnen.
+- **Het aftellen heeft de balk al.** Alleen `#cdBack` ligt op de gemeten
+  plek van de klokknop, met het pauzeteken waar het daar ook staat; op nul
+  verschijnen de seconden.
 - **Alleen de klokknop heeft lift**, dus alleen hij leest als knop. Het
   cijfer houdt zijn vaste vak (`--digit-w`), zodat de knop niet versmalt als
   10 naar 9 gaat.
@@ -1784,7 +1855,7 @@ Eerder was het in 0,3 s voorbij, terwijl het feest tot 0,55 s doorliep.
 **Een rimpel trilt niet.** Een trilling hoort bij een gebeurtenis, niet bij
 het beeld van een druk. Waar een rimpel een gebeurtenis draagt, trilt die al,
 op hetzelfde moment: elke tel van het aftellen (`Tril.tel()` met
-`telGolf()`), de schijf die opengaat (`Tril.go()`), het vuurwerk
+`rimpelRand()`), het omdraaien op nul (`Tril.go()`), het vuurwerk
 (`Tril.feest()`). De rest is spel: een tik op de grond, de landing van een
 dier op de titel, de golf achter een glijdende knop. Kinderen tikken daar
 twintig keer achter elkaar, en trillen kent alleen duur en ritme, met 20 ms

@@ -244,7 +244,7 @@
    kaart en de knoppen in hoofdletters. De chips en veldnamen niet; dat is
    zin-tekst voor de volwassene. */
 .wordmark h1, #s-setup h1, #s-kaarten h1, #s-regels h1, #s-maker h1, .group-head, .cb-tal b, .cb-bel,
-.cd-disc b, .chips.getal > .chip, .roundcard b, .ho-count span, .mini-score b,
+.cd-cijfer, .chips.getal > .chip, .roundcard b, .ho-count span, .mini-score b,
 .secs-left, .gain, .cardword, .kijk-grid small,
 .pv small, .tally .sr b, .tally .num, .btn-plain, .st-tal {
   font-family: var(--font-display);
@@ -257,11 +257,6 @@
 @media (prefers-reduced-motion: reduce) {
   :root { --dur: 0; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
-  /* Het aftellen lost normaal op terwijl de kaart eronder al gedeeld wordt,
-     en die uitloop is een animatie met forwards-vulling. Zonder animatie
-     blijft die vulling weg, en dan zou de laag nog twee tienden lang
-     ondoorzichtig over de kaart liggen. Hier dus meteen weg. */
-  .countdown.out { display: none !important; }
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -327,9 +322,9 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    - een omhullend vlak gebruikt trap 1 of 2 en schiet nooit door;
    - vervagen doet in een keten maar één vlak (zie slotIn);
    - geen vertrekanimaties: een uitloop houdt het volgende scherm tegen.
-     Uitzondering waar niets achter wacht: cdOut, de pauzesluier, de
-     eerste helft van het omdraaien (draaiOm) en het scherm onder de
-     titelcirkel (naarTitel);
+     Uitzondering waar niets achter wacht: de pauzesluier (alleen als het
+     paneel los ligt), de eerste helft van het omdraaien (draaiOm,
+     draaiWeg) en het scherm onder de titelcirkel (naarTitel);
    - geen richting: de app heeft geen ruimtelijk model.
 
    De knop is meteen raak: niets zet pointer-events uit, en de animatie
@@ -477,108 +472,37 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 .go-wrap { position: relative; display: grid; place-items: center; flex: 0 0 auto; }
 
 /* ---- aftellen voor de klok gaat lopen ----
-   Ligt op het spelscherm, in de ploegkleur van de overdracht ervoor:
-   hetzelfde moment, geen nieuw scherm. In het midden dezelfde gouden schijf
-   als de knop die je net indrukte, met een inktboog die leegloopt. Geen baan
-   onder de boog; boog, cijfer en tik zeggen hetzelfde. */
-.countdown {
-  position: absolute; inset: 0; z-index: 6;
-  display: grid; place-items: center;
-  background: var(--team);
-  border: 0; padding: 0;
-}
+   Eén kaart, twee kanten: de opdrachtkaart is de achterkant van de
+   speelkaart. Bij de tik draait ze om naar een schone kant en groeit ze tot
+   speelmaat; de klok windt de band in drie rukken op en drukt bij elke ruk
+   het volgende cijfer op de kaart. Op nul draait ze om naar het eerste
+   woord. De balk staat er al (wie, de ronde, de klok), goed en pas wachten
+   ingedrukt (.neer). Deze laag is alleen de grond eronder: de punten van de
+   overdracht, die op nul vanuit de kaart wegtrekken. Geen eigen vlak, want
+   #s-play is al de ploegkleur; het canvas ligt met z-index -1 onder de
+   stukken. */
+.countdown { position: absolute; inset: 0; pointer-events: none; }
 /* Terug naar de overdracht kan alleen via deze tegel, niet via het hele
    vlak: een kind dat enthousiast meetikt op "drie, twee, een" brak anders
    de beurt af. Een strijkende vinger bij het doorgeven vangen de tik op
    start en het aftellen zelf al op. Zelfde tegel, hoek én teken als de
-   pauzeknop die er een tel later staat: die hoek betekent de hele beurt
-   "wacht even". De omgekeerde pas-pijl las als terugspoelen, en als familie
-   van de pasknop eronder. */
-#s-play .countdown .cd-back { position: absolute; z-index: 2; }
-/* De ronde, tijdens het aftellen: dat zijn de drie tellen waarin het toestel
-   van hand gaat. Alleen het teken, in hetzelfde tegeltje als op de balk --
-   geen woord, want tekst hoort niet op ploegkleur. De hele balk optillen is
-   geprobeerd: de mascotte werd een silhouet, de pauzeknop aantikbaar zonder
-   klok, en het woord haalde maar 3,7:1. */
-.cd-round {
-  /* Op precies de plek waar het tegeltje van de balk komt, zodat het teken
-     blijft staan terwijl het vlak eronder oplost. Die plek wordt gemeten
-     (countdown()); deze waarden zijn alleen de terugval, en kloppen liggend
-     en op een tablet niet. */
-  position: absolute;
-  top: calc(env(safe-area-inset-top, 0px) + var(--corner));
-  left: 50%; transform: translateX(-50%);
-  width: 48px; height: 48px; display: grid; place-items: center;
-  border: var(--line-2) solid var(--ink); background: var(--paper-2);
+   pauzeknop: countdown() legt hem op de gemeten plek van de klokknop, die
+   zolang onzichtbaar is. */
+#s-play .countdown .cd-back { position: absolute; z-index: 3; pointer-events: auto; }
+#s-play.telt .klokknop { visibility: hidden; }
+/* Na nul ligt de grond nog een halve tel onder het wegtrekken; de tegel niet. */
+#s-play:not(.telt) .cd-back { visibility: hidden; }
+/* Het cijfer staat alleen op de kaart, groot en in inkt, zoals straks het
+   woord op dezelfde kaart: geen goud (dat is "druk hier", en hier drukt de
+   klok) en geen raster (dat is de grond). De maat volgt het teken uit
+   sizeCard(). */
+.cd-cijfer { display: none; }
+#s-play.telt .cd-cijfer {
+  display: grid; place-items: center; position: absolute; inset: 0;
+  font-size: calc(var(--glyph, 200px) * 1.05); line-height: 1; color: var(--ink);
+  font-variant-numeric: tabular-nums;
 }
-.cd-round svg { width: 75%; height: 75%; }
-
-/* De ploeg, tijdens het aftellen: daar stond het anders alleen in de
-   achtergrondkleur, en kleur staat hier nooit alleen. Papier eronder, want
-   een mascotte in ploegkleur op een vlak in ploegkleur wordt een silhouet.
-   countdown() legt de tegel op de gemeten plek van .who en de mascotte op
-   precies de gemeten maat, zodat ze bij het oplossen blijft staan. */
-.cd-team {
-  position: absolute;
-  top: calc(env(safe-area-inset-top, 0px) + var(--corner));
-  left: calc(env(safe-area-inset-left, 0px) + var(--corner));
-  width: var(--tap); height: var(--tap);
-  display: grid; place-items: center;
-  background: var(--paper); border: var(--line-2) solid var(--ink);
-}
-.cd-team svg { width: 36px; height: 36px; display: block; }
-/* Met een ondergrens: liggend kromp de schijf op 24vh tot 94 px, kleiner dan
-   de knop waar ze uit komt. */
-.cd-disc { position: relative; width: max(120px, min(46vw, 30vh, 190px)); aspect-ratio: 1; display: block; }
-.cd-disc b {
-  position: absolute; inset: 0; display: grid; place-items: center;
-  border-radius: 50%; background: var(--go);
-  border: var(--line) solid var(--ink);
-  /* De schijf ís de startknop (ze begint op zijn gemeten plek), dus ze houdt
-     zijn lift (--lift-2). */
-  box-shadow: var(--lift-2) var(--lift-2) 0 0 var(--ink);
-  font-weight: 900; font-size: max(52px, min(20vw, 11vh, 84px)); color: var(--ink);
-  font-variant-numeric: tabular-nums; line-height: 1;
-}
-/* Elke tel drukt de klok de knop in: dezelfde beweging als een vinger op
-   een knop (zie 3. KNOPPEN). Snel en zonder veer zijn schaduw in, verend
-   terug; de ring door de punten vertrekt bij het terugveren (telGolf()).
-   Geen ring om de schijf: die liep vloeiend af terwijl al het andere per tel
-   sprong, twee ritmes tegelijk. De tel is nu één beweging. */
-@keyframes telDruk {
-  0%   { transform: translate(0, 0); box-shadow: var(--lift-2) var(--lift-2) 0 0 var(--ink); animation-timing-function: ease-out; }
-  27%  { transform: translate(var(--lift-2), var(--lift-2)); box-shadow: 0 0 0 0 var(--ink); animation-timing-function: var(--e-los); }
-  100% { transform: translate(0, 0); box-shadow: var(--lift-2) var(--lift-2) 0 0 var(--ink); }
-}
-.cd-disc b.klop { animation: telDruk calc(.22s / max(var(--dur), .001)); }
-/* Op nul geeft de schijf het beeld door: ze zet even uit en lost op terwijl
-   de kaart eronder al gedeeld wordt. done() draait meteen; deze laag ligt er
-   alleen nog overheen, zonder pointer-events. */
-@keyframes cdOut {
-  from { opacity: 1; transform: scale(1); }
-  to   { opacity: 0; transform: scale(1.06); }
-}
-.countdown.out {
-  pointer-events: none;
-  animation: cdOut calc(var(--t-los) / max(var(--dur), .001)) var(--e-weg) forwards;
-}
-/* Eén grond: op nul gaat de schijf open. Er komt een gat in dit vlak, zo
-   groot als de schijf, dat uitgroeit tot het hele scherm; door het gat ligt
-   het spelscherm al klaar, dus de gouden schijf wordt een papieren cirkel
-   die de kaart is. Vanuit wat je net aanraakte, in plaats van een vlak dat
-   vervaagt. --gat-van en --gx/--gy zet handOffCountdown() op de gemeten
-   schijf. Bij beperkte beweging blijft het cdOut (dat dan meteen weg is). */
-@property --gat { syntax: "<length>"; inherits: false; initial-value: 0px; }
-@keyframes cdOpen { from { --gat: var(--gat-van, 90px); } to { --gat: 150vmax; } }
-.countdown.open {
-  pointer-events: none;
-  -webkit-mask-image: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), transparent var(--gat), #000 calc(var(--gat) + 1px));
-          mask-image: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), transparent var(--gat), #000 calc(var(--gat) + 1px));
-  animation: cdOpen calc(var(--t-groot) / max(var(--dur), .001)) var(--e-uit) forwards;
-}
-/* De opdrachtkaart van de overdracht, als losse kopie op het aftelvlak: ze
-   zakt in de grond terwijl de punten haar plek innemen (zie countdown()). */
-.cd-kaart { position: absolute; margin: 0; pointer-events: none; transform-origin: 50% 50%; }
+#s-play.telt .cardword { visibility: hidden; }
 
 /* ---- geraden ----
    Nooit op alleen min(): op een lage staande stand kromp deze knop anders
@@ -628,8 +552,20 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 }
 .btn-icon svg { width: 22px; }
 
-/* Zie openPause(): op de overdracht maar één gouden speelteken in beeld. */
-#s-handoff.paneel .go-wrap { visibility: hidden; }
+/* Ingedrukt blijven: dit staat stil, nog niet of niet meer. Het stuk zakt
+   zijn schaduw in en blijft liggen op --paper-2, zonder dat er een vinger
+   op staat. Tijdens het aftellen (goed en pas wachten), in de pauze (de
+   klok, goed en pas; op de overdracht het huisje en start) en bij tijd om
+   (#s-play.over). Loslaten veert terug met de overgang uit 3. KNOPPEN.
+   Zo heeft de pauze geen sluier nodig, en is er op de overdracht maar één
+   gouden speelteken in beeld: "verder". */
+.btn-go.neer, .btn-good.neer, .btn-icon.neer, .btn-skip.neer {
+  pointer-events: none; background: var(--paper-2); box-shadow: 0 0 0 var(--ink);
+  transition: transform calc(var(--t-press) * var(--dur)) var(--e-uit),
+              box-shadow calc(var(--t-press) * var(--dur)) var(--e-uit);
+}
+.btn-go.neer, .btn-good.neer { transform: translate(var(--lift-2), var(--lift-2)); }
+.btn-icon.neer, .btn-skip.neer { transform: translate(var(--lift-1), var(--lift-1)); }
 
 /* ---- vasthouden om te stoppen ----
    Dezelfde huid als pauze, huisje en terug (papier, inkt-rand, --lift-1).
@@ -1665,9 +1601,8 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
    - in het midden hoe je mag uitleggen (het rondeteken), alleen;
    - rechts de klok en de knop die hem stilzet, ook als één dubbel stuk
      (.klokknop): de seconden, een inktlijn, het pauzeteken.
-   Allemaal --balk hoog. Op het aftellen staan dezelfde drie op dezelfde
-   plekken (.cd-team, .cd-round, #cdBack), dus als de schijf opengaat blijft
-   alles liggen en verschijnen alleen de seconden in de knop.
+   Allemaal --balk hoog. Op het aftellen staat de balk er al; alleen de
+   klokknop is dan #cdBack, op dezelfde plek en met hetzelfde teken.
    Alle tekst in de balk staat op papier of op het groen van de buit, nooit op
    de ploegkleur. */
 /* Deze balk raakt beide bovenhoeken; de hulpknop staat hier in de rij, dus
@@ -1713,8 +1648,8 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 
 /* De pauzeknop draagt de seconden: lezen en stilzetten gaan over dezelfde
    klok, dus ze zijn één stuk. Hij blijft het enige in de balk met een
-   schaduw, dus het enige dat een knop lijkt, en zijn pauzeteken staat op
-   precies de plek van #cdBack op het aftellen. Het cijfer heeft een vast vak
+   schaduw, dus het enige dat een knop lijkt, en op het aftellen ligt #cdBack
+   precies op zijn plek. Het cijfer heeft een vast vak
    (--digit-w), zodat de knop niet van breedte verandert als 10 naar 9 gaat. */
 #s-play .btn-icon { position: static; flex: 0 0 auto; }
 #s-play .klokknop {
@@ -1750,6 +1685,12 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   content: ""; position: absolute; inset: 0; z-index: -1;
   background: rgba(20, 17, 15, .82);
 }
+/* Ligt het paneel als achterkant op de kaart, dan geen sluier: 82% inkt
+   over de ploegkleur gaf bruin (Vos) en marine (Uil), kleuren buiten het
+   palet, en dimde de kaart nog vóór ze omdraaide. Wat stilstaat zegt dat
+   zelf: de klok, goed en pas blijven ingedrukt (.neer). Alleen het losse
+   paneel, als de achterkant niet op de kaart past, houdt de sluier. */
+#pauze.kaart::before { background: none; }
 /* Het waas komt op in --t-los, het paneel schaalt in --t-kom van 96% met
    --e-los. Wegklikken lost kort op (zie .uit hieronder), maar de klok loopt
    dan al. */
@@ -3254,6 +3195,8 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
           <!-- Het woord bij de tekening: náást een beeld dat hetzelfde
                vertelt, nooit in plaats daarvan. Zie .cardword. -->
           <b class="cardword" id="cardWord">olifant</b>
+          <!-- Het aftellen: alleen het cijfer, groot in inkt. Zie .cd-cijfer. -->
+          <b class="cd-cijfer" id="cdNum" aria-hidden="true"></b>
           <!-- Het stempel als de tijd om is: het merk zelf, inkt met de
                gouden zandloper, schuin op de kaart. Zie #s-play.over. -->
           <span class="stempel om" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
@@ -3284,22 +3227,14 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   </div>
 
   <!-- Aftellen voor de klok gaat lopen: een misser kost drie tellen, geen
-       beurt, en het is de tel waarin je je klaarzet. De kaart blijft tot nul
-       leeg. Alleen de tegel in de hoek breekt af. -->
+       beurt, en het is de tel waarin je je klaarzet. De kaart zelf telt (zie
+       .cd-cijfer); dit is alleen de grond met punten eronder, en de tegel
+       rechtsboven die afbreekt. -->
   <div class="countdown" id="countdown" hidden role="timer" aria-label="Aftellen">
     <canvas class="stipveld" id="cdVeld" aria-hidden="true"></canvas>
     <button class="btn-icon cd-back" id="cdBack" aria-label="Terug, nog niet beginnen">
       <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pauze"/></svg>
     </button>
-    <!-- Wie en wat: dezelfde twee tegels die een tel later op de balk staan,
-         op dezelfde plek. Alleen het teken van de ronde; het woord staat een
-         tel later op de balk en mag hier niet, want dit vlak is ploegkleur.
-         Zie .cd-team en .cd-round. -->
-    <div class="cd-team" aria-hidden="true"><svg id="cdMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg></div>
-    <div class="cd-round" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
-    <span class="cd-disc">
-      <b id="cdNum">3</b>
-    </span>
   </div>
 
 </section>
@@ -5712,6 +5647,8 @@ function zetOpRand(team) {
 
 function handoff(mode, freshA, freshB, zelfdeGrond) {
   const round = mode === "round";
+  /* Wat in een pauze ingedrukt bleef (zie PAUZE_NEER), ligt hier weer op. */
+  ["#btnPauzeHo", "#btnStartTurn", "#btnPauze"].forEach(sel => $(sel).classList.remove("neer"));
   handoffMode = round ? "round" : "turn";
   const t = TEAMS[G.team], r = G.round - 1;
   $("#s-handoff").classList.toggle("mode-round", round);
@@ -5800,6 +5737,13 @@ function handoff(mode, freshA, freshB, zelfdeGrond) {
   saveGame(handoffMode);
   show("handoff");
   veldHo.aan();
+  /* Na een beurt of ronde stroomt de kleur vanaf papier, en de punten
+     groeien vanuit de kaart naar de rand: het vlakke spelscherm eindigt waar
+     je keek, zoals het daar op nul begon (zie handOffCountdown()). */
+  if (vloed) {
+    const k = $("#hoRoundCard").getBoundingClientRect(), v = $("#hoVeld").getBoundingClientRect();
+    if (k.width) veldHo.toon(k.left + k.width / 2 - v.left, k.top + k.height / 2 - v.top, false, 700);
+  }
   /* Twee beeldjes: het eerste zet display op flex, pas het tweede heeft een
      beginwaarde om vandaan te lopen. De getBoundingClientRect() ervoor
      dwingt de opmaak af, zodat papier ook echt geschilderd is. */
@@ -5819,70 +5763,38 @@ function handoff(mode, freshA, freshB, zelfdeGrond) {
 /* Starten is een gewone tik; een strijkende vinger tijdens het doorgeven
    vangt het aftellen op (een misser kost drie tellen, geen beurt). Een lange
    druk was het lastigste gebaar voor een kind van vier. */
-/* De maat en plek van de knop op het moment van de tik: het aftelvlak legt
-   zijn gouden schijf daar neer, zodat de cirkel die je indrukte de cirkel is
-   die begint te tellen. Meten moet hier; een tel later is de knop weg. */
-let goRect = null;
-/* Ook de opdrachtkaart: een kopie op haar plek, die op het aftelvlak in de
-   grond zakt (zie countdown()). Nu, want een tel later is ze weg. */
-let goKaart = null;
-/* Een kopie buiten #s-handoff verliest alles wat daar op id of op scherm
-   hangt: de dieren op de rand, de ruimte voor de rand, de maten van de stand.
-   Dan sprong de kaart op het eerste beeld van het aftellen naar een andere
-   opmaak en verdwenen Vos en Uil in één klap. Daarom krijgt elk element van
-   de kopie de berekende stijl van zijn origineel mee, zoals het er op het
-   moment van de tik bij lag (ook midden in een adem), en staat alles daarna
-   stil: de kopie is een afdruk, geen tweede overdracht.
-   Alleen de eigenschappen van maat, plek, vorm en verf: alle ruim 500 lezen
-   kost op een telefoon meer dan een beeld, en dat precies op de tik. Krijgt
-   de kaart een eigenschap die buiten deze lijst haar uiterlijk bepaalt, zet
-   hem erbij; de controle is het aftellen frame voor frame filmen. */
-const AFDRUK = ("display position top right bottom left width height min-width " +
-  "min-height max-width max-height box-sizing margin-top margin-right " +
-  "margin-bottom margin-left padding-top padding-right padding-bottom " +
-  "padding-left flex-direction flex-wrap flex-grow flex-shrink flex-basis " +
-  "order align-items align-self align-content justify-content row-gap " +
-  "column-gap aspect-ratio grid-template-columns grid-template-rows " +
-  "font-family font-size font-weight line-height letter-spacing text-transform " +
-  "text-align white-space color background-color border-top-width " +
-  "border-right-width border-bottom-width border-left-width border-top-style " +
-  "border-right-style border-bottom-style border-left-style border-top-color " +
-  "border-right-color border-bottom-color border-left-color box-shadow " +
-  "clip-path overflow-x overflow-y transform transform-origin translate rotate " +
-  "scale opacity visibility z-index filter fill stroke").split(" ");
-function bevries(bron, kopie) {
-  const a = [bron, ...bron.querySelectorAll("*")];
-  const b = [kopie, ...kopie.querySelectorAll("*")];
-  /* Eerst alles lezen, dan alles schrijven: één stijlberekening. */
-  const teksten = a.map(el => {
-    const cs = getComputedStyle(el);
-    let t = "";
-    for (const p of AFDRUK) t += p + ":" + cs.getPropertyValue(p) + ";";
-    return t + "animation:none;transition:none;";
-  });
-  b.forEach((el, i) => { el.style.cssText = teksten[i]; });
+/* Eén kaart, twee kanten. De tik draait de opdrachtkaart om (de eerste
+   helft, draaiWeg()), met de dieren op haar rand, en de startknop zakt weg
+   achter de onderrand van het scherm: zijn werk is gedaan. Daarna ligt op
+   het spelscherm de speelkaart, die vanaf de plek en maat van de
+   opdrachtkaart breed wordt (landOm). De gemeten opdrachtkaart gaat mee naar
+   countdown(); een tel later is ze weg. */
+let goKaart = null, vertrekt = false;
+const KAART_GROEI = 280;
+function draaiWeg(els, ms) {
+  els.forEach(el => el && el.animate && el.animate([{ scale: "1 1" }, { scale: "0 1" }],
+    { duration: ms, easing: curve("weg"), fill: "forwards" }));
 }
+function zetTerug(els) { els.forEach(el => el && el.getAnimations().forEach(a => a.cancel())); }
 $("#btnStartTurn").addEventListener("click", () => {
-  const r = $("#btnStartTurn").getBoundingClientRect();
-  if (r.width > 0) goRect = { x: r.x, y: r.y, w: r.width, h: r.height };
-  goKaart = null;
+  if (vertrekt) return;
+  Snd.unlock();
   const kaart = $("#hoRoundCard"), k = kaart.getBoundingClientRect();
-  if (k.width > 0 && !stilAan()) {
-    const kopie = kaart.cloneNode(true);
-    bevries(kaart, kopie);
-    kopie.removeAttribute("id");
-    kopie.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
-    kopie.setAttribute("aria-hidden", "true");
-    kopie.classList.add("cd-kaart");
-    Object.assign(kopie.style, { position: "absolute", margin: "0",
-                                 left: k.left + "px", top: k.top + "px",
-                                 width: k.width + "px", height: k.height + "px",
-                                 transform: "none", translate: "none", scale: "none",
-                                 rotate: "none", opacity: "1", boxSizing: "border-box",
-                                 pointerEvents: "none" });
-    goKaart = kopie;
-  }
-  Snd.unlock(); startTurn();
+  goKaart = k.width > 0 ? k : null;
+  if (stilAan() || !goKaart) { startTurn(); return; }
+  vertrekt = true;
+  const knop = $("#btnStartTurn"), kn = knop.getBoundingClientRect();
+  const s = $("#s-handoff").getBoundingClientRect();
+  /* De druk zelf rimpelt nog op de grond van de overdracht. */
+  veldHo.rimpel(kn.left + kn.width / 2 - s.left, kn.top + kn.height / 2 - s.top, 1.2, kn.width / 2);
+  draaiWeg([kaart, $("#hoTally")], OMDRAAI);
+  knop.animate([{ translate: "0 0" }, { translate: "0 " + (innerHeight - kn.top + 20) + "px" }],
+    { duration: OMDRAAI, easing: curve("weg"), fill: "forwards" });
+  setTimeout(() => {
+    vertrekt = false;
+    if (current === "handoff" && $("#pauze").hidden) startTurn();
+    zetTerug([kaart, $("#hoTally"), knop]);
+  }, OMDRAAI);
 });
 
 /* ---------- de klok ---------- */
@@ -5959,6 +5871,8 @@ function sizeCard() {
 function remeasure() {
   if (current !== "play") return;
   sizeCard(); repaintClock();
+  /* Tijdens het aftellen windt de band op, los van de klok. */
+  if (countRaf !== null) zetBand(bandNu);
 }
 if (window.ResizeObserver) new ResizeObserver(remeasure).observe($(".cardwrap"));
 addEventListener("resize", remeasure);
@@ -6044,194 +5958,146 @@ function startTurn() {
   countdown(beginTurn);
 }
 
-/* Per frame getekend, net als holdButton: een CSS-overgang zou bij
-   prefers-reduced-motion meteen op vol springen en dan telt er niets meer
-   af. Tikken breekt af -- zonder dat zou een losse aanraking tijdens het
-   doorgeven alsnog een beurt starten, alleen drie tellen later. */
-function countdown(done) {
-  const el = $("#countdown"), num = $("#cdNum");
-  const MS = COUNT_FROM * 1000;
-  el.hidden = false;
-  num.textContent = COUNT_FROM;
-  /* Welke ronde dit is (zie .cd-round): het aftelvlak dekt de balk af. Op de
-     gemeten plek van het echte rondetegeltje, want nagerekend klopt het
-     liggend niet. Lukt meten niet, dan blijft de terugval uit de stijlen. */
-  paintRound($(".cd-round"), "teken");
-  const chip = $(".roundchip .ico"), tegel = $(".cd-round");
-  if (chip && tegel) {
-    const c = chip.getBoundingClientRect(), o = el.getBoundingClientRect();
-    if (c.width > 0) {
-      tegel.style.left = (c.left - o.left) + "px";
-      tegel.style.top = (c.top - o.top) + "px";
-      tegel.style.width = c.width + "px";
-      tegel.style.height = c.height + "px";
-      tegel.style.transform = "none";
-    }
-  }
+/* Het aftellen is de klok die zich opwindt. De kaart ligt met een schone
+   kant boven; drie keer trekt de klok de band een derde om de kaart (een
+   ratel, de kaart zakt haar schaduw in zoals onder een vinger, het volgende
+   cijfer staat erop, een rimpel in de vorm van de kaart), en op de vierde
+   tel draait ze om naar het eerste woord terwijl de punten vanuit haar
+   wegtrekken. Eén maat van TEL_MAAT; de eerste ruk valt TEL_EERST na het
+   begin. Tikken op het vlak breekt niet af; alleen #cdBack. countRaf is
+   niet null zolang er geteld wordt (bewaarBeurt() en terug() lezen dat). */
+const TEL_MAAT = 800, TEL_EERST = 460;
+let telTimers = [];
+function telLater(ms, f) { telTimers.push(setTimeout(f, ms)); }
 
-  /* En van wie deze beurt is (zie .cd-team): de tegel op de gemeten plek
-     van de dubbele tegel op de balk (die hier nog alleen de mascotte draagt,
-     want de buit staat op nul), de mascotte op de maat van die op de balk.
-     Zo blijven ze allebei liggen als de schijf opengaat. */
-  $("#cdMascot").firstElementChild.setAttribute("href", TEAMS[G.team].mascot);
-  const wieT = $(".play-top .who"), tegelT = $(".cd-team");
-  if (wieT && tegelT) {
-    const c = wieT.getBoundingClientRect(), o = el.getBoundingClientRect();
-    const m = $("#plMascot").getBoundingClientRect();
-    if (c.width > 0) {
-      tegelT.style.left = (c.left - o.left) + "px";
-      tegelT.style.top = (c.top - o.top) + "px";
-      tegelT.style.width = c.width + "px";
-      tegelT.style.height = c.height + "px";
-      tegelT.style.padding = "0";
-      $("#cdMascot").style.width = m.width + "px";
-      $("#cdMascot").style.height = m.height + "px";
-    }
-  }
-  /* De schijf begint waar de knop stond en stijgt daarna naar haar eigen
-     midden, waar iemand kijkt die het toestel net aangereikt krijgt. Absoluut
-     geplaatst met de gemeten rechthoek zelf: dit vlak ligt met inset: 0 op
-     .screen, dat op (0, 0) van het venster begint. */
-  const disc = $(".cd-disc");
-  disc.style.transition = "none";
-  const natW = disc.getBoundingClientRect().width || 0;
-  if (goRect && goRect.w > 0 && natW > 0) {
-    disc.style.position = "absolute";
-    disc.style.margin = "0";
-    disc.style.left = goRect.x + "px";
-    disc.style.top = goRect.y + "px";
-    disc.style.width = goRect.w + "px";
-    disc.style.height = goRect.h + "px";
-    /* Bij beperkte beweging blijft ze staan waar de knop stond. Dat is nog
-       steeds de goede plek, alleen zonder de reis ernaartoe. */
-    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      disc.getBoundingClientRect();                 // forceer de beginstand
-      disc.style.transition =
-        "left .34s var(--e-los), top .34s var(--e-los)," +
-        "width .34s var(--e-los), height .34s var(--e-los)";
-      requestAnimationFrame(() => {
-        const o = el.getBoundingClientRect();
-        disc.style.left = (o.width / 2 - natW / 2) + "px";
-        disc.style.top = (o.height / 2 - natW / 2) + "px";
-        disc.style.width = natW + "px";
-        disc.style.height = natW + "px";
-      });
-      golfMee(veldCd, disc, el, 340);
-    }
-  }
-
-  $("#cdBack").focus({ preventScroll: true });
-
-  /* De eerste tel klinkt vóór t0 gezet wordt: een koud audio-apparaat heeft
-     een kwart seconde nodig, en anders begint het aftellen met een hink. */
-  let last = COUNT_FROM;
-  Snd.count(0);
-  Tril.tel();
-  /* Eén grond. De kaart van de overdracht zakt in de punten, die er al
-     die tijd onder lagen; de druk op de knop stuurt een rimpel vanaf de
-     knop. Die rimpel is de eerste tel. Alleen als er net op de knop
-     getikt is: na een afgebroken aftelling begint het gewoon. */
-  const kopie = goKaart;
-  goKaart = null;
-  if (kopie && kopie.animate) {
-    el.querySelector(".stipveld").after(kopie);
-    /* Ze zakt achter haar eigen onderrand weg, zoals de dieren achter de
-       rand van de kaart: de knip blijft op de plek van die rand (plus de
-       schaduw) terwijl de kaart erdoor zakt, tot ook de dieren erachter
-       zijn. Niet vervagen: op de ploegkleur mengt dat kleuren buiten het
-       palet (olijfgoud, een paarse vos). */
-    const h = parseFloat(kopie.style.height) || 200, D = h + 110;
-    const a = kopie.animate([
-      { transform: "translateY(0)", clipPath: "inset(-200px -40px -12px -40px)" },
-      { transform: `translateY(${D}px)`, clipPath: `inset(-200px -40px ${D - 12}px -40px)` }
-    ], { duration: 450, easing: curve("weg"), fill: "forwards" });
-    a.onfinish = a.oncancel = () => kopie.remove();
-  }
-  veldCd.aan();
-  /* Na een tik heeft de vinger de knop net ingedrukt: de eerste tel is die
-     druk, met zijn rimpel vanaf de knop. */
-  if (kopie && goRect) veldCd.rimpel(goRect.x + goRect.w / 2, goRect.y + goRect.h / 2, 1.2, goRect.w / 2);
-  else telGolf();
-  const t0 = performance.now();
-  const step = now => {
-    /* Ook aan de bovenkant afknellen. De tijdstempel van de eerste
-       rAF-frame kan vóór t0 liggen -- die frame was al onderweg toen de
-       eerste tel nog klonk -- en dan is er méér over dan de hele
-       aftelling: shown wordt 4, en die tel bestaat niet. */
-    const left = Math.min(MS, Math.max(0, MS - (now - t0)));
-    const shown = Math.ceil(left / 1000);
-    if (shown !== last && shown > 0) {
-      last = shown; num.textContent = shown; Snd.count(COUNT_FROM - shown); Tril.tel(); telGolf();
-    }
-    if (left <= 0) { handOffCountdown(); done(); return; }
-    countRaf = requestAnimationFrame(step);
+/* De band rechtstreeks, zonder paintClock(): die zou bij een bijna lege
+   band de hitte van de laatste vijf tellen schilderen. */
+let bandNu = 0;
+function zetBand(p) {
+  bandNu = p;
+  $("#timerBand").style.strokeDashoffset = framePerim * (1 - Math.max(0, Math.min(1, p)));
+}
+function rukBand(van, naar) {
+  if (stilAan()) { zetBand(naar); return; }
+  const t0 = performance.now(), MS = 180;
+  const stap = nu => {
+    if (countRaf === null) return;
+    const t = Math.min(1, (nu - t0) / MS), u = t - 1;
+    /* Een ratel: iets voorbij de inkeping en terug. */
+    zetBand(van + (naar - van) * (1 + 2 * u * u * u + u * u));
+    if (t < 1) requestAnimationFrame(stap);
   };
-  countRaf = requestAnimationFrame(step);
+  requestAnimationFrame(stap);
+}
+/* De klok drukt de kaart in: dezelfde beweging als een vinger op een knop. */
+function drukKaart() {
+  if (stilAan()) return;
+  const l = "var(--lift-1)";
+  $("#card").animate([
+    { transform: "none", boxShadow: l + " " + l + " 0 0 var(--ink)", easing: curve("uit") },
+    { transform: "translate(" + l + ", " + l + ")", boxShadow: "0 0 0 0 var(--ink)", offset: .27, easing: curve("los") },
+    { transform: "none", boxShadow: l + " " + l + " 0 0 var(--ink)" }
+  ], { duration: 220 });
+}
+/* De kaart, gemeten in de maat van het veld van het aftellen. */
+function kaartIn() {
+  const k = $("#card").getBoundingClientRect(), o = $("#countdown").getBoundingClientRect();
+  return { x: k.left - o.left, y: k.top - o.top, width: k.width, height: k.height };
 }
 
-/* Elke tel drukt de klok de schijf in (zie .klop), en bij het terugveren,
-   60 ms later, vertrekt er een ring door het stipveld vanuit haar rand: de
-   rimpel die elke ronde knop op een stippengrond geeft. */
-function telGolf() {
-  const b = $("#cdNum");
-  if (stilAan()) return;
-  b.classList.remove("klop"); void b.offsetWidth; b.classList.add("klop");
-  setTimeout(() => {
-    if ($("#countdown").hidden) return;
-    const el = $("#countdown").getBoundingClientRect();
-    const r = $(".cd-disc").getBoundingClientRect().width / 2;
-    veldCd.rimpel(el.width / 2, el.height / 2, 1, r + 14);
-  }, 60);
+function countdown(done) {
+  const el = $("#countdown"), num = $("#cdNum");
+  el.hidden = false;
+  num.textContent = "";
+  $("#s-play").classList.add("telt");
+  $("#btnGoed").classList.add("neer");
+  $("#btnPas").classList.add("neer");
+  zetBand(0);
+  /* #cdBack op de gemeten plek van het pauzeteken in de klokknop. */
+  const kk = $("#btnPauze").getBoundingClientRect(), o = el.getBoundingClientRect(), terugK = $("#cdBack");
+  if (kk.width > 0) {
+    terugK.style.left = (kk.right - o.left - terugK.offsetWidth) + "px";
+    terugK.style.top = (kk.top - o.top) + "px";
+  }
+  terugK.focus({ preventScroll: true });
+  veldCd.aan();
+  const vanKaart = goKaart;
+  goKaart = null;
+  countRaf = 1;
+  if (vanKaart && !stilAan()) {
+    /* De speelkaart wordt breed vanaf de opdrachtkaart, en goed en pas komen
+       ingedrukt van onder het scherm op. */
+    /* Het hele vak, met de stapel eronder: die hoort bij de kaart. */
+    landOm($("#cardslot"), vanKaart, KAART_GROEI);
+    $$("#btnGoed, #btnPas").forEach(b => b.animate(
+      [{ translate: "0 " + (innerHeight - b.getBoundingClientRect().top) + "px" }, { translate: "0 0" }],
+      { duration: KAART_GROEI, delay: OMDRAAI, easing: curve("uit"), fill: "backwards" }));
+  }
+  for (let n = 0; n < COUNT_FROM; n++) {
+    telLater(TEL_EERST + n * TEL_MAAT, () => {
+      rukBand(n / COUNT_FROM, (n + 1) / COUNT_FROM);
+      num.textContent = COUNT_FROM - n;
+      drukKaart();
+      if (!stilAan()) num.animate([{ scale: "1.18" }, { scale: "1" }], { duration: 160, easing: curve("uit") });
+      Snd.tick(2200, .05); Snd.count(n); Tril.tel();
+      /* Bij het terugveren, en elke tel iets sterker. */
+      setTimeout(() => { if (countRaf !== null) veldCd.rimpelRand(kaartIn(), .7 + n * .15); }, 60);
+    });
+  }
+  telLater(TEL_EERST + COUNT_FROM * TEL_MAAT, () => handOffCountdown(done));
 }
 
 /* Afbreken: meteen weg. Wie tijdens het aftellen tikt, wil terug, en daar
    hoort niets tussen te zitten. */
 function stopCountdown() {
-  cancelAnimationFrame(countRaf); countRaf = null;
-  const el = $("#countdown");
-  el.classList.remove("out", "open");
-  el.querySelectorAll(".cd-kaart").forEach(k => k.remove());
-  el.hidden = true;
+  telTimers.forEach(clearTimeout); telTimers = [];
+  countRaf = null;
+  $("#s-play").classList.remove("telt");
+  $("#btnGoed").classList.remove("neer");
+  $("#btnPas").classList.remove("neer");
+  $("#countdown").hidden = true;
 }
 
-/* Uitgeteld: de schijf geeft het beeld door. done() draait meteen, de kaart
-   wordt eronder al gedeeld, en deze laag lost erover op; .out zet
-   pointer-events uit, zodat een tik bij de kaart terechtkomt. Hier valt ook
-   het startsein. */
-function handOffCountdown() {
-  cancelAnimationFrame(countRaf); countRaf = null;
+/* Uitgeteld: de kaart draait om naar het eerste woord, de punten trekken
+   vanuit haar weg, en goed en pas veren omhoog. Hier valt ook het
+   startsein. done() deelt de eerste kaart op het moment dat de kaart op
+   haar rand staat. */
+function handOffCountdown(done) {
+  telTimers = [];
   Snd.go();
   Tril.go();
-  const el = $("#countdown");
-  if (stilAan()) {
-    el.classList.add("out");
-    setTimeout(() => { el.classList.remove("out"); el.hidden = true; }, 200);
-    return;
-  }
-  /* De schijf gaat open (zie .countdown.open), met een laatste ring. */
-  const o = el.getBoundingClientRect(), d = $(".cd-disc").getBoundingClientRect();
-  const mx = d.left + d.width / 2 - o.left, my = d.top + d.height / 2 - o.top;
-  el.style.setProperty("--gx", mx + "px");
-  el.style.setProperty("--gy", my + "px");
-  el.style.setProperty("--gat-van", (d.width / 2) + "px");
-  veldCd.rimpel(mx, my, 1, d.width / 2 + 14);
-  el.classList.add("open");
-  setTimeout(() => { el.classList.remove("open"); el.hidden = true; }, 450);
+  const k = kaartIn();
+  veldCd.toon(k.x + k.width / 2, k.y + k.height / 2, true, 520);
+  draaiOm(p => {
+    countRaf = null;
+    $("#s-play").classList.remove("telt");
+    $("#btnGoed").classList.remove("neer");
+    $("#btnPas").classList.remove("neer");
+    done();
+    if (p) landOm($("#card"), p);
+    setTimeout(() => { if (countRaf === null) $("#countdown").hidden = true; }, stilAan() ? 0 : 520);
+  });
 }
 
 // Afgebroken: geen beurt begonnen, dus terug naar waar het toestel vandaan
 // kwam. G is niet aangeraakt behalve G.gained, en dat is voor een nieuwe
-// beurt toch nul.
+// beurt toch nul. De speelkaart draait terug naar de opdracht, en de
+// startknop komt van onder het scherm terug.
 $("#cdBack").addEventListener("click", () => {
   if (countRaf === null) return;
-  /* De schijf gaat terug in de startknop, zoals ze eruit kwam: gemeten vóór
-     het aftelvlak verdwijnt. */
-  const schijf = $(".cd-disc").getBoundingClientRect();
+  const kaart = $("#card").getBoundingClientRect();
   stopCountdown();
   releaseWake();
   handoff(handoffMode, 0, 0, true);
-  rimpelDoor(schijf);
+  terugNaarOpdracht(kaart);
 });
+function terugNaarOpdracht(p) {
+  if (stilAan()) return;
+  landOm($("#hoRoundCard"), p, KAART_GROEI);
+  const knop = $("#btnStartTurn"), kn = knop.getBoundingClientRect();
+  if (kn.width) knop.animate([{ translate: "0 " + (innerHeight - kn.top + 20) + "px" }, { translate: "0 0" }],
+    { duration: KAART_GROEI, easing: curve("uit") });
+}
 
 function beginTurn() {
   nextCard(null);
@@ -6629,7 +6495,7 @@ function stipveld(cv, opt) {
   const STRAAL_RONDE = 26000, STRALEN = 12;
   const cx = cv.getContext("2d");
   let W = 0, H = 0, punten = [], rimpels = [], raf = 0;
-  let inkt = !!opt.inkt, onthul = null, stralen = -1;
+  let inkt = !!opt.inkt, onthul = null, stralen = -1, toon = null, leeg = false;
   function maat() {
     const r = cv.getBoundingClientRect();
     if (!r.width || !r.height) return false;
@@ -6652,7 +6518,7 @@ function stipveld(cv, opt) {
     return true;
   }
   function actief(nu) {
-    return rimpels.some(r => nu - r.t < LEEF) || !!onthul || stralen >= 0;
+    return rimpels.some(r => nu - r.t < LEEF) || !!onthul || !!toon || stralen >= 0;
   }
   /* Onthullen: de ploegkleur groeit als een cirkel uit de knop, en binnen die
      cirkel worden de punten papier. Klaar: de kleur staat op het scherm zelf,
@@ -6666,6 +6532,17 @@ function stipveld(cv, opt) {
   function teken(nu) {
     cx.clearRect(0, 0, W, H);
     rimpels = rimpels.filter(r => nu - r.t < LEEF);
+    /* Rastertoon die komt of gaat (toon()): een rand die vanaf (x, y) naar
+       buiten loopt; erbinnen zijn de punten weg (of er al), erbuiten nog
+       niet. In een band van 120 px krimpt of groeit een punt, hij vervaagt
+       niet. */
+    let tg = null;
+    if (toon) {
+      const t = Math.min(1, (nu - toon.t) / toon.ms), e = t * t * (3 - 2 * t);
+      tg = { x: toon.x, y: toon.y, weg: toon.weg, R: -120 + (toon.tot + 120) * e };
+      if (t >= 1) { leeg = toon.weg; toon = null; tg = null; }
+    }
+    if (leeg && !tg) return;
     let straal = -1;
     if (onthul) {
       const t = Math.min(1, (nu - onthul.t) / onthul.ms), e = 1 - Math.pow(1 - t, 3);
@@ -6683,12 +6560,17 @@ function stipveld(cv, opt) {
       /* De rimpel moet je zien als antwoord op je tik: 12 px opzij, een punt
          tot ruim het dubbele. Met 4,5 px las hij op een telefoon als niets. */
       for (const r of rimpels) {
-        const rt = (nu - r.t) / 1000, d = Math.hypot(p.x - r.x, p.y - r.y) || 1;
+        const rt = (nu - r.t) / 1000;
+        /* Een rimpel heeft de vorm van wat drukte: rond vanaf een knop, of
+           een rechthoek vanaf de rand van de kaart (r.hw, r.hh). */
+        let dx = p.x - r.x, dy = p.y - r.y;
+        if (r.hw) { dx = Math.sign(dx) * Math.max(Math.abs(dx) - r.hw, 0); dy = Math.sign(dy) * Math.max(Math.abs(dy) - r.hh, 0); }
+        const d = Math.hypot(dx, dy) || 1;
         const z = (d - (r.van + rt * 360)) / 32;
         if (z < -4 || z > 4) continue;
         const pak = Math.exp(-z * z) * Math.cos(z * 2.4), demp = Math.exp(-rt * 1.7) * r.sterk;
         const duw = pak * demp * 12;
-        ex += (p.x - r.x) / d * duw; ey += (p.y - r.y) / d * duw;
+        ex += dx / d * duw; ey += dy / d * duw;
         golf = Math.max(golf, Math.min(1.6, Math.max(0, pak) * demp));
         dal = Math.max(dal, Math.min(1, Math.max(0, -pak) * demp));
       }
@@ -6704,7 +6586,12 @@ function stipveld(cv, opt) {
       }
       const a = Math.min(1, (A0 + golf * LICHT_R) * m);
       cx.fillStyle = `rgba(${KLEUR}, ${a.toFixed(3)})`;
-      const rad = Math.max(.5, r0 + golf * 3 - dal * r0 * .8);
+      let rad = Math.max(.5, r0 + golf * 3 - dal * r0 * .8);
+      if (tg) {
+        const q = Math.min(1, Math.max(0, (Math.hypot(p.x - tg.x, p.y - tg.y) - tg.R) / 120));
+        rad *= tg.weg ? q : 1 - q;
+        if (rad < .2) continue;
+      }
       cx.beginPath(); cx.arc(p.x + ex, p.y + ey, rad, 0, 6.2832); cx.fill();
     }
   }
@@ -6720,12 +6607,28 @@ function stipveld(cv, opt) {
   return {
     /* Het scherm komt in beeld: tekenen. */
     aan() {
-      rimpels = [];
+      rimpels = []; toon = null; leeg = false;
       wek();
     },
     rimpel(x, y, sterk, van) {
       if (stilAan()) return;
       rimpels.push({ x, y, sterk: sterk || 1, van: van || 0, t: performance.now() });
+      wek();
+    },
+    /* Vanaf de rand van een rechthoek (gemeten, in de maat van het veld). */
+    rimpelRand(k, sterk) {
+      if (stilAan() || !k || !k.width) return;
+      rimpels.push({ x: k.x + k.width / 2, y: k.y + k.height / 2, hw: k.width / 2, hh: k.height / 2,
+                     sterk: sterk || 1, van: 0, t: performance.now() });
+      wek();
+    },
+    /* De punten trekken weg vanaf (x, y) naar de rand (weg) of groeien
+       vanaf daar terug. Bij beperkte beweging meteen. */
+    toon(x, y, weg, ms) {
+      if (stilAan() || !maat()) { toon = null; leeg = !!weg; wek(); return; }
+      const tot = Math.max(Math.hypot(x, y), Math.hypot(W - x, y), Math.hypot(x, H - y), Math.hypot(W - x, H - y));
+      toon = { x, y, weg: !!weg, ms, tot, t: performance.now() };
+      leeg = false;
       wek();
     },
     /* Inkt op papier (de titel, de worp) of papier op ploegkleur. */
@@ -6824,14 +6727,15 @@ function golfMee(veld, el, host, ms) {
   };
   requestAnimationFrame(stap);
 }
-function rimpelDoor(k) {
+function rimpelDoor(k, vanKaart) {
   if (current !== "handoff" || !k) return;
   const s = $("#s-handoff").getBoundingClientRect();
   veldHo.rimpel(k.left + k.width / 2 - s.left, k.top + k.height / 2 - s.top, 1.2, k.width / 2);
   /* De knop die je indrukte is de startknop van de overdracht: hij glijdt
      van waar hij stond naar zijn plek, zoals de startknop in de schijf van
-     het aftellen overgaat. De kaart komt eronder vandaan omhoog, in plaats
-     van uit het niets te verschijnen. */
+     het aftellen overgaat. De opdrachtkaart is de achterkant van de kaart
+     die je net zag (het merk, de eindstand): ze wordt breed vanaf haar plek
+     en maat, zoals elke kaart die omdraait. */
   if (stilAan()) return;
   const knop = $("#btnStartTurn"), n = knop.getBoundingClientRect();
   if (!n.width) return;
@@ -6839,8 +6743,7 @@ function rimpelDoor(k) {
   knop.animate([{ transform: `translate(${dx}px, ${dy}px) scale(${k.width / n.width})` }, { transform: "none" }],
     { duration: 340, easing: curve("los") });
   golfMee(veldHo, knop, $("#s-handoff"), 340);
-  $("#hoRoundCard").animate([{ transform: "translateY(24px)", opacity: 0 }, { transform: "none", opacity: 1 }],
-    { duration: 280, easing: curve("uit") });
+  if (vanKaart) landOm($("#hoRoundCard"), vanKaart, KAART_GROEI);
 }
 
 /* Safari zet :active op een aanraking alleen als er ergens naar touchstart
@@ -6994,7 +6897,7 @@ function draaiOm(verder) {
     { duration: OMDRAAI, easing: curve("weg"), fill: "forwards" });
   a.onfinish = () => { verder(p); a.cancel(); };
 }
-function landOm(doel, p) {
+function landOm(doel, p, ms) {
   if (!p || !doel || stilAan() || !doel.animate) return;
   const h = doel.getBoundingClientRect();
   if (!h.width || !h.height) return;
@@ -7003,7 +6906,7 @@ function landOm(doel, p) {
   doel.animate([
     { transform: `translate(${dx}px, ${dy}px) scale(0, ${p.height / h.height})` },
     { transform: "none" }
-  ], { duration: 180, easing: curve("uit") });
+  ], { duration: ms || 180, easing: curve("uit") });
 }
 function timeUp() {
   stopClock(); releaseWake();
@@ -7397,9 +7300,18 @@ function clearConfetti() {
    indrukken -- het woord beloofde een revanche en leverde een menu. Nu
    begint hij er ook echt een, met dezelfde instellingen en een vers deck.
    Terug naar de titel is een eigen knop geworden. */
+/* Net zo: de eindstand draait om naar de eerste opdracht van het nieuwe
+   potje. */
 $("#btnAgain").addEventListener("click", () => {
+  if (vertrekt) return;
   const k = $("#btnAgain").getBoundingClientRect();
-  clearConfetti(); Snd.unlock(); newGame(); rimpelDoor(k);
+  const stand = $("#wnPiles"), m = stand.getBoundingClientRect();
+  clearConfetti(); Snd.unlock();
+  const verder = () => { vertrekt = false; newGame(); rimpelDoor(k, m.width ? m : null); zetTerug([stand]); };
+  if (stilAan() || !m.width) { verder(); return; }
+  vertrekt = true;
+  draaiWeg([stand], OMDRAAI);
+  setTimeout(verder, OMDRAAI);
 });
 $("#btnHome").addEventListener("click", () => {
   const k = $("#btnHome").getBoundingClientRect();
@@ -7414,8 +7326,8 @@ $("#btnHome").addEventListener("click", () => {
 function naarTitel(k, sluier) {
   const van = $(".screen.on");
   show("title");
-  /* Op de overdracht houdt .paneel de startknop weg zolang de sluier er nog
-     ligt; pas als de titel rond is, mag hij terug. */
+  /* Op de overdracht houdt .paneel het paneel op zijn plek tot de titel
+     rond is. */
   const klaar = () => $("#s-handoff").classList.remove("paneel");
   if (stilAan() || !k || !k.width || !van || van.id === "s-title" || !document.body.animate) { klaar(); return; }
   const ti = $("#s-title");
@@ -7495,6 +7407,10 @@ function openPause() {
   $("#pauseTally").hidden = !G;
   if (G) paintRound($("#pauseRonde"), "teken");
   $("#s-handoff").classList.toggle("paneel", current === "handoff");
+  /* Wat stilstaat, blijft ingedrukt (zie .neer): tijdens een beurt de
+     klokknop, goed en pas; op de overdracht het huisje en start. */
+  (opKaart ? PAUZE_NEER.spel : current === "handoff" ? PAUZE_NEER.overdracht : [])
+    .forEach(sel => $(sel).classList.add("neer"));
   paintPauseScore();
 
   pauseReturn = document.activeElement;
@@ -7566,9 +7482,13 @@ function kaartBoven(draai) {
     { duration: 180, easing: curve("uit") });
 }
 
+const PAUZE_NEER = { spel: ["#btnPauze", "#btnGoed", "#btnPas"],
+                     overdracht: ["#btnPauzeHo", "#btnStartTurn"] };
 function closePause() {
   const el = $("#pauze");
   el.hidden = true;
+  /* Wat ingedrukt lag, veert terug (de overgang uit 3. KNOPPEN). */
+  [...PAUZE_NEER.spel, ...PAUZE_NEER.overdracht].forEach(sel => $(sel).classList.remove("neer"));
   $("#s-handoff").classList.remove("paneel");
   screensInert(false);
   kaartBoven(true);     // het paneel is meteen weg; de kaart komt weer boven
@@ -7796,10 +7716,20 @@ addEventListener("pagehide", bewaarBeurt);
    minder dan twee uur oud, dan opent de app op het overdrachtscherm
    waar dat was (loadGame); anders op de titel.
    ============================================================== */
+/* Spelen draait het merk om: de inktplaat wordt smal tot een rand
+   (draaiWeg), en haar achterkant is de eerste opdrachtkaart, die op de
+   overdracht vanaf de maat van het merk breed wordt (rimpelDoor). Vos en
+   Uil zitten op beide kanten op de rand. */
 $("#btnStart").addEventListener("click", () => {
+  if (vertrekt) return;
   const k = $("#btnStart").getBoundingClientRect();
+  const merk = $("#s-title .wordmark"), m = merk.getBoundingClientRect();
   Snd.unlock();
-  newGame(); rimpelDoor(k);
+  const verder = () => { vertrekt = false; newGame(); rimpelDoor(k, m.width ? m : null); zetTerug([merk]); };
+  if (stilAan() || !m.width) { verder(); return; }
+  vertrekt = true;
+  draaiWeg([merk], OMDRAAI);
+  setTimeout(verder, OMDRAAI);
 });
 
 /* ==============================================================
