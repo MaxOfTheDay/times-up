@@ -199,20 +199,24 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     leeg: document.querySelector('#kaartEigen').classList.contains('leeg') }));
   ok(stapel.scherm && stapel.lade && stapel.tal === '1' && !stapel.leeg,
     `na bewaren staat Eigen niet open op de nieuwe kaart (${JSON.stringify(stapel)})`);
-  // Terug naar Instellingen: de knoppen van "In elk potje" tonen wat er
-  // echt in gaat (1, niet 3), een verzonken knop houdt zijn eigen getal, en
-  // de telling zegt 1 eigen.
-  await page.click('#btnKaartenTerug');
+  // Bovenaan Eigen: de knoppen van "In elk potje" tonen vaste getallen,
+  // met één eigen kaart draagt de tweede knop 1 en liggen de rest
+  // verzonken met hun eigen getal; de uitkomst zegt 1 van de 24. Op
+  // Instellingen zegt de rij van Eigen hetzelfde.
   const potje = await page.evaluate(() => {
     document.querySelector('#sizeChips [data-size="24"]').click();
     return {
-      scherm: document.querySelector('#s-setup').classList.contains('on'),
-      zichtbaar: !document.querySelector('#eigenDeelVeld').hidden,
-      knoppen: [...document.querySelectorAll('#eigenDeelChips .chip .n')].map(n => n.textContent).join(','),
-      tal: document.querySelector('#potjeTal').textContent };
+      zichtbaar: !document.querySelector('#eigenAantalVeld').hidden,
+      knoppen: [...document.querySelectorAll('#eigenAantalChips .chip .n')].map(n => n.textContent).join(','),
+      op: [...document.querySelectorAll('#eigenAantalChips .chip.op')].length,
+      gekozen: document.querySelector('#eigenAantalChips [aria-checked="true"] .n').textContent,
+      tal: document.querySelector('#eigenUitkomst').textContent,
+      rij: document.querySelector('#eigSub').textContent };
   });
-  ok(potje.scherm && potje.zichtbaar && potje.knoppen === '0,1,6,12' && potje.tal === '1 eigen · 23 gewone',
-    `het potje klopt niet met één eigen kaart bij 24 (${JSON.stringify(potje)})`);
+  ok(potje.zichtbaar && potje.knoppen === '0,1,4,8' && potje.op === 2 && potje.gekozen === '1'
+    && potje.tal === '1 van de 24' && potje.rij === '1 in elk potje',
+    `het aantal klopt niet met één eigen kaart bij 24 (${JSON.stringify(potje)})`);
+  await page.click('#btnKaartenTerug');
   await page.click('#rijEigen');
   const eigen = await page.evaluate(() => {
     const T = window.__tijd;
@@ -222,9 +226,9 @@ const ok = (c, m) => { if (!c) fails.push(m); };
       if (greep.some(c => T.Spel.eigenId(c) !== null)) out.inPotje++;
       if (greep.some(c => c[0] === '🐶')) out.gewoneHond++;
     }
-    T.settings.eigenDeel = 0;
+    T.settings.eigenAantal = 0;
     out.uit = T.drawDeck('klein', 16).some(c => T.Spel.eigenId(c) !== null);
-    T.settings.eigenDeel = 1 / 4;
+    T.settings.eigenAantal = 4;
     return out;
   });
   ok(eigen.lijst === 1 && eigen.beeld === 1, 'de bewaarde eigen kaart staat niet in de lijst of heeft geen beeld');
