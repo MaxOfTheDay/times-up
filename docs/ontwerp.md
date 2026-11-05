@@ -933,7 +933,11 @@ aanraakte:
   eerste tel.
 - **De opdrachtkaart zakt in de grond**: een kopie op haar gemeten plek
   (`.cd-kaart`, in de klik-handler gemaakt, want een tel later is de kaart
-  weg) zakt 10 px en krimpt naar 94% terwijl ze in 0,42 s verdwijnt. De
+  weg) zakt in 0,45 s achter haar eigen onderrand weg, met de dieren op
+  haar rand mee: de knip blijft staan waar die rand lag terwijl de kaart
+  erdoor zakt. Ze vervaagde eerst (10 px zakken, 94%), maar op de
+  ploegkleur gaf dat kleuren buiten het palet: olijfgoud, een paarse vos op
+  blauw. Max koos uit de twee, naast elkaar gefilmd, het zakken. De
   punten lagen er al die tijd onder, dus de grond springt niet. De kopie
   is een afdruk: `bevries()` geeft elk element de berekende maat, plek en
   verf van zijn origineel mee (lijst `AFDRUK`). Zonder dat verloor ze alles
