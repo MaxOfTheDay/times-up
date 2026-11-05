@@ -49,8 +49,8 @@ komt binnen) of `--t-groot` (450 ms, een groot moment), en een curve uit
 Web Animations lezen geen `var()`, dus halen ze hun curve met `curve()` uit
 `:root`.
 
-Buiten de trap blijven, met reden: `--t-card` (180 ms) en `--t-fly`
-(220 ms), gemeten voor een speellus waarin een snelle ploeg om de twee
+Buiten de trap blijven, met reden: `--t-fly` (220 ms) en `PAS_MS`
+(300 ms), gemeten voor een speellus waarin een snelle ploeg om de twee
 tellen scoort; `drukKaart()` (220 ms, precies één druk plus terugveren); en
 de lussen die leven of een gevoel dragen (ademen, juichen, de zandloper,
 de stralen, de val snippers), die hun eigen, lange tijd hebben. De
@@ -1616,10 +1616,23 @@ er vanaf het eerste beeld al onder. Die kopie blijft dekkend. Eerst vervaagde
 ze terwijl ze bewoog, en dan lagen twee tekeningen over elkaar (een appel
 door een paraplu, "APPEL" door "PARAPLU"); in slowmotion las het als vuil.
 Bij goed vliegt ze dekkend naar de teller (zie "Eén label voor wat er bij
-komt"). Bij pas schuift ze ónder de stapel: ze wordt
-vóór de randen in `.cardslot` gezet, dus achter de nieuwe kaart, en piept
-nog even onder de onderrand uit. Een kopie die bóven de nieuwe kaart naar
-beneden zakt, zei het omgekeerde van wat er gebeurt.
+komt"). Bij pas gaat ze onderop, zoals met een echte stapel: eerst schuift
+ze bóven de stapel een flink stuk omlaag (`PAS_OMLAAG`, 42% van de kaart,
+een kleine draai), halverwege duikt ze achter de stapel (de `z-index` zit
+in dezelfde animatie) en schuift ze er onderdoor terug in, in `PAS_MS`
+(300 ms). De nieuwe kaart en de klokband bewegen niet.
+
+Daarvoor zijn twee versies geprobeerd. Een kopie die alleen bóven de
+nieuwe kaart naar beneden zakte, zei het omgekeerde van wat er gebeurt:
+weg, niet onderop. Daarna begon ze achter de stapel, vóór de randen in
+`.cardslot`, en piepte ze even onder de onderrand uit, terwijl de nieuwe
+kaart 14 px van onder kwam (`.card.tuck`). Op een tiende van de snelheid
+gefilmd verdween de overgeslagen kaart in één beeld; het piepen was een
+paar pixels tussen de randen van de stapel, en wat je wél zag was de
+nieuwe kaart met de klokband die zakte en terugkwam. Uit een mock-up met
+nu, onderop, en dieper piepen koos Max onderop: je ziet welke kaart
+weggaat, dat ze onder de stapel gaat (dus terugkomt), en ze gaat omlaag
+waar goed omhoog gaat.
 
 Terugnemen (`kaartTerug()`) is geraden achterstevoren: de kaart komt uit de
 teller terug naar haar plek, en de kaart die er lag schuift onder de
@@ -1860,8 +1873,9 @@ vliegen). Max koos vliegen zonder duw:
   richting waar de kopie heen ging. Het las als een stapel die schokt, niet
   als een kaart die aankomt, en het was geen van de zeven werkwoorden. Een
   kaart van een stapel tillen laat zien wat eronder lag; meer hoeft niet.
-  Pas houdt zijn eigen aankomst (van onder de stapel), dus de twee knoppen
-  blijven verschillend: de kopie vliegt omhoog of zakt onder de stapel.
+  Pas kreeg daarna hetzelfde (zie "Vertrekken mag"): ook daar beweegt de
+  nieuwe kaart niet meer, en de kopie zegt welke knop het deed: omhoog naar
+  de teller, of omlaag en onderop.
 - **De vlucht vervaagt niet en vliegt op `--e-vloei`.** Op `--e-weg` was
   de kaart op 80% van de tijd pas 64% van de weg gekomen, nog zo'n 110 px
   breed, en daar begon het vervagen: een doorschijnende kaart over de

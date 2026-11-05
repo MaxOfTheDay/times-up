@@ -220,7 +220,7 @@
      Vier lengtes en vier curves; elke animatie kiest daaruit. Alleen wat
      leeft (Vos en Uil) en de lussen die een gevoel dragen (de zandloper, de
      stralen, de snippers) hebben eigen, lange tijden.
-     Niets in de speellus duurt langer dan --t-card en --t-fly: een beurt is
+     Niets in de speellus duurt langer dan --t-fly en PAS_MS: een beurt is
      twintig seconden en een snelle ploeg scoort om de twee. Die twee en de
      druk van de klok op de schijf (telDruk) zijn daarvoor gemeten en blijven
      buiten de trap. */
@@ -228,7 +228,6 @@
   --t-los:   .16s;   /* en veert terug, iets voorbij zijn rust; kleine wissels */
   --t-kom:   .28s;   /* iets komt binnen: een scherm, een vak, een paneel */
   --t-groot: .45s;   /* een groot moment: de schijf gaat open, de kroon valt */
-  --t-card:  .18s;
   --t-fly:   .22s;   /* de geraden kaart naar de teller (zie vliegKaart) */
   --e-uit:   cubic-bezier(.2, .6, .3, 1);    /* indrukken, binnenkomen en tot rust komen */
   --e-los:   cubic-bezier(.3, 1.6, .5, 1);   /* veren: loslaten en ploppen */
@@ -314,9 +313,9 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
                    freshIn, gainPop, roundPop)
    4. FEEST.       Alleen het winnaarsscherm: 1 en 3 plus de lussen.
 
-   Los daarvan, omdat hij honderd keer per potje speelt: EEN KAART KOMT
-   AAN na pas, van onder de stapel, 180 ms --e-uit, hoogstens 14 px
-   (--t-card). Trekt nooit de aandacht. Na goed ligt ze er gewoon.
+   Los daarvan, omdat het honderd keer per potje speelt: EEN KAART GAAT
+   WEG (kaartSpook): goed vliegt naar de teller (--t-fly), pas gaat onderop
+   (PAS_MS). De kaart eronder beweegt niet.
 
    Vier regels eromheen:
    - een omhullend vlak gebruikt trap 1 of 2 en schiet nooit door;
@@ -1998,17 +1997,12 @@ button.ho-count:enabled:active {
 #s-play.over .btn-skip, #s-play.leeg .btn-skip { transform: translate(var(--lift-1), var(--lift-1)); }
 #s-play.over .btn-skip .bar         { display: block; }
 
-/* Na gepast komt de nieuwe kaart van onder de stapel omhoog. Na geraden
-   ligt ze er gewoon: de geraden kaart gaat als kopie van de stapel af
-   (kaartSpook) en wat eronder lag, ligt nu bovenop. Een eigen aankomst
-   verdween onder die kopie, en zag er alleen uit als een scheve hoek in de
-   richting waar de kopie heen vloog. Zonder te kijken weet je toch welke
-   knop het deed: de kopie vliegt omhoog of zakt onder de stapel. */
-@keyframes tuck {
-  0%   { transform: translateY(14px) scale(.98); }
-  100% { transform: translateY(0) scale(1); }
-}
-.card.tuck { animation: tuck calc(var(--t-card) / max(var(--dur), .001)) var(--e-uit); }
+/* De nieuwe kaart heeft geen eigen aankomst, na goed noch na pas: de kaart
+   die je raadde of oversloeg gaat als kopie van de stapel af (kaartSpook)
+   en wat eronder lag, ligt nu bovenop. Een aankomst verdween onder die
+   kopie, en wat je ervan zag (een scheve hoek, een kaart met klokband die
+   14 px zakte) betekende niets. Welke knop het deed, zie je aan de kopie:
+   omhoog naar de teller, of omlaag en onder de stapel. */
 /* Een tik die niet meetelt (twee vingers op dezelfde kaart binnen 280 ms)
    werd stilletjes weggegooid. Nu knippert de rand één keer, zodat je ziet
    dát hij binnenkwam. */
@@ -2503,15 +2497,15 @@ button.ho-count:enabled:active {
 #s-play.leeg .card .cardword { visibility: hidden; }
 
 /* De kaart die je net raadde of oversloeg, als losse kopie boven de nieuwe:
-   geraden krimpt ze naar de teller, overgeslagen zakt ze onder de stapel.
+   geraden krimpt ze naar de teller, overgeslagen gaat ze onderop.
    Dit is een vertrek, maar er wacht niets achter -- de nieuwe kaart ligt er
    vanaf het eerste beeld onder (zie "Vertrekken mag" in CLAUDE.md). */
 .kaart-spook {
   position: fixed; margin: 0; z-index: 7; pointer-events: none;
   transform-origin: 50% 50%;
 }
-/* Onder de stapel: achter de randen eronder (dezelfde laag, maar eerder in
-   de slot), dus ook achter de nieuwe kaart. */
+/* Onderop: eerst boven de nieuwe kaart, dan achter de randen eronder
+   (dezelfde laag, maar eerder in de slot). De animatie zet de laag. */
 .kaart-spook.onder { position: absolute; inset: 0; z-index: -1; }
 
 /* De eindstand komt op: eerst tellen de totalen op, dan valt de kroon. De
@@ -6198,12 +6192,6 @@ function paintCard(how) {
   if (G.card === null) return;
   zetTeken($("#glyph"), G.deck[G.card]);
   $("#cardWord").textContent = G.deck[G.card][1];
-  if (how === "pas") {
-    const c = $("#card");
-    c.classList.remove("tuck");
-    void c.offsetWidth;                       // herstart de animatie
-    c.classList.add("tuck");
-  }
 }
 
 /* Twee tikken binnen 280 ms op dezelfde knop zijn één enthousiaste vinger. De
@@ -6874,9 +6862,14 @@ function draaiGlas() {
      ploegkleur werd een doorschijnende kaart roze, en over het groene vak
      zag je twee beelden. Deze vlucht is de landing: vliegKaart() hangt het
      getal aan haar einde;
-   - pas (en de kaart die plaatsmaakt bij terugnemen): ze schuift ónder de
-     stapel, achter de nieuwe kaart en de randen eronder, en piept er even
-     onderuit voor ze weg is. */
+   - pas (en de kaart die plaatsmaakt bij terugnemen): ze gaat onderop,
+     zoals met een echte stapel. Eerst schuift ze bóven de stapel omlaag,
+     zodat je ziet welke kaart weggaat en de volgende eronder vandaan komt;
+     halverwege duikt ze achter de stapel (z-index in dezelfde animatie;
+     eerst 10, boven de klokband en de contour van .card::after) en
+     schuift ze er onderdoor terug in. Dekkend: achter de stapel is ze
+     vanzelf weg. Omlaag en onder, waar goed omhoog en naar de teller gaat. */
+const PAS_MS = 300, PAS_OMLAAG = .42;   // de overgeslagen kaart: duur, en hoe ver omlaag (deel van de kaart)
 function kaartSpook(soort, naar) {
   if (stilAan() || !document.body.animate) return;
   const kaart = $("#card"), slot = $("#cardslot");
@@ -6886,7 +6879,7 @@ function kaartSpook(soort, naar) {
   k.removeAttribute("id");
   k.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
   k.querySelectorAll(".timerframe, .stempel").forEach(e => e.remove());
-  k.classList.remove("tuck", "seen", "terug");
+  k.classList.remove("seen", "terug");
   k.classList.add("kaart-spook");
   let frames, opties;
   if (soort === "goed" && naar) {
@@ -6903,12 +6896,14 @@ function kaartSpook(soort, naar) {
   } else {
     k.classList.add("onder");
     slot.insertBefore(k, slot.firstChild);
+    const omlaag = Math.round(r.height * PAS_OMLAAG);
     frames = [
-      { transform: "translateY(0) scale(1)", opacity: 1 },
-      { transform: "translateY(34px) scale(.94)", opacity: 1, offset: .6 },
-      { transform: "translateY(22px) scale(.92)", opacity: 0 }
+      { transform: "translateY(0) rotate(0)", zIndex: 10, easing: curve("uit") },
+      { transform: `translateY(${omlaag}px) rotate(2deg)`, zIndex: 10, offset: .45 },
+      { transform: `translateY(${omlaag}px) rotate(2deg)`, zIndex: -1, offset: .451, easing: curve("vloei") },
+      { transform: "translateY(10px) rotate(0) scale(.98)", zIndex: -1 }
     ];
-    opties = { duration: 280, easing: curve("uit") };
+    opties = { duration: PAS_MS, easing: "linear" };
   }
   const a = k.animate(frames, { ...opties, fill: "forwards" });
   /* Luisteraars, geen onfinish: die is voor wie op de landing wacht. */
