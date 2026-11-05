@@ -1432,32 +1432,41 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 .roundcard.big b         { order: 3 }
 .roundcard.big .ho-meta  { order: 5 }
 
-/* Wat je meekrijgt: kaarten op de stapel en seconden. Twee feiten van
-   dezelfde soort, één behandeling. Aan de voet, want ze gaan over de beurt
-   die de knop eronder start. De scheiding is een haarlijn in --paper-2: een
-   verdeling, geen tweede rand. */
+/* Wat je meekrijgt: de kaarten die nog liggen, en de seconden als een
+   onderbroken beurt verdergaat. Aan de voet, want ze gaan over de beurt die
+   de knop eronder start. Geen lijn erboven: lucht scheidt de drie vakken van
+   de kaart (zie #hoTally), een streep erbij was ruis. */
 .ho-meta {
-  align-self: stretch; display: flex; justify-content: center; gap: 26px;
-  margin-top: 2px; padding-top: 10px;
-  border-top: 2px solid var(--paper-2);
+  align-self: stretch; display: flex; justify-content: center; align-items: center;
+  gap: 26px; padding-top: min(1.4vh, 12px);
 }
 .ho-count { display: flex; align-items: center; gap: 5px; color: var(--ink-2); }
 .ho-count svg { width: 18px; height: 18px; display: block; flex: 0 0 auto; }
 .ho-count span { font-size: var(--fs-4); font-weight: 900; font-variant-numeric: tabular-nums; }
-/* Bijna op: hetzelfde bijschrift, alleen zwaarder. Geen kleur erbij -- op dit
-   scherm staan er al genoeg. */
-.ho-count.kort { color: var(--ink); }
-button.ho-count { font: inherit; color: var(--ink-2); background: none; border: 0; padding: 0; }
-/* Vanaf ronde 2 indrukbaar: een tegeltje met lift, dat bij :active inzakt.
-   De tikzone reikt verder dan het tegeltje. */
+/* De kaarten die nog liggen zijn een stapeltje: een kaart met het getal,
+   met één kaart erachter (de schaduw naar rechtsboven, geen eigen vlak). Een
+   kaart, geen pictogram: twee vierkantjes lazen als "kopiëren". In ronde 1
+   ligt hij ingedrukt (nog niet: kijken zou de stapel verklappen), vanaf
+   ronde 2 staat hij op en kun je hem aantikken. De tikzone reikt verder dan
+   het kaartje. */
+button.ho-count {
+  position: relative; display: grid; place-items: center;
+  width: 38px; height: 46px; margin-top: 5px; padding: 0;
+  font: inherit; color: var(--ink);
+  background: var(--paper-2); border: var(--line-2) solid var(--ink);
+  box-shadow: 5px -5px 0 -3px var(--paper-2), 5px -5px 0 0 var(--ink);
+  transform: translate(var(--lift-1), var(--lift-1));
+}
 button.ho-count:enabled {
-  position: relative; cursor: pointer; color: var(--ink);
-  padding: 4px 10px; background: var(--paper);
-  border: var(--line-2) solid var(--ink);
-  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
+  cursor: pointer; background: var(--paper); transform: none;
+  box-shadow: 5px -5px 0 -3px var(--paper), 5px -5px 0 0 var(--ink),
+              var(--lift-1) var(--lift-1) 0 var(--ink);
 }
 button.ho-count:enabled::after { content: ""; position: absolute; inset: -8px; }
-button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-1)); box-shadow: none; }
+button.ho-count:enabled:active {
+  transform: translate(var(--lift-1), var(--lift-1));
+  box-shadow: 5px -5px 0 -3px var(--paper), 5px -5px 0 0 var(--ink);
+}
 
 /* Terugkijken: de plaatjes met hun woord eronder, zonder kader -- het zijn
    geen knoppen. */
@@ -1527,7 +1536,11 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   --zak: calc(var(--rand) * .24);
   margin-top: calc(var(--rand) * .72);
 }
-#s-handoff #hoTally { justify-content: space-around; }
+/* De kaart heeft drie vakken: de stand, de ronde, wat er nog ligt. Lucht
+   scheidt ze, geen lijn: de cijfers staan groot onder hun dier en houden
+   afstand tot de rij met rondes, zodat "12 9" niet als een deel van die rij
+   leest. */
+#s-handoff #hoTally { justify-content: space-around; padding-bottom: min(2.2vh, 18px); }
 #s-handoff #hoTally .side {
   position: relative; width: var(--rand); justify-content: center; padding: 0;
 }
@@ -1568,7 +1581,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   transition: translate calc(var(--t-groot) * var(--dur)) var(--e-los);
   animation: gluurAdem calc(2.8s / max(var(--dur), .001)) var(--e-vloei) infinite;
 }
-#s-handoff #hoTally .side b { min-width: 0; font-size: max(var(--fs-4), min(7vw, var(--fs-5))); }
+#s-handoff #hoTally .side b { min-width: 0; font-size: max(var(--fs-5), min(9vw, var(--fs-6))); line-height: 1; }
 /* Vaste cijferbreedte en tabulaire cijfers: anders springt de rij opzij
    zodra iemand van 9 naar 10 gaat. */
 .mini-score b {
@@ -2325,6 +2338,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   .roundcard.big b { font-size: var(--fs-6); }
   .ho-count svg { width: 24px; height: 24px; }
   .ho-count span { font-size: var(--fs-5); }
+  button.ho-count { width: 48px; height: 58px; }
   #s-handoff .mini-score .side .head { width: 92px; }
   #s-handoff .mini-score .side .head > svg { width: 52px; height: 52px; }
   #s-handoff .mini-score .side.up .head > svg { width: 84px; height: 84px; }
@@ -2525,7 +2539,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   <!-- De inktlijn is 5 eenheden, maar nooit dunner dan zo'n 2,3 px op het
        scherm: penLijn() zet --pen per plek (de eenheden voor 2,3 px), zodat
        een kleine Vos in de stand geen haarlijn krijgt naast de 4 px van de
-       kaart. De rondetekens en #i-kaarten doen hetzelfde. -->
+       kaart. De rondetekens doen hetzelfde. -->
   <g id="m-vos-kop">
     <path d="M8 26 L21 3 L37 21 H63 L79 3 L92 26 L50 95 Z"
           fill="#E8452B" stroke="#14110F" style="stroke-width: max(5px, min(var(--pen, 0px), 10px))" stroke-linejoin="round"/>
@@ -2819,12 +2833,6 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
     <path d="M24 12 H76 M24 88 H76 M30 12 L50 50 L30 88 M70 12 L50 50 L70 88"
           fill="none" stroke="currentColor" stroke-width="9"
           stroke-linecap="round" stroke-linejoin="round"/>
-  </symbol>
-  <symbol id="i-kaarten" viewBox="0 0 100 100">
-    <path d="M10 34 H62 V90 H10 Z M26 34 V10 H90 V66 H62"
-          fill="none" stroke="currentColor"
-          style="stroke-width: max(9px, min(var(--pen, 0px), 14px))"
-          stroke-linejoin="round"/>
   </symbol>
 
 </defs></svg>
@@ -3151,7 +3159,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
       <!-- Vanaf ronde 2 een knop: de kaarten die nog liggen, als plaatjes
            (zie #kijk). In ronde 1 zou dat de stapel verklappen. -->
       <button class="ho-count" id="hoCards" aria-label="Bekijk de kaarten die nog liggen" disabled>
-        <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-kaarten"/></svg><span>16</span>
+        <span>16</span>
       </button>
       <div class="ho-count" id="hoSecs">
         <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-zand"/></svg><span>30</span>
@@ -5752,7 +5760,6 @@ function handoff(mode, freshA, freshB, zelfdeGrond) {
   $("#hoSecs").hidden = !(G.pendingMs > 0 && G.pendingMs < G.secs * 1000);
   $("#hoCards").querySelector("span").textContent = G.pile.length;
   $("#hoCards").disabled = G.round < 2;
-  $("#hoCards").classList.toggle("kort", G.pile.length <= 5);
   $("#hoRoundCard").setAttribute("aria-label",
     $("#hoRoundCard").getAttribute("aria-label") +
     " " + G.pile.length + " kaarten, je begint met " + secs + " seconden.");
@@ -7142,7 +7149,7 @@ function svgUse(href, cls) {
   const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
   use.setAttribute("href", href);
   svg.appendChild(use);
-  if (/^#(m-|r-|i-kaarten$)/.test(href)) penLijn(svg);
+  if (/^#(m-|r-)/.test(href)) penLijn(svg);
   return svg;
 }
 
@@ -7165,7 +7172,7 @@ function penLijn(svg) {
   });
   penLijn.kijker.observe(svg);
 }
-document.querySelectorAll('svg > use[href^="#m-"], svg > use[href^="#r-"], svg > use[href="#i-kaarten"]')
+document.querySelectorAll('svg > use[href^="#m-"], svg > use[href^="#r-"]')
   .forEach(u => penLijn(u.parentNode));
 
 function tallyNode(t) {

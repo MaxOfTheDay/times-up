@@ -675,15 +675,33 @@ een afgebroken aftelling en beperkte beweging krijgen meteen de stand van nu.
 De gouden schijf zit daarom niet meer in `RI_ART`: ze is het vak zelf, anders
 kan een tegel niet tot schijf groeien.
 
-Aan de voet van de kaart staan twee tellers: hoeveel kaarten er nog liggen en
-hoe lang je krijgt. Allebei altijd in beeld, ook als er niets bijzonders aan
-is -- zo betekent het teken elke keer hetzelfde, en hoeft niemand het te leren
-op het ene moment dat het afwijkt. Ze staan aan de vóét omdat ze over de beurt
-gaan die de knop eronder start; in de kop lazen ze als bijschrift bij de ronde
-erboven. Ze delen één tekenstijl (`#i-kaarten` en `#i-zand`, contour in
-`currentColor`): `#i-glass` kon dat niet doen, want dat is de merkplaat --
-gouden zandloper op crème contour, getekend om op een inkt-vlak te staan -- en
-naast een inkt-teken op papier las hij als een gouden splinter.
+Aan de voet van de kaart staat wat er nog ligt, en de seconden als een
+onderbroken beurt met haar resttijd verdergaat (`#i-zand`). Ze staan aan de
+vóét omdat ze over de beurt gaan die de knop eronder start; in de kop lazen
+ze als bijschrift bij de ronde erboven. `#i-glass` kon daar niet staan, want
+dat is de merkplaat -- gouden zandloper op crème contour, getekend om op een
+inkt-vlak te staan -- en naast een inkt-teken op papier las hij als een
+gouden splinter.
+
+**Drie vakken, gescheiden door lucht.** De kaart draagt drie dingen: de
+stand, de ronde, wat er nog ligt. Ze liepen in elkaar over: de cijfers van de
+stand waren het kleinste op de kaart (zo'n 20 px) en stonden 6 px boven de
+rij met rondes, zodat "12 9" las als een deel van die rij; de teller aan de
+voet stond onder een haarlijn in `--paper-2`, als grijs getal in ronde 1 en
+als tegeltje vanaf ronde 2, met een teken (twee vierkantjes) dat las als
+"kopiëren". Geprobeerd: inktlijnen tussen de drie vakken, rand tot rand, en
+fijnere lijnen in `--rule` binnen de rand, met een lijn tussen de twee
+helften van de stand. Dat scheidde wel, maar het waren drie lijnen erbij om
+een probleem van afstand op te lossen: ruis. Nu:
+
+- de cijfers staan groot onder hun dier (`max(--fs-5, min(9vw, --fs-6))`,
+  op 390 px zo'n 35 px), met `min(2.2vh, 18px)` lucht tot de rij met rondes;
+- geen lijn boven de voet;
+- wat er nog ligt is een stapeltje: een kaart van 38 bij 46 met het getal,
+  met één kaart erachter als schaduw naar rechtsboven (`box-shadow`, geen
+  eigen vlak). Een kaart is het stuk van dit bord; een pictogram moest je
+  leren. In ronde 1 ligt hij ingedrukt op `--paper-2` (nog niet), vanaf ronde
+  2 staat hij op met lift en kun je hem aantikken.
 
 Het scherm blijft hier aan. De wake lock liep alleen tijdens een beurt --
 `show()` liet hem los op elk scherm dat geen `play` was -- en daarmee was
@@ -1520,7 +1538,7 @@ Nu zet `penLijn()` met een `ResizeObserver` op elke svg `--pen`: hoeveel
 eenheden 2,3 px op het scherm zijn. Elke lijn in die symbolen neemt het
 grootste van haar eigen dikte en `--pen`, met een plafond zodat een kleine
 kop niet dichtloopt: `max(5px, min(var(--pen, 0px), 10px))` voor de
-mascottes, 7 en 12 voor de rondetekens, 9 en 14 voor `#i-kaarten`. Op de
+mascottes, 7 en 12 voor de rondetekens. Op de
 titel en de grote schijf verandert er dus niets. Een waarnemer omdat de
 maat aan schermstand en scherm hangt, en een verborgen scherm nul meet.
 Vaste svg's in de opmaak worden bij het opstarten aangemeld, de rest via
@@ -2276,16 +2294,15 @@ in de regels op het instellingenscherm, voor de volwassene.
 
 Ronde 2 en 3 werken alleen als je de kaarten van ronde 1 nog weet, en kleine
 kinderen vergeten de helft. Vanaf ronde 2 is de kaartenteller op de
-overdracht (`#hoCards`) daarom een knop: een tegeltje met lift, dat de
-kaarten die nog liggen als plaatjes toont (`#kijk`), met het woord eronder
+overdracht (`#hoCards`) daarom een knop: het stapeltje staat op met lift,
+en toont de kaarten die nog liggen als plaatjes (`#kijk`), met het woord eronder
 zoals op de kaart. Een tik waar dan ook sluit het weer, net als Escape en de
 terugveeg.
 
 - **Op alfabet, niet in stapelvolgorde.** De stapel is geschud; zijn
   volgorde tonen zou verklappen wat er komt.
 - **Niet in ronde 1.** Dan heeft niemand de kaarten nog gezien, en is
-  kijken spieken. De knop staat er dan uit (`disabled`) en ziet eruit als
-  het gewone getal.
+  kijken spieken. De knop staat er dan uit (`disabled`) en ligt ingedrukt.
 - **Geen kaders om de plaatjes.** Het zijn geen knoppen; met een rand om
   elk plaatje kwamen er tientallen rechthoeken op één paneel.
 
