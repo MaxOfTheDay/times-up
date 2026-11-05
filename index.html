@@ -570,8 +570,10 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
    Het huisje dat je vasthoudt: in de hoek van de overdracht (#btnStopHo) en
    op de achterkant van de speelkaart (#btnStop). Dezelfde huid als pauze,
    huisje en terug (papier, inkt-rand, --lift-1), en in rust niets eigens:
-   de knop leert het zelf, want een losse tik doet de druk voor (de vloed
-   loopt een kwart op, de vinger drukt). Twee tekens onderweg:
+   de knop leert het zelf, want een losse tik doet de druk voor: hij blijft
+   ingezakt terwijl de vloed een kwart oploopt, alsof je hem nog vasthoudt,
+   en veert dan terug. Geen getekende hand: de knop die zelf ingedrukt blijft
+   zegt al "blijf duwen". Twee tekens onderweg:
    - tijdens het houden loopt de inkt van onder naar boven vol, per frame
      getekend door holdButton();
    - halverwege haalt die vloed het teken in en keert het om naar papier: het
@@ -584,7 +586,7 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
   border: var(--line-2) solid var(--ink); background: var(--paper-2);
   box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
 }
-.btn-houd { overflow: hidden; color: var(--ink); }
+.btn-houd { color: var(--ink); }
 .btn-danger { position: relative; }
 .btn-houd .mark { width: 22px; position: relative; z-index: 1; }
 .btn-danger .mark { width: 32px; }
@@ -595,12 +597,13 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 /* Het teken staat in currentColor, dus het keert om naar papier zodra de
    inkt eronder staat (15,9:1). */
 .btn-houd.flooded { color: var(--paper); }
-/* De vinger die bij een losse tik de lange druk voordoet: de top van de
-   vinger op het hart van het huisje. Alleen via Web Animations zichtbaar
-   (zie holdButton()); in rust onzichtbaar. */
-.btn-houd .vinger {
-  position: absolute; z-index: 2; width: 36px; opacity: 0; pointer-events: none;
-  left: calc(50% - 15px); top: calc(50% - 4px);
+/* Het voordoen: de knop zakt in zoals onder :active en blijft liggen tot de
+   vloed weer zakt. Geen .neer: die zegt "nog niet" en neemt de tik weg. */
+.btn-houd.voordoen {
+  transform: translate(var(--lift-1), var(--lift-1));
+  box-shadow: 0 0 0 var(--ink);
+  transition-duration: calc(var(--t-press) * var(--dur));
+  transition-timing-function: var(--e-uit);
 }
 
 /* ============================================================
@@ -2733,13 +2736,6 @@ button.ho-count:enabled:active {
     </g>
   </symbol>
 
-  <!-- Een vinger die drukt: verschijnt boven de stopknop als je er alleen op
-       tikt, en wijst zo de lange druk aan. Zie holdButton(). -->
-  <symbol id="i-vinger" viewBox="0 0 100 100">
-    <path d="M40 94 C28 82 18 68 14 58 C11 50 20 46 26 52 L36 62 V18 C36 9 48 9 48 18 V42 C48 35 59 35 59 42 V48 C59 41 70 41 70 48 V54 C70 47 81 47 81 54 V72 C81 84 74 94 66 94 Z"
-          fill="#F4EBDA" stroke="#14110F" stroke-width="6" stroke-linejoin="round"/>
-  </symbol>
-
   <!-- Naar een scherm en terug: een rij in een lijst, en de uitgang van
        #s-kaarten. -->
   <symbol id="i-verder" viewBox="0 0 100 100">
@@ -3188,7 +3184,6 @@ button.ho-count:enabled:active {
   <button class="btn-icon btn-houd" id="btnStopHo" aria-label="Spel stoppen — houd ingedrukt">
     <i></i>
     <svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-stop"/></svg>
-    <svg class="vinger" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vinger"/></svg>
   </button>
 
   <!-- 3. START. Dezelfde knop als op het titelscherm: één tik. Een losse
@@ -3418,7 +3413,6 @@ button.ho-count:enabled:active {
       <button class="btn-danger btn-houd" id="btnStop" aria-label="Spel stoppen — houd ingedrukt">
         <i></i>
         <svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-stop"/></svg>
-        <svg class="vinger" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vinger"/></svg>
       </button>
       <button class="btn-go" id="btnResume" aria-label="Verder spelen">
         <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-play"/></svg>
@@ -5432,7 +5426,6 @@ function holdButton(el, ms, run, paint) {
      plaats van terug op nul te springen. */
   let raf = null, weg = null, t0 = 0, druk = 0, p = 0;
   const TIK_MS = 250;                       // korter dan dit is een tik, geen druk
-  const vinger = el.querySelector(".vinger");
   const draw = v => { p = v; if (paint) paint(v); };
 
   /* Van waar de vloed staat naar `naar`, in `duur` ms; daarna eventueel
@@ -5452,6 +5445,7 @@ function holdButton(el, ms, run, paint) {
   function start() {
     if (raf !== null) return;               // al bezig (toets die herhaalt)
     cancelAnimationFrame(weg); weg = null;
+    el.classList.remove("voordoen");
     druk = performance.now();
     t0 = druk - p * ms;
     raf = requestAnimationFrame(step);
@@ -5463,8 +5457,9 @@ function holdButton(el, ms, run, paint) {
     else raf = requestAnimationFrame(step);
   }
   /* Losgelaten voor het vol was. Een tik is geen fout maar een vraag
-     ("wat doet dit?"), dus geen nee: de knop doet de druk voor -- de vloed
-     loopt een kwart op, de vinger drukt -- en loopt dan weer leeg. Wie
+     ("wat doet dit?"), dus geen nee: de knop doet de druk voor -- hij blijft
+     ingezakt terwijl de vloed een kwart oploopt, veert dan terug en de vloed
+     loopt weer leeg. Wie
      wél hield en te vroeg losliet, ziet het rood weglopen in plaats van
      verdwijnen: bijna, niet kapot. */
   function cancel() {
@@ -5475,18 +5470,12 @@ function holdButton(el, ms, run, paint) {
   }
   function voordoen() {
     if (raf !== null) return;
-    loop(.28, 300, () => setTimeout(() => { if (raf === null) loop(0, 600); }, 250));
-    if (vinger && vinger.animate) {
-      const s = stilAan();
-      vinger.animate(s
-        ? [{ opacity: 0 }, { opacity: 1, offset: .15 }, { opacity: 1, offset: .8 }, { opacity: 0 }]
-        : [{ opacity: 0, transform: "translate(6px, -10px)" },
-           { opacity: 1, transform: "translate(0, 0)", offset: .25 },
-           { opacity: 1, transform: "translate(0, 0) scale(.9)", offset: .45 },
-           { opacity: 1, transform: "translate(0, 0) scale(.9)", offset: .8 },
-           { opacity: 0, transform: "translate(0, 0) scale(.9)" }],
-        { duration: 1100, easing: curve("uit") });
-    }
+    el.classList.add("voordoen");
+    loop(.28, 300, () => setTimeout(() => {
+      if (raf !== null) return;
+      el.classList.remove("voordoen");
+      loop(0, 600);
+    }, 250));
   }
 
   /* Een lange druk opent op een tablet het eigen menu van het toestel
