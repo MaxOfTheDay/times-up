@@ -2187,19 +2187,22 @@ Onder Moeilijkheid staat één regel: links het aantal in de bak (`#cbTal`, in
 Fredoka), rechts de sleuf met "Tik om weg te leggen" of "Alles terug". Eén
 regel, omdat het getal en de knop over hetzelfde gaan: wat er in de bak ligt.
 
-**De letters als strook naast het raster.** De letterbalk stond als rij
-boven het raster en schoof opzij: acht letters in beeld, de rest buiten het
-scherm, en hij rolde weg zodra je in de lijst zat -- precies waar je hem
-nodig hebt. Nu staat hij als smalle strook (28 px) rechts van het raster en
-loopt hij mee (`position: sticky`), zoals in een adresboek: alle letters
-tegelijk, op elke hoogte van de lijst. Tik een letter, of veeg erlangs: de
-letter onder de vinger springt meteen (geen glijden, anders loopt het
-raster achter de vinger aan) en kleurt inkt zolang je hem raakt; een losse
-tik glijdt zacht (`buildIndex()`, `springNaar(tegel, zacht)`). De strook
-begint onder de hoek van de uitgang, ook liggend waar de titel niet plakt,
-en is plat: een liniaal, geen rij tegels met lift. Liggend (390 hoog) is
-een letter zo'n 11 px; dat is te klein om te mikken, maar vegen werkt op
-elke hoogte. Wat het kost: drie kolommen tegels zijn 34 px smaller.
+**De letter bij het scrollen.** De letterbalk stond eerst als rij boven
+het raster die opzij schoof (acht letters in beeld, en weg zodra je in de
+lijst zat), daarna als strook A tot Z die naast het raster meeliep. Die
+kostte altijd 34 px breedte en bleef een balk die je de hele tijd zag. Nu
+is het zoals in een contactenlijst: in rust staat er niets naast het
+raster. Zodra je scrollt, schuift rechts een kleine greep in (`.cb-greep`,
+een tegel met lift en drie strepen) op de hoogte die zegt hoe ver je in de
+lijst bent. Pak hem en sleep: de lijst volgt de vinger, de greep zakt in,
+en ernaast staat groot de letter van de bovenste rij (`.cb-bel`, in
+Fredoka). Een tel (`RUST`, 1200 ms) na het laatste scrollen is hij weg,
+meteen en zonder uitloop. De baan begint onder de schaduw van de uitgang en
+eindigt op `--corner` boven de onderrand. Alleen op Gewone, en alleen als
+de lijst meer dan anderhalf scherm lang is. Wat het kost: je kunt niet in
+één tik naar de K; je sleept tot er K staat. Ook gewogen: de strook die
+alleen tijdens het scrollen inschuift (ze lag dan over de rechterkolom
+tegels heen, en het bleef een balk).
 
 Ook gewogen: de lijst in stukken per moeilijkheid zonder letters (het raster
 is per stand alfabetisch, en dan kun je niet naar een letter), en een
@@ -2607,8 +2610,9 @@ code: een foto of tekening en het woord, in Instellingen.
   kunnen terugdraaien: 0 bij "In elk potje". Een aparte Aan/Uit
   stond ver van de vraag die er echt toe doet (hoeveel), en een oude Uit
   wordt bij het laden 0. Bij 0 wijken de beelden in de tegels en in de rij
-  terug, en staat "uit" onder de naam. Dat de kaarten op de telefoon
-  blijven, staat op de pagina van Eigen, bij de kaarten zelf.
+  terug, en staat "uit" onder de naam. Boven de kaarten staat geen zin: de
+  lege kaart met de plus legt zichzelf uit, en dat ze op de telefoon
+  blijven verandert niets aan wat je doet.
 - **Het woord wint van een gewone kaart.** Een foto van je eigen hond heet
   "hond"; weigeren voelde als een fout van de app. De gewone kaart met dat
   woord blijft uit het potje zolang de eigen bestaat. Twee eigen kaarten met
@@ -2646,18 +2650,28 @@ code: een foto of tekening en het woord, in Instellingen.
   niet: wisselen zou haar beeld weggooien. Twee knoppen in het veld ("+ Foto",
   "+ Tekening") zeiden meteen welke soorten er zijn, maar herhaalden die
   keuze en stonden los van de kaarten.
-- **Het paneel is de kaart.** Het beeld in het vierkant, het woord eronder,
-  op de plek waar het in het spel komt. Schuiven met één vinger, knijpen met
-  twee, en − en + voor wie dat niet doet. Het kruis staat rechtsboven op het
-  paneel en niet in de hoek van het scherm: daar viel het op 320 px over de
-  kaart. Liggend staat de kaart links en de rest rechts; onder elkaar past
-  het niet in 390 px hoog.
+- **Een eigen scherm, en het vierkant is de kaart.** Het beeld in het
+  vierkant, het woord eronder, op de plek waar het in het spel komt.
+  Schuiven met één vinger, knijpen met twee. De maker was een paneel over
+  een gedimd scherm, het laatste op Instellingen nu Kaarten en Zo speel je
+  eigen schermen zijn. Als scherm (`#s-maker`) werkt hij zoals die: de titel
+  in de band (Nieuwe kaart, Kaart aanpassen), de uitgang rechtsboven met de
+  pijl terug (geen kruis: er sluit geen paneel), terugvegen. Foto en
+  Tekenen staan onder de titel. Het vierkant is staand zo breed als de kolom
+  (358 px op 390, was 274 in het paneel: zo'n 70% meer vel om op te
+  tekenen), maar nooit zo hoog dat Bewaren op een gewone telefoon onder de
+  rand valt; op 320 bij 568 is het 240 en rol je even. Liggend staat de
+  titel boven, de kaart links en de rest rechts.
+- **Geen − en +.** Na een foto stonden er vier knoppen onder het vierkant:
+  opnieuw, kleiner, groter, album. Kleiner en groter deden wat knijpen al
+  doet, en een foto staat bij het openen al passend in het vierkant. Wat het
+  kost: wie niet weet dat je kunt knijpen, kan niet inzoomen.
 - **Bewaren wijst de weg.** Bewaren is goud zodra er een beeld is. Een
   grijze knop die pas met een woord oplicht, zei niet waarom hij niets deed;
   met het toetsenbord weg viel de woordregel niet op. Nu laat een tik zonder
   woord de woordregel schudden en opent het toetsenbord, zoals elders een
   losse tik voordoet in plaats van te weigeren.
-- **Niets gaat verloren.** Wie per ongeluk op het kruis tikt of terugveegt,
+- **Niets gaat verloren.** Wie per ongeluk op terug tikt of terugveegt,
   vindt de niet bewaarde kaart terug bij de volgende tik op de plus
   (een klad per soort). Geen
   "weet je het zeker?": dat is een vraag in tekst. Weggooien kost twee tikken

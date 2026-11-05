@@ -292,7 +292,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(vel.bewaar, 'Bewaren gaat niet aan na toveren');
   // Bewaard is ze kaal: haar eigen lijn, geen pen van .glyph erom.
   await page.click('#mkBewaar');
-  await page.waitForFunction(() => document.querySelector('#maker').hidden);
+  await page.waitForFunction(() => !document.querySelector('#s-maker').classList.contains('on'));
   const getoverd = await page.evaluate(() => JSON.parse(localStorage.getItem('tijdisom.eigen')).kaarten.find(k => k.woord === 'zon'));
   ok(getoverd && getoverd.getoverd === true, 'een getoverde kaart onthoudt niet dat ze getoverd is');
   await page.click('#btnEigenNieuw');
