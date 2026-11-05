@@ -496,8 +496,9 @@ twee wissels meetkundig gelijk: gemeten op 390 bij 844 een kaart van 343 bij
 372 en een knop op y 557, wat het ook is. Wat de twee onderscheidt is
 **beweging en één merkteken**, niet de opmaak:
 
-- **beurtwissel** -- de mascotte in de stand komt op en ademt daarna; het
-  opdrachtblok staat stil;
+- **beurtwissel** -- wie net speelde duikt achter de rand en de ander komt
+  op en ademt daarna (zie "De dieren op de rand"); het opdrachtblok staat
+  stil;
 - **rondewissel** -- de tekening en het woord komen op; de stand staat stil,
   en de gouden schijf schuift door naar de volgende ronde in de rij.
 
@@ -1459,6 +1460,17 @@ nee met de ogen dicht: klein, want overslaan is geen fout. Een sip gezicht
 voor wie verliest is bekeken en weggelaten: aan het eind van een potje met
 kleuters juicht iedereen mee.
 
+**Tijd om drukt de knoppen in.** Goed en pas gingen bij tijd om en bij een
+lege stapel naar 38% dekking. Op een grond die tegelijk van ploegkleur naar
+papier stroomt gaf dat een halve seconde kleuren die nergens in het palet
+staan (een bruine vinkknop op een roze grond), en daarna bleke spookknoppen.
+Nu drukt het stempel ze in: 120 ms na de klap zakken ze hun schaduw in, met
+de beweging van een vinger, en blijven ze op `--paper-2` liggen. "Kan niet
+meer" is een vorm, geen tint, zoals bij stoppen. De buit groeide tegelijk tot
+125% over het rondeteken heen, en dekte het op 320 px half af; nu springt de
+tegel twee keer op haar eigen plek. Een groter groen vak zou boven en onder
+uit zijn tegel steken.
+
 De oorpluimen van de uil liggen achter de kop, niet erop: getekend over de
 cirkel liep er een zwarte lijn door zijn hoofd waar elke pluim begon.
 
@@ -1660,6 +1672,42 @@ laat het paneel weer achter.
 Het enige echte verschil is beweging: op de overdracht ademt de mascotte van
 wie aan zet is, in het paneel niet. Daar staat een beurt stil, en iets dat
 ademt spreekt dat tegen.
+
+### De dieren op de rand
+
+Bij een visuele doorloop van het hele potje (november) bleek de overdracht
+het scherm waar Vos en Uil het kleinst waren, terwijl "wie is er nu?" daar
+de enige vraag is: een kopje van 44 tegen 26 px in de standregel, op een
+grond in dezelfde kleur. Op de titel zitten ze groot op de rand van het merk.
+Nu zitten ze ook op de bovenrand van de opdrachtkaart, met dezelfde knip,
+kanteling en adem als `.gluur`: één motief van titel tot overdracht, de
+dieren leven op de rand van het papier. Er kwam geen mascotte bij; de koppen
+van de stand zijn verhuisd, en de standregel houdt alleen de cijfers, elk
+onder zijn dier.
+
+- **Wie aan zet is staat rechtop, de ander gluurt.** Gezakt tot de oren (een
+  eerste versie) las de wachtende ploeg als een rood vlekje; tot de ogen
+  blijft hij een dier dat meekijkt, en het verschil met rechtop blijft groot.
+- **Geen papieren rand om het dier.** Wie aan zet is, heeft altijd de kleur
+  van de grond. De inktlijn en de ogen dragen het; een papieren rand erom
+  (als een standaard uit een bordspel) is geprobeerd en las als een derde
+  lijn.
+- **De wissel.** Eerst staat nog wie net speelde rechtop. Als de omgedraaide
+  kaart geland is (`RAND_WEG`, 180 ms) duikt hij weg, en 140 ms later komt de
+  ander op, net als het tweede dier op de titel (`RAND_OP`), op de
+  ploegklank. Pas na `RIJ_WACHT` (260 ms) was te laat: de grond is dan al van
+  de nieuwe ploeg, en een dier dat er nog rechtop staat spreekt haar tegen.
+  Waar het nieuwe dier op de rand neerkomt (`RAND_LAND`, 200 ms na het
+  opkomen) gaat een zachte rimpel door de punten, sterkte 0,6, vanaf zijn
+  voeten: het doorgeven drukt op het bord, net als een aangetikte wip op de
+  titel. Het is geen beweging uit zichzelf maar de gebeurtenis van het
+  scherm, dus de regel "wat de dieren uit zichzelf doen rimpelt niet" staat
+  er niet tegenover. Bij de worp wippen ze om beurten op tot hij landt, zonder
+  rimpel: daar groeit de ploegkleur al uit de knop.
+- **Alleen op de overdracht.** De regel hierboven zegt dat de stand op twee
+  schermen dezelfde stijlen heeft. Dit is de uitzondering: het pauzepaneel
+  ligt op de speelkaart, en boven die kaart ligt de balk. Daar blijft de
+  stand een mascotte met een getal.
 
 ## Geluid en trilling
 

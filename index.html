@@ -1481,7 +1481,8 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 .roundcard.big {
   flex-direction: column; text-align: center;
   gap: min(1.2vh, 10px);
-  padding: min(1.8vh, 16px) min(5vw, 22px) min(1.6vh, 14px);
+  --pt: min(1.8vh, 16px);
+  padding: var(--pt) min(5vw, 22px) min(1.6vh, 14px);
   /* width én max-width: de kaart vult haar breedte altijd, zodat ze breder
      blijft dan de stand en de uitleg een vaste regellengte heeft. Liggend
      gaat dit uit; daar staan de vakken naast elkaar. */
@@ -1587,23 +1588,47 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 #pauze .mini-score .side.up .head > svg {
   width: 44px; height: 44px;
 }
-/* Op de overdracht ademt ze, en alleen daar: in het paneel staat een beurt
-   stil, en iets dat ademt spreekt dat tegen. */
-#s-handoff .mini-score .side.up .head > svg {
-  animation: ademen calc(2.8s / max(var(--dur), .001)) var(--e-vloei) infinite;
+/* Op de overdracht zitten ze op de rand van de opdrachtkaart, zoals op de
+   titel op de rand van het merk (.gluur): dezelfde knip, dezelfde kanteling,
+   dezelfde adem. Wie aan zet is staat rechtop, de ander is tot de ogen achter
+   de rand gezakt en gluurt. Bij een beurtwissel duikt wie net speelde weg en komt de
+   ander omhoog (zie handoff()); bij de worp wippen ze om beurten op tot hij
+   landt. In de standregel blijven alleen de cijfers, elk onder zijn dier.
+   Alleen hier: in het pauzepaneel ligt de achterkant op de speelkaart, en
+   boven die kaart ligt de balk.
+   --rand is de maat van het dier, --pt de bovenmarge van de kaart: de knip
+   ligt precies op de buitenkant van haar inktrand. Twee ids, zodat dit wint
+   van de maten van .mini-score hierboven en in de media queries. */
+#s-handoff #hoRoundCard {
+  --rand: clamp(56px, 19vw, 76px);
+  --zak: calc(var(--rand) * .24);
+  margin-top: calc(var(--rand) * .72);
 }
-@keyframes ademen {
-  0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.06); }
+#s-handoff #hoTally { justify-content: space-around; }
+#s-handoff #hoTally .side {
+  position: relative; width: var(--rand); justify-content: center; padding: 0;
 }
-/* En bij een beurtwissel komt ze op -- daar is "wie" het nieuws. Bij een
-   rondewissel staat ze stil en schuift de schijf door (.ronderij.wissel): precies
-   één gebied van de kaart leeft, en welk gebied dat is, ís de mededeling. */
-@keyframes upPop { from { transform: scale(.8); } to { transform: scale(1); } }
-#s-handoff:not(.mode-round).on .mini-score .side.up .head {
-  animation: upPop calc(var(--t-kom) / max(var(--dur), .001)) var(--e-los) backwards;
-  animation-delay: calc(.07s / max(var(--dur), .001));
+#s-handoff #hoTally .side .head {
+  position: absolute; left: 0; width: 100%; aspect-ratio: 1;
+  bottom: calc(100% + var(--pt) + var(--line) - var(--zak));
+  clip-path: inset(-120% -60% var(--zak) -60%);
 }
+#s-handoff #hoTally .side .head > svg {
+  width: 100%; height: 100%;
+  rotate: -8deg; transform-origin: 50% 76%;
+  translate: 0 34%;
+  transition: translate calc(var(--t-kom) * var(--dur)) var(--e-weg);
+}
+/* De vos heeft zijn ogen lager in de kop dan de uil: hij zakt minder ver,
+   anders steken alleen zijn oren boven de rand uit. */
+#s-handoff #hoTally #hoSideA:not(.up) .head > svg { translate: 0 24%; }
+#s-handoff #hoTally #hoSideB .head > svg { rotate: 7deg; }
+#s-handoff #hoTally .side.up .head > svg {
+  translate: 0 0;
+  transition: translate calc(var(--t-groot) * var(--dur)) var(--e-los);
+  animation: gluurAdem calc(2.8s / max(var(--dur), .001)) var(--e-vloei) infinite;
+}
+#s-handoff #hoTally .side b { min-width: 0; font-size: max(var(--fs-4), min(7vw, var(--fs-5))); }
 /* Vaste cijferbreedte en tabulaire cijfers: anders springt de rij opzij
    zodra iemand van 9 naar 10 gaat. */
 .mini-score b {
@@ -1955,13 +1980,26 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 
    En de twee knoppen gaan uit. Elders mag dat niet (een uitgeschakelde knop
    kan niet antwoorden), maar hier is de beurt afgelopen en zegt de knop dat
-   vóór je hem aanraakt. De streep door het pas-teken is dezelfde als bij de
-   laatste kaart. */
+   vóór je hem aanraakt. Ze vervagen niet: een knop op 38% over een grond die
+   van ploegkleur naar papier stroomt, gaf onderweg kleuren die nergens in het
+   palet staan (een bruine vinkknop op roze). Het stempel drukt ze in: op de
+   klap zakken ze hun schaduw in, met de beweging van een vinger, en blijven
+   ingedrukt liggen op --paper-2. "Kan niet meer" is een vorm, geen tint. De
+   streep door het pas-teken is dezelfde als bij de laatste kaart. Hetzelfde
+   bij een lege stapel (#s-play.leeg). */
 #s-play.over .card                  { background: var(--paper); }
 #s-play.over .timerframe .track     { stroke: var(--ink-2); }
 #s-play.over .cardslot              { transform: scale(.98); }
-#s-play.over .btn-good,
-#s-play.over .btn-skip              { opacity: .38; pointer-events: none; }
+#s-play.over .btn-good, #s-play.leeg .btn-good,
+#s-play.over .btn-skip, #s-play.leeg .btn-skip {
+  pointer-events: none; background: var(--paper-2); box-shadow: 0 0 0 var(--ink);
+  transition: transform calc(var(--t-press) * var(--dur)) var(--e-uit),
+              box-shadow calc(var(--t-press) * var(--dur)) var(--e-uit),
+              background-color calc(var(--t-press) * var(--dur)) var(--e-uit);
+  transition-delay: calc(.12s * var(--dur));
+}
+#s-play.over .btn-good, #s-play.leeg .btn-good { transform: translate(var(--lift-2), var(--lift-2)); }
+#s-play.over .btn-skip, #s-play.leeg .btn-skip { transform: translate(var(--lift-1), var(--lift-1)); }
 #s-play.over .btn-skip .bar         { display: block; }
 
 /* Geraden en gepast komen uit een andere richting: geraden wordt er schuin
@@ -2255,6 +2293,8 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
      kleiner dan de pauzeknop ernaast, terwijl hij de hoofdhandeling is. */
   .btn-go { width: min(30vw, 34vh, 150px); }
   #s-handoff { flex-direction: row; flex-wrap: wrap; gap: 3vw; }
+  /* Liggend is hoogte het schaarst: de dieren op de rand rekenen met vh. */
+  #s-handoff #hoRoundCard { --rand: min(15vh, 60px); }
 
   /* Liggend staan de stand en de opdracht naast elkaar en is hoogte het
      schaarst. De mascotte van wie aan zet is krijgt een bovengrens in vh,
@@ -2320,7 +2360,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
      reuzenkaart naar een ansichtkaart las de overdracht als bijzaak, terwijl
      het het scherm is waar het toestel van hand gaat. */
   .roundcard.big { width: min(70vw, 34rem); max-width: min(70vw, 34rem);
-                   gap: 14px; padding: 22px 32px 18px; }
+                   gap: 14px; --pt: 22px; padding: var(--pt) 32px 18px; }
   .ronderij { --schijf: min(19vh, 176px); }
   .ronderij .vak.nu { border-width: 6px; }
   .roundcard.big b { font-size: var(--fs-6); }
@@ -2330,6 +2370,8 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   #s-handoff .mini-score .side .head > svg { width: 52px; height: 52px; }
   #s-handoff .mini-score .side.up .head > svg { width: 84px; height: 84px; }
   #s-handoff .mini-score b { font-size: var(--fs-6); }
+  #s-handoff #hoRoundCard { --rand: 108px; }
+  #s-handoff #hoTally .side b { font-size: var(--fs-6); }
   .overlay .panel { min-width: 440px; gap: var(--s-5); padding: 40px 56px; }
   .overlay .panel .btn-go { width: 148px; }
   .overlay .panel .btn-danger { width: 88px; height: 88px; }
@@ -2452,23 +2494,22 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   display: block; position: absolute; left: 0; right: 0; bottom: 0; height: 4px;
   background: var(--ink); transform-origin: 0 50%;
 }
-/* De hele dubbele tegel groeit, niet het groene vak alleen: anders steekt
-   het vak boven en onder uit zijn eigen tegel. Vanuit de hoek, en over het
-   rondeteken heen als dat in de weg ligt (de beurt is toch om). */
+/* De buit klopt nog één keer aan voor de ploeg die hem speelde: de dubbele
+   tegel springt twee keer op haar eigen plek. Ze groeit niet: niets in de
+   balk ligt over een ander stuk heen, en op een smal scherm dekte een
+   vergrote tegel het rondeteken half af. Een groter groen vak zou boven en
+   onder uit zijn tegel steken. Op translate, zodat transform vrij blijft. */
 #s-play.over .play-top .who:has(#turnScore:not([hidden])) {
-  position: relative; z-index: 2; transform-origin: 0 0;
-  animation: buit calc(var(--t-groot) / max(var(--dur), .001)) var(--e-los) calc(.15s / max(var(--dur), .001)) both;
+  animation: buitWip calc(.6s / max(var(--dur), .001)) var(--e-vloei) calc(.15s / max(var(--dur), .001)) both;
 }
-@keyframes buit {
-  0%   { transform: scale(1); }
-  55%  { transform: scale(1.45); }
-  100% { transform: scale(1.25); }
+@keyframes buitWip {
+  0%, 55%, 100% { translate: 0 0; }
+  28%           { translate: 0 -9px; }
+  76%           { translate: 0 -4px; }
 }
 /* De stapel is leeg: er ligt niets meer onder de kaart, het groene stempel
-   valt erop, en de knoppen gaan uit zoals bij tijd-om. */
+   valt erop, en de knoppen worden ingedrukt zoals bij tijd-om. */
 #s-play.leeg .cardslot .under { visibility: hidden; }
-#s-play.leeg .btn-good,
-#s-play.leeg .btn-skip { opacity: .38; pointer-events: none; }
 
 /* De kaart die je net raadde of oversloeg, als losse kopie boven de nieuwe:
    geraden krimpt ze naar de teller, overgeslagen zakt ze onder de stapel.
@@ -5649,6 +5690,19 @@ let handoffMode = "round";
 /* Na de landing van de omgedraaide kaart (landOm, 180 ms) en het klokje van
    de nieuwe ronde: dan pas schuift de schijf door. */
 const RIJ_WACHT = 260;      // waar een afgebroken aftelling naar terugkeert
+/* Wanneer bij een beurtwissel de nieuwe ploeg op de rand opkomt: als de
+   omgedraaide kaart geland is (landOm, 180 ms) duikt wie net speelde weg,
+   en zoveel later als op de titel het tweede dier (140 ms) komt de ander
+   omhoog. Niet pas na RIJ_WACHT: de grond is dan al van de nieuwe ploeg, en
+   een dier dat er nog lang rechtop staat spreekt haar tegen. De ploegklank
+   valt op het opkomen. */
+const RAND_WEG = 180, RAND_OP = RAND_WEG + 140;
+const RAND_LAND = 200;   // van opkomen tot de voeten op de rand staan
+let randTimer = null;
+function zetOpRand(team) {
+  $("#hoSideA").classList.toggle("up", team === 0);
+  $("#hoSideB").classList.toggle("up", team === 1);
+}
 
 function handoff(mode, freshA, freshB, zelfdeGrond) {
   const round = mode === "round";
@@ -5676,8 +5730,34 @@ function handoff(mode, freshA, freshB, zelfdeGrond) {
   $("#s-handoff").style.setProperty("--team",
     tossPending || vloed ? "var(--paper)" : t.color);
 
-  // Vak 1: de stand, met de ploeg die aan zet is opgetild.
+  // Vak 1: de stand, met de ploeg die aan zet is op de rand.
   paintHoTally(freshA || 0, freshB || 0);
+  /* Bij een beurtwissel vanuit het spel staat eerst nog wie net speelde
+     rechtop; als de kaart geland is, duikt die weg en komt de ander op, op de
+     ploegklank (Snd.ploeg in turnEnd, RAND_OP na het begin). Een hersteld
+     potje, een afgebroken aftelling en beperkte beweging krijgen meteen de
+     stand van nu. */
+  clearTimeout(randTimer);
+  if (!round && current === "play" && !zelfdeGrond && !stilAan()) {
+    const nu = G.team;
+    zetOpRand(1 - nu);
+    randTimer = setTimeout(() => {
+      $("#hoSide" + "AB"[1 - nu]).classList.remove("up");
+      randTimer = setTimeout(() => {
+        if (!G || G.team !== nu) return;
+        zetOpRand(nu);
+        /* Waar het dier op de rand neerkomt, drukt het op het bord: een
+           zachte rimpel vanaf zijn voeten, zoals een aangetikte wip op de
+           titel. De veer van --e-los is na zo'n 200 ms op zijn plek. */
+        randTimer = setTimeout(() => {
+          if (current !== "handoff") return;
+          const h = $("#hoSide" + "AB"[nu] + " .head").getBoundingClientRect();
+          const k = $("#hoRoundCard").getBoundingClientRect(), v = $("#hoVeld").getBoundingClientRect();
+          if (h.width) veldHo.rimpel(h.left + h.width / 2 - v.left, k.top - v.top, .6, h.width * .3);
+        }, RAND_LAND);
+      }, RAND_OP - RAND_WEG);
+    }, RAND_WEG);
+  }
   if (tossPending) { tossPending = false; tossTeams(); } else veldHo.inkt(false);
 
   // Vak 2: de opdracht. Zelfde schilder als de balk op het spelscherm.
@@ -7030,13 +7110,13 @@ function turnEnd() {
   draaiOm(p => {
     if (!G || current !== "play") return;
     /* Eén cue voor de hele buit, samen met het scherm dat hem toont. Daarna
-       wie er nu aan zet is, met de mascotte die opkomt (70 ms, zie upPop);
+       wie er nu aan zet is, met de mascotte die opkomt (zie #hoTally .side.up);
        na een buit wacht de ploeg tot die uitgeklonken is. Hier en niet in
        handoff(): die opent ook na een afgebroken aftelling en na herladen,
        en dan is er niets nieuws te melden. */
     if (G.gained) Snd.haul(G.gained);
     const [freshA, freshB] = Spel.beurtWissel(G);
-    Snd.ploeg(G.team, G.gained ? .35 : .07);
+    Snd.ploeg(G.team, RAND_OP / 1000);
     handoff("turn", freshA, freshB);
     landOm($("#hoRoundCard"), p);
   });
