@@ -1476,6 +1476,13 @@ meer" is een vorm, geen tint, zoals bij stoppen. De buit groeide tegelijk tot
 tegel twee keer op haar eigen plek. Een groter groen vak zou boven en onder
 uit zijn tegel steken.
 
+**De lege stapel is leeg papier.** Bij de laatste geraden kaart vloog de
+kopie naar de teller, maar de kaart zelf bleef met hetzelfde teken en woord
+liggen: de kaart stond er twee keer, en het vinkje viel op een kaart die al
+weg was. Nu verdwijnen teken en woord onder `#s-play.leeg`, zoals er ook
+niets meer onder de kaart ligt, en valt het stempel op leeg papier. Bij tijd
+om blijft het woord wel liggen: die kaart gaat terug op de stapel.
+
 De oorpluimen van de uil liggen achter de kop, niet erop: getekend over de
 cirkel liep er een zwarte lijn door zijn hoofd waar elke pluim begon.
 
