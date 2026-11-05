@@ -6139,14 +6139,17 @@ function handOffCountdown(done) {
 // kwam. G is niet aangeraakt behalve G.gained, en dat is voor een nieuwe
 // beurt toch nul. De speelkaart draait terug naar de opdracht, en de
 // startknop komt van onder het scherm terug.
-$("#cdBack").addEventListener("click", () => {
+/* Afbreken op het aftellen: de tegel rechtsboven en de terugveeg (terug())
+   doen hetzelfde. De grond blijft, de kaart draait terug naar de opdracht. */
+$("#cdBack").addEventListener("click", breekAftellenAf);
+function breekAftellenAf() {
   if (countRaf === null) return;
   const kaart = $("#card").getBoundingClientRect();
   stopCountdown();
   releaseWake();
   handoff(handoffMode, 0, 0, true);
   terugNaarOpdracht(kaart);
-});
+}
 function terugNaarOpdracht(p) {
   if (stilAan()) return;
   landOm($("#hoRoundCard"), p, KAART_GROEI);
@@ -7797,10 +7800,14 @@ function terug() {
   if (!$("#pauze").hidden) { closePause(); return; }
   if (current === "setup")  { show("title"); return; }
   if (current === "kaarten" || current === "regels") { show("setup"); return; }
-  if (current === "winner") { clearConfetti(); clearGame(); show("title"); return; }
-  // Aftellen: dezelfde uitweg als een tik op het vlak, en als het teken
-  // rechtsboven dat die tik aankondigt.
-  if (countRaf !== null) { stopCountdown(); releaseWake(); handoff(handoffMode); return; }
+  /* Eindstand: hetzelfde als het huisje, ook de titel die als cirkel uit
+     dat huisje groeit. */
+  if (current === "winner") {
+    const k = $("#btnHome").getBoundingClientRect();
+    clearConfetti(); clearGame(); naarTitel(k); return;
+  }
+  // Aftellen: dezelfde uitweg als de tegel rechtsboven (#cdBack).
+  if (countRaf !== null) { breekAftellenAf(); return; }
   /* Overdracht: het huisje doet de druk voor. Een veeg gooit geen potje weg,
      maar wijst wel de uitgang aan. */
   if (current === "handoff") { stopHo.voordoen(); return; }
