@@ -2174,6 +2174,38 @@ nergens anders staat), en woorden als Geen, Wat, Veel (vaag tot je het
 getal ernaast leest, en met drie eigen kaarten doen Wat en Veel hetzelfde).
 Wat het kost: 0 voor bezoek is een scherm verder.
 
+**Eén lijst per bezoek, zonder tabbladen.** Je komt op `#s-kaarten` via de
+rij Gewone of de rij Eigen, en wilt dan die lijst. Bovenaan stonden toch nog
+Gewone en Eigen als keuzeknoppen, met elk hun getal: een tweede keuze voor
+iets wat je net gekozen had, en een getal dat de rij op Instellingen al
+noemde. Nu zegt de titel welke lijst het is ("Gewone kaarten", "Eigen
+kaarten", `paintLade()`), en terug is de weg naar de andere. Op 320 tot 389
+breed staat die titel één trede kleiner (`--fs-4`): op `--fs-5` brak
+"GEWONE KAARTEN" over twee regels en werd de titelband 34 px hoger.
+
+Onder Moeilijkheid staat één regel: links het aantal in de bak (`#cbTal`, in
+Fredoka), rechts de sleuf met "Tik om weg te leggen" of "Alles terug". Eén
+regel, omdat het getal en de knop over hetzelfde gaan: wat er in de bak ligt.
+
+**De letters als strook naast het raster.** De letterbalk stond als rij
+boven het raster en schoof opzij: acht letters in beeld, de rest buiten het
+scherm, en hij rolde weg zodra je in de lijst zat -- precies waar je hem
+nodig hebt. Nu staat hij als smalle strook (28 px) rechts van het raster en
+loopt hij mee (`position: sticky`), zoals in een adresboek: alle letters
+tegelijk, op elke hoogte van de lijst. Tik een letter, of veeg erlangs: de
+letter onder de vinger springt meteen (geen glijden, anders loopt het
+raster achter de vinger aan) en kleurt inkt zolang je hem raakt; een losse
+tik glijdt zacht (`buildIndex()`, `springNaar(tegel, zacht)`). De strook
+begint onder de hoek van de uitgang, ook liggend waar de titel niet plakt,
+en is plat: een liniaal, geen rij tegels met lift. Liggend (390 hoog) is
+een letter zo'n 11 px; dat is te klein om te mikken, maar vegen werkt op
+elke hoogte. Wat het kost: drie kolommen tegels zijn 34 px smaller.
+
+Ook gewogen: de lijst in stukken per moeilijkheid zonder letters (het raster
+is per stand alfabetisch, en dan kun je niet naar een letter), en een
+zoekveld (een toetsenbord voor één kaart, op een scherm dat verder alleen
+tikken kent).
+
 **Eén vorm, één betekenis.** Op dit scherm zijn er twee soorten stukken. Een
 rij keuzeknoppen kiest er één; goud met een vinkje is de keuze. Een rij in
 een lijst (`.lijst`, `.rij`) gaat ergens heen (de pijl) of schakelt (de
