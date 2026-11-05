@@ -2435,6 +2435,18 @@ getoonde greep meer die verouderen kan. **Trek nooit opnieuw vooruit** --
 zodra er weer ergens een greep klaarligt vóór het potje, is die hele klasse
 fouten terug.
 
+Wélke kaarten de greep krijgt, is niet helemaal het lot. Een audit van het
+hele spelverloop (november 2026) speelde potjes achter elkaar: uit de 90
+makkelijke kaarten kwamen er bij Nog een keer gemiddeld 6 van de 24 terug
+uit het potje ervoor, en 11 van de 32. Kinderen onthouden die en roepen ze
+voor ze beschreven zijn. De eigen kaarten hadden dat al opgelost (de langst
+niet getrokken eerst); de gewone doen nu hetzelfde. `tijdisom.gezien`
+bewaart per woord wanneer het laatst in een greep zat, `newGame` werkt het
+bij, en `Spel.drawDeck` schudt de bak en zet daarna de oudste vooraan (een
+stabiele sortering, dus bij gelijke stand blijft het lot). Pas na drie à
+vier potjes komt een kaart terug. Het is een geheugen, geen keuze: niets op
+het scherm toont het, en kwijt is gewoon "nooit gezien".
+
 Wat er te kiezen valt zit in de bak, en die keuze blijft staan:
 `settings.hidden`, op het wóórd en niet op de emoji, want een tekening kan
 ooit door een betere vervangen worden voor hetzelfde woord. Eén lijst voor

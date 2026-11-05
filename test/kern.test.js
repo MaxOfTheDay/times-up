@@ -404,6 +404,40 @@ test('eigen kaarten: zonder eigen kaarten trekt drawDeck precies als voorheen', 
   assert.deepEqual(zonder, leeg);
 });
 
+test('gewone kaarten: Nog een keer deelt eerst wat het langst niet kwam', () => {
+  // Klein heeft 50 kaarten: twee potjes van 24 delen er niets van, het
+  // derde neemt de 2 die nooit kwamen en dan de 22 oudste van potje 1.
+  const gezien = {};
+  const potjes = [];
+  for (let i = 1; i <= 3; i++) {
+    const greep = Spel.drawDeck(DECKS, 'klein', 24, [], rng(20 + i), [], 4, gezien);
+    greep.forEach(c => { gezien[c[1]] = i; });
+    potjes.push(new Set(greep.map(c => c[1])));
+  }
+  const samen = (a, b) => [...a].filter(w => b.has(w)).length;
+  assert.equal(samen(potjes[0], potjes[1]), 0);
+  assert.equal(samen(potjes[1], potjes[2]), 0);
+  assert.equal(samen(potjes[0], potjes[2]), 22);
+});
+
+test('gewone kaarten: met eigen kaarten erbij geldt hetzelfde voor de rest', () => {
+  const gezien = {};
+  DECKS.klein.slice(0, 30).forEach(c => { gezien[c[1]] = 5; });
+  const eigen = [{ id: 'a', woord: 'oma', laatst: 0 }, { id: 'b', woord: 'opa', laatst: 0 }];
+  const greep = Spel.drawDeck(DECKS, 'klein', 16, [], rng(4), eigen, 2, gezien);
+  assert.equal(greep.length, 16);
+  // De 14 gewone komen uit de 20 die nooit gezien zijn.
+  assert.ok(greep.filter(c => Spel.eigenId(c) === null).every(c => !gezien[c[1]]));
+});
+
+test('gewone kaarten: zonder geheugen trekt drawDeck als voorheen', () => {
+  assert.deepEqual(Spel.drawDeck(DECKS, 'midden', 24, [], rng(12)),
+                   Spel.drawDeck(DECKS, 'midden', 24, [], rng(12), [], 4, undefined));
+  // Een leeg geheugen houdt het lot: de volgorde blijft die van de schudding.
+  assert.deepEqual(Spel.drawDeck(DECKS, 'midden', 24, [], rng(12)),
+                   Spel.drawDeck(DECKS, 'midden', 24, [], rng(12), [], 4, {}));
+});
+
 test('eigenId: alleen het voorvoegsel telt, geen emoji', () => {
   assert.equal(Spel.eigenId([Spel.EIGEN + 'abc', 'oma']), 'abc');
   assert.equal(Spel.eigenId(['🐶', 'hond']), null);

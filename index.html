@@ -3508,19 +3508,28 @@ const Spel = (() => {
       .sort((a, b) => (a.laatst || 0) - (b.laatst || 0))
       .slice(0, n);
   }
+  /* Welke gewone kaarten in dit potje gaan: net als bij de eigen kaarten
+     die het langst niet kwamen eerst (gezien = { woord: wanneer laatst in
+     een greep }, ontbreekt is nooit), bij gelijke stand door het lot. Zo
+     deelt Nog een keer geen kaarten van het potje ervoor, tot de bak op is. */
+  function gewoneGreep(bak, n, rnd, gezien) {
+    const r = shuffle(bak, rnd);
+    if (gezien) r.sort((a, b) => (gezien[a[1]] || 0) - (gezien[b[1]] || 0));
+    return r.slice(0, n);
+  }
   /* De greep bestaat pas bij de start van een potje, nergens eerder.
      Eigen kaarten gaan voor: een gewone kaart met hetzelfde woord blijft uit
      het potje zolang de eigen kaart bestaat (een foto van je eigen hond heet
      "hond"). */
-  function drawDeck(decks, tier, size, hidden, rnd, eigen, aantal) {
+  function drawDeck(decks, tier, size, hidden, rnd, eigen, aantal, gezien) {
     eigen = eigen || [];
     const woorden = new Set(eigen.map(k => k.woord.toLocaleLowerCase("nl")));
     const bak = bakFor(decks, tier, hidden)
       .filter(c => !woorden.has(c[1].toLocaleLowerCase("nl")));
     const mijn = eigenGreep(eigen, size, rnd, aantal);
-    if (!mijn.length) return shuffle(bak, rnd).slice(0, size);
+    if (!mijn.length) return gewoneGreep(bak, size, rnd, gezien);
     return shuffle(mijn.map(k => [EIGEN + k.id, k.woord])
-      .concat(shuffle(bak, rnd).slice(0, size - mijn.length)), rnd);
+      .concat(gewoneGreep(bak, size - mijn.length, rnd, gezien)), rnd);
   }
 
   function nieuw(deck, secs, rnd) {
@@ -4115,7 +4124,24 @@ const poolFor = tier => Spel.poolFor(DECKS, tier);
 const bakFor = tier => Spel.bakFor(DECKS, tier, settings.hidden);
 const canHide = word => Spel.canHide(DECKS, settings.hidden, word);
 const drawDeck = (tier, size) =>
-  Spel.drawDeck(DECKS, tier, size, settings.hidden, undefined, eigenInSpel(), settings.eigenAantal);
+  Spel.drawDeck(DECKS, tier, size, settings.hidden, undefined, eigenInSpel(), settings.eigenAantal, laadGezien());
+
+/* Wanneer elke gewone kaart voor het laatst in een greep zat, per woord:
+   { woord: tijdstip }. Alleen op deze telefoon, en alleen om Nog een keer
+   andere kaarten te laten delen (Spel.drawDeck). Kapot of leeg is gewoon
+   "nooit gezien". */
+const KEY_GEZIEN = "tijdisom.gezien";
+function laadGezien() {
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY_GEZIEN) || "null");
+    return s && typeof s === "object" && !Array.isArray(s) ? s : {};
+  } catch (e) { return {}; }
+}
+function bewaarGezien(deck, nu) {
+  const g = laadGezien();
+  deck.forEach(c => { if (Spel.eigenId(c) === null) g[c[1]] = nu; });
+  try { localStorage.setItem(KEY_GEZIEN, JSON.stringify(g)); } catch (e) {}
+}
 
 /* ==============================================================
    4. SCHERMEN
@@ -5502,14 +5528,15 @@ function newGame() {
      geloot; de worp op het overdrachtscherm (tossTeams) toont alleen de
      uitkomst. */
   G = Spel.nieuw(drawDeck(settings.tier, settings.size), settings.secs);
-  /* De eigen kaarten in deze greep zijn nu gespeeld: de volgende keer gaan
-     de andere voor (Spel.eigenGreep). */
+  /* De kaarten in deze greep zijn nu gespeeld: de volgende keer gaan de
+     andere voor (Spel.eigenGreep, en voor de gewone tijdisom.gezien). */
   const nu = Date.now();
   G.deck.forEach(c => {
     const k = eigen.kaarten.find(k => k.id === Spel.eigenId(c));
     if (k) k.laatst = nu;
   });
   bewaarEigen();
+  bewaarGezien(G.deck, nu);
   // Alleen de allereerste overdracht van een potje toont de worp; bij een
   // rondewissel is allang bekend wie er speelt.
   tossPending = true;
