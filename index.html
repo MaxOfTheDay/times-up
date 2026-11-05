@@ -1487,37 +1487,28 @@ button.ho-count:enabled:active {
 }
 .roundcard.big b { font-size: max(20px, min(8vw, 4vh, 34px)); line-height: 1; }
 
-/* ---- de stand: één regel voor twee schermen ----
-   buildTally() bouwt de opmaak voor de overdracht en het pauzepaneel; deze
-   selectorlijst doet hetzelfde voor de stijlen. De ids staan erin om in
-   specificiteit te winnen, niet omdat de schermen iets anders krijgen. Wie
-   iets alleen onder #s-handoff zet, laat het paneel achter.
-
-   Per ploeg een mascotte en een getal. Wie aan zet is, is de grote mascotte.
-   Het mascotte-vak heeft een vaste breedte, zodat de twee cijfers op dezelfde
+/* ---- de stand op de overdracht ----
+   buildTally() bouwt de opmaak. Per ploeg een mascotte en een getal. Wie
+   aan zet is, is de grote mascotte. Het mascotte-vak heeft een vaste breedte, zodat de twee cijfers op dezelfde
    plek in hun blok staan. */
 .mini-score {
   display: flex; align-items: center;
   gap: min(5vw, var(--s-4));
   padding: min(2.6vw, var(--s-3)) min(3vw, var(--s-3));
 }
-#s-handoff .mini-score .side,
-#pauze .mini-score .side {
+#s-handoff .mini-score .side {
   display: flex; align-items: center; gap: 9px;
   background: none; border: 0; box-shadow: none; padding: 2px 0; width: auto;
 }
-#s-handoff .mini-score .side .head,
-#pauze .mini-score .side .head {
+#s-handoff .mini-score .side .head {
   position: relative; flex: 0 0 auto;
   width: clamp(44px, 12vw, 48px);
   display: flex; align-items: center; justify-content: center;
 }
-#s-handoff .mini-score .side .head > svg,
-#pauze .mini-score .side .head > svg {
+#s-handoff .mini-score .side .head > svg {
   width: 26px; height: 26px; display: block; animation: none;
 }
-#s-handoff .mini-score .side.up .head > svg,
-#pauze .mini-score .side.up .head > svg {
+#s-handoff .mini-score .side.up .head > svg {
   width: 44px; height: 44px;
 }
 /* Op de overdracht zitten ze op de rand van de opdrachtkaart, zoals op de
@@ -1705,7 +1696,8 @@ button.ho-count:enabled:active {
 /* Ligt het paneel als achterkant op de kaart, dan geen sluier: 82% inkt
    over de ploegkleur gaf bruin (Vos) en marine (Uil), kleuren buiten het
    palet, en dimde de kaart nog vóór ze omdraaide. Wat stilstaat zegt dat
-   zelf: de klok, goed en pas blijven ingedrukt (.neer). Alleen het losse
+   zelf: het spel gaat van het bord en de klokknop blijft ingedrukt
+   (legSpelWeg(), .neer). Alleen het losse
    paneel, als de achterkant niet op de kaart past, houdt de sluier. */
 #pauze.kaart::before { background: none; }
 /* Het waas komt op in --t-los, het paneel schaalt in --t-kom van 96% met
@@ -1769,8 +1761,8 @@ button.ho-count:enabled:active {
   position: fixed; margin: 0; box-sizing: border-box;
   left: var(--kx); top: var(--ky); width: var(--kw); height: var(--kh);
   min-width: 0;
-  /* Bovenaan de stand met het huisje in de hoek, daaronder het rondeteken
-     en "verder". Alles schaalt met de kaart (cqmin), zodat het liggend en
+  /* Bovenaan het huisje in de hoek, daaronder het rondeteken en
+     "verder". Alles schaalt met de kaart (cqmin), zodat het liggend en
      klein binnen de band blijft; legPaneel() valt terug op een los paneel
      als het toch niet past. */
   container-type: size;
@@ -1783,25 +1775,27 @@ button.ho-count:enabled:active {
 }
 #pauze.kaart .panel > :not(.timerframe) { position: relative; }
 #pauze.kaart .panel > .doors { display: contents; }
-#pauze.kaart #pauseTally {
-  grid-area: 1 / 1; justify-self: start; padding: 0; gap: 4cqmin;
-}
-#pauze.kaart .mini-score .side .head { width: auto; min-width: 15cqmin; }
-#pauze.kaart .mini-score .side .head > svg { width: 12cqmin; height: 12cqmin; }
-#pauze.kaart .mini-score .side.up .head > svg { width: 20cqmin; height: 20cqmin; }
-#pauze.kaart .mini-score b { font-size: 10cqmin; }
 #pauze.kaart #btnStop { grid-area: 1 / 2; width: max(48px, 15cqmin); height: max(48px, 15cqmin); }
 #pauze.kaart #btnStop .mark { width: 62%; }
+/* Op de kaart drie dingen: de ronde in het midden, "verder" eronder (de
+   enige cirkel en het enige goud), het huisje rechtsboven. */
 #pauze.kaart #pauseRonde {
-  display: block; grid-area: 3 / 1 / 4 / 3;
-  width: 20cqmin; height: 20cqmin;
+  grid-area: 3 / 1 / 4 / 3;
+  width: 28cqmin; height: 28cqmin;
 }
-#pauze.kaart #pauseRonde svg { width: 100%; height: 100%; display: block; }
+#pauseRonde { width: 56px; height: 56px; }
+#pauseRonde svg { width: 100%; height: 100%; display: block; }
 #pauze.kaart #btnResume {
   grid-area: 4 / 1 / 5 / 3; margin-top: 6cqmin;
-  width: max(96px, 40cqmin);
+  width: max(96px, 44cqmin);
 }
-#pauseRonde { display: none; }
+/* De stapel onder de kaart hoort bij het spel: in de pauze ligt er één
+   kaart. Bij beperkte beweging gaat het spel meteen van het bord. */
+#s-play.pauze .cardslot .under { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  #s-play.pauze .play-top .who, #s-play.pauze .roundchip,
+  #s-play.pauze .btn-good, #s-play.pauze .btn-skip { visibility: hidden; }
+}
 #pauze[data-time="ok"]   .timerframe .band { stroke: var(--time-3); }
 #pauze[data-time="warn"] .timerframe .band { stroke: var(--time-2); }
 #pauze[data-time="crit"] .timerframe .band { stroke: var(--time-1); stroke-width: 18; }
@@ -2275,8 +2269,7 @@ button.ho-count:enabled:active {
      opeist zou de rij van het scherm duwen. Hier weer op haar natuurlijke
      breedte. */
   .roundcard.big { width: auto; }
-  #s-handoff .mini-score .side.up .head > svg,
-  #pauze .mini-score .side.up .head > svg { width: 36px; height: 36px; }
+  #s-handoff .mini-score .side.up .head > svg { width: 36px; height: 36px; }
 
   /* Liggend rekent het merk met vh: de kortste zijde bepaalt de maat. In vw
      viel de zandloper op 844x390 van het scherm. */
@@ -2312,12 +2305,9 @@ button.ho-count:enabled:active {
   /* Op een tablet groeien stand en opdrachtvak mee, de stand altijd kleiner
      dan de kaart: de naslag hoort niet groter te staan dan waar de speler
      iets mee moet. */
-  #s-handoff .mini-score .side .head,
-  #pauze .mini-score .side .head { width: 68px; }
-  #s-handoff .mini-score .side .head > svg,
-  #pauze .mini-score .side .head > svg { width: 40px; height: 40px; }
-  #s-handoff .mini-score .side.up .head > svg,
-  #pauze .mini-score .side.up .head > svg { width: 62px; height: 62px; }
+  #s-handoff .mini-score .side .head { width: 68px; }
+  #s-handoff .mini-score .side .head > svg { width: 40px; height: 40px; }
+  #s-handoff .mini-score .side.up .head > svg { width: 62px; height: 62px; }
   .mini-score b { font-size: var(--fs-5); }
   /* Het cijfer en zijn vak groeien samen mee: het vak moet "30" op de grote
      maat blijven dragen, anders loopt het cijfer er in de laatste tellen
@@ -2349,10 +2339,6 @@ button.ho-count:enabled:active {
   .overlay .panel .btn-go { width: 148px; }
   .overlay .panel .btn-danger { width: 88px; height: 88px; }
   .overlay .panel .btn-danger .mark { width: 40px; }
-  #pauze .mini-score .side .head { width: 84px; }
-  #pauze .mini-score .side .head > svg { width: 48px; height: 48px; }
-  #pauze .mini-score .side.up .head > svg { width: 76px; height: 76px; }
-  #pauze .mini-score b { font-size: var(--fs-6); }
 }
 
 /* ============================================================
@@ -3197,7 +3183,7 @@ button.ho-count:enabled:active {
   <!-- Drie stukken: wie er speelt met wat hij binnenhaalde, hoe je mag
        uitleggen, en de klok met de knop die hem stilzet. Zie .play-top. -->
   <div class="play-top">
-    <div class="who">
+    <div class="who" id="plWho">
       <div class="teamchip"><svg id="plMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg></div>
       <!-- Het pijltje en de lont staan er alleen zolang het punt nog terug
            kan (TERUG_MS): zie .kan-terug. -->
@@ -3393,11 +3379,9 @@ button.ho-count:enabled:active {
       <path class="track" id="pauseTrack"/>
       <path class="band"  id="pauseBand"/>
     </svg>
-    <!-- Dezelfde stand als op het overdrachtscherm, gebouwd door
-         buildTally(): één component, niet twee die uit elkaar groeien. -->
-    <div class="mini-score" id="pauseTally" aria-hidden="true"></div>
-    <!-- De regel waar je mee speelt: na een pauze is dat het eerste wat je
-         kwijt bent, en in de balk ligt hij onder de sluier. -->
+    <!-- Geen stand: die hoort op de overdracht, en midden in een beurt helpt
+         hij je niet verder. Wel de regel waar je mee speelt: na een pauze is
+         dat het eerste wat je kwijt bent, en de balk is dan weg. -->
     <div class="rondeteken" id="pauseRonde" aria-hidden="true"></div>
     <!-- Op de achterkant van de kaart staat het huisje in de hoek
          rechtsboven, waar elke uitgang staat, en "verder" alleen in het
@@ -6959,10 +6943,8 @@ function timeUp() {
   setTimeout(turnEnd, BEURT_ADEM);
 }
 
-/* Eén bouwer voor de stand op twee schermen (overdracht en pauzepaneel), twee
-   keer aangeroepen bij het laden: twee kopieën groeiden uit elkaar. De ids
-   (hoSideA, pauseScoreB, ...) zijn vast, zodat paintHoTally en
-   paintPauseScore ze vinden. */
+/* De bouwer voor de stand op de overdracht. De ids (hoSideA, hoScoreB, ...)
+   zijn vast, zodat paintHoTally ze vindt. */
 /* Geen kroon en geen "+N" op de overdracht: ze gingen over de ploeg die het
    toestel net kwijtraakt, en er hangt geen handeling van af. De kroon bestaat
    nog op het winnaarsscherm (tallyNode()), waar ze een prijs is in plaats van
@@ -6991,7 +6973,6 @@ function buildTally(host, prefix) {
   });
 }
 buildTally($("#hoTally"), "ho");
-buildTally($("#pauseTally"), "pause");
 /* De stand hoort ín de opdrachtkaart, niet ernaast: zo staat alle tekst op
    hetzelfde papier (op ploegkleur haalt --ink-2 maar 1,5:1) en heeft het
    scherm nog maar twee vlakken -- de kaart en de knop. */
@@ -7394,17 +7375,6 @@ let pauseMs = 0, pauseReturn = null, pauseUit = null, pauzeKaart = false;
    een weggegooid spel weer. */
 function screensInert(on) { $$(".screen").forEach(s => s.inert = on); }
 
-/* Dezelfde stand als op de overdracht: per ploeg een getal, en .up op wie aan
-   zet is -- juist in een pauze raak je de draad kwijt. */
-function paintPauseScore() {
-  [[0, "#pauseScoreA", "#pauseSideA"],
-   [1, "#pauseScoreB", "#pauseSideB"]]
-    .forEach(([t, num, side]) => {
-      $(num).textContent = G ? total(t) : 0;
-      $(side).classList.toggle("up", !!G && t === G.team);
-    });
-}
-
 function openPause() {
   // Al open: dit mag geen tweede keer gebeuren. Zie de toelichting bij
   // screensInert() -- een herhaalde tik zou pauseMs opnieuw op remaining()
@@ -7430,9 +7400,10 @@ function openPause() {
   $("#pauze").classList.add("klok");
   pauzeKaart = $("#card");
   paintRound($("#pauseRonde"), "teken");
-  /* Wat stilstaat, blijft ingedrukt (zie .neer): de klokknop, goed en pas. */
+  /* Wat stilstaat, blijft ingedrukt (zie .neer): de klokknop. De rest van
+     het spel gaat van het bord (legSpelWeg()). */
   PAUZE_NEER.forEach(sel => $(sel).classList.add("neer"));
-  paintPauseScore();
+  legSpelWeg();
 
   pauseReturn = document.activeElement;
   screensInert(true);
@@ -7503,12 +7474,49 @@ function kaartBoven(draai) {
     { duration: 180, easing: curve("uit") });
 }
 
-const PAUZE_NEER = ["#btnPauze", "#btnGoed", "#btnPas"];
+const PAUZE_NEER = ["#btnPauze"];
+
+/* De pauze legt het spel weg: goed en pas zakken achter de onderrand, de
+   mascotte en het rondeteken schuiven boven de rand weg, en de stapel onder
+   de kaart verdwijnt. Op het lege bord in de ploegkleur blijven de
+   ingedrukte klokknop en de omgedraaide kaart over. Zo verschilt pauze van
+   spelen in vorm, niet in tint: een sluier of een donkere grond gaf bruin en
+   marine, en papier leek op de titel of het einde van een beurt.
+   Via Web Animations op `translate`: transform is van het indrukken. Bij
+   beperkte beweging verbergt .pauze ze meteen. */
+const SPEL_WEG = ["#plWho", "#plRoundChip", "#btnPas", "#btnGoed"];
+let spelWeg = [];
+function legSpelWeg() {
+  $("#s-play").classList.add("pauze");
+  spelWeg.forEach(a => a.cancel());
+  spelWeg = [];
+  if (stilAan() || !document.body.animate) return;
+  spelWeg = SPEL_WEG.map(sel => {
+    const el = $(sel), r = el.getBoundingClientRect();
+    const dy = r.top < innerHeight / 2 ? -(r.bottom + 12) : innerHeight - r.top + 12;
+    return el.animate([{ translate: "0 0" }, { translate: "0 " + dy + "px" }],
+      { duration: KAART_GROEI, easing: curve("weg"), fill: "forwards" });
+  });
+}
+/* Terug op hun plek, van waar ze nu zijn. Met terug = false (stoppen) meteen. */
+function legSpelTerug(terug) {
+  $("#s-play").classList.remove("pauze");
+  const oud = spelWeg;
+  spelWeg = [];
+  oud.forEach(a => {
+    const el = a.effect.target, dy = getComputedStyle(el).translate;
+    a.cancel();
+    if (terug && !stilAan() && dy && dy !== "none") el.animate(
+      [{ translate: dy }, { translate: "0 0" }],
+      { duration: KAART_GROEI, easing: curve("uit") });
+  });
+}
 function closePause() {
   const el = $("#pauze");
   el.hidden = true;
   /* Wat ingedrukt lag, veert terug (de overgang uit 3. KNOPPEN). */
   PAUZE_NEER.forEach(sel => $(sel).classList.remove("neer"));
+  legSpelTerug(true);
   screensInert(false);
   kaartBoven(true);     // het paneel is meteen weg; de kaart komt weer boven
   if (pauseReturn && pauseReturn.isConnected) pauseReturn.focus({ preventScroll: true });
@@ -7586,6 +7594,8 @@ function stopPotje(knop) {
   if (paneel) {
     $("#pauze").hidden = true;
     kaartBoven(false);
+    PAUZE_NEER.forEach(sel => $(sel).classList.remove("neer"));
+    legSpelTerug(false);
     screensInert(false);      // niet via closePause(): dat zou de klok van
                                // een spel dat we net weggooien weer starten
   }

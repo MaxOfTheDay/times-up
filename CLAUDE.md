@@ -318,23 +318,27 @@ klokknop heeft lift. Op het aftellen staat de balk er al; alleen ligt
 `#cdBack` dan op de gemeten plek van de klokknop. Tekst in de balk staat op papier of op het groen, nooit op de
 ploegkleur.
 
-**Pauze draait de kaart om, zonder sluier.** Wat stilstaat blijft
-ingedrukt (`PAUZE_NEER`: de klokknop, goed en pas); een sluier van inkt over de ploegkleur gaf bruin en
-marine. Alleen het losse paneel houdt de sluier. Tijdens een beurt ligt het pauzepaneel als
+**Pauze legt het spel weg en draait de kaart om, zonder sluier.** De grond
+blijft vlak in de ploegkleur (hij zegt wie er speelt); wat verandert is de
+vorm van het bord: goed en pas zakken achter de onderrand, de mascotte en
+het rondeteken schuiven boven de rand weg, de stapel onder de kaart is weg
+(`legSpelWeg()`, `#s-play.pauze`, op `translate`), en de klokknop blijft
+ingedrukt (`PAUZE_NEER`). Geen donkere grond, geen punten, geen papier: een
+sluier of donkere inkt gaf bruin en marine, papier leek op de titel of het
+einde van een beurt. Alleen het losse paneel houdt de sluier. Tijdens een beurt ligt het pauzepaneel als
 achterkant op de gemeten plek van de kaart (`legPaneel()`), met haar eigen
-stilstaande band als rand. Erop: bovenaan de stand met het huisje in de hoek
-rechtsboven, daaronder het rondeteken (`#pauseRonde`) en "verder" alleen in
-het midden; alles in `cqmin`, zodat het met de kaart meeschaalt. Geen tweede
+stilstaande band als rand. Erop drie dingen: het rondeteken (`#pauseRonde`)
+in het midden, "verder" eronder, het huisje rechtsboven; geen stand (die
+hoort op de overdracht), geen dieren, geen zandloper; alles in `cqmin`,
+zodat het met de kaart meeschaalt. Geen tweede
 klok, geen pauzebalken, en het woord ligt afgedekt. Verder draait haar weer
 om (`kaartBoven()`). Op de overdracht is er geen pauze: er loopt geen klok,
 en het huisje in de hoek is zelf de uitgang. Past de achterkant niet op de
 kaart, dan een los paneel met de deuren naast elkaar.
 
-**Eén stand, twee schermen.** `buildTally()` bouwt de stand voor
-`#hoTally` en `#pauseTally`. Ook de stijlen staan in één selectorlijst met
-allebei de plekken; iets alleen onder `#s-handoff` laat het paneel achter.
-De enige uitzondering is de rand: de dieren op de rand staan alleen op de
-overdracht, want boven de speelkaart ligt de balk.
+**Eén stand.** `buildTally()` bouwt de stand voor `#hoTally`, de enige
+plek waar hij staat. Ook de pauze laat hem weg: midden in een beurt helpt
+hij je niet verder.
 
 **Geluid en trilling.** Eén betekenis per cue, nooit het enige kanaal.
 Alle cues lopen door `Snd` en `Tril`, naar één bus met compressor. Geen
