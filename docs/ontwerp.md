@@ -153,7 +153,7 @@ De regel is herschreven naar wat er al stond; er is geen pixel veranderd.
 Wijnrood (`--danger`) stond op de vloed van de stopknop, zijn stippellijn,
 de streep door de ballon van ronde 3 en de rand bij een weigering. Op een
 telefoon las het naast vermiljoen als een vuile Vos: een derde rood. De
-stopknop zei al drie keer wat hij is (huisje, stippellijn, vloed), dus
+stopknop zei al wat hij is (huisje, vloed), dus
 vloeit hij nu in inkt met het huisje in papier (15,9:1), is de streep door de
 ballon inkt, en krijgt een geweigerde knop heel even een tweede inktring
 (het stilstaande signaal naast de schud, voor beperkte beweging). Het palet
@@ -397,27 +397,56 @@ gewoon in met volle maten.
 ## Wat je moet vasthouden, zegt dat
 
 Een lange druk is alleen voor wat echt niet ongedaan te maken is, en dat is
-nog precies één ding: **stoppen**. Die knop loopt via `holdButton()` en draagt
-als enige de stippellijn — gestippeld betekent nu dus letterlijk "dit is de
-onomkeerbare". `holdButton()` tekent de voortgang zelf, per frame: een
+nog precies één ding: **stoppen**. Het huisje dat je vasthoudt loopt via
+`holdButton()` (`.btn-houd`) en staat op twee plekken: in de hoek van de
+overdracht (`#btnStopHo`) en op de achterkant van de speelkaart in de pauze
+(`#btnStop`). `holdButton()` tekent de voortgang zelf, per frame: een
 CSS-overgang zou bij `prefers-reduced-motion` meteen op vol springen, en het
 toetsenbord zou de druk overslaan.
 
-Die stippellijn is een regel ín de knop en niet haar contour, en dat is één
-keer heen en weer gegaan. Eerst een streepje van 22 px onderin, in de kleur
+### Geen stippellijn
+
+Een stippellijn in de knop moest zeggen "vasthouden". Ze is twee keer heen
+en weer gegaan en daarna helemaal weg. Eerst een streepje van 22 px onderin, in de kleur
 van de knop zelf op 45% dekking: onzichtbaar, en het las als een vlekje.
 Het antwoord daarop was de hele omtrek stippelen — waarmee stoppen het enige
 vlak in de app werd zonder inkt-contour én zonder reliëf, en dus niet op het
 paneel lag maar eruit geknipt leek. Rood-gestippeld betekent buiten deze app
 bovendien "uitgeschakeld" of "sleep hier iets heen", niet "pas op".
 
+Daarna werd het een regel van volle breedte en volle dekking onderin de
+knop. Op een tegel van 48 px bleven daar twee streepjes van over, en Max
+vond het lelijk. Wat de knop echt uitlegt is de tik: die doet de druk voor
+(de vloed loopt een kwart op, de vinger drukt), en dat leert meer dan een
+teken dat je eerst moet kennen.
+
 De knop draagt nu dezelfde huid als pauze, huisje en terug (papier,
-inkt-rand, `--lift-1`), en houdt drie eigen tekens: de gestippelde regel in
-rust, de inkt die van onder naar boven volloopt tijdens het houden, en het
-teken dat halverwege omkeert naar papier zodra die vloed het inhaalt. Dat
-omslagpunt is het enige ijkpunt onderweg. Wat de eerste poging mankeerde was
-contrast en maat — volle dekking, volle breedte — niet de plek (de kleur is
-later inkt geworden, zie "Stoppen heeft geen eigen kleur").
+inkt-rand, `--lift-1`), zonder eigen teken in rust. Onderweg twee tekens: de
+inkt die van onder naar boven volloopt tijdens het houden, en het teken dat
+halverwege omkeert naar papier zodra die vloed het inhaalt. Dat omslagpunt
+is het enige ijkpunt onderweg (de kleur is inkt, zie "Stoppen heeft geen
+eigen kleur").
+
+### Het huisje op de overdracht is zelf de uitgang
+
+Op de overdracht stond rechtsboven een huisje, want daar loopt geen klok en
+valt er niets te pauzeren. Een tik erop opende toch het pauzepaneel: de
+opdrachtkaart draaide om naar een achterkant met een tweede, kleiner huisje
+om vast te houden, en onder de gouden "verder" lag de ingedrukte startknop.
+Twee huisjes en twee speeltekens, en het eerste huisje bracht je niet naar
+huis. Max: "twee huisjes?".
+
+Nu is het huisje in de hoek zelf de knop die je vasthoudt: één huisje, één
+stap. Er is geen pauze op de overdracht meer; de stand en de ronde staan al
+op de opdrachtkaart, en zonder klok valt er niets stil te zetten. Een tik
+doet de druk voor, en de terugveeg ook: wie terugveegt, ziet waar de
+uitgang zit, maar een veeg gooit geen potje weg. Liggend viel het
+overdrachtpaneel bovendien terug op het losse paneel met de bruine sluier;
+dat bestaat nu niet meer. Alternatief bekeken: overal het pauzeteken in de
+hoek, met de startknop die wegzakt tijdens de pauze. Dat hield een stap
+extra om weg te gaan, en een pauze zonder klok.
+
+### Starten is een tik
 
 Starten hoorde daar ooit ook bij, maar dat was het niet waard. De klok
 starten is niet onomkeerbaar — pauze zet 'm zo weer stil — en de rekening
@@ -441,9 +470,8 @@ terugspoelen, of als familie van de pasknop eronder.
 
 **Het teken op stoppen is het huisje, geen kruis.** Een kruis op een paneel
 betekent overal "sluit dit", en wie dat dacht, wilde juist verder spelen: de
-betekenis was precies omgekeerd. Het huisje zegt waar je heen gaat, en het is
-het huisje dat op de overdracht dit paneel opende. Dat het iets kost, zegt
-de stippellijn en de lange druk, niet het teken.
+betekenis was precies omgekeerd. Het huisje zegt waar je heen gaat. Dat het
+iets kost, zegt de lange druk (en de tik die hem voordoet), niet het teken.
 
 **Een tik is een vraag, geen fout.** Wie er alleen op tikt, wil weten wat de
 knop doet. Een schud en een nee-trilling vertelden alleen dát het niet
@@ -1326,10 +1354,9 @@ Achter de omgedraaide kaart lag eerst nog een sluier van 82% inkt over het
 hele scherm. Op de ploegkleur gaf dat bruin (op rood) en marine (op blauw):
 twee kleuren buiten het palet, op een scherm waar de kaart de pauze al
 zegt. Nu is er geen sluier; wat stilstaat blijft ingedrukt (`.neer`, lijst
-`PAUZE_NEER`): tijdens een beurt de klokknop, goed en pas, op de overdracht
-het huisje en de startknop. Ze zakken hun schaduw in en liggen op
+`PAUZE_NEER`): de klokknop, goed en pas. Ze zakken hun schaduw in en liggen op
 `--paper-2`, en veren bij verder terug. Het losse paneel (de kaart is te
-klein, liggend op de overdracht of op 568 bij 320) houdt de sluier: daar
+klein, liggend op 568 bij 320) houdt de sluier: daar
 dekt geen kaart iets af.
 
 Het pauzepaneel lag als tweede vel papier midden op de kaart. Haar randen en
@@ -1362,11 +1389,9 @@ meteen weg, zoals altijd, en de kaart wordt op haar plek weer breed.
 - **Past het niet, dan een los paneel.** Liggend op 568 bij 320 is de kaart
   nog geen 60 px; dan meet `legPaneel()` overloop en valt terug op het
   paneel in het midden.
-- **Op de overdracht draait de opdrachtkaart om** (`#hoRoundCard`), op
-  Max' vraag om overal hetzelfde gedrag. Daar loopt geen klok, dus de
-  achterkant heeft geen band (`#pauze.klok` staat alleen tijdens een beurt).
-  De startknop blijft ingedrukt op `--paper-2` zolang het paneel openstaat,
-  dus er staan geen twee gouden speeltekens.
+- **Op de overdracht is er geen pauze.** Daar loopt geen klok, en het
+  huisje in de hoek is zelf de uitgang (zie "Het huisje op de overdracht is
+  zelf de uitgang").
 
 Wat er op de achterkant staat. Eerst lagen de stand en de twee deuren klein
 in het midden van een grote kaart: leeg, zei Max, en het huisje (een

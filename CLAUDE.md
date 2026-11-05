@@ -179,10 +179,14 @@ Pixel onderaan nul. Controleer door de bogen te tekenen, niet met
 `getBoundingClientRect()`.
 
 **Wat je moet vasthouden, zegt dat.** Een lange druk is alleen voor het
-onomkeerbare, en dat is precies één knop: stoppen, via `holdButton()`, als
-enige met de stippellijn. Het teken is het huisje, nooit een kruis (een
-kruis betekent "sluit dit paneel"). Een losse tik doet de druk voor in
-plaats van te weigeren; loslaten laat de vloed leeglopen. Starten is een
+onomkeerbare, en dat is precies één handeling: stoppen, via `holdButton()`
+(`.btn-houd`). Het huisje staat op twee plekken: in de hoek van de
+overdracht (`#btnStopHo`) en op de achterkant van de speelkaart
+(`#btnStop`). Er staat nooit een huisje dat een tweede huisje opent. Het
+teken is het huisje, nooit een kruis (een kruis betekent "sluit dit
+paneel"), zonder stippellijn of ander teken in rust: een losse tik doet de
+druk voor in plaats van te weigeren, en dat leert de knop. Loslaten laat de
+vloed leeglopen; de terugveeg op de overdracht doet de druk voor. Starten is een
 tik; het aftellen van drie tellen vangt een strijkende vinger op. Afbreken
 kan tijdens het aftellen alleen via de tegel rechtsboven (`#cdBack`), met
 het pauzeteken, niet via het hele vlak.
@@ -312,17 +316,16 @@ klokknop heeft lift. Op het aftellen staat de balk er al; alleen ligt
 ploegkleur.
 
 **Pauze draait de kaart om, zonder sluier.** Wat stilstaat blijft
-ingedrukt (`PAUZE_NEER`: de klokknop, goed en pas; op de overdracht het
-huisje en start); een sluier van inkt over de ploegkleur gaf bruin en
+ingedrukt (`PAUZE_NEER`: de klokknop, goed en pas); een sluier van inkt over de ploegkleur gaf bruin en
 marine. Alleen het losse paneel houdt de sluier. Tijdens een beurt ligt het pauzepaneel als
 achterkant op de gemeten plek van de kaart (`legPaneel()`), met haar eigen
 stilstaande band als rand. Erop: bovenaan de stand met het huisje in de hoek
 rechtsboven, daaronder het rondeteken (`#pauseRonde`) en "verder" alleen in
 het midden; alles in `cqmin`, zodat het met de kaart meeschaalt. Geen tweede
 klok, geen pauzebalken, en het woord ligt afgedekt. Verder draait haar weer
-om (`kaartBoven()`). Op de overdracht draait de opdrachtkaart zo om, met
-dezelfde achterkant zonder band. Past de achterkant niet op de kaart, dan
-een los paneel met de deuren naast elkaar.
+om (`kaartBoven()`). Op de overdracht is er geen pauze: er loopt geen klok,
+en het huisje in de hoek is zelf de uitgang. Past de achterkant niet op de
+kaart, dan een los paneel met de deuren naast elkaar.
 
 **Eén stand, twee schermen.** `buildTally()` bouwt de stand voor
 `#hoTally` en `#pauseTally`. Ook de stijlen staan in één selectorlijst met
