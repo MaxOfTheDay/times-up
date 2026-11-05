@@ -6199,7 +6199,9 @@ function handOffCountdown(done) {
     $("#btnGoed").classList.remove("neer");
     $("#btnPas").classList.remove("neer");
     done();
-    if (p) landOm($("#card"), p);
+    /* Het hele vak: draaiOm() vouwde de stapel eronder mee dicht, dus
+       vouwt ze ook mee open. Anders stond de stapel meteen weer breed. */
+    if (p) landOm($("#cardslot"), p);
     /* De punten blijven liggen. Het canvas van het aftellen houdt ze nog
        even, tot de golf van de laatste tel is uitgedempt; dan nemen de
        stille punten van het spelscherm het over, op dezelfde plekken. */
@@ -6249,7 +6251,9 @@ function beginTurn() {
 function runClock(totalMs) {
   cancelAnimationFrame(clockRaf);
   const step = now => {
-    const left = deadline - now;
+    /* De tijd van het beeld ligt soms vóór het moment dat deadline werd
+       gezet; dan las een beurt van 30 even 31. De klok gaat nooit omhoog. */
+    const left = Math.min(deadline - now, lastMs);
     if (left <= 0) { paintClock(0, totalMs); timeUp(); return; }
     paintClock(left, totalMs);
     if (left <= 10000) {
