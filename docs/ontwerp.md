@@ -417,8 +417,8 @@ bovendien "uitgeschakeld" of "sleep hier iets heen", niet "pas op".
 Daarna werd het een regel van volle breedte en volle dekking onderin de
 knop. Op een tegel van 48 px bleven daar twee streepjes van over, en Max
 vond het lelijk. Wat de knop echt uitlegt is de tik: die doet de druk voor
-(de vloed loopt een kwart op, de vinger drukt), en dat leert meer dan een
-teken dat je eerst moet kennen.
+(de knop blijft ingezakt terwijl de vloed een kwart oploopt), en dat leert
+meer dan een teken dat je eerst moet kennen.
 
 De knop draagt nu dezelfde huid als pauze, huisje en terug (papier,
 inkt-rand, `--lift-1`), zonder eigen teken in rust. Onderweg twee tekens: de
@@ -475,9 +475,15 @@ iets kost, zegt de lange druk (en de tik die hem voordoet), niet het teken.
 
 **Een tik is een vraag, geen fout.** Wie er alleen op tikt, wil weten wat de
 knop doet. Een schud en een nee-trilling vertelden alleen dát het niet
-mocht. Nu doet de knop de druk voor: de vloed loopt een kwart op, een vinger
-drukt op het huisje, en dan loopt het weer leeg (`holdButton()`, korter dan
-250 ms telt als tik). Wie wél hield en te vroeg losliet, ziet het rood in
+mocht. Nu doet de knop de druk voor: hij blijft ingezakt (`.voordoen`)
+terwijl de vloed een kwart oploopt, veert dan terug en loopt weer leeg
+(`holdButton()`, korter dan 250 ms telt als tik).
+
+**Geen getekende hand.** Er stond een hand bij die op het huisje drukte. Ze
+zei hetzelfde als de knop die ingedrukt blijft, met een figuur die nergens
+anders in het spel voorkomt, op een tegel van 48 px. Ze drukte bovendien op
+een knop die al teruggeveerd was, en vervaagde boven de inkt door grijs.
+Max koos voor de knop alleen. Wie wél hield en te vroeg losliet, ziet het rood in
 0,3 s weglopen in plaats van in één beeld te verdwijnen, en een nieuwe druk
 gaat verder waar de vloed stond. Twee keer tikken als alternatief is bekeken
 en afgewezen: een kleuter die twee keer port, stopt dan het spel, en dat is
