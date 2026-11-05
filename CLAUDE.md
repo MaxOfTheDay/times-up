@@ -285,7 +285,7 @@ beweging één stilstaand beeld.
 de startknop die na zijn tik achter de onderrand wegzakt, het oplossen van
 de sluier van het losse pauzepaneel bij hervatten (`.uit`; alleen de
 sluier, `.overlay::before`, het paneel vervaagt nooit), de eerste helft
-van het omdraaien (`draaiOm()`, `draaiWeg()`, `draaiPauze()`, `closePause()`), het scherm
+van het omdraaien (`draaiOm()`, `draaiWeg()`, `draaiPauze()`, `closePause()`, `sluitKijk()`), het scherm
 onder de titelcirkel (`naarTitel()`) en de kopie
 van de kaart die naar de teller krimpt of onderop gaat
 (`kaartSpook()`: eerst bóven de stapel omlaag, dan erachter terug in): de volgende kaart ligt er dan al onder. `hidden` gaat
@@ -306,9 +306,11 @@ komen daarna: vier rimpels bij de hoeken op de noten van de fanfare, een
 ring uit de kaart op de slotnoot, en één val snippers.
 
 **De eindstand telt niet, ze noemt.** Wie won staat in de kroon en de
-mascotte die groeit; per ploeg het totaal, met de drie rondes klein eronder.
+mascotte die rechtop komt; per ploeg het totaal, met de drie rondes klein eronder.
 Twee totalen even groot, op een papieren kaart zo breed als de opdrachtkaart
-(`.wn-kaart`), met de kroon binnen de rand. Grep voor je een korte
+(`.wn-kaart`). Vos en Uil zitten op haar bovenrand zoals op de overdracht:
+wie won gluurt tijdens het optellen en komt overeind met de kroon, de ander
+gluurt tot de ogen; bij gelijkspel staan ze allebei. Grep voor je een korte
 klassenaam pakt (`.bar` bestond al).
 
 **Eén label voor "wat er bij komt".** Het groene `+N` (`.gain`) staat alleen
@@ -335,7 +337,10 @@ het rondeteken schuiven boven de rand weg, de stapel onder de kaart is weg
 (`legSpelWeg()`, `#s-play.pauze`, op `translate`), en de klokknop blijft
 ingedrukt (`PAUZE_NEER`). Geen donkere grond, geen punten, geen papier: een
 sluier of donkere inkt gaf bruin en marine, papier leek op de titel of het
-einde van een beurt. Alleen het losse paneel houdt de sluier. Tijdens een beurt ligt het pauzepaneel als
+einde van een beurt. Alleen het losse paneel houdt de sluier. Terugkijken
+naar de stapel (`#kijk`) gaat net zo: de opdrachtkaart draait om, haar
+achterkant toont de kaarten die nog liggen, de startknop zakt weg
+(`legKijk()`, `sluitKijk()`), zonder sluier. Tijdens een beurt ligt het pauzepaneel als
 achterkant op de gemeten plek van de kaart (`legPaneel()`), met haar eigen
 stilstaande band als rand. Erop drie dingen: het rondeteken (`#pauseRonde`)
 in het midden, "verder" eronder, het huisje rechtsboven; geen stand (die
