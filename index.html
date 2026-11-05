@@ -5820,6 +5820,42 @@ let goRect = null;
 /* Ook de opdrachtkaart: een kopie op haar plek, die op het aftelvlak in de
    grond zakt (zie countdown()). Nu, want een tel later is ze weg. */
 let goKaart = null;
+/* Een kopie buiten #s-handoff verliest alles wat daar op id of op scherm
+   hangt: de dieren op de rand, de ruimte voor de rand, de maten van de stand.
+   Dan sprong de kaart op het eerste beeld van het aftellen naar een andere
+   opmaak en verdwenen Vos en Uil in één klap. Daarom krijgt elk element van
+   de kopie de berekende stijl van zijn origineel mee, zoals het er op het
+   moment van de tik bij lag (ook midden in een adem), en staat alles daarna
+   stil: de kopie is een afdruk, geen tweede overdracht.
+   Alleen de eigenschappen van maat, plek, vorm en verf: alle ruim 500 lezen
+   kost op een telefoon meer dan een beeld, en dat precies op de tik. Krijgt
+   de kaart een eigenschap die buiten deze lijst haar uiterlijk bepaalt, zet
+   hem erbij; de controle is het aftellen frame voor frame filmen. */
+const AFDRUK = ("display position top right bottom left width height min-width " +
+  "min-height max-width max-height box-sizing margin-top margin-right " +
+  "margin-bottom margin-left padding-top padding-right padding-bottom " +
+  "padding-left flex-direction flex-wrap flex-grow flex-shrink flex-basis " +
+  "order align-items align-self align-content justify-content row-gap " +
+  "column-gap aspect-ratio grid-template-columns grid-template-rows " +
+  "font-family font-size font-weight line-height letter-spacing text-transform " +
+  "text-align white-space color background-color border-top-width " +
+  "border-right-width border-bottom-width border-left-width border-top-style " +
+  "border-right-style border-bottom-style border-left-style border-top-color " +
+  "border-right-color border-bottom-color border-left-color box-shadow " +
+  "clip-path overflow-x overflow-y transform transform-origin translate rotate " +
+  "scale opacity visibility z-index filter fill stroke").split(" ");
+function bevries(bron, kopie) {
+  const a = [bron, ...bron.querySelectorAll("*")];
+  const b = [kopie, ...kopie.querySelectorAll("*")];
+  /* Eerst alles lezen, dan alles schrijven: één stijlberekening. */
+  const teksten = a.map(el => {
+    const cs = getComputedStyle(el);
+    let t = "";
+    for (const p of AFDRUK) t += p + ":" + cs.getPropertyValue(p) + ";";
+    return t + "animation:none;transition:none;";
+  });
+  b.forEach((el, i) => { el.style.cssText = teksten[i]; });
+}
 $("#btnStartTurn").addEventListener("click", () => {
   const r = $("#btnStartTurn").getBoundingClientRect();
   if (r.width > 0) goRect = { x: r.x, y: r.y, w: r.width, h: r.height };
@@ -5827,12 +5863,17 @@ $("#btnStartTurn").addEventListener("click", () => {
   const kaart = $("#hoRoundCard"), k = kaart.getBoundingClientRect();
   if (k.width > 0 && !stilAan()) {
     const kopie = kaart.cloneNode(true);
+    bevries(kaart, kopie);
     kopie.removeAttribute("id");
     kopie.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
     kopie.setAttribute("aria-hidden", "true");
     kopie.classList.add("cd-kaart");
-    Object.assign(kopie.style, { left: k.left + "px", top: k.top + "px",
-                                 width: k.width + "px", height: k.height + "px" });
+    Object.assign(kopie.style, { position: "absolute", margin: "0",
+                                 left: k.left + "px", top: k.top + "px",
+                                 width: k.width + "px", height: k.height + "px",
+                                 transform: "none", translate: "none", scale: "none",
+                                 rotate: "none", opacity: "1", boxSizing: "border-box",
+                                 pointerEvents: "none" });
     goKaart = kopie;
   }
   Snd.unlock(); startTurn();

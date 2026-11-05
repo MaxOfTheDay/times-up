@@ -934,7 +934,12 @@ aanraakte:
 - **De opdrachtkaart zakt in de grond**: een kopie op haar gemeten plek
   (`.cd-kaart`, in de klik-handler gemaakt, want een tel later is de kaart
   weg) zakt 10 px en krimpt naar 94% terwijl ze in 0,42 s verdwijnt. De
-  punten lagen er al die tijd onder, dus de grond springt niet.
+  punten lagen er al die tijd onder, dus de grond springt niet. De kopie
+  is een afdruk: `bevries()` geeft elk element de berekende maat, plek en
+  verf van zijn origineel mee (lijst `AFDRUK`). Zonder dat verloor ze alles
+  wat op `#s-handoff` of een id hangt, en sprong ze op het eerste beeld naar
+  een andere opmaak terwijl Vos en Uil van de rand verdwenen. Alle ruim 500
+  eigenschappen kopiëren kostte 30 tot 50 ms op de tik; de lijst kost 4 ms.
 - **Op nul gaat de schijf open** (`.countdown.open`): een gat zo groot als
   de schijf groeit in 0,45 s uit tot het hele scherm, met een laatste ring.
   Door het gat ligt het spelscherm al klaar; `done()` draait meteen, dus er
