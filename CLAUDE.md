@@ -277,7 +277,7 @@ beweging één stilstaand beeld.
 de startknop die na zijn tik achter de onderrand wegzakt, het oplossen van
 de sluier van het losse pauzepaneel bij hervatten (`.uit`; alleen de
 sluier, `.overlay::before`, het paneel vervaagt nooit), de eerste helft
-van het omdraaien (`draaiOm()`, `draaiWeg()`, `draaiPauze()`), het scherm
+van het omdraaien (`draaiOm()`, `draaiWeg()`, `draaiPauze()`, `closePause()`), het scherm
 onder de titelcirkel (`naarTitel()`) en de kopie
 van de kaart die naar de teller krimpt of onder de stapel zakt
 (`kaartSpook()`): de volgende kaart ligt er dan al onder. `hidden` gaat
@@ -332,7 +332,8 @@ in het midden, "verder" eronder, het huisje rechtsboven; geen stand (die
 hoort op de overdracht), geen dieren, geen zandloper; alles in `cqmin`,
 zodat het met de kaart meeschaalt. Geen tweede
 klok, geen pauzebalken, en het woord ligt afgedekt. Verder draait haar weer
-om (`kaartBoven()`). Op de overdracht is er geen pauze: er loopt geen klok,
+helemaal om: de achterkant wordt smal, dan de kaart breed (`closePause()`,
+`kaartBoven()`); pas daarna loopt de klok. Op de overdracht is er geen pauze: er loopt geen klok,
 en het huisje in de hoek is zelf de uitgang. Past de achterkant niet op de
 kaart, dan een los paneel met de deuren naast elkaar.
 

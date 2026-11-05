@@ -1432,8 +1432,12 @@ gemeten plek van de kaart (`legPaneel()`, `--kx/--ky/--kw/--kh`), met
 dezelfde contour en schaduw, en zijn rand is een kopie van haar band: pad,
 `viewBox`, streepjes en `data-time` worden overgenomen, dus ook de dikkere
 band en het warme papier onder vijf tellen. Erop: de ronde en de twee
-deuren. Verder draait de kaart weer om (`kaartBoven()`): het paneel is
-meteen weg, zoals altijd, en de kaart wordt op haar plek weer breed.
+deuren. Verder draait de kaart weer om, met beide helften: de achterkant
+wordt smal tot een rand (`closePause()`, `OMDRAAI`), dan wordt de kaart op
+haar plek weer breed (`kaartBoven()`). Een paneel dat in één beeld verdwijnt
+en alleen de kaart die openvouwt was een half omdraaien. Pas na de eerste
+helft gaat het paneel dicht en loopt de klok; het losse paneel en beperkte
+beweging sluiten meteen.
 
 - **De maat komt uit de opmaak.** De kaart staat tijdens de pauze op
   `scaleX(0)`, dus `legPaneel()` neemt `offsetWidth`/`offsetHeight` en

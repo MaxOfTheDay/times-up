@@ -7511,14 +7511,33 @@ function legSpelTerug(terug) {
       { duration: KAART_GROEI, easing: curve("uit") });
   });
 }
+/* Verder is het hele omdraaien: eerst wordt de achterkant smal tot een
+   rand, dan komt de kaart weer breed (kaartBoven()). Pas daarna gaat het
+   paneel dicht en loopt de klok. Het losse paneel en beperkte beweging
+   sluiten meteen. */
+let pauzeDicht = null;
 function closePause() {
+  if (pauzeDicht) return;
+  const pn = $("#pauze .panel");
+  if (kaartOm && $("#pauze").classList.contains("kaart") && !stilAan() && pn.animate) {
+    pauzeDicht = pn.animate([{ transform: "none" }, { transform: "scaleX(0)" }],
+      { duration: OMDRAAI, easing: curve("weg"), fill: "forwards" });
+    pauzeDicht.onfinish = () => { stopPauzeDicht(); sluitPauze(); };
+    return;
+  }
+  sluitPauze();
+}
+function stopPauzeDicht() {
+  if (pauzeDicht) { pauzeDicht.onfinish = null; pauzeDicht.cancel(); pauzeDicht = null; }
+}
+function sluitPauze() {
   const el = $("#pauze");
   el.hidden = true;
   /* Wat ingedrukt lag, veert terug (de overgang uit 3. KNOPPEN). */
   PAUZE_NEER.forEach(sel => $(sel).classList.remove("neer"));
   legSpelTerug(true);
   screensInert(false);
-  kaartBoven(true);     // het paneel is meteen weg; de kaart komt weer boven
+  kaartBoven(true);     // de achterkant is smal; de kaart komt weer breed
   if (pauseReturn && pauseReturn.isConnected) pauseReturn.focus({ preventScroll: true });
   pauseReturn = null;
   /* Pas ná het verzetten van de focus: inert zou hem anders naar de body
@@ -7592,6 +7611,7 @@ function stopPotje(knop) {
   pauseMs = 0; pauseReturn = null;
   stopClock(); releaseWake();
   if (paneel) {
+    stopPauzeDicht();
     $("#pauze").hidden = true;
     kaartBoven(false);
     PAUZE_NEER.forEach(sel => $(sel).classList.remove("neer"));
