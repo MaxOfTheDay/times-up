@@ -341,33 +341,35 @@ test('een heel potje: elke kaart drie keer geraden, niets dubbel', () => {
 const eigenVan = (n, laatst = () => 0) =>
   Array.from({ length: n }, (_, i) => ({ id: 'f' + i, woord: 'eigen' + i, laatst: laatst(i) }));
 
-test('eigen kaarten: hoogstens een kwart van de greep', () => {
-  for (const [size, max] of [[16, 4], [24, 6], [32, 8]]) {
+test('eigen kaarten: standaard vier, bij elke maat van de greep', () => {
+  for (const size of [16, 24, 32]) {
     const greep = Spel.drawDeck(DECKS, 'klein', size, [], rng(5), eigenVan(20));
     assert.equal(greep.length, size, 'de greep blijft even groot');
-    assert.equal(greep.filter(c => Spel.eigenId(c) !== null).length, max);
+    assert.equal(greep.filter(c => Spel.eigenId(c) !== null).length, Spel.EIGEN_STANDAARD);
   }
   const weinig = Spel.drawDeck(DECKS, 'klein', 24, [], rng(5), eigenVan(2));
-  assert.equal(weinig.filter(c => Spel.eigenId(c) !== null).length, 2, 'minder dan een kwart: allemaal');
+  assert.equal(weinig.filter(c => Spel.eigenId(c) !== null).length, 2, 'minder dan gevraagd: allemaal');
   assert.equal(weinig.length, 24);
 });
 
-test('eigen kaarten: het gekozen deel van de greep, afgerond, nooit meer dan er zijn', () => {
+test('eigen kaarten: het gekozen aantal, hetzelfde bij 16, 24 en 32, nooit meer dan er zijn', () => {
   const tel = g => g.filter(c => Spel.eigenId(c) !== null).length;
-  const verwacht = { 16: [0, 2, 4, 8], 24: [0, 3, 6, 12], 32: [0, 4, 8, 16] };
+  assert.deepEqual(Spel.EIGEN_AANTALLEN, [0, 2, 4, 8]);
   for (const size of [16, 24, 32]) {
-    Spel.EIGEN_DELEN.forEach((deel, i) => {
-      assert.equal(Spel.eigenAantal(size, deel), verwacht[size][i]);
-      const greep = Spel.drawDeck(DECKS, 'klein', size, [], rng(7), eigenVan(20), deel);
+    Spel.EIGEN_AANTALLEN.forEach(n => {
+      assert.equal(Spel.eigenAantal(size, n), n, '8 is de helft van 16, dus elke knop kan');
+      const greep = Spel.drawDeck(DECKS, 'klein', size, [], rng(7), eigenVan(20), n);
       assert.equal(greep.length, size, 'de greep blijft even groot');
-      assert.equal(tel(greep), verwacht[size][i], `deel ${deel} bij ${size}`);
+      assert.equal(tel(greep), n, `${n} bij ${size}`);
     });
   }
-  // Minder eigen kaarten dan het deel vraagt: allemaal, de rest gewone.
-  assert.equal(tel(Spel.drawDeck(DECKS, 'klein', 24, [], rng(7), eigenVan(5), 1 / 2)), 5);
-  // Geen deel of een onbekend deel: het kwart van altijd.
-  assert.equal(tel(Spel.drawDeck(DECKS, 'klein', 24, [], rng(7), eigenVan(20))), 6);
-  assert.equal(tel(Spel.drawDeck(DECKS, 'klein', 24, [], rng(7), eigenVan(20), 0.3)), 6);
+  // Nooit meer dan de helft van de greep, ook bij een kleinere greep.
+  assert.equal(Spel.eigenAantal(10, 8), 5);
+  // Minder eigen kaarten dan gevraagd: allemaal, de rest gewone.
+  assert.equal(tel(Spel.drawDeck(DECKS, 'klein', 24, [], rng(7), eigenVan(5), 8)), 5);
+  // Geen keuze of een onbekende: de standaard.
+  assert.equal(tel(Spel.drawDeck(DECKS, 'klein', 24, [], rng(7), eigenVan(20), 6)), 4);
+  assert.equal(tel(Spel.drawDeck(DECKS, 'klein', 24, [], rng(7), eigenVan(20), 1 / 4)), 4);
 });
 
 test('eigen kaarten: wie het langst niet kwam, gaat voor', () => {

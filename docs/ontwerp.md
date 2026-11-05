@@ -2138,8 +2138,8 @@ groepen, elk één vraag:
 
 - **Potje**: hoe lang een potje loopt. Aantal kaarten, Tijd per beurt.
 - **Kaarten**: welke kaarten erin kunnen. De lijst met Gewone en Eigen,
-  met de moeilijkheid onder de naam van Gewone en "In elk potje" in de rij
-  van Eigen.
+  met de moeilijkheid onder de naam van Gewone en "4 in elk potje" onder
+  de naam van Eigen.
 - **Deze telefoon**: Geluid, Trilling, installeren.
 - **Zo speel je**.
 
@@ -2161,15 +2161,20 @@ tweede rij getallen en woorden in één vak). De pagina wint: het
 hoofdscherm blijft het rustigst, en wie de stand omzet wil meestal ook zien
 welke kaarten dat zijn. Het kost één tik meer.
 
-**Eigen kaarten als één blok.** Hoeveel je er hebt en hoeveel er in een
-potje gaan staan samen, in de rij van Eigen: "In elk potje 0 3 6 12",
-kleiner dan de keuzes van het spel (40 px), zodat het een eigenschap van
-Eigen leest en geen vierde instelling. Het deel is een eigenschap van het
-potje; de telling naast Aantal kaarten ("5 eigen · 19 gewone") toont het
-gevolg daar. Ook gewogen: het deel op de pagina van Eigen (rustigst, maar
-0 voor bezoek kost dan een scherm) en als dunne regel onder Aantal kaarten
-(dan stapelen er weer twee rijen getallen). De strook van kaartjes is weg:
-de telling zegt hetzelfde in één regel.
+**Eigen kaarten zoals de moeilijkheid.** Hoeveel eigen kaarten er in elk
+potje gaan, kies je bovenaan haar kaarten op `#s-kaarten`, zoals de
+moeilijkheid bovenaan Gewone; op Instellingen zegt de rij van Eigen alleen
+de stand ("4 in elk potje", of "uit"). Zo zijn de twee rijen elkaars
+gelijke: een naam, een getal, de stand eronder, een pijl. Daarvoor stonden
+de knoppen klein in de rij van Eigen ("In elk potje 0 3 6 12"), met de
+menging ("5 eigen · 19 gewone") naast Aantal kaarten. Dat was één uitkomst
+uit twee groepen, met knoppen die van getal wisselden als je 16 of 32 koos,
+en vier keer "5" voor één vraag. Ook gewogen: één schakelaar (de app kiest
+hoeveel; maar je wil kunnen kiezen), de schakelaar in de rij van Eigen zelf
+(één rij met twee doelen), een teller met min en plus (een nieuw stuk dat
+nergens anders staat), en woorden als Geen, Wat, Veel (vaag tot je het
+getal ernaast leest, en met drie eigen kaarten doen Wat en Veel hetzelfde).
+Wat het kost: 0 voor bezoek is een scherm verder.
 
 **Eén vorm, één betekenis.** Op dit scherm zijn er twee soorten stukken. Een
 rij keuzeknoppen kiest er één; goud met een vinkje is de keuze. Een rij in
@@ -2535,16 +2540,19 @@ code gezet. Dat het spel van jullie is, is wat kinderen het hardst laat
 gieren: oma uitbeelden, of de hond. Eigen kaarten maken dat mogelijk zonder
 code: een foto of tekening en het woord, in Instellingen.
 
-- **Een deel van het potje, de langst niet getrokken eerst.** Je kiest 0,
-  ⅛, ¼ of ½ ("In elk potje"), standaard ¼. Een deel en geen vast
-  aantal: 4 van 16 is een kwart, 4 van 32 een achtste, en dan komt oma bij
-  het grote potje half zo vaak. Op de knoppen staat wel het aantal dat er
-  echt in gaat (24 met tien eigen: 0, 3, 6, 10; met vijf: 0, 3, 5 en een
-  verzonken 12), en de telling bij Aantal kaarten toont het. Stond er het
-  aantal dat het deel vraagt, dan was de gouden knop 6 terwijl de telling 5
-  zei. Een knop die meer vraagt dan er zijn ligt verzonken, behalve de
-  eerste die ze allemaal neemt; die verzonken knop houdt zijn eigen getal,
-  anders stonden er twee keer 5. Niet hoger dan de helft: met de
+- **Een vast aantal, de langst niet getrokken eerst.** Je kiest 0, 2, 4
+  of 8 ("In elk potje", bovenaan Eigen), standaard 4. Een aantal en geen
+  deel: eerst was het ⅛, ¼ of ½ van het potje, en dan stond er op de
+  knoppen 0 3 6 12 bij 24 en 0 4 8 16 bij 32. Je koos een deel en zag een
+  aantal, dus leek het of de app je keuze veranderde. Nu is 4 altijd 4, en
+  je denkt toch in foto's ("we hebben er vijf"), niet in delen. 8 is de
+  helft van de kleinste greep, dus elke knop kan bij elke maat. Met minder
+  eigen kaarten draagt de eerste knop die meer vraagt hun aantal (met twee:
+  0, 2 en verzonken 4 en 8), de knoppen erna liggen verzonken met hun eigen
+  getal, en de keuze blijft bewaard voor wie er later bijmaakt. Naast de
+  naam staat de uitkomst bij de maat van nu ("4 van de 24, om de beurt").
+  Een bewaard deel wordt bij het laden het aantal dat er het dichtst bij
+  ligt. Niet hoger dan de helft: met de
   helft zat na drie avonden steeds hetzelfde gezicht in elk potje en was oma
   geen verrassing meer. Los erdoor schudden was het andere uiterste: bij 275
   kaarten komt een eigen kaart dan bijna nooit, en daar maakte je haar niet

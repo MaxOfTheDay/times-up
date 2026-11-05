@@ -342,12 +342,12 @@ zakt niet in en er komt geen rimpel.
 **Het instellingenscherm.** Vier groepen, elk één vraag: Potje (hoe lang
 een potje loopt: Aantal kaarten met de telling van de menging op de regel
 van de naam, Tijd per beurt), Kaarten (welke kaarten erin kunnen: een
-lijst met Gewone en Eigen, de stand onder de naam van Gewone en "In elk
-potje" in de rij van Eigen), Deze telefoon (Geluid en Trilling als schakelaars in een lijst,
+lijst met Gewone en Eigen, elk met haar stand onder de naam: de
+moeilijkheid, en hoeveel eigen kaarten er in elk potje gaan), Deze telefoon (Geluid en Trilling als schakelaars in een lijst,
 installeren), Zo speel je (de vouwregel is de groepskop). Een veldnaam
 herhaalt zijn groepskop niet. De lange lijsten staan op hun eigen scherm,
 `#s-kaarten`, met bovenaan Gewone of Eigen als keuzeknoppen en de uitgang
-rechtsboven, en Moeilijkheid bovenaan Gewone; terug brengt je op
+rechtsboven, Moeilijkheid bovenaan Gewone en "In elk potje" bovenaan Eigen; terug brengt je op
 Instellingen (`terug()`). Twee soorten stukken, elk één betekenis: een rij
 keuzeknoppen kiest er één, een rij in een `.lijst` gaat naar een scherm (de
 pijl) of schakelt (`.knop`, goud is aan). Een rij zakt niet in; een druk kleurt hem. De keuzes zijn rijen
@@ -385,12 +385,15 @@ knop wisselt met `visibility`, nooit met `hidden`.
 (`Beeld`), niets verlaat de telefoon. In de greep is een eigen kaart
 `[Spel.EIGEN + id, woord]`.
 
-- `Spel.drawDeck` neemt er het gekozen deel van de greep
-  (`settings.eigenDeel`, een van `Spel.EIGEN_DELEN`: 0, ⅛, ¼, ½; standaard
-  ¼), de langst niet getrokken eerst, en een eigen kaart verdringt de
-  gewone met hetzelfde woord. Een deel en geen vast aantal; de knoppen
-  tonen het aantal dat er echt in gaat (`paintPotje()`); een verzonken
-  knop houdt zijn eigen getal.
+- `Spel.drawDeck` neemt er het gekozen aantal van
+  (`settings.eigenAantal`, een van `Spel.EIGEN_AANTALLEN`: 0, 2, 4, 8;
+  standaard 4; nooit meer dan de helft van de greep), de langst niet
+  getrokken eerst, en een eigen kaart verdringt de gewone met hetzelfde
+  woord. Een vast aantal en geen deel: de knoppen veranderen niet mee met
+  16, 24 of 32. Je kiest het bovenaan Eigen op `#s-kaarten`, met de
+  uitkomst ernaast (`paintPotje()`); de rij van Eigen op Instellingen
+  zegt "4 in elk potje". Met minder eigen kaarten draagt de eerste knop
+  die meer vraagt hun aantal; een verzonken knop houdt zijn eigen getal.
 - Een kaart zonder beeld bestaat niet: `Spel.zonder()` en
   `herstel(..., weg)` halen haar uit de stapel. Het herstel bij de start
   wacht daarom op `eigenKlaar`.

@@ -1020,19 +1020,6 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 .rij-naam small:empty { display: none; }
 .rij-tal { font-size: var(--fs-4); line-height: 1; font-variant-numeric: tabular-nums; }
 .rij-pijl { flex: none; width: 16px; height: 16px; }
-/* In elk potje: hoort bij de rij van Eigen erboven, dus geen lijn
-   ertussen, en kleiner dan de keuzes van het spel. */
-.rij-deel { display: flex; align-items: center; gap: var(--s-3); padding: 0 var(--s-3) var(--s-3); }
-.rij-lbl { font-size: var(--fs-2); font-weight: 700; color: var(--ink-2); white-space: nowrap; }
-.rij-deel .chips { flex: 1 1 auto; flex-wrap: nowrap; gap: var(--s-2); }
-.chips.fijn > .chip { min-height: 40px; }
-/* Op 320 px passen label en vier knoppen niet naast elkaar zonder dat het
-   vinkje over het getal valt: het label gaat erboven. */
-@media (max-width: 379px) {
-  .rij-deel { flex-wrap: wrap; row-gap: var(--s-2); }
-  .rij-deel .chips { flex-basis: 100%; }
-}
-.chips.getal.fijn > .chip { font-size: var(--fs-3); }
 /* De schakelaar: een vierkante knop die schuift, goud als hij aan staat.
    Uit verbleekt het teken ervoor ook. */
 .rij .teken { flex: none; width: 22px; height: 22px; }
@@ -2878,9 +2865,10 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 
       <!-- "Aantal kaarten": de tellingen van de bak staan op hun eigen rij
            onder KAARTEN, dus staan er geen twee getallen meer die allebei
-           "kaarten" heten boven elkaar. Rechts de menging van de greep. -->
+           "kaarten" heten boven elkaar. Hoeveel daarvan eigen kaarten zijn,
+           staat bij Eigen. -->
       <fieldset class="field">
-        <legend class="lg-tal">Aantal kaarten <span class="potje-tal" id="potjeTal"></span></legend>
+        <legend>Aantal kaarten</legend>
         <div class="chips getal" id="sizeChips" role="radiogroup" aria-label="Kaarten per potje">
           <button class="chip" role="radio" aria-checked="false" data-size="16">16
             <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
@@ -2914,9 +2902,9 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
       <!-- De bak als lijst: Gewone en Eigen, elk met het getal dat in de bak
            ligt, en een pijl naar hun kaarten op #s-kaarten. Onder de naam van
            Gewone staat de moeilijkheid; je zet haar om bovenaan haar kaarten,
-           want ze verandert alleen Gewone (90, 183, 275). Hoeveel eigen kaarten er
-           in een potje gaan, staat in de rij van Eigen zelf: één blok voor
-           alles over je eigen kaarten, en 0 voor bezoek blijft één tik. -->
+           want ze verandert alleen Gewone (90, 183, 275). Zo ook Eigen: onder
+           de naam hoeveel er in elk potje gaan, en je kiest het bovenaan
+           haar kaarten. Twee rijen die zich hetzelfde gedragen. -->
       <div class="lijst" id="bakLijst">
         <button class="rij" id="rijGewoon">
           <span class="rij-kaart" id="kaartGewoon" aria-hidden="true"></span>
@@ -2932,24 +2920,6 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
           <span class="rij-tal" id="eigenTel"></span>
           <svg class="rij-pijl" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-verder"/></svg>
         </button>
-        <!-- Een deel van het potje, geen vast aantal: 6 van 24 voelt als 8 van
-             32. Op de knoppen staat het aantal dat er echt in gaat
-             (paintPotje). 0 is voor bezoek: "Bobby" zegt een vriendje niets.
-             Kleiner dan de keuzes erboven: een eigenschap van Eigen, geen
-             vierde instelling. -->
-        <div class="rij-deel" id="eigenDeelVeld" hidden>
-          <span class="rij-lbl" id="deelLbl">In elk potje</span>
-          <div class="chips getal fijn" id="eigenDeelChips" role="radiogroup" aria-labelledby="deelLbl">
-          <button class="chip" role="radio" aria-checked="false" data-deel="0"><span class="n"></span>
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-          <button class="chip" role="radio" aria-checked="false" data-deel="1"><span class="n"></span>
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-          <button class="chip" role="radio" aria-checked="false" data-deel="2"><span class="n"></span>
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-          <button class="chip" role="radio" aria-checked="false" data-deel="3"><span class="n"></span>
-            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -3098,6 +3068,22 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
          plus vooraan: veertig kaarten lopen naar beneden door, niet opzij
          uit beeld. Een tik op een tegel opent dezelfde maker. -->
     <div class="lade" id="ladeEigen" hidden>
+      <!-- Hoeveel ervan in elk potje gaan, bovenaan de lijst, zoals de
+           moeilijkheid bij Gewone. Vaste getallen; rechts de uitkomst bij
+           de maat van nu (paintPotje). 0 is voor bezoek. -->
+      <fieldset class="field lade-tier" id="eigenAantalVeld" hidden>
+        <legend class="lg-tal"><span id="aantalLbl">In elk potje</span> <span class="potje-tal" id="eigenUitkomst"></span></legend>
+        <div class="chips getal" id="eigenAantalChips" role="radiogroup" aria-labelledby="aantalLbl">
+          <button class="chip" role="radio" aria-checked="false" data-n="0"><span class="n"></span>
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-n="1"><span class="n"></span>
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-n="2"><span class="n"></span>
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+          <button class="chip" role="radio" aria-checked="false" data-n="3"><span class="n"></span>
+            <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vink"/></svg></button>
+        </div>
+      </fieldset>
           <p class="hint">Tik op een kaart om ze aan te passen. Ze blijven op deze telefoon.</p>
           <div class="cards eigen-rij" id="eigenRij">
             <button class="pv eigen-plus" id="btnEigenNieuw" aria-label="Nieuwe kaart">
@@ -3482,18 +3468,18 @@ const Spel = (() => {
      beeld zelf woont buiten de spelkern, in IndexedDB. Het voorvoegsel kan
      geen emoji zijn (een emoji begint nooit met een letter). */
   const EIGEN = "eigen:";
-  /* Welk deel van de greep eigen kaarten mogen zijn: de volwassene kiest
-     uit deze vier (Instellingen, "In elk potje"). Een deel en geen
-     vast aantal: zo voelt het potje hetzelfde bij 16 als bij 32 kaarten. Een
-     kwart is de standaard; met de helft zaten na drie avonden steeds
-     dezelfde gezichten in elk potje, dus hoger dan de helft gaat het niet. */
-  const EIGEN_DELEN = [0, 1 / 8, 1 / 4, 1 / 2];
-  const EIGEN_DEEL = 1 / 4;
-  /* Hoeveel eigen kaarten een greep van deze maat krijgt bij dit deel, als
-     er genoeg zijn: 16 geeft 0, 2, 4 of 8; 24 geeft 0, 3, 6 of 12. */
-  function eigenAantal(size, deel) {
-    const d = EIGEN_DELEN.indexOf(deel) === -1 ? EIGEN_DEEL : deel;
-    return Math.round(size * d);
+  /* Hoeveel eigen kaarten er in elk potje gaan: de volwassene kiest uit
+     deze vier (bovenaan Eigen, "In elk potje"). Een vast aantal en geen
+     deel: 4 is 4, bij 16, 24 en 32 kaarten, zodat de knop nooit een ander
+     getal toont dan je koos. 8 is de helft van de kleinste greep; met meer
+     zaten na drie avonden steeds dezelfde gezichten in elk potje. */
+  const EIGEN_AANTALLEN = [0, 2, 4, 8];
+  const EIGEN_STANDAARD = 4;
+  /* Hoeveel eigen kaarten een greep van deze maat vraagt bij deze keuze,
+     als er genoeg zijn. Nooit meer dan de helft van de greep. */
+  function eigenAantal(size, aantal) {
+    const n = EIGEN_AANTALLEN.indexOf(aantal) === -1 ? EIGEN_STANDAARD : aantal;
+    return Math.min(n, Math.floor(size / 2));
   }
   function eigenId(kaart) {
     return typeof kaart[0] === "string" && kaart[0].indexOf(EIGEN) === 0
@@ -3502,8 +3488,8 @@ const Spel = (() => {
   /* Welke eigen kaarten in dit potje gaan: de kaarten die het langst niet
      kwamen eerst (laatst = wanneer ze voor het laatst getrokken werden, 0 is
      nooit), bij gelijke stand door het lot. Zo komt elke kaart aan de beurt. */
-  function eigenGreep(eigen, size, rnd, deel) {
-    const n = Math.min(eigen.length, eigenAantal(size, deel));
+  function eigenGreep(eigen, size, rnd, aantal) {
+    const n = Math.min(eigen.length, eigenAantal(size, aantal));
     return shuffle(eigen, rnd)
       .sort((a, b) => (a.laatst || 0) - (b.laatst || 0))
       .slice(0, n);
@@ -3512,12 +3498,12 @@ const Spel = (() => {
      Eigen kaarten gaan voor: een gewone kaart met hetzelfde woord blijft uit
      het potje zolang de eigen kaart bestaat (een foto van je eigen hond heet
      "hond"). */
-  function drawDeck(decks, tier, size, hidden, rnd, eigen, deel) {
+  function drawDeck(decks, tier, size, hidden, rnd, eigen, aantal) {
     eigen = eigen || [];
     const woorden = new Set(eigen.map(k => k.woord.toLocaleLowerCase("nl")));
     const bak = bakFor(decks, tier, hidden)
       .filter(c => !woorden.has(c[1].toLocaleLowerCase("nl")));
-    const mijn = eigenGreep(eigen, size, rnd, deel);
+    const mijn = eigenGreep(eigen, size, rnd, aantal);
     if (!mijn.length) return shuffle(bak, rnd).slice(0, size);
     return shuffle(mijn.map(k => [EIGEN + k.id, k.woord])
       .concat(shuffle(bak, rnd).slice(0, size - mijn.length)), rnd);
@@ -3689,7 +3675,7 @@ const Spel = (() => {
   }
 
   return {
-    ROUNDS, TIER_ORDER, MIN_BAK, GAME_MAX_AGE, MIN_REST, EIGEN, EIGEN_DEEL, EIGEN_DELEN, eigenAantal,
+    ROUNDS, TIER_ORDER, MIN_BAK, GAME_MAX_AGE, MIN_REST, EIGEN, EIGEN_STANDAARD, EIGEN_AANTALLEN, eigenAantal,
     shuffle, poolFor, bakFor, canHide, drawDeck, eigenId, eigenGreep, zonder,
     nieuw, total, over, beurtKlaar, beurtMs, trek,
     geraden, terug, passen, tijdOm, beurtWissel, rondeEinde, onderbreek,
@@ -4005,9 +3991,9 @@ let settings = {
   /* Los van geluid: wie het geluid uitzet om het huis stil te houden heeft
      een trilling in de hand juist het hardst nodig. */
   haptics: true,
-  /* Welk deel van het potje eigen kaarten zijn: een van Spel.EIGEN_DELEN
-     (0, 1/8, 1/4, 1/2). 0 is voor bezoek. */
-  eigenDeel: 1 / 4,
+  /* Hoeveel eigen kaarten er in elk potje gaan: een van
+     Spel.EIGEN_AANTALLEN (0, 2, 4, 8). 0 is voor bezoek. */
+  eigenAantal: 4,
   /* De regeluitleg staat open tot je één keer een spel gestart hebt. Daarna
      klapt ze dicht en blijft dat, tenzij iemand haar zelf weer openzet. */
   rulesOpen: true,
@@ -4032,9 +4018,10 @@ const $$ = s => Array.from(document.querySelectorAll(s));
    halve punten. Er is geen "verder spelen"-knop: de app komt gewoon terug
    waar ze was. */
 function load() {
+  let s0 = {};
   try {
     const s = JSON.parse(localStorage.getItem(KEY_SET) || "null");
-    if (s && typeof s === "object") settings = Object.assign(settings, s);
+    if (s && typeof s === "object") { s0 = s; settings = Object.assign(settings, s); }
   } catch (e) { /* kapotte opslag: gewoon opnieuw beginnen */ }
   // Opslag van vóór de kaartenbak heeft dit veld niet, en een kapotte
   // opslag kan er van alles in gezet hebben. Alles wat geen lijst van
@@ -4047,7 +4034,17 @@ function load() {
     delete settings.cardsOpen;
   }
   if (settings.lade !== "gewoon" && settings.lade !== "eigen") settings.lade = null;
-  if (Spel.EIGEN_DELEN.indexOf(settings.eigenDeel) === -1) settings.eigenDeel = Spel.EIGEN_DEEL;
+  // Eerst koos je een deel van het potje (eigenDeel: 0, 1/8, 1/4, 1/2); dat
+  // wordt het aantal dat er het dichtst bij ligt voor de maat van nu.
+  if ("eigenDeel" in settings) {
+    const d = Number(settings.eigenDeel);
+    if (isFinite(d) && !("eigenAantal" in s0)) {
+      const doel = d * (Number(settings.size) || 24);
+      settings.eigenAantal = Spel.EIGEN_AANTALLEN.reduce((a, b) => Math.abs(b - doel) < Math.abs(a - doel) ? b : a);
+    }
+    delete settings.eigenDeel;
+  }
+  if (Spel.EIGEN_AANTALLEN.indexOf(settings.eigenAantal) === -1) settings.eigenAantal = Spel.EIGEN_STANDAARD;
   settings.hidden = settings.hidden.filter(w => typeof w === "string");
   // De tijd kiest uit vier knoppen. Een waarde ertussenin (van de schuif
   // die er vroeger stond, of een kapotte opslag) gaat naar de dichtstbijzijnde.
@@ -4104,7 +4101,7 @@ const poolFor = tier => Spel.poolFor(DECKS, tier);
 const bakFor = tier => Spel.bakFor(DECKS, tier, settings.hidden);
 const canHide = word => Spel.canHide(DECKS, settings.hidden, word);
 const drawDeck = (tier, size) =>
-  Spel.drawDeck(DECKS, tier, size, settings.hidden, undefined, eigenInSpel(), settings.eigenDeel);
+  Spel.drawDeck(DECKS, tier, size, settings.hidden, undefined, eigenInSpel(), settings.eigenAantal);
 
 /* ==============================================================
    4. SCHERMEN
@@ -4188,41 +4185,42 @@ function paintSetup() {
 }
 
 /* ==============================================================
-   HET POTJE
-   De telling naast Aantal kaarten is de menging van de greep. Die
-   wordt pas bij Beginnen echt getrokken (drawDeck), dus dit is wat er
-   komt, niet welke kaarten. De knoppen
-   van "In elk potje" dragen het aantal dat er echt in gaat: met vijf
-   eigen kaarten zegt de knop van een kwart van 24 dus 5, niet 6. Een
-   knop die meer vraagt dan er zijn, en waar de knop ervoor er al
-   allemaal neemt, ligt verzonken, houdt zijn eigen getal en schudt bij
-   een tik.
+   HOEVEEL EIGEN KAARTEN
+   Bovenaan Eigen op #s-kaarten, zoals de moeilijkheid bovenaan Gewone;
+   de rij van Eigen op Instellingen zegt alleen de stand ("4 in elk
+   potje"). De knoppen dragen vaste getallen (Spel.EIGEN_AANTALLEN), die
+   niet meeveranderen met 16, 24 of 32. Met minder eigen kaarten draagt
+   de eerste knop die meer vraagt dan er zijn hun aantal; de knoppen
+   erna liggen verzonken, houden hun eigen getal en schudden bij een tik.
+   De keuze blijft bewaard: wie later kaarten bijmaakt, krijgt ze terug.
+   Naast de naam staat de uitkomst, met de maat van het potje erbij.
    ============================================================== */
 function eigenAantal() {
-  return Math.min(eigenInSpel().length, Spel.eigenAantal(settings.size, settings.eigenDeel));
+  return Math.min(eigenInSpel().length, Spel.eigenAantal(settings.size, settings.eigenAantal));
 }
-function deelTeVeel(i) {
-  return i > 0 && Spel.eigenAantal(settings.size, Spel.EIGEN_DELEN[i - 1]) >= eigenInSpel().length;
+function aantalTeVeel(i) {
+  return i > 0 && Spel.EIGEN_AANTALLEN[i - 1] >= eigenInSpel().length;
 }
 function paintPotje() {
-  const n = settings.size, k = eigenAantal();
-  const mijn = eigenInSpel();
-  $("#potjeTal").innerHTML = (k ? "<b>" + k + "</b> eigen · " : "") + "<b>" + (n - k) + "</b> gewone";
-
-  $("#eigenDeelVeld").hidden = eigenStuk || !mijn.length;
-  $$("#eigenDeelChips .chip").forEach(c => {
-    const i = Number(c.dataset.deel);
-    const vraagt = Spel.eigenAantal(n, Spel.EIGEN_DELEN[i]), op = deelTeVeel(i);
-    c.querySelector(".n").textContent = op ? vraagt : Math.min(vraagt, mijn.length);
-    c.setAttribute("aria-checked", String(Spel.EIGEN_DELEN[i] === settings.eigenDeel));
+  const mijn = eigenInSpel(), k = eigenAantal();
+  $("#eigenAantalVeld").hidden = eigenStuk || !mijn.length;
+  $("#eigenUitkomst").innerHTML = !k ? "uit"
+    : "<b>" + k + "</b> van de <b>" + settings.size + "</b>" + (mijn.length > k ? ", om de beurt" : "");
+  const A = Spel.EIGEN_AANTALLEN;
+  let gekozen = A.indexOf(settings.eigenAantal);
+  while (gekozen > 0 && aantalTeVeel(gekozen)) gekozen--;
+  $$("#eigenAantalChips .chip").forEach(c => {
+    const i = Number(c.dataset.n), op = aantalTeVeel(i);
+    c.querySelector(".n").textContent = op ? A[i] : Math.min(A[i], mijn.length);
+    c.setAttribute("aria-checked", String(i === gekozen));
     c.classList.toggle("op", op);
   });
 }
-$("#eigenDeelChips").addEventListener("click", e => {
+$("#eigenAantalChips").addEventListener("click", e => {
   const c = e.target.closest(".chip"); if (!c) return;
-  const i = Number(c.dataset.deel);
-  if (deelTeVeel(i)) { nudge(c); return; }
-  settings.eigenDeel = Spel.EIGEN_DELEN[i]; saveSettings(); paintPotje(); paintEigen();
+  const i = Number(c.dataset.n);
+  if (aantalTeVeel(i)) { nudge(c); return; }
+  settings.eigenAantal = Spel.EIGEN_AANTALLEN[i]; saveSettings(); paintEigen();
 });
 
 /* ==============================================================
@@ -4483,7 +4481,7 @@ function laadEigenLijst() {
     if (!s || typeof s !== "object") return;
     // Er was een Aan/Uit; uit wordt het deel 0, en de schakelaar verdwijnt
     // uit de opslag bij het volgende bewaren.
-    if (s.aan === false) { settings.eigenDeel = 0; saveSettings(); }
+    if (s.aan === false) { settings.eigenAantal = 0; saveSettings(); }
     if (Array.isArray(s.kaarten)) eigen.kaarten = s.kaarten
       .filter(k => k && typeof k.id === "string" && typeof k.woord === "string" && k.woord.trim())
       .map(k => ({ id: k.id, woord: k.woord, laatst: Number(k.laatst) || 0,
@@ -4491,7 +4489,7 @@ function laadEigenLijst() {
   } catch (e) { /* kapotte opslag: geen eigen kaarten */ }
 }
 /* Wat er van een potje mee mag doen: alles met een beeld. Hoeveel ervan,
-   beslist het deel (settings.eigenDeel, in Spel.drawDeck). */
+   beslist de keuze (settings.eigenAantal, in Spel.drawDeck). */
 function eigenInSpel() {
   return eigen.kaarten.filter(k => beelden.has(k.id));
 }
@@ -4553,17 +4551,18 @@ function paintEigen() {
   });
   const n = eigen.kaarten.length;
   $("#btnEigenNieuw").hidden = n >= EIGEN_MAX;
-  $("#eigenRij").classList.toggle("uit", !settings.eigenDeel);
+  $("#eigenRij").classList.toggle("uit", !settings.eigenAantal);
 
   /* De rij: leeg een gestippelde plus en "Maak je eerste kaart", anders
-     je eerste kaart, het getal, en "uit" als ze niet meedoen. */
-  const uit = n > 0 && !settings.eigenDeel;
+     je eerste kaart, het getal, en eronder hoeveel er in elk potje gaan
+     (of "uit"), zoals de stand onder Gewone. */
+  const uit = n > 0 && !settings.eigenAantal;
   $("#rijEigen").setAttribute("aria-label", n
     ? "Eigen kaarten: " + n + (uit ? ", uit" : "")
     : "Nieuwe eigen kaart");
   $("#eigenTel").textContent = n;
   $("#tabEigen").textContent = n;
-  $("#eigSub").textContent = !n ? "Maak je eerste kaart" : uit ? "uit" : "";
+  $("#eigSub").textContent = !n ? "Maak je eerste kaart" : uit ? "uit" : eigenAantal() + " in elk potje";
   const voor = $("#kaartEigen");
   voor.textContent = "";
   voor.classList.toggle("leeg", !n);
