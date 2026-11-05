@@ -287,8 +287,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    precies voor de mensen die hem het hardst nodig hebben. Zwart haalt
    15,9:1, en de offset van 4 px laat een reepje papier staan zodat de
    ring niet opgaat in de eigen contour van de knop. */
-:focus-visible { outline: var(--line) solid var(--ink); outline-offset: var(--s-1); }
-:focus:not(:focus-visible) { outline: none; }
+/* De ring staat alleen voor wie met toetsen speelt (html[data-toets], zie
+   toetsModus()). Chrome rekent op Android de terugveeg als toets, en dan
+   kreeg de knop die show() de focus geeft een ring als tweede rand. */
+:focus { outline: none; }
+:root[data-toets] :focus-visible { outline: var(--line) solid var(--ink); outline-offset: var(--s-1); }
 
 /* ---------- schermen ---------- */
 .screen {
@@ -5527,6 +5530,24 @@ $("#btnGear").addEventListener("click", () => { Snd.unlock(); openSetup(); });
    klik stond dan het volgende scherm een paar beelden leeg. De klik roept
    unlock() nog een keer aan, voor een browser die alleen een klik telt. */
 addEventListener("pointerdown", () => Snd.unlock(), { capture: true, passive: true });
+
+/* Wie met toetsen speelt, krijgt de focusring; een vinger of muis haalt hem
+   weg. Alleen toetsen die de focus verzetten of een knop indrukken tellen:
+   de terugveeg van Android komt binnen als toets (GoBack), en de letters
+   van het woord in de maker zijn geen navigatie. */
+const NAV_TOETSEN = new Set(["Tab", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight",
+  "Home", "End", "PageUp", "PageDown"]);
+function toetsModus() {
+  const root = document.documentElement;
+  addEventListener("keydown", e => {
+    const veld = e.target.closest && e.target.closest("input, textarea, [contenteditable]");
+    if (NAV_TOETSEN.has(e.key) || (!veld && (e.key === "Enter" || e.key === " ")))
+      root.dataset.toets = "";
+  }, { capture: true });
+  addEventListener("pointerdown", () => { delete root.dataset.toets; },
+    { capture: true, passive: true });
+}
+toetsModus();
 
 /* Te vroeg losgelaten: schudden, én de rand even in waarschuwingskleur.
    Dat tweede is er voor wie beperkte beweging aan heeft: daar valt de
