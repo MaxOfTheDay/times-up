@@ -176,12 +176,16 @@ het pauzeteken, niet via het hele vlak.
 **Eén overdrachtscherm, drie vakken.** `#s-handoff` is het enige scherm
 tussen twee beurten: stand, opdracht, start. De stand staat ín de
 opdrachtkaart. Beurtwissel en rondewissel hebben dezelfde maat en
-verschillen in beweging (`.mode-round`): bij een beurtwissel ademt de
-mascotte, bij een rondewissel krimpt de gouden schijf tot tegel en groeit de
+verschillen in beweging (`.mode-round`): bij een beurtwissel duikt wie net
+speelde achter de rand en komt de ander op (`RAND_WEG`, `RAND_OP`, op de
+ploegklank; zijn landing rimpelt de punten), bij een rondewissel krimpt de gouden schijf tot tegel en groeit de
 volgende ronde tot schijf (`.ronderij`, `paintRij()`). De drie rondes staan
 als één rij: nu is de schijf, de andere zijn gelijke papieren tegels, en de
 plek links of rechts zegt geweest of nog te komen. Geen kroon, geen "+N", geen
-fiche per punt op dit scherm. De wake lock blijft hier aan, begrensd op
+fiche per punt op dit scherm. Vos en Uil zitten op de bovenrand van de
+opdrachtkaart zoals op het merk (`.gluur`): wie aan zet is rechtop en
+ademend, de ander gluurt tot de ogen; in de stand staan alleen de cijfers,
+elk onder zijn dier. De wake lock blijft hier aan, begrensd op
 `WAKE_MAX`.
 
 **Eén pen voor tekening en mascotte.** Het teken op de kaart (en in
@@ -251,8 +255,11 @@ van de kaart die naar de teller krimpt of onder de stapel zakt
 meteen aan; `inert` pas na het verzetten van de focus.
 
 **Beloning.** Een beurt en een ronde eindigen met een stempel op de kaart
-(tijd om: de zandloper op inkt; stapel leeg: het vinkje op groen) en een
-adem van `BEURT_ADEM`; dan draait de kaart om (`draaiOm()`, `landOm()`) en
+(tijd om: de zandloper op inkt; stapel leeg: het vinkje op groen) dat
+goed en pas indrukt: ze zakken hun schaduw in en blijven op `--paper-2`
+liggen, nooit vervagen (een tint op een stromende grond mengt kleuren buiten
+het palet), en een adem van `BEURT_ADEM` waarin de buit op zijn plek
+springt (hij groeit niet over het rondeteken); dan draait de kaart om (`draaiOm()`, `landOm()`) en
 is haar achterkant de opdracht, de volgende ronde of de eindstand. De mascotte in de balk reageert via
 `mascotte()` (wip, juich, schrik, nee bij overslaan), met rek en klets, altijd
 met Web Animations en overgeslagen bij beperkte beweging; bij juich, schrik en
@@ -296,6 +303,8 @@ een los paneel met de deuren naast elkaar.
 **Eén stand, twee schermen.** `buildTally()` bouwt de stand voor
 `#hoTally` en `#pauseTally`. Ook de stijlen staan in één selectorlijst met
 allebei de plekken; iets alleen onder `#s-handoff` laat het paneel achter.
+De enige uitzondering is de rand: de dieren op de rand staan alleen op de
+overdracht, want boven de speelkaart ligt de balk.
 
 **Geluid en trilling.** Eén betekenis per cue, nooit het enige kanaal.
 Alle cues lopen door `Snd` en `Tril`, naar één bus met compressor. Geen
