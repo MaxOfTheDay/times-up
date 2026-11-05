@@ -270,9 +270,9 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(vragen === 0, 'de staf vroeg een tekening zonder woord');
   // Al in het spel: een woord van een gewone kaart krijgt een regel, een ander niet.
   await page.fill('#mkWoord', 'blub');
-  ok(await page.evaluate(() => document.querySelector('#mkAl').hidden), '"al in het spel" staat er bij een woord dat geen kaart is');
+  ok(await page.evaluate(() => !document.querySelector('#mkAl').classList.contains('aan') && getComputedStyle(document.querySelector('#mkAl')).visibility === 'hidden'), '"al in het spel" staat er bij een woord dat geen kaart is');
   await page.fill('#mkWoord', 'zon');
-  ok(await page.evaluate(() => !document.querySelector('#mkAl').hidden && !!document.querySelector('#mkAl .mk-al-teken').textContent),
+  ok(await page.evaluate(() => document.querySelector('#mkAl').classList.contains('aan') && !!document.querySelector('#mkAl .mk-al-teken').textContent),
      '"al in het spel" ontbreekt bij een woord dat al een gewone kaart is');
   ok(await page.evaluate(() => document.querySelector('#mkStaf').classList.contains('klaar')), 'de staf wordt niet goud met een woord');
   await page.click('#mkStaf');

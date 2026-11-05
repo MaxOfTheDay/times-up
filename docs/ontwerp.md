@@ -2228,7 +2228,9 @@ tot het eerste potje: een kop met een min ervoor en een lap tekst, het
 enige stuk op het scherm dat geen keuzeknop of rij was. Nu zijn ze één rij
 in een eigen lijst, met een pijl, net als Gewone en Eigen, en staan ze op
 `#s-regels` met de beelden uit het spel: de twee ploegen met hun dier en de
-drie rondes met hun teken. Wat het kost: een oppas die ze nooit zag moet
+drie rondes met hun teken. Vos en Uil staan ín de eerste zin, zonder tegel:
+twee opgetilde vlakken naast elkaar lazen als keuzeknoppen (zoals 16 / 24 /
+32), en een tik deed niets. Wat het kost: een oppas die ze nooit zag moet
 één keer tikken. Ook gewogen: de rij die in de lijst openklapt (geen extra
 scherm, maar open nog steeds een lap tekst, en een derde soort rij naast
 "gaat ergens heen" en "schakelt").
@@ -2712,6 +2714,15 @@ code: een foto of tekening en het woord, in Instellingen.
   die met een tweede tik dik of dun wordt, een emmer, een gum, een stap terug
   en alles weg: genoeg voor een kind van vier, zonder menu. Wie de gum pakt,
   heeft geen kleur meer gekozen; een tik op een kleur pakt de pen weer.
+  Een nieuwe tekening begint op de dikke pen (26 op 512): met de dunne (10)
+  werd een lijn op de tegel in Eigen kaarten ongeveer 2 px, en een kind
+  tekent grof. Fijn tekenen is één tik op de pen.
+- **Het vierkant krimpt tot Bewaren in beeld is.** Onder het vierkant staat
+  met tekenen 470 px; de ondergrens van 240 duwde Bewaren op 360x640 en
+  375x667 onder de rand. Nu 180: vanaf 640 px hoog past alles, op 320x568
+  rol je nog even, want kleiner wordt tekenen te krap. Het toetsenbord
+  telt niet mee: op Chrome (sinds 108) en Safari schuift het over de
+  pagina en verkleint het de layout niet.
 - **Zes tekenkleuren zijn inhoud, geen betekenis.** Inkt, rood, blauw, goud,
   groen en bruin. "Kleur betekent één ding" gaat over de stukken van het
   bord; wat er op een kaart staat is inhoud, net als de kleuren van een
@@ -2801,6 +2812,10 @@ accenten ("pinguin" is "pinguïn").
   naast het woord zonder zin liet raden wat het betekende, en het teken vaag
   op het lege vel botste met de staf en las als "teken dit na". De maker is
   voor de volwassene, dus een zin mag.
+- **Een vaste sleuf.** De zin komt bij de letter die het woord afmaakt, en
+  liet dan kleuren, gereedschap en Bewaren 38 px verspringen terwijl je
+  typt. Nu houdt hij altijd twee regels vrij en wisselt hij met
+  `visibility`, zoals de sleuf van hint en Alles terug op Gewone.
 - **Geen vaste beeldbank.** Een zoekfunctie over emoji of OpenMoji zou vooral
   kaarten vinden die al in het spel zitten; eigen kaarten zijn voor wat geen
   beeldbank heeft (de camera) en wat er tussenin valt (de staf).
