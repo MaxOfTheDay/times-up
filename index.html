@@ -913,15 +913,9 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 }
 /* ---- Zo speel je (#s-regels) ----------------------------------------
    Zin-tekst voor de volwassene, met de beelden uit het spel: de ploegen als
-   tegels met hun dier, de rondes als rijen in een lijst met hun teken. */
-.regel-ploegen { display: flex; gap: var(--s-3); }
-.regel-ploeg {
-  flex: 1 1 0; display: flex; align-items: center; gap: var(--s-3);
-  padding: var(--s-2) var(--s-3); font-size: var(--fs-3); font-weight: 700;
-  border: var(--line-2) solid var(--ink); background: var(--paper);
-  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
-}
-.regel-ploeg svg { width: 44px; height: 44px; flex: none; }
+   hun dier in de zin, de rondes als rijen in een lijst met hun teken. */
+.regel-ploeg { white-space: nowrap; }
+.regel-ploeg svg { width: 32px; height: 32px; vertical-align: middle; margin: -6px 2px -4px 0; }
 .regel-zin { margin: 0; font-size: var(--fs-3); line-height: 1.5; color: var(--ink-2); }
 .regel-zin b { color: var(--ink); }
 .regel-zin .nb { white-space: nowrap; }
@@ -1164,10 +1158,12 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 
 /* De maker: een scherm in de kolom van Instellingen. --mk is de zijde van
    het vierkant: zo breed als de kolom, maar staand nooit zo hoog dat Bewaren
-   op een gewone telefoon onder de rand valt; op een kleine rol je even. */
+   onder de rand valt. Met tekenen staat er onder het vierkant 470 px; een
+   ondergrens van 180 houdt Bewaren in beeld vanaf 640 px hoog (360x640,
+   375x667). Kleiner dan dat wordt tekenen te krap; op 320x568 rol je even. */
 #s-maker {
   --mk: min(100vw - 2 * var(--s-4), 440px,
-            max(240px, 100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 470px));
+            max(180px, 100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 470px));
 }
 #s-maker .maker { align-items: center; gap: var(--s-3); }
 #s-maker .maker > h1 { align-self: stretch; }
@@ -1206,9 +1202,15 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 /* Al in het spel: het teken van de gewone kaart en één zin, in de tweede
    inkt. Voor de volwassene, zoals alles in de maker. */
 .mk-al {
-  width: var(--mk); margin: 0; display: flex; align-items: center; gap: var(--s-2);
+  width: max(var(--mk), 256px); margin: 0; display: flex; align-items: center; gap: var(--s-2);
   font-size: var(--fs-2); line-height: 1.35; color: var(--ink-2);
 }
+/* Een vaste sleuf van twee regels: de zin wisselt met visibility, zodat de
+   kleuren en Bewaren niet verspringen bij de letter die hem oproept. Zo
+   breed als het gereedschap, anders breekt hij op een klein vierkant over
+   drie regels. */
+.mk-al { min-height: calc(2 * 1.35 * var(--fs-2)); }
+.mk-al:not(.aan) { visibility: hidden; }
 .mk-al-teken { font-size: 26px; line-height: 1; flex: 0 0 auto; }
 .mk-woord:focus { outline: none; border-bottom-style: solid; }
 /* Minstens 256 px: zes kleuren en vijf stukken gereedschap op één rij. Op
@@ -3092,11 +3094,11 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
 <section class="screen" id="s-regels">
   <div class="setup-scroll">
     <h1>Zo speel je</h1>
-    <div class="regel-ploegen">
-      <span class="regel-ploeg"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-vos"/></svg>Vos</span>
-      <span class="regel-ploeg"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-uil"/></svg>Uil</span>
-    </div>
-    <p class="regel-zin">Twee ploegen spelen drie rondes met dezelfde kaarten.</p>
+    <!-- De dieren staan in de zin, zonder tegel: twee opgetilde vlakken naast
+         elkaar lazen als een keuze, en hier valt niets te kiezen. -->
+    <p class="regel-zin">Twee ploegen, <span class="regel-ploeg"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-vos"/></svg><b>Vos</b></span>
+      en <span class="regel-ploeg"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-uil"/></svg><b>Uil</b></span>,
+      spelen drie rondes met dezelfde kaarten.</p>
     <ol class="lijst regel-rondes">
       <li class="rij"><span class="regel-teken"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#r-praten"/></svg></span>
         <span class="rij-naam">Omschrijven<small>Alles mag, behalve het woord zelf.</small></span></li>
@@ -3317,7 +3319,7 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
              autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="done"
              aria-label="Het woord op de kaart">
       <!-- Het woord is al een gewone kaart: zeg het, en wat bewaren dan doet. -->
-      <p class="mk-al" id="mkAl" hidden><span class="mk-al-teken" aria-hidden="true"></span>Staat al in het spel. Jouw kaart neemt haar plaats in.</p>
+      <p class="mk-al" id="mkAl"><span class="mk-al-teken" aria-hidden="true"></span>Staat al in het spel. Jouw kaart neemt haar plaats in.</p>
     </div>
     <div class="mk-rest">
       <!-- Zolang de camera loopt: album, afdrukken, omdraaien. De sluiter is
@@ -4672,7 +4674,7 @@ function zetMk(kaart, soort, woord) {
     kaart: kaart, soort: soort,
     img: null, nieuw: false, zoom: 1, x: 0, y: 0, s: 1,
     woord: kaart ? kaart.woord : woord || "", live: !kaart && soort === "foto" && camKan(),
-    acties: [], basis: null, kleur: KLEUREN[0][0], dik: false, gereed: "pen"
+    acties: [], basis: null, kleur: KLEUREN[0][0], dik: true, gereed: "pen"
   };
   $("#mkWoord").value = mk.woord;
 }
@@ -4947,7 +4949,7 @@ function keurMaker() {
     k !== mk.kaart && k.woord.toLocaleLowerCase("nl") === w);
   /* Een gewone kaart met hetzelfde woord: zeggen, niet tegenhouden. */
   const gewoon = w && !dubbel ? gewoneKaart(w) : null;
-  $("#mkAl").hidden = !gewoon;
+  $("#mkAl").classList.toggle("aan", !!gewoon);
   if (gewoon) $("#mkAl .mk-al-teken").textContent = gewoon[0];
   const knop = $("#mkBewaar");
   const beeld = mk.soort === "tekening" ? !!(mk.acties.length || mk.basis) : !!(mk.img && !mk.live);
