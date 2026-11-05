@@ -2071,10 +2071,8 @@ app twee regels hoger `ze` heet. Nu staat er geen voornaamwoord meer. En
 "sturen", niet "doorgeven": doorgeven is in deze app het toestel over tafel
 aanreiken.
 
-En: `.handmatig` staat in dezelfde twee lijsten als `.hint` -- de regel die
-tekst uit de kolom van het zwevende huisje houdt, en de plakkende band die
-hem weer opheft. Op het moment van schrijven paste die zin er toevallig
-sowieso naast; dat is geen reden om hem eruit te laten.
+De zinnen onder de knop zijn later weg: de stand is nu een rij in de lijst
+van Deze telefoon, en het woord op de rij zegt het al (zie Instellingen).
 
 De standen zijn niet af te dwingen in een test -- `beforeinstallprompt`
 vuurt alleen in een echte browser met een echt profiel, en iOS al helemaal
@@ -2141,7 +2139,7 @@ groepen, elk één vraag:
   met de moeilijkheid onder de naam van Gewone en "4 in elk potje" onder
   de naam van Eigen.
 - **Deze telefoon**: Geluid, Trilling, installeren.
-- **Zo speel je**.
+- **Zo speel je**: één rij naar de regels op `#s-regels`.
 
 **Twee banen, twee schermen.** Het spel voor vanavond instellen (een paar
 tikken, elke avond) en je kaarten beheren (wegleggen, eigen maken, af en
@@ -2190,10 +2188,23 @@ bepalen ze hoe het volgende potje loopt. Op 390x844 met de regels open stond
 de eerste keuzeknop op 49% van het scherm; nu, open of dicht, op 22% en staan daar
 alle drie de spelknoppen in het eerste scherm.
 
-De regels blijven open tot het eerste gestarte spel: de oppas die ze nooit
-zag vindt ze onder de knoppen, met een groepskop die openklapt. De vouwregel
-ís die kop (zelfde maat als `.group-head`, met de plus ervoor);
-een kop plus een vouwregel eronder zou twee keer hetzelfde zeggen.
+**De regels op hun eigen scherm.** Ze stonden onderaan als vouwregel, open
+tot het eerste potje: een kop met een min ervoor en een lap tekst, het
+enige stuk op het scherm dat geen keuzeknop of rij was. Nu zijn ze één rij
+in een eigen lijst, met een pijl, net als Gewone en Eigen, en staan ze op
+`#s-regels` met de beelden uit het spel: de twee ploegen met hun dier en de
+drie rondes met hun teken. Wat het kost: een oppas die ze nooit zag moet
+één keer tikken. Ook gewogen: de rij die in de lijst openklapt (geen extra
+scherm, maar open nog steeds een lap tekst, en een derde soort rij naast
+"gaat ergens heen" en "schakelt").
+
+**De app als rij.** Installeren en Delen stonden als losse knop met de
+merkplaat onder de lijst van Deze telefoon, met een zin eronder ("Dan staat
+ze met een eigen icoon tussen je andere apps", "Stuur de app door aan iemand
+die ook wil spelen"). Twee vormen in één groep, en een zin die uitlegt wat
+het woord al zegt. Nu is het de derde rij van die lijst: de plaat, "Op je
+beginscherm" of "Delen", en de pijl. Op iOS, waar niets aan te tikken valt,
+is het een rij zonder pijl met de weg eronder.
 
 **Drie lagen tekst, niet vier.** Titel, groepskop, veldnaam en vouwregel
 stonden alle vier in vette hoofdletters met spatiëring, alleen in maat
