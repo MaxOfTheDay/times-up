@@ -1366,14 +1366,53 @@ is de kaart die zegt wat er nu komt.
   winnaar). Bij gelijkspel blijft het papier.
 - Bij beperkte beweging gebeurt alles meteen.
 
-## Pauze draait de kaart om, zonder sluier
+## Pauze legt het spel weg en draait de kaart om, zonder sluier
+
+### Het spel gaat van het bord
+
+Max: na de start was de pauze "niet duidelijk", ook zonder de dubbele
+huisjes. De grond bleef vol rood, goed en pas lagen er ingedrukt bij, en van
+een afstand zag het scherm eruit als een beurt die liep. In zeven rondes
+mockups (`pauze/pauze-staat.html` in de projectmap) is geprobeerd:
+
+- **Donkerder.** Rasterpunten van inkt over de grond (Max: "zwart is niet
+  mooi"), fijne inktpunten (nog steeds zwart op rood), en een vlak donkere
+  inkt (een nieuwe kleur per ploeg, en die zakt naar bruin en marine).
+- **Lichter.** Papieren punten op rood (bleek, maar druk), en de grond naar
+  `--paper-2` met het rood als punten. Het rustigst, maar het bleef "niet
+  duidelijk".
+- **Papier.** De ploegkleur wijkt voor ingedrukt papier met de inktpunten
+  van de titel. Dat las goed als pauze, maar het lijkt op twee dingen die
+  iets anders betekenen: de titel (thuis) en het einde van een beurt (de
+  kleur trekt weg). Midden in een beurt zei het "dit is voorbij".
+- **Tekens.** Een zandloper op zijn zij, een groot pauzeteken op de kaart,
+  Vos en Uil slapend op de rand. Allemaal een tweede teken voor iets wat het
+  bord al zegt; de dieren brachten vooral beweging, en liggend is er boven
+  de kaart geen plek.
+
+Wat het duidelijk maakte, was niet de grond maar de vorm: het spel gaat
+van het bord. `legSpelWeg()` laat goed en pas achter de onderrand zakken
+en de mascotte en het rondeteken in de balk boven de rand wegschuiven, op
+`translate` met Web Animations (`transform` is van het indrukken), in
+`KAART_GROEI` met `--e-weg`; `legSpelTerug()` brengt ze met `--e-uit`
+terug. De stapel onder de kaart verdwijnt (`#s-play.pauze .cardslot
+.under`). Wat overblijft is een leeg bord in de ploegkleur, de ingedrukte
+klokknop (het pauzeteken, en wat je indrukte) en één omgedraaide kaart. De
+grond blijft zeggen wie er speelt, dus de kaart hoeft dat niet. Bij beperkte
+beweging verbergt `.pauze` de stukken meteen.
+
+Op de kaart staat wat je nodig hebt om verder te gaan: de regel van deze
+ronde, groot in het midden (een pictogram in een hoek leek op een knop), en
+de gouden knop eronder. Het huisje staat rechtsboven. De stand is weg: hij
+hoort op de overdracht, en midden in een beurt helpt hij niet.
+
+### Geen sluier
 
 Achter de omgedraaide kaart lag eerst nog een sluier van 82% inkt over het
 hele scherm. Op de ploegkleur gaf dat bruin (op rood) en marine (op blauw):
 twee kleuren buiten het palet, op een scherm waar de kaart de pauze al
-zegt. Nu is er geen sluier; wat stilstaat blijft ingedrukt (`.neer`, lijst
-`PAUZE_NEER`): de klokknop, goed en pas. Ze zakken hun schaduw in en liggen op
-`--paper-2`, en veren bij verder terug. Het losse paneel (de kaart is te
+zegt. Nu is er geen sluier; de klokknop blijft ingedrukt (`.neer`, lijst
+`PAUZE_NEER`) en veert bij verder terug. Het losse paneel (de kaart is te
 klein, liggend op 568 bij 320) houdt de sluier: daar
 dekt geen kaart iets af.
 
@@ -1392,9 +1431,13 @@ dezelfde plek breed worden (180 ms, `--e-uit`). Het paneel ligt op de
 gemeten plek van de kaart (`legPaneel()`, `--kx/--ky/--kw/--kh`), met
 dezelfde contour en schaduw, en zijn rand is een kopie van haar band: pad,
 `viewBox`, streepjes en `data-time` worden overgenomen, dus ook de dikkere
-band en het warme papier onder vijf tellen. Erop: de stand en de twee
-deuren. Verder draait de kaart weer om (`kaartBoven()`): het paneel is
-meteen weg, zoals altijd, en de kaart wordt op haar plek weer breed.
+band en het warme papier onder vijf tellen. Erop: de ronde en de twee
+deuren. Verder draait de kaart weer om, met beide helften: de achterkant
+wordt smal tot een rand (`closePause()`, `OMDRAAI`), dan wordt de kaart op
+haar plek weer breed (`kaartBoven()`). Een paneel dat in één beeld verdwijnt
+en alleen de kaart die openvouwt was een half omdraaien. Pas na de eerste
+helft gaat het paneel dicht en loopt de klok; het losse paneel en beperkte
+beweging sluiten meteen.
 
 - **De maat komt uit de opmaak.** De kaart staat tijdens de pauze op
   `scaleX(0)`, dus `legPaneel()` neemt `offsetWidth`/`offsetHeight` en
@@ -1420,19 +1463,19 @@ echte app gefotografeerd; Max koos deze:
 - **Het huisje in de hoek rechtsboven**, waar elke uitgang in de app staat.
   Het blijft de knop die je vasthoudt. "Verder" staat alleen in het midden,
   groter, en heeft niets naast zich om tegen af te wegen.
-- **De stand bovenaan, groter**, op één regel met het huisje.
 - **Het rondeteken boven "verder"** (`#pauseRonde`, via `paintRound(...,
-  "teken")`). Na een pauze is de regel van de ronde het eerste wat je kwijt
-  bent, en in de balk ligt hij onder de sluier. Dat vult de kaart met iets
-  wat je nodig hebt, in plaats van alles groter te maken.
+  "teken")`, 28 `cqmin`). Na een pauze is de regel van de ronde het eerste
+  wat je kwijt bent, en de balk is dan weg. Dat vult de kaart met iets wat
+  je nodig hebt, in plaats van alles groter te maken. De stand stond hier
+  eerst ook, bovenaan op één regel met het huisje; die is weg (zie "Het spel
+  gaat van het bord").
 - **Alles in `cqmin`**: het paneel is een container (`container-type:
   size`), dus de maten volgen de kaart, en liggend en op 320 bij 568 blijft
   alles binnen de band. De rijen zijn `auto 1fr auto auto 1fr`: rondeteken
-  en "verder" staan samen in het midden van wat er onder de stand overblijft.
-- Op de overdracht staan de stand en de ronde er nu ook op: de achterkant
-  dekt de voorkant af, dus wat daar stond is anders weg.
+  en "verder" staan samen in het midden van wat er onder het huisje
+  overblijft.
 - Het losse paneel (de kaart is te klein) houdt de deuren naast elkaar,
-  zonder rondeteken.
+  met het rondeteken erboven.
 - Bij beperkte beweging draait er niets; het paneel ligt er meteen.
 
 ## Vertrekken mag, als er niets achter wacht
@@ -1768,9 +1811,13 @@ en stilzetten gaan over dezelfde klok.
 - Liggend krimpen de tegels niet meer tot 40 px: de klokknop is een knop en
   houdt `--tap`, en de andere twee horen even hoog te zijn.
 
-## Eén stand, twee schermen
+## Eén stand
 
-`#hoTally` en de stand in het pauzepaneel zijn hetzelfde onderdeel: per ploeg
+De stand staat alleen nog op de overdracht (`#hoTally`); de pauze laat hem
+weg (zie "Het spel gaat van het bord"). Wat hieronder staat, is waarom er
+één bouwer is, uit de tijd dat hij op twee schermen stond.
+
+`#hoTally` en de stand in het pauzepaneel waren hetzelfde onderdeel: per ploeg
 een mascotte en een getal, en wie aan zet is is de grote mascotte. Ze waren
 losse kopieën, en die groeiden uit elkaar: de kopie in het paneel miste de
 `.head`-omhulling en viel daardoor buiten `.mini-score .head > svg`, zodat
