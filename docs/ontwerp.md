@@ -1615,8 +1615,8 @@ De derde is de kopie van de kaart (`kaartSpook()`): de volgende kaart ligt
 er vanaf het eerste beeld al onder. Die kopie blijft dekkend. Eerst vervaagde
 ze terwijl ze bewoog, en dan lagen twee tekeningen over elkaar (een appel
 door een paraplu, "APPEL" door "PARAPLU"); in slowmotion las het als vuil.
-Bij goed vliegt ze versnellend naar de teller en lost pas op het laatste
-derde op, als ze al klein is. Bij pas schuift ze ónder de stapel: ze wordt
+Bij goed vliegt ze dekkend naar de teller (zie "Eén label voor wat er bij
+komt"). Bij pas schuift ze ónder de stapel: ze wordt
 vóór de randen in `.cardslot` gezet, dus achter de nieuwe kaart, en piept
 nog even onder de onderrand uit. Een kopie die bóven de nieuwe kaart naar
 beneden zakt, zei het omgekeerde van wat er gebeurt.
@@ -1848,6 +1848,28 @@ Drie dingen die daarbij vastzitten:
   een transform op een voorouder laat een `position: fixed` nakomeling tegen
   dát vlak rekenen in plaats van tegen het venster; zonder de landing bleef
   ze over het overdrachtscherm heen vliegen.
+
+Daarna nog twee dingen, uit een opname op een tiende van de snelheid en
+een mock-up met drie versies (nu, vliegen zonder duw, eerst optillen dan
+vliegen). Max koos vliegen zonder duw:
+
+- **De kaart eronder beweegt niet.** De volgende kaart werd schuin van
+  linksboven gedeeld (`.card.in`, 180 ms). Dat gebeurde bijna helemaal
+  onder de vliegende kopie, die haar eerste 100 ms nog bijna op ware
+  grootte staat; wat overbleef was een scheve hoek die uitstak in de
+  richting waar de kopie heen ging. Het las als een stapel die schokt, niet
+  als een kaart die aankomt, en het was geen van de zeven werkwoorden. Een
+  kaart van een stapel tillen laat zien wat eronder lag; meer hoeft niet.
+  Pas houdt zijn eigen aankomst (van onder de stapel), dus de twee knoppen
+  blijven verschillend: de kopie vliegt omhoog of zakt onder de stapel.
+- **De vlucht vervaagt niet en vliegt op `--e-vloei`.** Op `--e-weg` was
+  de kaart op 80% van de tijd pas 64% van de weg gekomen, nog zo'n 110 px
+  breed, en daar begon het vervagen: een doorschijnende kaart over de
+  balk, roze op rood en twee beelden over het groene vak. Nu blijft ze
+  dekkend en heeft ze bij aankomst precies de hoogte van het vak; dan is ze
+  weg en wipt het vak op haar plek. `--e-vloei` is de curve die de
+  bewegingstabel al voor vliegen noemt; hij remt af in het vak in plaats
+  van er op volle snelheid tegenaan te slaan. Dezelfde 220 ms.
 
 Hetzelfde stijgt hoorbaar mee: `Snd.goed(i)` gaat een halve toon omhoog per
 geraden kaart van deze beurt, tot zeven. Een reeks klinkt dan als klimmen,
