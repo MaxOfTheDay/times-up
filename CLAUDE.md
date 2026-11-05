@@ -316,8 +316,8 @@ is cache eerst, ververs erachter, met `res.ok` vóór `cache.put` en
 `cache: "no-cache"` bij het verversen. Geen melding over een nieuwe versie; wel een stille herlaadbeurt als de
 pagina verborgen raakt op de titel zonder bewaard potje (`meldNieuw()`).
 Het installeerveld heeft vijf standen (`knop`, `zetop`, `menu`, `delen`,
-`weg`), staat in de groep Deze telefoon, en levert alleen de weg die het
-platform heeft weggenomen.
+`weg`), is hoogstens één rij in de lijst van Deze telefoon (zonder
+uitlegzin), en levert alleen de weg die het platform heeft weggenomen.
 
 **Eén letter voor cijfers en koppen.** Fredoka, ingebakken als base64 in de
 `@font-face`, vast op 700, met cijfers die even breed zijn. Hij staat op wat
@@ -344,7 +344,8 @@ een potje loopt: Aantal kaarten met de telling van de menging op de regel
 van de naam, Tijd per beurt), Kaarten (welke kaarten erin kunnen: een
 lijst met Gewone en Eigen, elk met haar stand onder de naam: de
 moeilijkheid, en hoeveel eigen kaarten er in elk potje gaan), Deze telefoon (Geluid en Trilling als schakelaars in een lijst,
-installeren), Zo speel je (de vouwregel is de groepskop). Een veldnaam
+en de rij om te installeren of te delen), Zo speel je (één rij naar
+`#s-regels`). Een veldnaam
 herhaalt zijn groepskop niet. De lange lijsten staan op hun eigen scherm,
 `#s-kaarten`, met bovenaan Gewone of Eigen als keuzeknoppen en de uitgang
 rechtsboven, Moeilijkheid bovenaan Gewone en "In elk potje" bovenaan Eigen; terug brengt je op

@@ -243,7 +243,7 @@
 /* Alles wat in Fredoka staat, op één plek: cijfers, koppen, het woord op de
    kaart en de knoppen in hoofdletters. De chips en veldnamen niet; dat is
    zin-tekst voor de volwassene. */
-.wordmark h1, #s-setup h1, #s-kaarten h1, .group-head, .rules > summary,
+.wordmark h1, #s-setup h1, #s-kaarten h1, #s-regels h1, .group-head,
 .cd-disc b, .chips.getal > .chip, .roundcard b, .ho-count span, .mini-score b,
 .secs-left, .gain, .cardword, .kijk-grid small,
 .pv small, .tally .sr b, .tally .num, .btn-plain, .cb-index button, .st-tal {
@@ -764,11 +764,11 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 /* ============================================================
    5. INSTELLINGEN — het enige scherm met tekst. Voor de volwassene.
    ============================================================ */
-#s-setup, #s-kaarten { padding: 0; }
+#s-setup, #s-kaarten, #s-regels { padding: 0; }
 /* De kolom is overal even breed, ook op een liggende telefoon (breed maar
    niet hoog): anders rekken de keuzeknoppen uit tot platte balken en wordt de
    uitleg 105 tekens breed. */
-#s-setup.screen, #s-kaarten.screen { align-items: center; }
+#s-setup.screen, #s-kaarten.screen, #s-regels.screen { align-items: center; }
 .setup-scroll { width: 100%; max-width: 560px; }
 
 /* Tekst blijft uit de kolom van het zwevende huisje. Een omrand vlak onder de
@@ -782,9 +782,7 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   .setup-scroll .group-head,
   .setup-scroll legend,
   .setup-scroll .hint,
-  .setup-scroll .handmatig,
-  .setup-scroll summary,
-  .rules p, .rules li {
+  .setup-scroll .regel-zin {
     /* 64 px: de knop begint op --corner + --tap van de rechterrand (80), de
        kolom eindigt op --s-4 (16). Plus --s-2 lucht. */
     padding-right: calc(var(--corner) + var(--tap) - var(--s-4) + var(--s-2));
@@ -803,7 +801,7 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   padding: calc(env(safe-area-inset-top, 0px) + var(--s-4)) var(--s-4)
            calc(env(safe-area-inset-bottom, 0px) + var(--corner));
 }
-#s-setup h1, #s-kaarten h1 {
+#s-setup h1, #s-kaarten h1, #s-regels h1 {
   font-size: var(--fs-5); font-weight: 900; text-transform: uppercase;
   letter-spacing: var(--track-caps); margin: var(--s-2) 0 0;
 }
@@ -829,13 +827,11 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   .setup-scroll .group-head,
   .setup-scroll legend,
   .setup-scroll .hint,
-  .setup-scroll .handmatig,
-  .setup-scroll summary,
-  .rules p, .rules li { padding-right: 0; }
+  .setup-scroll .regel-zin { padding-right: 0; }
   .cb-index { margin-right: 0; }
 
   .setup-scroll { padding-top: 0; }
-  #s-setup .setup-scroll > h1, #s-kaarten .setup-scroll > h1 {
+  #s-setup .setup-scroll > h1, #s-kaarten .setup-scroll > h1, #s-regels .setup-scroll > h1 {
     position: sticky; top: 0; z-index: 2;
     box-sizing: border-box; display: flex; align-items: center;
     min-height: calc(env(safe-area-inset-top, 0px)
@@ -849,7 +845,8 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
      scheidt hij niets, en met de groepskoppen eronder stonden er dan twee
      strepen vlak boven elkaar. Een schaduw en geen rand, zodat er niets
      verspringt als hij komt. */
-  #s-setup .setup-scroll.geschoven > h1, #s-kaarten .setup-scroll.geschoven > h1 { box-shadow: 0 var(--line-2) 0 var(--rule); }
+  #s-setup .setup-scroll.geschoven > h1, #s-kaarten .setup-scroll.geschoven > h1,
+  #s-regels .setup-scroll.geschoven > h1 { box-shadow: 0 var(--line-2) 0 var(--rule); }
 }
 
 /* Waar de band niet past (onder 592 breed én onder 560 hoog), levert de
@@ -894,14 +891,14 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
    velden. Meer lucht hoeft niet: de schuif onderaan Spel heeft al ruim een
    halve tikhoogte wit onder zijn baan. */
 .field-group + .field-group,
-.field-group + .rules, .rules + .field-group { margin-top: var(--s-4); }
+.field-group + .lijst { margin-top: var(--s-4); }
 /* Vier groepen, elk één vraag:
      Potje -- hoe lang een potje loopt: aantal kaarten, tijd per beurt.
      Kaarten -- welke kaarten erin kunnen: Gewone en Eigen als lijst (met
        In elk potje bij Eigen); hun kaarten staan op #s-kaarten, met de
        moeilijkheid bovenaan Gewone.
      Deze telefoon -- geluid, trilling en installeren.
-     Zo speel je -- de regels, met de vouwregel als groepskop.
+     Zo speel je -- één rij naar de regels op #s-regels.
 
    Zet hier nooit een #s-setup h2 naast: die wint op zijn ID, ongeacht de
    volgorde, en dan zien de groepskoppen eruit als veldlabels. Geen goud: dat
@@ -910,47 +907,25 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
   font-size: var(--fs-2); font-weight: 900; text-transform: uppercase;
   letter-spacing: var(--track-caps); margin: 0; color: var(--ink-2);
 }
-/* Geen gouden rail: goud betekent op dit scherm "gekozen". Deze vouwregel en
-   die van de kaartenbak doen hetzelfde, dus dragen ze dezelfde vorm. */
-.rules {
-  font-size: var(--fs-2); line-height: 1.5; color: var(--ink-2);
+/* ---- Zo speel je (#s-regels) ----------------------------------------
+   Zin-tekst voor de volwassene, met de beelden uit het spel: de ploegen als
+   tegels met hun dier, de rondes als rijen in een lijst met hun teken. */
+.regel-ploegen { display: flex; gap: var(--s-3); }
+.regel-ploeg {
+  flex: 1 1 0; display: flex; align-items: center; gap: var(--s-3);
+  padding: var(--s-2) var(--s-3); font-size: var(--fs-3); font-weight: 700;
+  border: var(--line-2) solid var(--ink); background: var(--paper);
+  box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
 }
-.rules p { margin: 0 0 var(--s-2); }
-.rules b { color: var(--ink); }
-/* De naam met het dier eraan vast, op één regel. Alleen het dier zakt
-   (-.45em), zodat het woord zijn eigen basislijn houdt. */
-.teamname { white-space: nowrap; }
-.teamname svg { width: 1.4em; height: 1.4em; vertical-align: -.45em; margin-left: 3px; }
-/* De rondes als genummerde lijst: ze hebben een volgorde. Eigen inspringing;
-   de standaard veertig pixels laat de nummers los zweven. */
-/* Een plus die een min wordt in plaats van het driehoekje van de browser, dat
-   op elke machine anders is. list-style: none is nodig voor Safari. */
-/* min-height op --tap: niets dat je aanraakt is kleiner dan 48 px, ook deze
-   regel niet. */
-/* De vouwregel ís de groepskop: zelfde maat en streep als .group-head, met
-   de plus ervoor. */
-.rules > summary {
-  list-style: none; cursor: pointer;
-  display: flex; align-items: center; gap: var(--s-2);
-  min-height: var(--tap); box-sizing: border-box;
-  font-size: var(--fs-2); font-weight: 900; text-transform: uppercase;
-  letter-spacing: var(--track-caps); color: var(--ink-2);
-}
-.rules > summary::-webkit-details-marker { display: none; }
-.rules > summary::before {
-  content: "+";
-  font-weight: 900; font-size: var(--fs-3); line-height: 1;
-  width: 1.1em; text-align: center;
-}
-.rules[open] > summary::before { content: "−"; }
-/* Lucht tussen de kop en de tekst pas als hij openstaat, net als
-   een lade -- dichtgeklapt is er niets om lucht van te houden. */
-.rules[open] > summary { margin-bottom: var(--s-3); }
-.rules ol {
-  margin: 0 0 var(--s-2); padding-left: 1.4em;
-}
-.rules li { margin: 0 0 2px; }
-.rules li::marker { font-weight: 900; color: var(--ink); }
+.regel-ploeg svg { width: 44px; height: 44px; flex: none; }
+.regel-zin { margin: 0; font-size: var(--fs-3); line-height: 1.5; color: var(--ink-2); }
+.regel-zin b { color: var(--ink); }
+.regel-zin .nb { white-space: nowrap; }
+.regel-rondes { margin: 0; padding: 0; list-style: none; }
+.regel-rondes > .rij + .rij { border-top: 2px solid var(--rule); }
+.regel-rondes .rij-naam small { font-size: var(--fs-2); font-weight: 400; margin-top: 2px; }
+.regel-teken { flex: none; width: 48px; height: 48px; display: grid; place-items: center; }
+.regel-teken svg { width: 44px; height: 44px; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 10px; }
 .chip {
@@ -1336,22 +1311,16 @@ button.pv:active, button.btn-plain:active, button.ho-count:active,
 .plaat { flex: 0 0 auto; display: block; background: var(--ink); padding: 2px; }
 .plaat svg { display: block; width: 100%; height: 100%; }
 .btn-plain { display: inline-flex; align-items: center; gap: var(--s-3); }
-#btnInstall .plaat, #btnDelen .plaat { width: 32px; height: 32px; }
+/* In een rij: zo breed als het teken van Geluid en Trilling, zodat de namen
+   op één lijn beginnen. */
+.rij .plaat { width: 24px; height: 24px; margin: 0 -1px; }
 
-/* Dezelfde plaat, dezelfde belofte, zonder knop: op iOS valt er niets aan
-   te tikken en na een weggetikte dialoog is de knop opgebruikt. Beeld met
-   bijschrift, zoals de kaartjes in de bak -- dus dezelfde inkt als een
-   .hint, want de plaat is de mededeling en de zin het bijschrift. */
-.handmatig {
-  display: flex; align-items: center; gap: var(--s-3);
-  margin: 0; font-size: var(--fs-2); line-height: 1.45; color: var(--ink-2);
-}
-.handmatig .plaat { width: 40px; height: 40px; padding: 3px; }
-.handmatig b { color: var(--ink); font-weight: 900; }
-/* Het deel-teken staat middenin een zin, dus loopt het met de regel mee in
-   plaats van op een vaste pixelmaat te staan: wie hier inzoomt, zoomt het
-   teken mee in. */
-.handmatig .teken { width: 1.3em; height: 1.3em; vertical-align: -.3em; }
+/* De weg met de hand staat onder de naam, in zin-tekst. Het deel-teken loopt
+   met de regel mee in plaats van op een vaste pixelmaat te staan: wie hier
+   inzoomt, zoomt het teken mee in. */
+#installHand .rij-naam small { font-size: var(--fs-2); font-weight: 400; line-height: 1.45; margin-top: 2px; }
+#installHand b { color: var(--ink); font-weight: 700; }
+#installHand .teken { width: 1.3em; height: 1.3em; vertical-align: -.3em; }
 
 
 /* Het teken speelt zijn regel twee keer voor als de overdracht binnenkomt
@@ -2741,6 +2710,14 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
           stroke="#14110F" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
   </symbol>
 
+  <!-- Zo speel je: een vel met regels. -->
+  <symbol id="i-regels" viewBox="0 0 100 100">
+    <g fill="none" stroke="#14110F" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="20" y="12" width="60" height="76" stroke-width="9"/>
+      <path d="M34 34 H66 M34 50 H66 M34 66 H54" stroke-width="8"/>
+    </g>
+  </symbol>
+
   <symbol id="i-vink" viewBox="0 0 100 100">
     <path d="M18 52 L40 74 L84 24" fill="none" stroke="#14110F" stroke-width="16"
           stroke-linecap="round" stroke-linejoin="round"/>
@@ -2940,66 +2917,48 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
           <svg class="teken" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-tril"/></svg>
           <span class="rij-naam">Trilling</span><span class="knop" aria-hidden="true"></span>
         </button>
+        <!-- De app zelf, in dezelfde lijst: hoogstens één van deze drie staat er
+             (toonInstall). De plaat is de belofte: dít vlak komt op het
+             beginscherm. Geen zin eronder: het woord zegt het al. Geen lange
+             druk: installeren is niets onomkeerbaars. -->
+        <!-- Verschijnt op het signaal van het toestel en verdwijnt pas als er
+             echt geïnstalleerd is. -->
+        <button class="rij" id="btnInstall" hidden>
+          <span class="plaat" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
+          <span class="rij-naam">Op je beginscherm</span>
+          <svg class="rij-pijl" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-verder"/></svg>
+        </button>
+        <!-- Alleen in app-modus: daar is er geen adresbalk en geen deelmenu
+             meer. In een tabblad bestaat die weg al. -->
+        <button class="rij" id="btnDelen" hidden>
+          <span class="plaat" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
+          <span class="rij-naam">Delen</span>
+          <svg class="rij-pijl" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-verder"/></svg>
+        </button>
+        <!-- De weg met de hand: op iOS bestaat er niets om aan te tikken, en
+             na een weggetikte dialoog is de knop hierboven opgebruikt. Een
+             rij zonder pijl, met de weg eronder; hoogstens één zin zichtbaar. -->
+        <div class="rij" id="installHand" hidden>
+          <span class="plaat" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
+          <span class="rij-naam">Op je beginscherm
+            <small class="zin" id="handZetop" hidden>Tik op <svg class="teken" viewBox="0 0 100 100"
+              role="img" aria-label="delen"><use href="#i-deel"/></svg> en kies <b>Zet op beginscherm</b>.</small>
+            <small class="zin" id="handMenu" hidden>Kies in het menu van de browser <b>App installeren</b>.</small></span>
+        </div>
       </div>
 
-      <!-- Geen lange druk: installeren is niets onomkeerbaars. Op iOS staat
-           de weg via het deelmenu er als eigen stand (#installHand). -->
-      <div class="field" id="installField" hidden>
-        <!-- De knop verschijnt op het signaal van het toestel en verdwijnt
-             pas als er echt geïnstalleerd is. "Installeren" en niet "App
-             installeren": de kop zegt al welke app. -->
-        <button class="btn-plain" id="btnInstall" hidden>
-          <span class="plaat" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
-          Installeren
-        </button>
-
-        <!-- Delen staat er alleen in app-modus: daar is er geen adresbalk en
-             geen deelmenu meer. In een tabblad bestaat die weg al en staat
-             hier niets -- de app levert alleen de weg die het platform heeft
-             weggenomen. Dezelfde plaat als de installatieknop: dezelfde plek,
-             dus niet flikkeren per stand. -->
-        <button class="btn-plain" id="btnDelen" hidden>
-          <span class="plaat" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
-          Delen
-        </button>
-
-        <!-- De weg met de hand. Dezelfde plaat, dezelfde belofte, alleen
-             zonder knop: op iOS bestaat er niets om aan te tikken, en na een
-             weggetikte dialoog is de knop hierboven opgebruikt. Twee zinnen,
-             altijd hoogstens één zichtbaar. -->
-        <p class="handmatig" id="installHand" hidden>
-          <span class="plaat" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
-          <span class="zin" id="handZetop" hidden>Tik op <svg class="teken" viewBox="0 0 100 100"
-            role="img" aria-label="delen"><use href="#i-deel"/></svg> en kies <b>Zet op beginscherm</b>.</span>
-          <span class="zin" id="handMenu" hidden>Het kan ook via het menu van de browser:
-            kies daar <b>App installeren</b>.</span>
-        </p>
-
-        <p class="hint" id="installHint"></p>
-      </div>
     </div>
 
-    <!-- De regels zijn een groep op zich, met de vouwregel als kop. Open tot
-         je één keer een spel gestart hebt: wie ze nooit zag (een oppas, een
-         opa) krijgt ze wel, de rest ziet één regel. Onder de knoppen, want
-         wie het tandwiel aantikt komt iets bijstellen. -->
-    <details class="rules" id="rules">
-      <summary>Zo speel je</summary>
-      <!-- De enige plek waar de ploegen bij naam én dier staan: dit is het
-           scherm van de volwassene. Het dier ernaast koppelt de naam aan het
-           beeld op de stand. -->
-      <p>Twee ploegen — <b class="teamname">Vos<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-vos"/></svg></b>
-        en <b class="teamname">Uil<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-uil"/></svg></b> —
-        spelen 3 rondes met dezelfde kaarten:</p>
-      <ol>
-        <li><b>Omschrijven</b> — alles mag, behalve het woord zelf.</li>
-        <li><b>Eén woord</b> — geef precies één woord als hint.</li>
-        <li><b>Uitbeelden</b> — niet praten.</li>
-      </ol>
-      <p>Goed geraden: <b>1 punt</b>. Passen mag. Is de stapel leeg, dan
-        begint de andere ploeg de volgende ronde.</p>
-      <p>Te vroeg op goed getikt? Tik op het groene <b>+</b>-getal bovenaan.</p>
-    </details>
+    <!-- De regels op hun eigen scherm (#s-regels), als één rij: hetzelfde
+         stuk als Gewone en Eigen. Onderaan, want wie het tandwiel aantikt
+         komt iets bijstellen. -->
+    <div class="lijst">
+      <button class="rij" id="rijRegels">
+        <svg class="teken" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-regels"/></svg>
+        <span class="rij-naam">Zo speel je</span>
+        <svg class="rij-pijl" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-verder"/></svg>
+      </button>
+    </div>
   </div>
 
   <!-- Rechtsboven, waar op elk ander scherm ook de uitgang zit -- en waar
@@ -3096,6 +3055,35 @@ button.ho-count:enabled:active { transform: translate(var(--lift-1), var(--lift-
   <!-- Rechtsboven, waar elke uitgang zit; terug naar Instellingen, net als
        de terugveeg (terug()). -->
   <button class="btn-icon" id="btnKaartenTerug" aria-label="Terug naar Instellingen">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vorig"/></svg>
+  </button>
+</section>
+
+<!-- ========================= ZO SPEEL JE ========================= -->
+<!-- De regels voor de volwassene, met de beelden uit het spel erbij: de twee
+     ploegen en de drie rondetekens. Uitgang rechtsboven, net als de
+     terugveeg (terug()). -->
+<section class="screen" id="s-regels">
+  <div class="setup-scroll">
+    <h1>Zo speel je</h1>
+    <div class="regel-ploegen">
+      <span class="regel-ploeg"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-vos"/></svg>Vos</span>
+      <span class="regel-ploeg"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#m-uil"/></svg>Uil</span>
+    </div>
+    <p class="regel-zin">Twee ploegen spelen drie rondes met dezelfde kaarten.</p>
+    <ol class="lijst regel-rondes">
+      <li class="rij"><span class="regel-teken"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#r-praten"/></svg></span>
+        <span class="rij-naam">Omschrijven<small>Alles mag, behalve het woord zelf.</small></span></li>
+      <li class="rij"><span class="regel-teken"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#r-eenwoord"/></svg></span>
+        <span class="rij-naam">Eén woord<small>Geef precies één woord als hint.</small></span></li>
+      <li class="rij"><span class="regel-teken"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#r-mimen"/></svg></span>
+        <span class="rij-naam">Uitbeelden<small>Niet praten.</small></span></li>
+    </ol>
+    <p class="regel-zin">Goed geraden: <b>1 punt</b>. Passen mag. Is de stapel leeg, dan
+      begint de andere ploeg de volgende ronde.</p>
+    <p class="regel-zin">Te vroeg op goed getikt? Tik op het groene <span class="nb"><b>+</b>-getal</span> bovenaan.</p>
+  </div>
+  <button class="btn-icon" id="btnRegelsTerug" aria-label="Terug naar Instellingen">
     <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vorig"/></svg>
   </button>
 </section>
@@ -3994,9 +3982,6 @@ let settings = {
   /* Hoeveel eigen kaarten er in elk potje gaan: een van
      Spel.EIGEN_AANTALLEN (0, 2, 4, 8). 0 is voor bezoek. */
   eigenAantal: 4,
-  /* De regeluitleg staat open tot je één keer een spel gestart hebt. Daarna
-     klapt ze dicht en blijft dat, tenzij iemand haar zelf weer openzet. */
-  rulesOpen: true,
   /* Welke lade van de kaartenbak openstaat: null, "gewoon" of "eigen".
      Dicht om te beginnen -- 90 tot 275 tegeltjes zijn niets wat je elke
      avond langs wil scrollen -- maar wie er een opent, vindt haar de
@@ -4034,6 +4019,9 @@ function load() {
     delete settings.cardsOpen;
   }
   if (settings.lade !== "gewoon" && settings.lade !== "eigen") settings.lade = null;
+  // De regels waren een vouwregel die openstond tot het eerste potje; ze
+  // staan nu op hun eigen scherm.
+  delete settings.rulesOpen;
   // Eerst koos je een deel van het potje (eigenDeel: 0, 1/8, 1/4, 1/2); dat
   // wordt het aantal dat er het dichtst bij ligt voor de maat van nu.
   if ("eigenDeel" in settings) {
@@ -4111,7 +4099,7 @@ let current = "title";
 /* De hoofdknop van elk scherm, die de focus krijgt bij een schermwissel. Op
    de instellingen het huisje: het enige dat er altijd staat. */
 const PRIMARY = {
-  title: "#btnStart", setup: "#btnBack", kaarten: "#btnKaartenTerug",
+  title: "#btnStart", setup: "#btnBack", kaarten: "#btnKaartenTerug", regels: "#btnRegelsTerug",
   handoff: "#btnStartTurn", play: "#btnGoed", winner: "#btnAgain"
 };
 
@@ -4179,7 +4167,6 @@ function paintSetup() {
     c.setAttribute("aria-checked", String(Number(c.dataset.size) === settings.size)));
   $$("#secsChips .chip").forEach(c =>
     c.setAttribute("aria-checked", String(Number(c.dataset.secs) === settings.secs)));
-  $("#rules").open = !!settings.rulesOpen;
   paintCards();
   paintEigen();
 }
@@ -4420,6 +4407,11 @@ $("#rijEigen").addEventListener("click", () => {
   openKaarten("eigen");
 });
 $("#btnKaartenTerug").addEventListener("click", () => show("setup"));
+$("#rijRegels").addEventListener("click", () => {
+  $("#s-regels .setup-scroll").scrollTop = 0;
+  show("regels");
+});
+$("#btnRegelsTerug").addEventListener("click", () => show("setup"));
 
 /* ==============================================================
    EIGEN KAARTEN
@@ -5428,15 +5420,6 @@ const fillY = (el, btn) => p => {
    bestaat alleen op dit scherm. */
 $("#btnGear").addEventListener("click", () => { Snd.unlock(); openSetup(); });
 
-/* Zelf open- of dichtklappen wordt onthouden, zodat het scherm niet elke
-   keer terugveert naar wat de app wil. */
-$("#rules").addEventListener("toggle", () => {
-  const open = $("#rules").open;
-  if (open === !!settings.rulesOpen) return;
-  settings.rulesOpen = open;
-  saveSettings();
-});
-
 /* Te vroeg losgelaten: schudden, én de rand even in waarschuwingskleur.
    Dat tweede is er voor wie beperkte beweging aan heeft: daar valt de
    schud weg, en dan bleef er niets over. */
@@ -5459,11 +5442,6 @@ function openSetup() {
    6. SPELVERLOOP
    ============================================================== */
 function newGame() {
-  /* Wie een potje start heeft de regels gehad. Ze klappen daarna dicht en
-     staan er de volgende avond als één regel -- terug te vinden, maar niet
-     meer het eerste wat je ziet. Eén keer, niet elke keer: daarna beslist de
-     volwassene zelf, en dat wordt onthouden. */
-  if (settings.rulesOpen) { settings.rulesOpen = false; saveSettings(); }
   /* Hier, en nergens anders, worden de kaarten van dit potje getrokken:
      een greep die eerder klaarligt, kan verouderen. Wie begint wordt hier
      geloot; de worp op het overdrachtscherm (tossTeams) toont alleen de
@@ -7534,7 +7512,7 @@ function terug() {
   if (!$("#kijk").hidden) { sluitKijk(); return; }
   if (!$("#pauze").hidden) { closePause(); return; }
   if (current === "setup")  { show("title"); return; }
-  if (current === "kaarten") { show("setup"); return; }
+  if (current === "kaarten" || current === "regels") { show("setup"); return; }
   if (current === "winner") { clearConfetti(); clearGame(); show("title"); return; }
   // Aftellen: dezelfde uitweg als een tik op het vlak, en als het teken
   // rechtsboven dat die tik aankondigt.
@@ -7677,26 +7655,14 @@ const isIOS = () =>
      zetop -- iOS: de weg via het deelmenu
      menu -- de dialoog is weggetikt en de knop is op
      delen -- de app draait geïnstalleerd; dan valt er iets door te geven
-   De hint zegt wat je eraan hebt, niet hoe: voor knop en zetop één zin, als
-   constante. "Sturen" en niet "doorgeven": doorgeven is hier het toestel over
-   tafel aanreiken. */
-const OP_BEGINSCHERM = "Dan staat ze met een eigen icoon tussen je andere apps.";
-const INSTALL_HINT = {
-  knop:  OP_BEGINSCHERM,
-  zetop: OP_BEGINSCHERM,
-  menu:  "",
-  delen: "Stuur de app door aan iemand die ook wil spelen."
-};
+   Het zijn rijen in de lijst van Deze telefoon, zonder zin eronder: het
+   woord zegt wat het doet. */
 function toonInstall(stand) {
   $("#btnInstall").hidden = stand !== "knop";
   $("#btnDelen").hidden = stand !== "delen";
   $("#installHand").hidden = stand !== "zetop" && stand !== "menu";
   $("#handZetop").hidden = stand !== "zetop";
   $("#handMenu").hidden = stand !== "menu";
-  const hint = INSTALL_HINT[stand] || "";
-  $("#installHint").textContent = hint;
-  $("#installHint").hidden = !hint;
-  $("#installField").hidden = stand === "weg";
 }
 
 /* Weggetikt is geen fout: de knop blijft dan gewoon staan, want delen is
