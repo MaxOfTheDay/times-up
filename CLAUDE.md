@@ -287,8 +287,8 @@ de sluier van het losse pauzepaneel bij hervatten (`.uit`; alleen de
 sluier, `.overlay::before`, het paneel vervaagt nooit), de eerste helft
 van het omdraaien (`draaiOm()`, `draaiWeg()`, `draaiPauze()`, `closePause()`), het scherm
 onder de titelcirkel (`naarTitel()`) en de kopie
-van de kaart die naar de teller krimpt of onder de stapel zakt
-(`kaartSpook()`): de volgende kaart ligt er dan al onder. `hidden` gaat
+van de kaart die naar de teller krimpt of onderop gaat
+(`kaartSpook()`: eerst bóven de stapel omlaag, dan erachter terug in): de volgende kaart ligt er dan al onder. `hidden` gaat
 meteen aan; `inert` pas na het verzetten van de focus.
 
 **Beloning.** Een beurt en een ronde eindigen met een stempel op de kaart
@@ -315,7 +315,7 @@ klassenaam pakt (`.bar` bestond al).
 in de balk tijdens het spelen. Bij goed vliegt alleen de kaart erin
 (`vliegKaart()`), geen los `+1`: op `--e-vloei`, dekkend tot ze er is,
 en ze krimpt tot precies de hoogte van het vak. De kaart eronder ligt er al
-en beweegt niet (alleen na pas komt ze van onder de stapel). Terugnemen
+en beweegt niet, ook niet na pas. Terugnemen
 (`kaartTerug()`) is dezelfde vlucht achterstevoren. Via Web
 Animations; het getal plus de wip horen bij de landing (`landFly()`), ook
 bij een schermwissel.
