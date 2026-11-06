@@ -315,7 +315,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    2. OP VOLGORDE. 8 px omhoog per vak, --t-kom met --e-uit, 70 tot 90 ms
                    uit elkaar, hoogstens drie stappen. (slotIn, markIn/goIn)
    3. OPKOMEN.     Schaal naar 1 in --t-kom of --t-groot met --e-los. Alleen voor
-                   iets dat net ontstaat of verdiend is. (panelIn, crownIn,
+                   iets dat net ontstaat of verdiend is. (panelIn,
                    freshIn, gainPop, roundPop)
    4. FEEST.       Alleen het winnaarsscherm: 1 en 3 plus de lussen.
 
@@ -363,7 +363,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    Opacity van ouder en kind vermenigvuldigen; een kind dat ook vervaagt komt
    veel later aan en staat ondertussen op een grijs dat dit ontwerp niet kent.
    De ouder doet de vervaging, de kinderen doen de volgorde (schuif of schaal,
-   geen opacity). Hetzelfde voor panelIn onder scrimIn en voor crownIn.
+   geen opacity). Hetzelfde voor panelIn onder scrimIn.
 
    De volgorde: opdracht, dan start, zeventig ms na elkaar. Dat is één golf
    die op de knop eindigt, geen twee losse aankomsten; grotere stappen kopen
@@ -2184,21 +2184,6 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
 }
 .tally .head { position: relative; align-self: end; }
 .tally .mascot-sm { width: min(74px, 9vh); display: block; }
-/* Een kroon boven wie voorstaat, en op dit scherm het enige dat dat zegt
-   zonder cijfers -- twee getallen vergelijken kan een vierjarige nog niet. */
-.tally .crown {
-  position: absolute; top: -26px; left: 50%; transform: translateX(-50%) rotate(-8deg);
-  width: 42px;
-}
-/* Ook hier geen eigen opacity -- zie slotIn. De kroon zit op het
-   winnaarsscherm onder screenIn en op de overdracht onder screenIn én
-   slotIn, dus dat waren twee tot drie vervagingen over elkaar. Ze valt en
-   groeit; het scherm eronder regelt of ze al te zien is. */
-@keyframes crownIn {
-  from { transform: translateX(-50%) rotate(-8deg) translateY(-14px) scale(.5); }
-  to   { transform: translateX(-50%) rotate(-8deg) translateY(0) scale(1); }
-}
-.tally .crown { animation: crownIn calc(var(--t-groot) / max(var(--dur), .001)) var(--e-los) backwards; }
 /* De uitsplitsing per ronde: pictogram + aantal, klein en rustig. Staat
    onder het totaal, dus met een streep erboven die zegt "hier komt de
    herkomst" in plaats van "hier komt de som". */
@@ -2245,15 +2230,10 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
      de kaart staat vanaf het eerste beeld (zie landOm()). */
   transition: background-color calc(var(--t-kom) * var(--dur)) var(--e-uit);
 }
-@keyframes cheer { 0%,100% { transform: scale(1) rotate(-2deg); } 50% { transform: scale(1.07) rotate(2deg); } }
 /* Er stonden twee dezelfde mascottes op dit scherm: een grote juichende
    bovenaan en een kleine gekroonde in de stand eronder. Nu groeit de
    winnaar in de stand zelf, met de kroon erop -- één dier. */
-.tally.winner .mascot-sm {
-  width: min(44vw, 15vh, 170px);
-  animation: cheer calc(.9s / max(var(--dur), .001)) var(--e-vloei) infinite;
-}
-.tally.winner .crown { width: 64px; top: -34px; }
+.tally.winner .mascot-sm { width: min(44vw, 15vh, 170px); }
 /* Dezelfde breedte als de opdrachtkaart op de overdracht. Bovenaan ruimte
    voor de kroon: die valt ín de kaart, niet door haar rand. */
 #wnPiles.wn-kaart {
@@ -2296,14 +2276,19 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
   width: 100%; height: 100%;
   rotate: 7deg; transform-origin: 50% 76%; translate: 0 34%;
   animation: none;
+  /* De kroon steekt boven het vak van het dier uit. */
+  overflow: visible;
 }
 /* De vos heeft zijn ogen lager in de kop: hij zakt minder ver. */
 #wnPiles .tally[data-team="0"]:not(.winner) .mascot-sm { rotate: -8deg; translate: 0 24%; }
-#wnPiles .tally.winner .mascot-sm {
-  rotate: 0deg; translate: 0 0;
-  animation: cheer calc(.9s / max(var(--dur), .001)) var(--e-vloei) infinite;
+#wnPiles .tally.winner .mascot-sm { rotate: 0deg; translate: 0 0; }
+/* De kroon valt scheef en landt recht, om haar onderrand. */
+#wnPiles .kroon { transform-box: fill-box; transform-origin: 50% 100%; }
+/* Na het juichen ademt wie won, zoals wie op de overdracht aan zet is: het
+   scherm komt tot rust en de stand is te lezen. */
+#wnPiles .tally.winner.adem .mascot-sm {
+  animation: gluurAdem calc(2.8s / max(var(--dur), .001)) var(--e-vloei) infinite;
 }
-#wnPiles .tally .crown { top: calc(var(--rand) * -.22); width: calc(var(--rand) * .46); }
 @media (max-height: 520px) {
   #wnPiles.wn-kaart { --wn-pt: 16px; --rand-uit: min(15vh, 60px); --rand-win: min(23vh, 92px); }
 }
@@ -2387,7 +2372,6 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
   .side-by-side { width: min(38vw, 300px); gap: var(--s-1) var(--s-2); }
   #wnPiles.wn-kaart { width: min(46vw, 340px); padding: var(--wn-pt) var(--s-3) var(--s-2); }
   .tally { width: min(17vw, 132px); }
-  .tally .crown { width: 32px; top: -20px; }
   .tally .mascot-sm { width: min(52px, 13vh); }
   .tally.winner .mascot-sm { width: min(26vw, 20vh, 110px); }
   /* De hoofdknop hing op 21vh, en 21% van 390 px is een knoop van 82 px:
@@ -2436,7 +2420,6 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
 @media (min-width: 700px) and (min-height: 700px) {
   .tally { width: min(38vw, 230px); }
   .tally .mascot-sm { width: min(104px, 11vh); }
-  .tally .crown { width: 58px; top: -34px; }
   .tally .num { font-size: min(11vw, 7vh, 88px); }
   .tally .sr svg { width: 26px; height: 26px; }
   .tally .sr b { font-size: var(--fs-4); }
@@ -2627,25 +2610,6 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
    (dezelfde laag, maar eerder in de slot). De animatie zet de laag. */
 .kaart-spook.onder { position: absolute; inset: 0; z-index: -1; }
 
-/* De eindstand komt op: eerst tellen de totalen op, dan valt de kroon. De
-   ploeg die verloor klapt mee in plaats van stil te staan. */
-@keyframes kroonVal {
-  0%   { transform: translateX(-50%) rotate(-8deg) translateY(-70px) scale(.6); opacity: 0; }
-  60%  { transform: translateX(-50%) rotate(-8deg) translateY(6px) scale(1.08); opacity: 1; }
-  100% { transform: translateX(-50%) rotate(-8deg) translateY(0) scale(1); opacity: 1; }
-}
-#s-winner .tally .crown.later {
-  animation: kroonVal calc(var(--t-groot) / max(var(--dur), .001)) var(--e-uit) var(--kroon, 0s) both;
-}
-@keyframes klap {
-  0%, 100% { transform: rotate(0); }
-  25%      { transform: rotate(-5deg); }
-  75%      { transform: rotate(5deg); }
-}
-#s-winner .tally:not(.winner) .mascot-sm {
-  transform-origin: 50% 90%;
-  animation: klap calc(.9s / max(var(--dur), .001)) var(--e-vloei) infinite;
-}
 </style>
 </head>
 <body>
@@ -2808,12 +2772,14 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
     <path d="M48 22 L90 50 L48 78 Z" fill="#14110F" stroke="#14110F" stroke-width="8" stroke-linejoin="round"/>
   </symbol>
 
-  <!-- kroon voor wie voorstaat -->
-  <symbol id="i-kroon" viewBox="0 0 100 100">
-    <path d="M10 74 L18 26 L34 48 L50 18 L66 48 L82 26 L90 74 Z"
-          fill="#F2B705" stroke="#14110F" stroke-width="7" stroke-linejoin="round"/>
-    <path d="M10 74 H90" stroke="#14110F" stroke-width="7" stroke-linecap="round"/>
-  </symbol>
+  <!-- De kroon van wie won, getekend in het vak van het dier en met zijn
+       pen: ze hoort bij de kop en gaat mee met alles wat hij doet. Bij de
+       vos tussen de oren op de platte kruin, bij de uil tussen de pluimen
+       op de bol. Ze steekt boven het vak uit (overflow: visible). -->
+  <path id="m-vos-kroon" d="M32 22.5 L34.9 1 L43.2 10 L50 -2.5 L56.8 10 L65.1 1 L68 22.5 Z"
+        fill="#F2B705" stroke="#14110F" style="stroke-width: max(5px, min(var(--pen, 0px), 10px))" stroke-linejoin="round"/>
+  <path id="m-uil-kroon" d="M30 17 L33.2 -6.2 L42.4 3.5 L50 -10 L57.6 3.5 L66.8 -6.2 L70 17 Z"
+        fill="#F2B705" stroke="#14110F" style="stroke-width: max(5px, min(var(--pen, 0px), 10px))" stroke-linejoin="round"/>
 
   <!-- Harde hoeken, net als al het andere: de afgeronde hoekjes hier waren
        de enige zachte vorm in de hele set. -->
@@ -6850,9 +6816,11 @@ function mascotte(el, soort, n) {
              [-3, 4, 1, 1.03, 0, .5], [-1, -2, 1, 1, 0, .64], [0, 1, 1, 1, 0, .78], [0, 0, 1, 1, 0, 1]],
     /* Overslaan: een kort nee-schudje, klein, want overslaan is geen fout. */
     nee:    [[0, 0, 1, 1, 0, 0], [0, -5, 1, 1, -9, .2], [0, 5, 1, 1, 9, .45],
-             [0, -3, 1, 1, -5, .7], [0, 0, 1, 1, 0, 1]]
+             [0, -3, 1, 1, -5, .7], [0, 0, 1, 1, 0, 1]],
+    /* Er landt iets op de kop (de kroon): alleen de klets, zonder sprong. */
+    klets:  [[0, 0, 1, 1, 0, 0], [0, 0, 1.12, .86, 0, .35], [0, 0, .97, 1.04, 0, .7], [0, 0, 1, 1, 0, 1]]
   };
-  const duur = { wip: 340, juich: 820, schrik: 560, nee: 420 }[soort];
+  const duur = { wip: 340, juich: 820, schrik: 560, nee: 420, klets: 300 }[soort];
   /* Juich draait om het midden, maar rekt en kletst op de voeten: een plat
      gedrukte mascotte die om haar midden krimpt, komt los van de grond en
      zweeft net bij de landing. Daarom schuift ze telkens zoveel omlaag als
@@ -6877,8 +6845,10 @@ function zetGezicht(el, gezicht, ms) {
   const basis = use.getAttribute("href").replace(/-(blij|schrik|dicht)$/, "");
   use.setAttribute("href", basis + gezicht);
   clearTimeout(el._gezicht);
+  /* Terug naar het rustgezicht: het gewone, of dat van data-rust (wie won
+     lacht de hele eindstand, ook na het juichen). */
   el._gezicht = setTimeout(() => {
-    if (use.getAttribute("href") === basis + gezicht) use.setAttribute("href", basis);
+    if (use.getAttribute("href") === basis + gezicht) use.setAttribute("href", basis + (el.dataset.rust || ""));
   }, ms);
 }
 
@@ -7756,8 +7726,17 @@ function tallyNode(t) {
 
   const head = document.createElement("div");
   head.className = "head";
-  head.appendChild(svgUse(TEAMS[t].mascot, "mascot-sm"));
-  if (total(t) > total(1 - t)) head.appendChild(svgUse("#i-kroon", "crown"));
+  const dier = svgUse(TEAMS[t].mascot, "mascot-sm");
+  head.appendChild(dier);
+  /* De kroon is een deel van het dier, na het gezicht in dezelfde svg:
+     als los stuk erboven bleef ze hangen terwijl de kop bewoog. Het gezicht
+     blijft de eerste use (zetGezicht, knipperLus). */
+  if (total(t) > total(1 - t)) {
+    const kroon = document.createElementNS("http://www.w3.org/2000/svg", "use");
+    kroon.setAttribute("href", TEAMS[t].mascot + "-kroon");
+    kroon.setAttribute("class", "kroon");
+    dier.appendChild(kroon);
+  }
 
   /* De uitslag eerst, groot. */
   const num = document.createElement("div");
@@ -7811,8 +7790,11 @@ function winner() {
   nodes.forEach((n, t) => { if (win === null || win === t) n.classList.add("winner"); });
   nodes.forEach(n => box.appendChild(n));
   /* Wie won lacht, de hele eindstand lang. */
-  $$("#wnPiles .tally.winner .mascot-sm use").forEach(u =>
-    u.setAttribute("href", u.getAttribute("href") + "-blij"));
+  $$("#wnPiles .tally.winner .mascot-sm").forEach(m => {
+    m.dataset.rust = "-blij";
+    const u = m.querySelector(":scope > use");
+    u.setAttribute("href", u.getAttribute("href") + "-blij");
+  });
   $("#s-winner").dataset.draw = win === null ? "1" : "0";
 
   const scherm = $("#s-winner");
@@ -7835,6 +7817,21 @@ function winner() {
 
   /* De onthulling: de totalen tellen samen op, dan valt de kroon en pas dán
      het feest. Bij beperkte beweging staat alles er meteen. */
+  /* Wie won juicht op de fanfare: een wip op de eerste noot, de juich met
+     zijn draai (de kroon draait mee) op de slotnoot, en elke landing rimpelt
+     de punten vanaf de rand, zoals een wip op de titel. Daarna ademt hij. Bij
+     gelijkspel allebei, de uil een tikje later. */
+  const juichen = () => $$("#wnPiles .tally.winner").forEach((tally, i) => {
+    const dier = tally.querySelector(".mascot-sm");
+    const s = scherm.getBoundingClientRect(), r = dier.getBoundingClientRect();
+    const rimpel = sterk => {
+      if (current === "winner") veldWn.rimpel(r.left + r.width / 2 - s.left, r.bottom - r.height * .24 - s.top, sterk, r.width * .3);
+    };
+    const d = win === null ? i * 140 : 0;
+    na(d, () => { mascotte(dier, "wip", 3); na(300, () => rimpel(.5)); });
+    na(d + 550, () => { mascotte(dier, "juich"); na(800, () => rimpel(.8)); });
+    na(d + 1500, () => tally.classList.add("adem"));
+  });
   const feest = () => {
     // Op de ploegkleur zou snipper in dezelfde kleur verdwijnen: papier en goud.
     confetti(win === null ? ["#E8452B", "#1B6FC4", "#F2B705"] : ["#F4EBDA", "#F2B705"]);
@@ -7844,22 +7841,28 @@ function winner() {
     // uit in de instellingen.
     Tril.feest();
   };
-  if (stilAan()) { feest(); return; }
+  if (stilAan()) { $$("#wnPiles .tally.winner").forEach(t => t.classList.add("adem")); feest(); return; }
   const OPTEL = 1100;
   const nums = $$("#wnPiles .tally .num");
   const doel = nums.map(n => Number(n.textContent) || 0);
   const hoogst = Math.max(1, ...doel);
-  $$("#wnPiles .crown").forEach(c => {
-    c.classList.add("later");
-    c.style.setProperty("--kroon", OPTEL + "ms");
+  /* Wie won gluurt tijdens het optellen nog over de rand en komt overeind
+     als de telling stopt. Pas als hij staat valt de kroon, recht op de kop,
+     en die zakt even in onder de landing (klets). Daarna het feest. De kroon
+     valt in de maat van het dier (de svg rekent in zijn eigen eenheden), en
+     is er tot dan niet: geen vervaging, ze verschijnt boven en valt. */
+  const KROON = OPTEL + 260, VAL = duur("kom");
+  $$("#wnPiles .tally.winner .mascot-sm").forEach(m => {
+    const dy = m.parentNode.getBoundingClientRect().height * .34;
+    m.animate([{ translate: "0 " + dy + "px" }, { translate: "0 0" }],
+      { duration: duur("groot"), delay: OPTEL, easing: curve("los"), fill: "backwards" });
   });
-  /* Wie won gluurt tijdens het optellen nog over de rand, en komt overeind
-     als de kroon valt. */
-  $$("#wnPiles .tally.winner .head").forEach(h => {
-    const dy = h.getBoundingClientRect().height * .34;
-    h.querySelectorAll(".mascot-sm, .crown").forEach(m => m.animate(
-      [{ translate: "0 " + dy + "px" }, { translate: "0 0" }],
-      { duration: duur("groot"), delay: OPTEL, easing: curve("los"), fill: "backwards" }));
+  $$("#wnPiles .kroon").forEach(k => {
+    k.animate([{ transform: "translateY(-90px) rotate(-14deg)", visibility: "hidden" },
+               { transform: "translateY(-88px) rotate(-14deg)", visibility: "visible", offset: .02 },
+               { transform: "translateY(0) rotate(0deg)", visibility: "visible" }],
+      { duration: VAL, delay: KROON, easing: curve("weg"), fill: "backwards" });
+    na(KROON + VAL, () => mascotte(k.parentNode, "klets"));
   });
   nums.forEach(n => { n.textContent = "0"; });
   const t0 = performance.now();
@@ -7874,7 +7877,7 @@ function winner() {
     if (waarde !== vorig && waarde % 3 === 0) Snd.tick(1500 + waarde * 6, .04);
     vorig = waarde;
     if (p < 1) requestAnimationFrame(stap);
-    else na(300, feest);
+    else na(KROON - OPTEL + VAL + 300, () => { juichen(); feest(); });
   };
   requestAnimationFrame(stap);
 }
