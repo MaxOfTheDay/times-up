@@ -1150,6 +1150,24 @@ met dezelfde maten als ervoor: raster 12 px op het midden, straal 2 px op
   rimpel onderweg is (of een onthulling loopt) en de grond in
   beeld is. Daarbuiten staat er één getekend beeld. Bij beperkte beweging
   alleen dat beeld, zonder rimpel.
+- **Alleen wat verandert** (code-gezondheid, november 2026): elke punt is
+  een eigen cirkel en dus een eigen rasterbeurt, en het canvas tekende er
+  elk beeld ~2.000. Gemeten in Chromium op 390x844, 3x pixels, met de CPU
+  4x vertraagd: het aftellen haalde mediaan 30 beelden per seconde, de
+  eindstand 21. Eén pad per kleur en een gestempelde punt (`drawImage`)
+  hielpen niets: de kost zit in het vullen, niet in het aantal aanroepen.
+  Wat wel hielp: een rimpel tekent alleen de punten over die anders liggen
+  dan het vorige beeld, plus wat binnen 22 px daarvan valt, in een masker
+  (`clip()`). Het aftellen haalt zo mediaan 60 beelden per seconde, met
+  ~500 cirkels in plaats van 2.000; het beeld is gelijk op randpixels na
+  (hoogstens 7/255 dekking). De stralen raken met hun 24 randen bijna het
+  hele bord, dus die tekenen alles, maar met 20 beelden per seconde zolang
+  er niets anders beweegt: een punt springt er toch maar een paar keer
+  per seconde in of uit. Eindstand nu 36 beelden per seconde.
+- **Canvas terug**: een grond die 1,2 s uit beeld is, zet zijn canvas op
+  0 bij 0 (`ruimOp()`, via `VELDEN` in `show()`). Drie grondcanvassen van
+  1170x2532 hielden samen 37 MB vast; nu ~1 MB. Die 1,2 s is er voor de
+  cirkel die over het oude scherm groeit en de oude grond nog laat zien.
 
 Op het spelscherm en de instellingen liggen geen punten: het spelscherm
 moet rustig blijven, en de instellingen zijn voor de volwassene. Op het
