@@ -200,8 +200,10 @@ speelde achter de rand en komt de ander op (`RAND_WEG`, `RAND_OP`, op de
 ploegklank; zijn landing rimpelt de punten), bij een rondewissel krimpt de gouden schijf tot tegel en groeit de
 volgende ronde tot schijf (`.ronderij`, `paintRij()`). Wat de kaart draagt
 (stand, ronde, wat er nog ligt) scheidt lucht, geen lijn: de cijfers
-groot onder hun dier, en wat er nog ligt als een stapeltje met het getal
-(`#hoCards`), ingedrukt in ronde 1. De drie rondes staan
+groot onder hun dier. Aan de voet, als bijzaak, wat er nog ligt (`#hoCards`)
+en de seconden van de beurt (`#hoSecs`), altijd allebei: elk een teken en
+een getal in `--ink-2`, zonder kader (met een kader leest de teller als een
+rondetegel). De drie rondes staan
 als één rij: nu is de schijf, de andere zijn gelijke papieren tegels, en de
 plek links of rechts zegt geweest of nog te komen. Geen kroon, geen "+N", geen
 fiche per punt op dit scherm. Vos en Uil zitten op de bovenrand van de

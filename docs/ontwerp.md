@@ -681,8 +681,9 @@ een afgebroken aftelling en beperkte beweging krijgen meteen de stand van nu.
 De gouden schijf zit daarom niet meer in `RI_ART`: ze is het vak zelf, anders
 kan een tegel niet tot schijf groeien.
 
-Aan de voet van de kaart staat wat er nog ligt, en de seconden als een
-onderbroken beurt met haar resttijd verdergaat (`#i-zand`). Ze staan aan de
+Aan de voet van de kaart staat wat er nog ligt (`#i-stapel`) en hoeveel
+seconden de beurt krijgt (`#i-zand`), altijd allebei: een volle beurt is 30,
+een onderbroken beurt gaat verder met haar resttijd. Ze staan aan de
 vóét omdat ze over de beurt gaan die de knop eronder start; in de kop lazen
 ze als bijschrift bij de ronde erboven. `#i-glass` kon daar niet staan, want
 dat is de merkplaat -- gouden zandloper op crème contour, getekend om op een
@@ -703,11 +704,20 @@ een probleem van afstand op te lossen: ruis. Nu:
 - de cijfers staan groot onder hun dier (`max(--fs-5, min(9vw, --fs-6))`,
   op 390 px zo'n 35 px), met `min(2.2vh, 18px)` lucht tot de rij met rondes;
 - geen lijn boven de voet;
-- wat er nog ligt is een stapeltje: een kaart van 38 bij 46 met het getal,
-  met één kaart erachter als schaduw naar rechtsboven (`box-shadow`, geen
-  eigen vlak). Een kaart is het stuk van dit bord; een pictogram moest je
-  leren. In ronde 1 ligt hij ingedrukt op `--paper-2` (nog niet), vanaf ronde
-  2 staat hij op met lift en kun je hem aantikken.
+- de voet is bijzaak en ziet er zo uit: twee tellers met dezelfde
+  behandeling, een teken van 24 px en een getal op `--fs-4`, allebei in
+  `--ink-2`, zonder kader. De tekens delen hun lijn (contour in
+  `currentColor`, streek 9). Het teken voor de stapel is twee staande
+  kaarten, scheef op elkaar, zoals onder de speelkaart.
+
+Geprobeerd voor wat er nog ligt: een stapeltje van 38 bij 46 met het getal
+erop en één kaart erachter, met lift vanaf ronde 2. Dat was een klein,
+vierkant, omrand stuk papier, net als de rondetegels erboven, en las als een
+vierde tegel. Ook geprobeerd: de opdrachtkaart zelf op een stapel scheve
+kaarten, zoals de speelkaart (geen getal meer: dat wilde Max houden), een
+kaart die onder de opdrachtkaart uitsteekt met het getal (las als een
+label, en kwam op 320 px tegen de startknop), en een waaier van drie
+kaarten (druk). Het kader was het probleem, niet het getal.
 
 Het scherm blijft hier aan. De wake lock liep alleen tijdens een beurt --
 `show()` liet hem los op elk scherm dat geen `play` was -- en daarmee was
@@ -2505,15 +2515,18 @@ in de regels op het instellingenscherm, voor de volwassene.
 
 Ronde 2 en 3 werken alleen als je de kaarten van ronde 1 nog weet, en kleine
 kinderen vergeten de helft. Vanaf ronde 2 is de kaartenteller op de
-overdracht (`#hoCards`) daarom een knop: het stapeltje staat op met lift,
-en toont de kaarten die nog liggen als plaatjes (`#kijk`), met het woord eronder
+overdracht (`#hoCards`) daarom een knop die de kaarten die nog liggen als
+plaatjes toont (`#kijk`), met het woord eronder
 zoals op de kaart. Een tik waar dan ook sluit het weer, net als Escape en de
 terugveeg.
 
 - **Op alfabet, niet in stapelvolgorde.** De stapel is geschud; zijn
   volgorde tonen zou verklappen wat er komt.
 - **Niet in ronde 1.** Dan heeft niemand de kaarten nog gezien, en is
-  kijken spieken. De knop staat er dan uit (`disabled`) en ligt ingedrukt.
+  kijken spieken. De knop staat er dan uit (`disabled`).
+- **Zonder lift.** Terugkijken is voor de volwassene; een tegel met lift
+  aan de voet trok het oog weg van de stand en de ronde. Hij zakt wel 2 px
+  in bij de druk, en de tikzone reikt 10 px verder dan teken en getal.
 - **Geen kaders om de plaatjes.** Het zijn geen knoppen; met een rand om
   elk plaatje kwamen er tientallen rechthoeken op één paneel.
 - **De achterkant van de opdrachtkaart, zonder sluier.** Het paneel lag
