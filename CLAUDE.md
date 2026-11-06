@@ -537,7 +537,10 @@ net, of als het dagbudget op is, werkt alles behalve de staf.
 
 ## Tests
 
-`npm test` draait vier suites, en CI draait ze op elke pull request:
+`npm test` draait vier suites, en CI draait ze op elke pull request, in het
+Docker-image van Playwright. Wie playwright in `package-lock.json` ophoogt,
+zet het image in `.github/workflows/test.yml` op dezelfde versie (CI breekt
+anders meteen af):
 
 - `test/kern.test.js` toetst de spelkern in Node, in milliseconden
   (`npm run test:kern`). Dit is de plek voor een nieuwe spelregel.
