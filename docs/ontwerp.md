@@ -1918,6 +1918,33 @@ rondes, dus ze is lager en de knop staat waar hij op de overdracht staat.
 Een verliezer die meejuicht is bekeken en weggelaten: dan zegt niets meer
 wie won.
 
+**De kroon hoort bij de kop.** De kroon was een los plaatje boven het dier,
+8° scheef, half op het oor van de vos, met een dunnere lijn dan het dier.
+Het dier wiebelde zonder ophouden (schaal 1,07, ±2°) en de kroon niet, dus
+schoof ze over de kop: aan de ene kant erin, aan de andere kant los erboven.
+Ze viel ook op hetzelfde moment dat het dier opstond, en kwam dus nergens
+op terecht. En de verliezer schommelde nog altijd ±5° heen en weer, een
+restje van toen hij meeklapte. Nu:
+
+- De kroon is getekend in de svg van het dier, in zijn eenheden en met zijn
+  pen (`#m-vos-kroon` tussen de oren op de platte kruin, `#m-uil-kroon`
+  tussen de pluimen op de bol), recht en zo breed dat oren en pluimen
+  blijven staan. Wat het dier doet, doet de kroon mee.
+- Eerst komt het dier overeind, dan valt de kroon (scheef in, recht neer,
+  `--t-kom` op `--e-weg`) en zakt de kop even in onder de landing
+  (`mascotte(..., "klets")`). Ze vervaagt niet: ze is er niet, en dan valt ze.
+- Op de fanfare juicht het dier zoals overal: een wip op de eerste noot, de
+  juich met zijn draai op de slotnoot (de kroon draait mee), elke landing een
+  rimpel vanaf de rand. Daarna ademt het (`.adem`, `gluurAdem`), zoals wie
+  op de overdracht aan zet is, en het blijft lachen (`data-rust`). Het
+  eindeloze wiebelen is weg: het scherm komt tot rust, de stand is te lezen.
+- De verliezer gluurt stil tot de ogen en knippert, zoals op de overdracht.
+
+Bekeken en weggelaten: de stralen vanuit de winnaar laten beginnen, om een
+rode vos los te maken van een rode grond. Op de huidige sterkte zie je het
+verschil niet, en sterkere stralen veranderen de hele grond; de inktlijn en
+de papieren ogen dragen het dier al.
+
 Let op de klassenaam als je hier ooit tóch iets bijtekent: `.bar` bestond
 al -- dat is de streep door de pas-knop als de stapel op is. Een tweede
 `.bar` erbij zette meteen `display: flex` en een rand op dat SVG-pad. Grep

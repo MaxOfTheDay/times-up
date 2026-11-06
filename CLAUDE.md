@@ -326,8 +326,13 @@ ring uit de kaart op de slotnoot, en één val snippers.
 mascotte die rechtop komt; per ploeg het totaal, met de drie rondes klein eronder.
 Twee totalen even groot, op een papieren kaart zo breed als de opdrachtkaart
 (`.wn-kaart`). Vos en Uil zitten op haar bovenrand zoals op de overdracht:
-wie won gluurt tijdens het optellen en komt overeind met de kroon, de ander
-gluurt tot de ogen; bij gelijkspel staan ze allebei. Grep voor je een korte
+wie won gluurt tijdens het optellen en komt overeind, de ander gluurt stil
+tot de ogen; bij gelijkspel staan ze allebei. De kroon is getekend ín de svg
+van het dier (`#m-vos-kroon`, `#m-uil-kroon`, met zijn pen), nooit een los
+stuk erboven: ze valt pas als het dier staat, de kop kletst onder de
+landing, en wat het dier daarna doet doet zij mee. Op de fanfare een wip en
+de juich, daarna ademt wie won (`.adem`) en blijft lachen (`data-rust`).
+Grep voor je een korte
 klassenaam pakt (`.bar` bestond al).
 
 **Eén label voor "wat er bij komt".** Het groene `+N` (`.gain`) staat alleen
