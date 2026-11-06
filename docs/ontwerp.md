@@ -1717,16 +1717,48 @@ de tegels, de knoppen. Het teken op de kaart kwam van ergens anders: de
 emoji van het toestel, met verloop, glans en schaduw en zonder lijn. Op het
 spelscherm is dat het grootste ding in beeld, dus het zette de toon.
 
-Daarom krijgt het teken de inktlijn, als contour om zijn silhouet. Vier
-schaduwen zonder vervaging, elk één kant op, na elkaar: samen een gesloten
-lijn. 4 px, de dikte van de kaartrand; op de kleine plaatjes van `#kijk`
-2 px. Over alle 275 kaarten bekeken op Noto: de tekening blijft zichzelf,
-alleen zachte gloed (de kaarsjes op de taart, de straal van de douche) wordt
-een donkere vlek, en losse sterretjes krijgen elk een eigen randje. Dat is
+Daarom krijgt het teken de inktlijn, als contour om zijn silhouet. 4 px, de
+dikte van de kaartrand; op de kleine plaatjes van `#kijk` 2 px.
+
+**Eén keer getekend, niet elk beeld.** De lijn was eerst een CSS-filter: vier
+schaduwen zonder vervaging, elk 4 px één kant op. Twee dingen gingen daarmee
+mis. Na elkaar gezet legt elke schaduw een kopie van wat er al lag, dus dat
+waren negen kopieën op een rooster van 4 px. Waar het teken dunner is dan
+4 px (de poten van de spin, de spaken, de krabbenpoten, een eigen tekening
+met een dunne lijn) vielen er gaten tussen de kopieën, en de lijn kreeg
+trapjes en rafels; een ronde punt werd een vierkant met een hap eruit, en
+schuin was de lijn 5,7 px in plaats van 4. En het filter rekende bij elk
+beeld opnieuw: de klokband tekent de kaart zestig keer per seconde. Acht
+schaduwen (een achthoek zonder gaten) haalden in Chromium zonder GPU geen 60
+beelden meer: de mediaan van een beeld ging van 17 naar 50 ms.
+
+Nu tekent `Pen` het teken één keer op een canvas, op schermpixels, met
+kopieën op twee ringen eromheen (de hele lijn en de halve, hoogstens twee
+schermpixels uit elkaar), alles in inkt en het teken erbovenop: een ronde
+lijn van gelijke dikte. De kaart hangt dat canvas op; het filter is weg.
+Gemeten over tien keer goed of pas: rasterwerk van 2,1 s naar 0,18 s, elk
+beeld 16,7 ms. Een teken kost 6 ms (zonder GPU; een telefoon tekent een
+canvas op de GPU) en gebeurt op een rustig moment voor de volgende kaart
+(`penVooruit()`, `G.pile[0]` is altijd de volgende), zodat goed en pas
+alleen een klaar beeld ophangen (0,1 tot 0,5 ms). De laatste zes blijven
+bewaard, voor terugnemen.
+
+Wat erbij hoort: het canvas beslaat precies het vak van de tekst (breedte
+van het teken, hoogte van de regel, de basislijn zoals de browser haar zet:
+in het midden van de regel naar de maten van de eerste letter), met een
+rand in een negatieve marge; de kaart staat dus op dezelfde plek. Het
+canvas is in `em`, zodat het meeschaalt tot `remeasure()` het op de nieuwe
+maat opnieuw tekent. De emoji staat er onzichtbaar bij als tekst (`.vh`),
+voor wie voorleest. `kaartSpook()` kopieert het canvas, want een kloon van
+een canvas is leeg. Een tekening krijgt de pen zodra haar beeld er is.
+
+Over alle 275 kaarten bekeken op Noto: de tekening blijft zichzelf, alleen
+zachte gloed (de kaarsjes op de taart, de straal van de douche) wordt een
+donkere vlek, en losse sterretjes krijgen elk een eigen randje. Dat is
 klein genoeg om te laten.
 
 Een SVG-filter met `feMorphology` gaf hetzelfde beeld, maar `filter: url()`
-op HTML is in Safari niet te vertrouwen; de schaduwen werken overal.
+op HTML is in Safari niet te vertrouwen, en het rekent net zo goed elk beeld.
 
 **Niet vlakker maken.** Een filter dat de emoji tot een paar tinten
 terugbrengt, maakt ze echt vlak als de mascottes, maar gezichten worden
