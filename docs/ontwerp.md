@@ -3408,8 +3408,7 @@ code: een foto of tekening en het woord, in Instellingen.
   `pagehide`, anders blijft het lampje branden. Komt de app terug terwijl de
   zoeker openstond, dan gaat hij weer aan.
 - **Of je tekent haar.** Niet elk ding heeft een foto, en een kind tekent
-  zelf graag. De potloodtegel opent de maker op een vel van 512 bij 512 in
-  hetzelfde vierkant. Eén pen
+  zelf graag. De potloodtegel opent de maker op een vel in hetzelfde vierkant. Eén pen
   die met een tweede tik dik of dun wordt, een emmer, een gum, een stap terug
   en alles weg: genoeg voor een kind van vier, zonder menu. Wie de gum pakt,
   heeft geen kleur meer gekozen; een tik op een kleur pakt de pen weer.
@@ -3422,8 +3421,11 @@ code: een foto of tekening en het woord, in Instellingen.
   rol je nog even, want kleiner wordt tekenen te krap. Het toetsenbord
   telt niet mee: op Chrome (sinds 108) en Safari schuift het over de
   pagina en verkleint het de layout niet.
-- **Zes tekenkleuren zijn inhoud, geen betekenis.** Inkt, rood, blauw, goud,
-  groen en bruin. "Kleur betekent één ding" gaat over de stukken van het
+- **Acht tekenkleuren zijn inhoud, geen betekenis.** Inkt, rood, oranje,
+  goud, groen, blauw, roze en bruin. Oranje en roze kwamen erbij omdat een
+  vos, een varken, een wortel of een flamingo zonder ze niet te tekenen is.
+  Ze staan op één rij: een staal is hoogstens 38 px en krimpt op 320 px
+  tot zo'n 29, met een raakvlak dat boven en onder groter is. "Kleur betekent één ding" gaat over de stukken van het
   bord; wat er op een kaart staat is inhoud, net als de kleuren van een
   emoji. De knoppen zelf houden de regel: gekozen is goud.
 - **Een tekening is doorzichtig en krijgt de pen.** Bewaard als PNG zonder
@@ -3437,6 +3439,13 @@ code: een foto of tekening en het woord, in Instellingen.
   het bewaarde beeld van een kaart die je aanpast. Eén tik van een kind op
   de prullenbak kostte de hele tekening. Wat er nu op het vel ligt, en dus
   of Bewaren mag, rekent `opVel()` vanaf de laatste wis.
+- **Tekenen op 1024, bewaren op 512.** Het vel van 512 werd op een
+  telefoon (358 px breed, 3x) zo'n twee keer opgeblazen: zachte randen.
+  Het canvas is nu `VEL` (1024) groot; de stappen rekenen in punten van
+  512 en `doekBlob()` verkleint bij het bewaren, zodat de kaart precies
+  blijft wat ze was. De emmer vult per pixel van het vel: zo'n 10 ms in
+  plaats van 2,5, en een stap terug na een paar vlakken blijft onder de
+  50 ms.
 - **Een lijn is een bocht, geen veelhoek.** Een telefoon geeft één
   `pointermove` per beeld; een snelle cirkel van een tiende seconde werd zo
   een twaalfhoek. De lijn neemt alle punten van de vinger
