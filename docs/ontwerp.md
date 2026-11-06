@@ -1897,6 +1897,11 @@ meer". In het aftellen ligt er nog geen kaart en geen streep: "nog niet",
 net als goed. Het indrukken gaat op `translate`, zodat `nudge()` hem op zijn
 ingedrukte plek schudt.
 
+De streep snijdt door de pijlen, met eronder een rand in `--paper-2`, de
+kleur van de knop. Zonder die rand liep de zwarte streep over in de zwarte
+pijlen en bleef er alleen een staart rechtsonder over: dat las als een
+muispijl.
+
 **De stapel draait mee om.** Bij tijd om werd de kaart smal boven een volle
 stapel die bleef liggen, en dan las het omdraaien als wegschuiven. Nu
 draaien de kaarten eronder mee (`draaiOm()`, op `scale`, want `transform`
