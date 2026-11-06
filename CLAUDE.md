@@ -490,7 +490,9 @@ vandaan kwam). De lijst staat in `tijdisom.eigen`, de beelden in IndexedDB
   woordregel aan (`nudge()` en focus). Weggooien kost twee tikken; een niet
   bewaarde nieuwe kaart blijft per soort als klad liggen.
 - Een nieuwe kaart opent op de camera in het vierkant (`startCam()`), met
-  het album als terugval. De camera gaat uit bij afdrukken, sluiten en
+  het album als terugval. Afdrukken klapt een sluiter van twee inktplaten
+  dicht en open (`sluitPlaten()`), met `Snd.klik()` en `Tril.klik()`; de
+  foto wisselt achter de dichte platen. De camera gaat uit bij afdrukken, sluiten en
   verbergen (`stopCam()`); de voorcamera spiegelt alleen in de zoeker.
 - Of je tekent haar in hetzelfde vierkant (`mkDoek`): zes tekenkleuren
   zijn inhoud, geen betekenis. Een tekening is een doorzichtige PNG en
