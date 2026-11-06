@@ -78,6 +78,10 @@ Regels voor die grens:
   `visibilitychange`/`pagehide` midden in een beurt (`bewaarBeurt()`, via
   `Spel.onderbreek()`). Twee terugvegen zonder tik ertussen sluiten de app
   op Android, wat je ook in de geschiedenis zet; reken daar niet omheen.
+  Een omdraai die een klok of het aftellen start (verder, start), kijkt
+  eerst of de app nog in beeld is. Uit beeld zwijgt `Snd` (`Snd.stil()`).
+- Een `<img>` neemt geen aanraking aan (`pointer-events: none`), anders
+  opent een lange druk het beeldmenu van Chrome over het spel.
 
 ## De harde eis
 
