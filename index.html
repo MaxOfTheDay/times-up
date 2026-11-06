@@ -7703,7 +7703,7 @@ function tallyNode(t) {
   head.className = "head";
   const dier = svgUse(TEAMS[t].mascot, "mascot-sm");
   head.appendChild(dier);
-  /* De kroon is een deel van het dier, achter het gezicht in dezelfde svg:
+  /* De kroon is een deel van het dier, na het gezicht in dezelfde svg:
      als los stuk erboven bleef ze hangen terwijl de kop bewoog. Het gezicht
      blijft de eerste use (zetGezicht, knipperLus). */
   if (total(t) > total(1 - t)) {
