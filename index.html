@@ -3506,18 +3506,14 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
 
 <!-- Pauze: de klok staat stil. Verder spelen is één tik; stoppen moet je
      vasthouden, want dat gooit het lopende spel weg. -->
-<!-- De kaarten die nog liggen, als plaatjes op alfabet (niet in de volgorde
-     van de stapel: die zou verklappen wat er komt). Kleine spelers onthouden
-     de kaarten van ronde 1 niet allemaal; hier kijken ze even terug. Een tik
-     waar dan ook sluit. -->
 <!-- Op je beginscherm: één vel, twee ingangen. De rij in Instellingen opent
      het, en bij de eerste start in een browser komt het één keer vanzelf op
      over de titel (welkom()). Het is voor de volwassene, zoals Instellingen:
      daarom mag er tekst op. Wat er tussen kop en knoppen staat, hangt af van
      het toestel (paintVel()): een gouden knop als het toestel zelf een
      dialoog heeft, anders de weg als tegels, of "open in Safari" met de link
-     om te kopiëren. Geen sluier: de titel blijft zichtbaar, en een tik ernaast
-     is "nu niet". -->
+     om te kopiëren. Onder de sluier van het losse paneel; een tik op de
+     sluier is "nu niet". -->
 <div id="installVel" role="dialog" aria-modal="true" aria-labelledby="ivKop" hidden>
   <div class="iv-vel surface">
     <div class="iv-kop">
@@ -3532,6 +3528,10 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
   </div>
 </div>
 
+<!-- De kaarten die nog liggen, als plaatjes op alfabet (niet in de volgorde
+     van de stapel: die zou verklappen wat er komt). Kleine spelers onthouden
+     de kaarten van ronde 1 niet allemaal; hier kijken ze even terug. Een tik
+     waar dan ook sluit. -->
 <div class="overlay" id="kijk" role="dialog" aria-modal="true" aria-label="De kaarten die nog liggen" tabindex="-1" hidden>
   <div class="panel surface"><div class="kijk-grid" id="kijkGrid"></div></div>
 </div>
