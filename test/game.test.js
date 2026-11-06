@@ -148,7 +148,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     ok(await screen() === 'play' && await page.getAttribute('#countdown', 'hidden') === null,
        `ronde ${round}: een tik op het aftelvlak breekt het aftellen af`);
     await page.click('#cdBack');
-    await page.waitForTimeout(120);
+    await page.waitForTimeout(300);           // de speelkaart draait eerst om
     ok(await screen() === 'handoff', `ronde ${round}: aftellen afbreken werkt niet`);
 
     await startTurn();

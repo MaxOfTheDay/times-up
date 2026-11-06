@@ -1336,10 +1336,13 @@ maar op nul is het dezelfde kaart, nog 0 breed, en dan slaat de landing
 zichzelf over. Nu laat `draaiOm()` de vouw eerst los; het scherm wisselt in
 dezelfde taak, dus de ongevouwen kaart komt nooit in beeld.
 
-Afbreken knipt nog: de speelkaart en goed en pas zijn in één beeld weg.
-Een spiegelbeeld van start (vouwen, wegzakken, landen) is geprobeerd, maar
-elke vertraagde wissel gaf in de opnames een kwart seconde zonder kaart en
-zakte naar 25 beelden per seconde. Daarom staat het nog niet in.
+Afbreken knipte: de speelkaart, de balk en goed en pas waren in één beeld
+weg, en twee beelden lang stond er niets. Een volledig spiegelbeeld van
+start (vouwen, wegzakken, landen) gaf in de opnames een kwart seconde
+zonder kaart. Nu doet afbreken alleen de eerste helft van het omdraaien
+(`draaiOm()` op de speelkaart en haar stapel, 140 ms), houdt de volgende
+tel tegen, en wisselt dan het scherm in dezelfde taak als de landing: één
+beeld zonder kaart, het midden van de draai, zoals op nul.
 
 Op nul werd de klokknop ook in één beeld twee keer zo breed: tijdens het
 aftellen stond alleen `#cdBack`, een losse tegel met het pauzeteken. Nu
@@ -1347,10 +1350,11 @@ staat de klokknop er het hele aftellen, met de seconden van de beurt die
 komt, en ligt `#cdBack` alleen op zijn pauzeteken (de knop zelf is zolang
 `inert`). Op nul verdwijnt `#cdBack` en ligt daar hetzelfde teken.
 
-De druk op start rimpelt op de overdracht, en de golf wordt na 130 ms
-afgeknipt als het spelscherm verschijnt. De golf doorgeven aan het canvas
-van het aftellen is geprobeerd en gaf hetzelfde haperen als het
-spiegelbeeld van afbreken; ook dat staat nog niet in.
+De druk op start rimpelt op de overdracht, en de golf werd na 140 ms
+afgeknipt als het aftellen verscheen. Nu neemt het canvas van het aftellen
+de rimpels over die nog lopen, op dezelfde plek en met dezelfde leeftijd
+(`veldCd.neem(veldHo.rimpels(), ...)`): een kopie van een paar getallen,
+geen extra tekenwerk.
 
 ### Instellingen openen zonder leeg beeld
 
@@ -3545,3 +3549,35 @@ van de overdracht, de tellen van het aftellen) houdt zijn eigen timer met
 een eigen clear. Een willekeurige tik-test (3.450 stappen: tikken, lang
 drukken, terugvegen, herladen, wegklikken) vond voor en na geen fout.
 
+## Beeld voor beeld nagelopen
+
+Een volledig potje, beeld voor beeld opgenomen (CDP-screencast, de beelden
+gesorteerd op hun tijdstempel: de screencast levert er soms een te laat,
+en dat leest als een flits die er niet is), op de drie maten en op een
+4x tragere processor. Wat er gevonden en rechtgezet werd:
+
+- **De klokband knipperde bij elke goed, pas en terugnemen.** De kopie van
+  de kaart die wegvliegt (`kaartSpook()`) werd zonder band gemaakt en lag
+  twee, drie beelden over de echte. Nu houdt de kopie haar band: ze vertrekt
+  precies zoals ze eruitzag, en de band op tafel wordt nooit bedekt.
+- **De stapel sprong bij pauze en verder.** Hij verdween in één beeld voor
+  de kaart begon te draaien, en stond bij verder in één beeld weer vol, met
+  een leeg papieren vel waar de kaart nog moest landen. Nu draait hij mee
+  om (`draaiPauze()`, `kaartBoven()`, `.stapel-om`), zoals op nul.
+- **Goed liep bij tijd om door saliegroen.** De achtergrond had een
+  overgang van 60 ms, en die mengt groen met papier. Nu springt de kleur
+  in één keer om als de knop geland is: inzakken is de beweging, de kleur
+  is een stand.
+- **De ploegkleur stond twee beelden als losse stip.** `kleurUitKaart()`
+  begon de cirkel op de halve kaart terwijl die kaart nog 0 breed was. Nu
+  wacht de cirkel (hoogstens acht beelden) tot de kaart een derde breed
+  is, zodat hij altijd van achter de kaart komt.
+- **De rimpel van start en het afbreken van het aftellen**: zie "Op nul landt de kaart".
+
+Wat bleef: de wissen van Nog een keer en naar huis snijden even door
+kaart en knop terwijl die groeien; dat is de wis zelf. Op een 4x tragere
+processor kost een tik op goed een beeld van zo'n 125 ms, vooral voor de
+inktlijn om het volgende teken. De testbrowser tekent canvassen op de
+processor, een telefoon op de grafische chip; het canvas verplaatsen in
+plaats van kopiëren en vooraf leegmaken in rusttijd veranderden in de
+testbrowser niets en staan er dus niet in.
