@@ -3139,6 +3139,21 @@ code: een foto of tekening en het woord, in Instellingen.
 - **Een spiegel in de zoeker, niet op de kaart.** De voorcamera spiegelt in
   de zoeker, zoals je jezelf verwacht te zien; de foto wordt ongespiegeld
   bewaard, zoals de camera van de telefoon dat doet.
+- **Afdrukken klikt.** Eerst stond het beeld bij afdrukken alleen stil: geen
+  klank, geen trilling, en met de voorcamera klapte het zichtbaar om van
+  gespiegeld naar echt. Nu klapt de sluiter dicht: twee inktplaten van boven
+  en onder (`.mk-plaat`, `sluitPlaten()`), 70 ms op `--e-weg`, 50 ms dicht,
+  180 ms open op `--e-uit`. Achter de dichte platen wisselt de zoeker voor de
+  foto, dus de spiegeling klapt niet meer in beeld om. Daarbij `Snd.klik()`
+  (een droge klik bij de druk, een rondere klak als de platen opengaan) en
+  `Tril.klik()` (30 ms, als ze dicht zijn). Platte inkt met harde randen: een
+  witte flits of een vervaging valt buiten het papier. De platen zijn de
+  druk van de vinger die het beeld raakt (Drukken), geen eigen leven. Het
+  beeld komt uit de zoeker op het moment van de tik, niet na de platen.
+  Getoetst tegen een omdraai van de zoeker (trager, 0,3 s, en omdraaien
+  betekent "wat nu komt") en tegen alleen klank en trilling (dan blijft de
+  sprong van de voorcamera). Bij beperkte beweging geen platen, wel klank
+  en trilling.
 - **Zonder camera het album.** Geen `getUserMedia`, geen toestemming of geen
   camera: dan is het vierkant leeg met het albumteken, en een tik opent de
   keuze van de telefoon, die daar ook zijn eigen camera aanbiedt. Een nee

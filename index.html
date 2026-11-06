@@ -1183,6 +1183,17 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
    Geen binnenring: die las als een doelwit of een munt. */
 .mk-sluiter svg { width: 40px; height: 40px; }
 .mk-tg[hidden] { display: none; }
+/* De sluiter zelf: twee inktplaten die bij afdrukken van boven en onder
+   dichtklappen en op de stilstaande foto weer opengaan (sluitPlaten()). In
+   rust staan ze buiten het vierkant. Platte inkt met harde randen: geen
+   witte flits, geen vervaging. Achter de dichte platen wisselt de
+   gespiegelde zoeker voor de foto, zodat je die niet ziet omklappen. */
+.mk-plaat {
+  position: absolute; left: 0; right: 0; height: 51%; z-index: 2;
+  background: var(--ink); pointer-events: none;
+}
+.mk-plaat.boven { top: 0; translate: 0 -101%; }
+.mk-plaat.onder { bottom: 0; translate: 0 101%; }
 
 /* Tekenen: een vel papier zonder rand. De tekening zelf is doorzichtig, zodat
    ze op de kaart de inktlijn van .glyph krijgt zoals een emoji. */
@@ -3401,6 +3412,7 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
         <svg class="mk-leeg" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-album"/></svg>
         <img id="mkFoto" alt="" hidden draggable="false">
         <video id="mkZoeker" playsinline muted hidden></video>
+        <i class="mk-plaat boven" aria-hidden="true"></i><i class="mk-plaat onder" aria-hidden="true"></i>
         <canvas id="mkDoek" width="512" height="512" hidden></canvas>
         <!-- Toveren: de staf ligt midden op het lege vel; tijdens het tekenen
              stuurt hij ringen door de punten. Zie docs/ontwerp.md, Toveren. -->
@@ -4010,6 +4022,14 @@ const Snd = (() => {
        Het enige onomkeerbare in de app krijgt het enige vallende geluid
        naast timeUp(), en klinkt nergens anders. */
     dicht() { tone(330, .2, "square", .1, 0, 110); },
+    /* Afdrukken: een droge klik (twee scheve squares, net na elkaar: dat
+       ratelt als een veer en klinkt anders dan de enkele tik van de klok),
+       en als de sluiter opengaat een rondere klak, lager en omlaag. */
+    klik(klakNa) {
+      tone(2350, .016, "square", .09, 0, 1500);
+      tone(3150, .012, "square", .06, .006);
+      tone(1050, .045, "triangle", .17, klakNa || .12, 700);
+    },
     /* Wie aan de beurt is, zonder lezen: Vos helder en vlug (twee korte
        noten omhoog), Uil rond en laag (een kleine terts omlaag, een
        oehoe). Alleen op drie plekken: als de worp landt, als de overdracht
@@ -4083,6 +4103,7 @@ const Tril = (() => {
     go()    { buzz(35); },                    // de klok loopt
     ijk()   { buzz(20); },                    // lange druk, halverwege
     doe()   { buzz(50); },                    // lange druk voltooid
+    klik()  { buzz(30); },                    // foto genomen, als de sluiter dicht is
     om()    { buzz([60, 70, 60]); },          // tijd om
     leeg()  { buzz([20, 50, 20, 50, 40]); },  // stapel leeg
     /* Gewonnen: een puls op elke uitbarsting van het vuurwerk (de noten
@@ -5202,24 +5223,49 @@ async function startCam() {
   }
 }
 /* Afdrukken: het vierkant uit het midden van het beeld, zoals de zoeker het
-   toont. De voorcamera wordt níet gespiegeld bewaard: een spiegel in de
-   zoeker, de echte wereld op de kaart, zoals de camera van de telefoon. */
+   toont, op het moment van de tik. De voorcamera wordt níet gespiegeld
+   bewaard: een spiegel in de zoeker, de echte wereld op de kaart, zoals de
+   camera van de telefoon. De sluiter klapt dicht (SLUIT_DICHT), de foto
+   wisselt erachter, en hij gaat open op de foto (SLUIT_OPEN). */
+const SLUIT_DICHT = 70, SLUIT_HOUD = 50, SLUIT_OPEN = 180;
 function afdrukken() {
   const v = $("#mkZoeker");
-  if (!mk || !mk.live || !v.videoWidth) return;
+  if (!mk || !mk.live || mk.drukt || !v.videoWidth) return;
+  mk.drukt = true;
+  const deze = mk, stil = stilAan();
+  Snd.klik((SLUIT_DICHT + SLUIT_HOUD) / 1000);
+  const dicht = stil ? Promise.resolve() : sluitPlaten(true);
   const z = Math.min(v.videoWidth, v.videoHeight), n = Math.min(z, 1024);
   const c = document.createElement("canvas");
   c.width = c.height = n;
   c.getContext("2d").drawImage(v, (v.videoWidth - z) / 2, (v.videoHeight - z) / 2, z, z, 0, 0, n, n);
   const i = new Image();
-  i.onload = () => {
-    if (!mk) return;
+  const geladen = new Promise(r => { i.onload = r; i.onerror = r; });
+  i.src = c.toDataURL("image/jpeg", .92);
+  Promise.all([dicht, geladen]).then(async () => {
+    deze.drukt = false;
+    /* Intussen gesloten of verborgen: de sluiter terug in rust, geen foto. */
+    if (mk !== deze || !mk.live || !i.naturalWidth) { sluitPlaten(false, true); return; }
+    Tril.klik();
+    stopCam();
     mk.img = i; mk.nieuw = true; mk.zoom = 1; mk.live = false;
     tekenMaker(); plaats(true);
-    if (!$("#mkWoord").value.trim()) $("#mkWoord").focus({ preventScroll: true });
-  };
-  i.src = c.toDataURL("image/jpeg", .92);
-  stopCam();
+    if (!stil) { await wachtMs(SLUIT_HOUD); sluitPlaten(false); }
+    if (mk === deze && !$("#mkWoord").value.trim()) $("#mkWoord").focus({ preventScroll: true });
+  });
+}
+const wachtMs = ms => new Promise(r => setTimeout(r, ms));
+/* De twee platen dicht (blijven staan) of open (terug naar rust). */
+function sluitPlaten(dicht, meteen) {
+  return Promise.all([...document.querySelectorAll("#mkVak .mk-plaat")].map(p => {
+    const rust = p.classList.contains("boven") ? "0 -101%" : "0 101%";
+    p.getAnimations().forEach(a => a.cancel());
+    if (meteen || !p.animate) return null;
+    const a = p.animate(dicht ? [{ translate: rust }, { translate: "0 0" }]
+                              : [{ translate: "0 0" }, { translate: rust }],
+      { duration: dicht ? SLUIT_DICHT : SLUIT_OPEN, easing: curve(dicht ? "weg" : "uit"), fill: dicht ? "forwards" : "none" });
+    return a.finished.catch(() => {});
+  }));
 }
 $("#mkSluiter").addEventListener("click", afdrukken);
 $("#mkCamAlbum").addEventListener("click", () => $("#mkBestand").click());
