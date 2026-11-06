@@ -1,6 +1,7 @@
 # De tests draaien in een echte browser, dus CI heeft een echte browser nodig.
-# Playwright installeert die zelf; test/browser.js valt daarop terug zodra de
-# vaste paden uit de ontwikkelomgeving niet bestaan.
+# Die komt uit het Docker-image van Playwright: browser en systeembibliotheken
+# zitten er al in, zodat er geen apt-download is die op een trage spiegel van
+# Ubuntu de run over zijn tien minuten duwt.
 name: Tests
 
 on:
@@ -17,39 +18,19 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # De versie hoort gelijk aan playwright in package-lock.json; de eerste
+    # stap hieronder breekt de run af als ze uit elkaar lopen.
+    container: mcr.microsoft.com/playwright:v1.62.1-noble
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
+      - name: Image past bij package-lock.json
+        run: |
+          lock=$(node -p "require('./package-lock.json').packages['node_modules/playwright'].version")
+          test "$lock" = "1.62.1" || { echo "playwright $lock in package-lock.json, image heeft 1.62.1: zet het image in test.yml op v$lock"; exit 1; }
 
       - run: npm ci
-
-      # De browser tussen runs bewaren; het versienummer in de sleutel zorgt
-      # dat een playwright-upgrade vanzelf een nieuwe download afdwingt.
-      - name: Playwright-versie bepalen
-        id: pw
-        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/playwright'].version")" >> "$GITHUB_OUTPUT"
-
-      - name: Browser uit de cache halen
-        id: cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
-
-      - name: Browser installeren
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
-
-      # Uit de cache komt alleen de browser zelf; de systeembibliotheken
-      # eromheen zitten niet in ~/.cache en moeten er altijd bij.
-      - name: Systeembibliotheken installeren
-        if: steps.cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
 
       # Duurt ruim een halve minuut: één beurt moet echt uitlopen om te zien
       # wat er gebeurt als de tijd om is.
