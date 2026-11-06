@@ -543,6 +543,49 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(await screen() === 'title', 'het huisje op de overdracht vasthouden komt niet op de titel uit');
   ok(!await game(() => !!window.__tijd.G), 'het huisje op de overdracht gooit het potje niet weg');
 
+  // --- een tik die schuift, of met een tweede vinger op het glas, telt ---
+  // Met click gingen die verloren: de browser maakte van een schuivende
+  // vinger een veeg, en twee vingers geven geen klik (een duim die de
+  // telefoon vasthoudt). Echte aanraking via CDP, op een touch-toestel.
+  {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    const tp = await ctx.newPage();
+    tp.on('pageerror', e => errs.push('PAGEERROR ' + e.message));
+    await tp.goto(APP_URL);
+    await tp.evaluate(() => localStorage.clear());
+    await tp.reload();
+    await tp.waitForTimeout(400);
+    await tp.tap('#btnStart');
+    await tp.waitForFunction(() => window.__tijd.screen === 'handoff', null, { timeout: 8000 });
+    await tp.waitForTimeout(2500);
+    await tp.tap('#btnStartTurn');
+    await tp.waitForFunction(() => window.__tijd.screen === 'play' &&
+      document.querySelector('#countdown').hidden, null, { timeout: 15000 });
+    await tp.waitForTimeout(400);
+    const cdp = await ctx.newCDPSession(tp);
+    const b = await tp.locator('#btnGoed').boundingBox();
+    const x = b.x + b.width / 2, y = b.y + b.height / 2;
+    const vinger = (px, py, id) => ({ x: px, y: py, id, radiusX: 8, radiusY: 8, force: 1 });
+    const raak = (type, pts) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts });
+    const punten = () => tp.evaluate(() => { const G = window.__tijd.G; return G.scores[G.team][G.round - 1]; });
+    const wacht = ms => tp.waitForTimeout(ms);
+
+    let voor = await punten();
+    await raak('touchStart', [vinger(x, y, 0)]); await wacht(40);
+    await raak('touchMove', [vinger(x + 20, y + 20, 0)]); await wacht(40);
+    await raak('touchEnd', []); await wacht(500);
+    ok(await punten() === voor + 1, 'een tik op goed die 28 px schuift, telt niet');
+
+    voor = await punten();
+    const duim = vinger(4, 500, 1);
+    await raak('touchStart', [duim]); await wacht(150);
+    await raak('touchStart', [duim, vinger(x, y, 2)]); await wacht(80);
+    await raak('touchEnd', [duim]); await wacht(100);
+    await raak('touchEnd', []); await wacht(500);
+    ok(await punten() === voor + 1, 'een tik op goed met een duim op de rand van het scherm, telt niet');
+    await ctx.close();
+  }
+
   ok(!errs.length, 'consolefouten: ' + errs.join(' | '));
 
   await browser.close();

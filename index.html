@@ -514,6 +514,9 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
   display: grid; place-items: center;
 }
 .btn-good svg { width: 52%; }
+/* Geen veeg en geen zoom vanaf de knoppen van het spel: een vinger die
+   onderweg schuift, blijft een tik (zie tikKnop). */
+#btnGoed, #btnPas, #turnScore { touch-action: none; }
 
 /* ---- passen ----
    --lift-1 en niet --lift-2: dit is de mindere keuze naast "goed", niet de
@@ -6621,6 +6624,33 @@ function penVooruit() {
 function paused() { return !$("#pauze").hidden; }
 
 let lastAct = { goed: 0, pas: 0 };
+
+/* Een tik op goed, pas of het +N telt op de vinger zelf, niet op `click`.
+   Een klik ging verloren zodra de vinger meer dan een paar pixels schoof
+   (de browser maakte er een veeg van: pointercancel) en zodra er ergens
+   anders een vinger op het glas lag, zoals de duim die de telefoon
+   vasthoudt: twee vingers maken geen klik. Precies wat er gebeurt als het
+   snel gaat. Daarom touch-action: none op de knoppen (geen veeg) en elke
+   vinger apart. De tik telt bij het loslaten, binnen TIK_RUIM px van de
+   knop. Het toetsenbord komt via click binnen (detail 0). */
+const TIK_RUIM = 24;
+function tikKnop(el, doe) {
+  const vingers = new Set();
+  el.addEventListener("pointerdown", e => {
+    if (e.button > 0) return;
+    vingers.add(e.pointerId);
+    try { el.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+  el.addEventListener("pointerup", e => {
+    if (!vingers.delete(e.pointerId)) return;
+    const r = el.getBoundingClientRect();
+    if (e.clientX < r.left - TIK_RUIM || e.clientX > r.right + TIK_RUIM ||
+        e.clientY < r.top - TIK_RUIM || e.clientY > r.bottom + TIK_RUIM) return;
+    doe();
+  });
+  el.addEventListener("pointercancel", e => vingers.delete(e.pointerId));
+  el.addEventListener("click", e => { if (e.detail === 0) doe(); });
+}
 function acts(key) {
   if (current !== "play" || !G || G.card === null || paused()) return false;
   const now = performance.now();
@@ -6781,7 +6811,7 @@ function midden(sel) {
   return { x: r.left + r.width / 2, y: r.top + r.height / 2, h: r.height };
 }
 
-$("#btnGoed").addEventListener("click", () => {
+tikKnop($("#btnGoed"), () => {
   if (!acts("goed")) return;
   // De toon stijgt per kaart van deze beurt; nog vóór het ophogen, zodat de
   // eerste kaart de grondtoon krijgt.
@@ -6809,7 +6839,7 @@ $("#btnGoed").addEventListener("click", () => {
   syncControls();
 });
 
-$("#btnPas").addEventListener("click", () => {
+tikKnop($("#btnPas"), () => {
   if (current !== "play" || !G || G.card === null || paused()) return;
   // Laatste kaart: er valt niets over te slaan. Antwoorden doet hij wel.
   // Eigen geluid: dit is een weigering, geen overslag, en die twee moeten
@@ -6830,7 +6860,7 @@ $("#btnPas").addEventListener("click", () => {
    dat het punt kreeg, neemt het ook weer af. Het venster is kort, zodat een
    ploeg aan het eind van de beurt niet zijn hele buit kan terugdraaien. */
 const TERUG_MS = 3000;
-$("#turnScore").addEventListener("click", () => {
+tikKnop($("#turnScore"), () => {
   if (current !== "play" || !G || G.card === null || paused()) return;
   if (performance.now() - lastAct.goed > TERUG_MS) return;
   landFly();

@@ -460,6 +460,19 @@ dat bestaat nu niet meer. Alternatief bekeken: overal het pauzeteken in de
 hoek, met de startknop die wegzakt tijdens de pauze. Dat hield een stap
 extra om weg te gaan, en een pauze zonder klok.
 
+### Goed, pas en het +N tellen op de vinger
+
+Bij snel spelen kwam een tik soms niet aan. Gemeten met echte aanraking
+(CDP, Chrome op een touch-toestel): een tik op goed die 16 px of meer
+schoof, werd een veeg (`pointercancel`, geen `click`), en een tik terwijl
+er ergens anders een vinger op het glas lag (de duim die de telefoon
+vasthoudt, een tweede kind) gaf helemaal geen `click`. Allebei precies wat
+er gebeurt in de laatste tellen. Daarom tellen goed, pas en het +N via
+`tikKnop()`: elke vinger apart, met `touch-action: none` op die knoppen,
+en een tik telt bij het loslaten binnen `TIK_RUIM` (24 px) van de knop.
+Het toetsenbord komt via `click` met `detail` 0 binnen. De dubbeltik van
+280 ms (`acts()`) blijft. De test staat in `test/game.test.js`.
+
 ### Starten is een tik
 
 Starten hoorde daar ooit ook bij, maar dat was het niet waard. De klok
