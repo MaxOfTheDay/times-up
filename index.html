@@ -4267,9 +4267,13 @@ function paintChrome(kleur) {
   if (m) m.setAttribute("content", kleur);
 }
 
+/* Elk stipveld() meldt hier zijn ruimOp(): na een schermwissel geeft een
+   grond die niet meer in beeld is zijn canvas terug. */
+const VELDEN = [];
 function show(name) {
   current = name;
   $$(".screen").forEach(s => s.classList.toggle("on", s.id === "s-" + name));
+  VELDEN.forEach(f => f());
   /* Het overdrachtscherm is het enige dat van rand tot rand ploegkleur is.
      Het spelscherm staat op papier, ook tijdens het aftellen: dat gekleurde
      vlak ligt nu ónder de balk bovenaan, en die is crème. */
@@ -6222,7 +6226,9 @@ function handOffCountdown(done) {
     /* De punten blijven liggen. Het canvas van het aftellen houdt ze nog
        even, tot de golf van de laatste tel is uitgedempt; dan nemen de
        stille punten van het spelscherm het over, op dezelfde plekken. */
-    setTimeout(() => { if (countRaf === null) $("#countdown").hidden = true; }, stilAan() ? 0 : NA_NUL);
+    setTimeout(() => {
+      if (countRaf === null) { $("#countdown").hidden = true; VELDEN.forEach(f => f()); }
+    }, stilAan() ? 0 : NA_NUL);
   });
 }
 
@@ -6643,6 +6649,10 @@ function stipveld(cv, opt) {
   const cx = cv.getContext("2d");
   let W = 0, H = 0, punten = [], rimpels = [], raf = 0;
   let inkt = !!opt.inkt, onthul = null, stralen = -1, toon = null, leeg = false;
+  /* Wat het vorige beeld tekende, zodat een rimpel alleen de punten
+     overtekent die hij raakt (zie teken()). */
+  let NX = 0, NY = 0, rooster = null, px, py, prad, pa, pk, lx, ly, lrad, la, lk, vuil;
+  let vol = true, vorSleutel = "", laatstStralen = 0, slaap = 0;
   function maat() {
     const r = cv.getBoundingClientRect();
     if (!r.width || !r.height) return false;
@@ -6655,12 +6665,20 @@ function stipveld(cv, opt) {
       punten = [];
       /* Op het midden uitgelijnd, zoals background-position: center. */
       const x0 = W / 2 - CEL * Math.floor(W / 2 / CEL), y0 = H / 2 - CEL * Math.floor(H / 2 / CEL);
-      for (let y = y0; y < H; y += CEL) for (let x = x0; x < W; x += CEL) {
+      NX = Math.ceil((W - x0) / CEL); NY = Math.ceil((H - y0) / CEL);
+      rooster = new Int32Array(NX * NY).fill(-1);
+      for (let r = 0, y = y0; y < H; y += CEL, r++) for (let c = 0, x = x0; x < W; x += CEL, c++) {
         /* Een vol bord: elk punt op volle dekking. opt.masker (0 tot 1 per
            punt) blijft als haak voor wie later toch een verloop wil. */
         const m = opt.masker ? opt.masker(x, y, W, H) : 1;
-        if (m > .01) punten.push({ x, y, m });
+        if (m > .01) { rooster[r * NX + c] = punten.length; punten.push({ x, y, m, r, c }); }
       }
+      const n = punten.length;
+      px = new Float32Array(n); py = new Float32Array(n); prad = new Float32Array(n);
+      pa = new Float32Array(n); pk = new Uint8Array(n);
+      lx = new Float32Array(n); ly = new Float32Array(n); lrad = new Float32Array(n);
+      la = new Float32Array(n); lk = new Uint8Array(n); vuil = new Uint8Array(n);
+      vol = true;
     }
     return true;
   }
@@ -6677,7 +6695,6 @@ function stipveld(cv, opt) {
     if (klaar) klaar();
   }
   function teken(nu) {
-    cx.clearRect(0, 0, W, H);
     rimpels = rimpels.filter(r => nu - r.t < LEEF);
     /* Rastertoon die komt of gaat (toon()): een rand die vanaf (x, y) naar
        buiten loopt; erbinnen zijn de punten weg (of er al), erbuiten nog
@@ -6689,20 +6706,29 @@ function stipveld(cv, opt) {
       tg = { x: toon.x, y: toon.y, weg: toon.weg, R: -120 + (toon.tot + 120) * e };
       if (t >= 1) { leeg = toon.weg; toon = null; tg = null; }
     }
-    if (leeg && !tg) return;
+    if (leeg && !tg) { cx.clearRect(0, 0, W, H); vol = true; return; }
     let straal = -1;
     if (onthul) {
       const t = Math.min(1, (nu - onthul.t) / onthul.ms), e = 1 - Math.pow(1 - t, 3);
       straal = onthul.van + (onthul.tot - onthul.van) * e;
-      cx.fillStyle = onthul.kleur;
-      cx.beginPath(); cx.arc(onthul.x, onthul.y, straal, 0, 6.2832); cx.fill();
     }
     const ploeg = opt.ploeg ? opt.ploeg() : null;
     const papierA = ploeg === null || ploeg === undefined ? PAPIER[0] : STIP_PAPIER[ploeg];
     const draai = stralen < 0 ? 0 : (stilAan() ? 0 : (nu - stralen) / STRAAL_RONDE * 6.2832);
     const vak = 6.2832 / STRALEN;
-    for (const p of punten) {
-      const m = p.m;
+    /* Een rimpel verandert maar een deel van de punten; de rest ligt waar
+       hij het vorige beeld lag. Dan worden alleen de veranderde punten
+       overgetekend. Op een trage telefoon is elke cirkel een rasterbeurt;
+       2.000 per beeld haalde het aftellen naar 30 beelden per seconde.
+       Onthullen, toon en de stralen (hun 24 randen raken samen bijna het
+       hele bord) tekenen alles. */
+    const sleutel = inkt + "|" + papierA;
+    const deel = !onthul && !tg && stralen < 0 && !vol && sleutel === vorSleutel;
+    vol = !!onthul || !!tg || stralen >= 0;
+    vorSleutel = sleutel;
+    const n = punten.length;
+    for (let i = 0; i < n; i++) {
+      const p = punten[i], m = p.m;
       let golf = 0, dal = 0, ex = 0, ey = 0;
       /* De rimpel moet je zien als antwoord op je tik: 12 px opzij, een punt
          tot ruim het dubbele. Met 4,5 px las hij op een telefoon als niets. */
@@ -6722,7 +6748,7 @@ function stipveld(cv, opt) {
         dal = Math.max(dal, Math.min(1, Math.max(0, -pak) * demp));
       }
       const papier = !inkt || (straal >= 0 && Math.hypot(p.x - onthul.x, p.y - onthul.y) < straal);
-      let [A0, KLEUR, LICHT_R] = papier ? PAPIER : INKT;
+      let [A0, , LICHT_R] = papier ? PAPIER : INKT;
       if (papier) A0 = papierA;
       /* In een straal is de punt groter en iets voller: toon uit het raster,
          geen vlak eroverheen. */
@@ -6731,26 +6757,91 @@ function stipveld(cv, opt) {
         const hoek = Math.atan2(p.y - H / 2, p.x - W / 2) - draai;
         if ((((hoek % vak) + vak) % vak) < vak / 2) { r0 = R0 * 1.75; A0 *= 1.25; }
       }
-      const a = Math.min(1, (A0 + golf * LICHT_R) * m);
-      cx.fillStyle = `rgba(${KLEUR}, ${a.toFixed(3)})`;
       let rad = Math.max(.5, r0 + golf * 3 - dal * r0 * .8);
       if (tg) {
         const q = Math.min(1, Math.max(0, (Math.hypot(p.x - tg.x, p.y - tg.y) - tg.R) / 120));
         rad *= tg.weg ? q : 1 - q;
-        if (rad < .2) continue;
       }
-      cx.beginPath(); cx.arc(p.x + ex, p.y + ey, rad, 0, 6.2832); cx.fill();
+      px[i] = p.x + ex; py[i] = p.y + ey; prad[i] = rad;
+      pa[i] = Math.min(1, (A0 + golf * LICHT_R) * m); pk[i] = papier ? 1 : 0;
     }
+    const stip = i => {
+      if (prad[i] < .2) return;
+      cx.fillStyle = `rgba(${pk[i] ? PAPIER[1] : INKT[1]}, ${pa[i].toFixed(3)})`;
+      cx.beginPath(); cx.arc(px[i], py[i], prad[i], 0, 6.2832); cx.fill();
+    };
+    const onthou = () => { lx.set(px); ly.set(py); lrad.set(prad); la.set(pa); lk.set(pk); };
+    if (!deel) {
+      cx.clearRect(0, 0, W, H);
+      if (onthul) {
+        cx.fillStyle = onthul.kleur;
+        cx.beginPath(); cx.arc(onthul.x, onthul.y, straal, 0, 6.2832); cx.fill();
+      }
+      for (let i = 0; i < n; i++) stip(i);
+      onthou();
+      return;
+    }
+    /* Overtekenen binnen een masker: 22 px rond elke veranderde punt (12 px
+       opzij plus de grootste punt, in een straal en op de kam), gewist en
+       opnieuw getekend met alles wat erin kan vallen, vier vakken ver. Wat
+       buiten het masker ligt, staat er nog goed. */
+    vuil.fill(0);
+    cx.save(); cx.beginPath();
+    let iets = false;
+    for (let i = 0; i < n; i++) {
+      if (Math.abs(px[i] - lx[i]) < .02 && Math.abs(py[i] - ly[i]) < .02 && Math.abs(prad[i] - lrad[i]) < .02 &&
+          Math.abs(pa[i] - la[i]) < .0005 && pk[i] === lk[i]) continue;
+      iets = true;
+      const p = punten[i];
+      cx.rect(p.x - 22, p.y - 22, 44, 44);
+      for (let r = Math.max(0, p.r - 4); r <= Math.min(NY - 1, p.r + 4); r++)
+        for (let c = Math.max(0, p.c - 4); c <= Math.min(NX - 1, p.c + 4); c++) {
+          const j = rooster[r * NX + c];
+          if (j >= 0) vuil[j] = 1;
+        }
+    }
+    if (iets) {
+      cx.clip();
+      cx.clearRect(0, 0, W, H);
+      /* Alleen wat echt getekend is, telt als getekend: een punt die per
+         beeld minder dan de drempel schuift, wordt overgetekend zodra het
+         samen genoeg is. */
+      for (let i = 0; i < n; i++) if (vuil[i]) {
+        stip(i);
+        lx[i] = px[i]; ly[i] = py[i]; lrad[i] = prad[i]; la[i] = pa[i]; lk[i] = pk[i];
+      }
+    }
+    cx.restore();
   }
   function stap(nu) {
     raf = 0;
-    if (!opt.zichtbaar() || !maat()) return;
+    if (!opt.zichtbaar()) { ruimOp(); return; }
+    if (!maat()) return;
+    /* De stralen draaien eens in de 26 tellen rond: een punt springt er een
+       paar keer per seconde in of uit. Twintig beelden per seconde is dan
+       genoeg; een rimpel of onthulling krijgt ze allemaal. */
+    const alleenStralen = stralen >= 0 && !onthul && !toon && !rimpels.some(r => nu - r.t < LEEF);
+    if (alleenStralen && nu - laatstStralen < 48) { raf = requestAnimationFrame(stap); return; }
+    laatstStralen = nu;
     teken(nu);
     if (onthul && nu - onthul.t >= onthul.ms) { eindOnthul(); teken(nu); }
     if (actief(nu) && !stilAan()) raf = requestAnimationFrame(stap);
   }
   function wek() { if (!raf) raf = requestAnimationFrame(stap); }
   window.addEventListener("resize", () => { if (opt.zichtbaar()) wek(); });
+  /* Een canvas van een grond die weg is, houdt op 3x zo'n 12 MB vast. Pas
+     een tel later leegmaken: een cirkel die over het oude scherm groeit
+     (naarTitel(), groeiUit()) laat de oude grond nog even zien. maat() zet
+     hem weer op maat zodra hij terug in beeld is. */
+  function ruimOp() {
+    clearTimeout(slaap);
+    slaap = setTimeout(() => {
+      if (opt.zichtbaar() || !cv.width) return;
+      cancelAnimationFrame(raf); raf = 0;
+      cv.width = 0; cv.height = 0; W = 0; H = 0; punten = []; vol = true;
+    }, 1200);
+  }
+  VELDEN.push(ruimOp);
   return {
     /* Het scherm komt in beeld: tekenen. */
     aan() {
