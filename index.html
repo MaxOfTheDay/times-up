@@ -409,13 +409,14 @@ button.ho-count, button.mk-sluiter {
    zichtbaar terugkomt nadat je vinger weg is; gelijk op allebei las als een
    knipper. */
 button.btn-go:active, button.btn-good:active, button.btn-skip:active,
+button.btn-good.tik, button.btn-skip.tik,
 button.btn-icon:active, button.btn-danger:active, button.chip:active,
 button.pv:active, button.btn-plain:active, button.ho-count:active,
 button.mk-sluiter:active, button.mk-staf.klaar:active {
   transition-duration: calc(var(--t-press) * var(--dur));
   transition-timing-function: var(--e-uit);
 }
-.btn-go:active, .btn-good:active, .mk-sluiter:active, .mk-staf.klaar:active {
+.btn-go:active, .btn-good:active, .btn-good.tik, .mk-sluiter:active, .mk-staf.klaar:active {
   transform: translate(var(--lift-2), var(--lift-2));
   box-shadow: 0 0 0 var(--ink);
 }
@@ -423,7 +424,7 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
    terugkoppeling die deze knop nodig heeft. Passen hoort hier en niet bij
    --lift-2: het is de mindere keuze naast geraden. */
 .btn-icon:active, .btn-danger:active, .chip:active, .pv:active, .btn-skip:active,
-.btn-plain:active {
+.btn-skip.tik, .btn-plain:active {
   transform: translate(var(--lift-1), var(--lift-1));
   box-shadow: 0 0 0 var(--ink);
 }
@@ -514,6 +515,14 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
   display: grid; place-items: center;
 }
 .btn-good svg { width: 52%; }
+/* Een onzichtbare ring van 20 px om goed: een duim die op de rand landt
+   terwijl de ogen bij de uitbeelder zijn, telt ook. Erft visibility en
+   pointer-events, dus ingedrukt (.neer) of weggelegd telt hij niet. */
+.btn-good { position: relative; }
+.btn-good::after { content: ""; position: absolute; inset: -20px; border-radius: 50%; }
+/* Geen veeg en geen zoom vanaf de knoppen van het spel: een vinger die
+   onderweg schuift, blijft een tik (zie tikKnop). */
+#btnGoed, #btnPas, #turnScore { touch-action: none; }
 
 /* ---- passen ----
    --lift-1 en niet --lift-2: dit is de mindere keuze naast "goed", niet de
@@ -537,7 +546,8 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
   transition: translate calc(var(--t-press) * var(--dur)) var(--e-uit),
               box-shadow calc(var(--t-press) * var(--dur)) var(--e-uit);
 }
-#s-play:not(.over):not(.leeg) .btn-skip[data-spent="1"]:not(.neer):active { transform: none; }
+#s-play:not(.over):not(.leeg) .btn-skip[data-spent="1"]:not(.neer):active,
+#s-play:not(.over):not(.leeg) .btn-skip[data-spent="1"]:not(.neer).tik { transform: none; }
 .btn-skip[data-spent="1"] .bar { display: block; }
 .btn-skip .bar { display: none; }
 /* Tijdens het aftellen ("nog niet") ligt er nog geen kaart, ook niet na een
@@ -6630,6 +6640,31 @@ function penVooruit() {
 function paused() { return !$("#pauze").hidden; }
 
 let lastAct = { goed: 0, pas: 0 };
+
+/* Een tik op goed, pas of het +N telt op het neerzetten van de vinger,
+   niet op `click`. Een klik kwam pas bij het loslaten (een stevige druk
+   voelde laat), ging verloren zodra de vinger een paar pixels schoof (de
+   browser maakte er een veeg van) en kwam helemaal niet als er ergens
+   anders een vinger op het glas lag, zoals de duim die de telefoon
+   vasthoudt. Elke vinger telt apart; touch-action: none op de knoppen.
+   Een te vroege goed neem je terug op het +N. Het toetsenbord komt via
+   click binnen (detail 0).
+
+   Elke druk laat de knop zichtbaar inzakken (.tik), ook een vluchtige
+   tik die :active anders overslaat: minstens TIK_NEER ms, daarna houdt
+   :active hem vast zolang de vinger er ligt. */
+const TIK_NEER = 70;
+function tikKnop(el, doe) {
+  let neer = 0;
+  el.addEventListener("pointerdown", e => {
+    if (e.button > 0) return;
+    el.classList.add("tik");
+    clearTimeout(neer);
+    neer = setTimeout(() => el.classList.remove("tik"), TIK_NEER);
+    doe();
+  });
+  el.addEventListener("click", e => { if (e.detail === 0) doe(); });
+}
 function acts(key) {
   if (current !== "play" || !G || G.card === null || paused()) return false;
   const now = performance.now();
@@ -6790,7 +6825,7 @@ function midden(sel) {
   return { x: r.left + r.width / 2, y: r.top + r.height / 2, h: r.height };
 }
 
-$("#btnGoed").addEventListener("click", () => {
+tikKnop($("#btnGoed"), () => {
   if (!acts("goed")) return;
   // De toon stijgt per kaart van deze beurt; nog vóór het ophogen, zodat de
   // eerste kaart de grondtoon krijgt.
@@ -6818,7 +6853,7 @@ $("#btnGoed").addEventListener("click", () => {
   syncControls();
 });
 
-$("#btnPas").addEventListener("click", () => {
+tikKnop($("#btnPas"), () => {
   if (current !== "play" || !G || G.card === null || paused()) return;
   // Laatste kaart: er valt niets over te slaan. Antwoorden doet hij wel.
   // Eigen geluid: dit is een weigering, geen overslag, en die twee moeten
@@ -6839,7 +6874,7 @@ $("#btnPas").addEventListener("click", () => {
    dat het punt kreeg, neemt het ook weer af. Het venster is kort, zodat een
    ploeg aan het eind van de beurt niet zijn hele buit kan terugdraaien. */
 const TERUG_MS = 3000;
-$("#turnScore").addEventListener("click", () => {
+tikKnop($("#turnScore"), () => {
   if (current !== "play" || !G || G.card === null || paused()) return;
   if (performance.now() - lastAct.goed > TERUG_MS) return;
   landFly();

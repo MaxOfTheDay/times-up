@@ -460,6 +460,29 @@ dat bestaat nu niet meer. Alternatief bekeken: overal het pauzeteken in de
 hoek, met de startknop die wegzakt tijdens de pauze. Dat hield een stap
 extra om weg te gaan, en een pauze zonder klok.
 
+### Goed, pas en het +N tellen op de vinger
+
+Bij snel spelen kwam een tik soms niet aan. Gemeten met echte aanraking
+(CDP, Chrome op een touch-toestel): een tik op goed die 16 px of meer
+schoof, werd een veeg (`pointercancel`, geen `click`), en een tik terwijl
+er ergens anders een vinger op het glas lag (de duim die de telefoon
+vasthoudt, een tweede kind) gaf helemaal geen `click`. Allebei precies wat
+er gebeurt in de laatste tellen. En een `click` komt pas bij het loslaten:
+bij een stevige druk kwamen de toon, de trilling en de vlucht laat.
+
+Daarom tellen goed, pas en het +N via `tikKnop()` op het neerzetten van
+de vinger (`pointerdown`), elke vinger apart, met `touch-action: none` op
+die knoppen. Je kunt een tik niet meer afbreken door weg te schuiven; een
+te vroege goed neem je terug op het +N. Elke druk laat de knop minstens
+`TIK_NEER` (70 ms) ingezakt zien (`.tik`), ook een vluchtige tik die
+`:active` anders overslaat. Om goed ligt een onzichtbare ring van 20 px
+(`.btn-good::after`): wie uitbeeldt, kijkt naar de ander en niet naar de
+knop. Pas krijgt geen ring, hij is de mindere keuze en ligt ver weg. Het
+toetsenbord komt via `click` met `detail` 0 binnen. De dubbeltik van 280 ms
+(`acts()`) blijft. Proef: de tiktest uit de review (goed-tik.html), met de
+oude klik, loslaten en neerzetten naast elkaar. De test staat in
+`test/game.test.js`.
+
 ### Starten is een tik
 
 Starten hoorde daar ooit ook bij, maar dat was het niet waard. De klok
