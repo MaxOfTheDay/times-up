@@ -243,7 +243,7 @@
 .wordmark h1, #s-setup h1, #s-kaarten h1, #s-regels h1, #s-maker h1, .group-head, .cb-tal b, .cb-bel,
 .cd-cijfer, .chips.getal > .chip, .roundcard b, .ho-count span, .mini-score b,
 .secs-left, .gain, .cardword, .kijk-grid small,
-.pv small, .tally .sr b, .tally .num, .btn-plain, .st-tal {
+.pv small, .tally .sr b, .tally .num, .btn-plain, .st-tal, #ivKop {
   font-family: var(--font-display);
 }
 
@@ -1291,12 +1291,58 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
    op één lijn beginnen. */
 .rij .plaat { width: 24px; height: 24px; margin: 0 -1px; }
 
-/* De weg met de hand staat onder de naam, in zin-tekst. Het deel-teken loopt
-   met de regel mee in plaats van op een vaste pixelmaat te staan: wie hier
-   inzoomt, zoomt het teken mee in. */
-#installHand .rij-naam small { font-size: var(--fs-2); font-weight: 400; line-height: 1.45; margin-top: 2px; }
-#installHand b { color: var(--ink); font-weight: 700; }
-#installHand .teken { width: 1.3em; height: 1.3em; vertical-align: -.3em; }
+/* Het vel: een gewoon stuk papier (.surface) onderaan, --corner van elke
+   schermrand, met de veilige marge erbij. Het komt van achter de onderrand
+   op, zoals de startknop daar na zijn tik achter wegzakt; weg is meteen weg
+   (Vertrekken). Eromheen de sluier van het losse paneel (.overlay), zodat het
+   vel niet tussen de rijen van Instellingen of over de knop van de titel
+   lijkt te liggen; een tik erop is "nu niet". */
+#installVel {
+  position: fixed; inset: 0; z-index: 9; isolation: isolate;
+  display: flex; align-items: flex-end; justify-content: center;
+  padding: var(--corner)
+           calc(env(safe-area-inset-right, 0px) + var(--corner))
+           calc(env(safe-area-inset-bottom, 0px) + var(--corner))
+           calc(env(safe-area-inset-left, 0px) + var(--corner));
+}
+#installVel::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: rgba(20, 17, 15, .82);
+}
+#installVel:not([hidden])::before { animation: scrimIn calc(var(--t-los) / max(var(--dur), .001)) var(--e-uit); }
+.iv-vel {
+  width: 100%; max-width: 24rem;
+  display: flex; flex-direction: column; gap: var(--s-4);
+  padding: var(--s-4);
+}
+@keyframes velOp { from { transform: translateY(calc(100% + var(--corner) + var(--lift-1))); } }
+#installVel:not([hidden]) .iv-vel {
+  animation: velOp calc(var(--t-kom) / max(var(--dur), .001)) var(--e-los) backwards;
+}
+.iv-kop { display: flex; align-items: center; gap: var(--s-3); }
+.iv-kop .plaat { width: 44px; height: 44px; padding: 3px; }
+.iv-kop h2 { margin: 0; font-size: var(--fs-4); line-height: 1.15; }
+/* De weg als tegels met een pijl ertussen: wat je op het toestel aantikt,
+   met het teken dat je daar ziet. Geen schaduw, want ze zijn niet om op te
+   tikken; alleen de laatste draagt een woord, het woord uit het menu. */
+.iv-pad {
+  margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2);
+  font-size: var(--fs-3); font-weight: 700; color: var(--ink);
+}
+.iv-pad:empty { display: none; }
+.iv-pad .stap { display: inline-flex; align-items: center; gap: var(--s-2); }
+.iv-pad .s { color: var(--ink-2); }
+.iv-pad .k {
+  display: inline-flex; align-items: center; gap: var(--s-1);
+  min-width: 36px; height: 36px; padding: 0 var(--s-2); justify-content: center;
+  border: 2px solid var(--ink); background: var(--paper); white-space: nowrap;
+}
+.iv-pad .k svg { width: 20px; height: 20px; }
+.iv-pad .los { font-weight: 400; }
+.iv-knoppen { display: flex; gap: var(--s-3); }
+.iv-knoppen .btn-plain { justify-content: center; padding: 0 var(--s-3); white-space: nowrap; }
+.iv-go { flex: 1 1 auto; background: var(--go); }
+.iv-go[hidden] + .btn-plain { flex: 1 1 auto; }
 
 
 /* Het teken speelt zijn regel twee keer voor als de overdracht binnenkomt
@@ -2844,15 +2890,24 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
           stroke-linecap="round" stroke-linejoin="round"/>
   </symbol>
 
-  <!-- Het deel-teken van iOS, nagetekend zodat de ouder het terugvindt in de
-       balk van Safari. Staat alleen naast de zin die uitlegt hoe je de app
-       daar op het beginscherm zet. -->
+  <!-- Het deel-teken van iOS, nagetekend zodat de ouder het terugvindt in
+       Safari. Staat alleen op het vel dat uitlegt hoe je de app daar op het
+       beginscherm zet (#installVel). -->
   <symbol id="i-deel" viewBox="0 0 100 100">
     <g fill="none" stroke="#14110F" stroke-width="10"
        stroke-linecap="round" stroke-linejoin="round">
       <path d="M34 42 H18 V88 H82 V42 H66"/>
       <path d="M50 60 V14"/>
       <path d="M31 33 L50 14 L69 33"/>
+    </g>
+  </symbol>
+
+  <!-- Het plus-vierkant naast "Zet op beginscherm" in het deelmenu van iOS,
+       nagetekend om dezelfde reden als het deel-teken. -->
+  <symbol id="i-erbij" viewBox="0 0 100 100">
+    <g fill="none" stroke="#14110F" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="14" y="14" width="72" height="72" rx="16"/>
+      <path d="M50 34 V66 M34 50 H66"/>
     </g>
   </symbol>
 
@@ -3040,15 +3095,14 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
           <svg class="teken" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-tril"/></svg>
           <span class="rij-naam">Trilling</span><span class="knop" aria-hidden="true"></span>
         </button>
-        <!-- De app zelf, in dezelfde lijst: hoogstens één van deze drie staat er
+        <!-- De app zelf, in dezelfde lijst: hoogstens één van deze twee staat er
              (toonInstall). De plaat is de belofte: dít vlak komt op het
-             beginscherm. Geen zin eronder: het woord zegt het al. Geen lange
+             beginscherm. Geen zin eronder: de rij opent het vel
+             (#installVel), en dat zegt per toestel wat je doet. Geen lange
              druk: installeren is niets onomkeerbaars. -->
-        <!-- Verschijnt op het signaal van het toestel en verdwijnt pas als er
-             echt geïnstalleerd is. -->
-        <button class="rij" id="btnInstall" hidden>
+        <button class="rij" id="btnInstall" aria-haspopup="dialog" hidden>
           <span class="plaat" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
-          <span class="rij-naam">Op je beginscherm</span>
+          <span class="rij-naam" id="installNaam">Op je beginscherm</span>
           <svg class="rij-pijl" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-verder"/></svg>
         </button>
         <!-- Alleen in app-modus: daar is er geen adresbalk en geen deelmenu
@@ -3058,16 +3112,6 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
           <span class="rij-naam">Delen</span>
           <svg class="rij-pijl" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-verder"/></svg>
         </button>
-        <!-- De weg met de hand: op iOS bestaat er niets om aan te tikken, en
-             na een weggetikte dialoog is de knop hierboven opgebruikt. Een
-             rij zonder pijl, met de weg eronder; hoogstens één zin zichtbaar. -->
-        <div class="rij" id="installHand" hidden>
-          <span class="plaat" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
-          <span class="rij-naam">Op je beginscherm
-            <small class="zin" id="handZetop" hidden>Tik op <svg class="teken" viewBox="0 0 100 100"
-              role="img" aria-label="delen"><use href="#i-deel"/></svg> en kies <b>Zet op beginscherm</b>.</small>
-            <small class="zin" id="handMenu" hidden>Kies in het menu van de browser <b>App installeren</b>.</small></span>
-        </div>
       </div>
 
     </div>
@@ -3459,6 +3503,28 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
     <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vorig"/></svg>
   </button>
 </section>
+
+<!-- Op je beginscherm: één vel, twee ingangen. De rij in Instellingen opent
+     het, en bij de eerste start in een browser komt het één keer vanzelf op
+     over de titel (welkom()). Het is voor de volwassene, zoals Instellingen:
+     daarom mag er tekst op. Wat er tussen kop en knoppen staat, hangt af van
+     het toestel (paintVel()): een gouden knop als het toestel zelf een
+     dialoog heeft, anders de weg als tegels, of "open in Safari" met de link
+     om te kopiëren. Onder de sluier van het losse paneel; een tik op de
+     sluier is "nu niet". -->
+<div id="installVel" role="dialog" aria-modal="true" aria-labelledby="ivKop" hidden>
+  <div class="iv-vel surface">
+    <div class="iv-kop">
+      <span class="plaat" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></span>
+      <h2 id="ivKop">Op je beginscherm</h2>
+    </div>
+    <p class="iv-pad" id="ivPad"></p>
+    <div class="iv-knoppen">
+      <button class="btn-plain iv-go" id="ivGo"></button>
+      <button class="btn-plain" id="ivLater"></button>
+    </div>
+  </div>
+</div>
 
 <!-- Pauze: de klok staat stil. Verder spelen is één tik; stoppen moet je
      vasthouden, want dat gooit het lopende spel weg. -->
@@ -4345,7 +4411,7 @@ function show(name) {
 
   if (name === "setup") paintSetup();
   if (name === "kaarten") { paintCardCounts(); paintEigen(); }
-  if (name === "title") veldTi.aan();
+  if (name === "title") { veldTi.aan(); welkom(); }
 
   /* De focus verhuist mee bij elke schermwissel, voor wie met toetsenbord of
      schakelaar speelt. Niet bij het allereerste beeld: dan zou de app openen
@@ -8038,6 +8104,7 @@ $("#kijk").addEventListener("click", sluitKijk);
 // Naast het paneel tikken is de veilige uitweg: verder spelen, nooit stoppen.
 $("#pauze").addEventListener("click", e => { if (e.target === $("#pauze")) closePause(); });
 document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && !$("#installVel").hidden) { e.preventDefault(); sluitVel(); return; }
   if (e.key === "Escape" && makerOpen()) { e.preventDefault(); sluitMaker(); return; }
   if (e.key === "Escape" && !$("#kijk").hidden) { e.preventDefault(); sluitKijk(); return; }
   if (e.key === "Escape" && !$("#pauze").hidden) { e.preventDefault(); closePause(); }
@@ -8142,6 +8209,7 @@ addEventListener("popstate", () => {
    veeg niets (openPause() keert daar om); beter dan de app verlaten op de
    laatste tel. */
 function terug() {
+  if (!$("#installVel").hidden) { sluitVel(); return; }
   if (makerOpen()) { sluitMaker(); return; }
   if (!$("#kijk").hidden) { sluitKijk(); return; }
   if (!$("#pauze").hidden) { closePause(); return; }
@@ -8286,40 +8354,156 @@ async function vraagVerversing(reg) {
   } catch (e) { /* niet ondersteund, of de browser wil niet */ }
 }
 
-/* Installeren: twee wegen naar het beginscherm, hoogstens één in beeld. De
-   knop hangt aan beforeinstallprompt (Chrome, Android); op iOS staat de weg
-   via het deelmenu. In app-modus valt er niets te installeren: display-mode
-   dekt Android en desktop, navigator.standalone iOS.
+/* Installeren: één rij in Instellingen en één vel (#installVel) dat zegt wat
+   je op dít toestel doet. De rij opent het vel; bij de eerste start in een
+   browser komt het één keer vanzelf op over de titel (welkom()). In
+   app-modus valt er niets te installeren: display-mode dekt Android en
+   desktop, navigator.standalone iOS.
 
    iOS vertelt in Safari niet of de app al op het beginscherm staat, dus wie
-   hem al heeft ziet de aanwijzing toch. Dat is de goede kant om op te raden.
+   hem al heeft ziet de rij toch. Dat is de goede kant om op te raden.
    Geen vlag in localStorage: die weet niet of de app er nog staat. */
 const inAppModus = () =>
   matchMedia("(display-mode: standalone)").matches ||
   matchMedia("(display-mode: fullscreen)").matches ||
   navigator.standalone === true;
 
-/* iPadOS meldt zich sinds 13 als "Macintosh", dus het toestel is alleen aan
-   de aanraakpunten te herkennen. navigator.platform zou hier ook werken maar
-   is afgeschaft; de user-agent blijft. */
+/* Herkennen gaat op de user-agent, want geen enkele browser meldt wélke weg
+   hij heeft. iPadOS meldt zich sinds 13 als "Macintosh", dus dat toestel is
+   alleen aan de aanraakpunten te herkennen. */
+const UA = navigator.userAgent;
 const isIOS = () =>
-  /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-  (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+  /iPad|iPhone|iPod/.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1);
+const isAndroid = () => /Android/.test(UA);
+/* De browser in een andere app (Instagram, Facebook, TikTok, een Android
+   WebView): daar bestaat geen weg naar het beginscherm, dus ook geen
+   uitleg die werkt. Het tabblad van Chrome binnen WhatsApp of Gmail is
+   niet te herkennen en krijgt de weg via het menu, waar "Openen in Chrome"
+   ook staat. */
+const inAppBrowser = () =>
+  /FBAN|FBAV|FB_IAB|Instagram|LinkedInApp|TikTok|musical_ly|Snapchat|Line\//.test(UA) ||
+  /; wv\)/.test(UA);
+const safariVersie = () => Number((UA.match(/Version\/(\d+)/) || [])[1]) || 0;
+/* Safari 26 zet de deelknop in de standaardweergave achter •••. Het
+   OS-nummer helpt niet: iOS 26 meldt zich nog als 18_6. Chrome, Firefox en
+   Edge op de iPhone hebben de deelknop gewoon in beeld. */
+const deelAchterMeer = () => isIOS() && !/CriOS|FxiOS|EdgiOS/.test(UA) && safariVersie() >= 26;
+// Safari op de Mac kan het sinds 17 (Sonoma), zonder signaal: via Archief.
+const isMacSafari = () =>
+  /Macintosh/.test(UA) && navigator.maxTouchPoints <= 1 &&
+  /Safari/.test(UA) && !/Chrome|Chromium|Edg|Firefox|OPR/.test(UA) && safariVersie() >= 17;
 
-/* Vijf standen; "weg" is het veld dicht, de andere zetten precies één ding
-   neer:
-     knop -- het toestel biedt een installatie aan
-     zetop -- iOS: de weg via het deelmenu
-     menu -- de dialoog is weggetikt en de knop is op
+/* Zeven standen. Vijf openen het vel, elk met een eigen midden:
+     knop  -- het toestel heeft een eigen dialoog (beforeinstallprompt)
+     ios   -- de weg via het deelmenu, als tegels
+     menu  -- de weg via het menu van de browser: de dialoog is weggetikt,
+              of een Android-browser gaf geen signaal
+     inapp -- in de browser van een andere app: open in Safari of Chrome
+     mac   -- Safari op de Mac: Archief, Voeg toe aan Dock
+   en twee niet:
      delen -- de app draait geïnstalleerd; dan valt er iets door te geven
-   Het zijn rijen in de lijst van Deze telefoon, zonder zin eronder: het
-   woord zegt wat het doet. */
+     weg   -- niets te doen (Firefox op de computer, of al gebeurd) */
+const VEL_STANDEN = ["knop", "ios", "menu", "inapp", "mac"];
+let installStand = "weg";
 function toonInstall(stand) {
-  $("#btnInstall").hidden = stand !== "knop";
+  installStand = stand;
+  const vel = VEL_STANDEN.includes(stand);
+  $("#btnInstall").hidden = !vel;
   $("#btnDelen").hidden = stand !== "delen";
-  $("#installHand").hidden = stand !== "zetop" && stand !== "menu";
-  $("#handZetop").hidden = stand !== "zetop";
-  $("#handMenu").hidden = stand !== "menu";
+  $("#installNaam").textContent = stand === "mac" ? "In je Dock" : "Op je beginscherm";
+  if (!vel) sluitVel();
+  else if (!$("#installVel").hidden) paintVel();
+  welkom();
+}
+
+/* Wat er tussen kop en knoppen staat. De weg staat als tegels met een pijl
+   ertussen: het teken dat je op het toestel ziet, en alleen op de laatste
+   tegel het woord uit het menu. */
+function paintVel() {
+  const st = installStand;
+  const tegel = (inhoud, label) =>
+    `<span class="k"${label ? ` role="img" aria-label="${label}"` : ""}>${inhoud}</span>`;
+  const teken = id => `<svg viewBox="0 0 100 100" aria-hidden="true"><use href="#${id}"/></svg>`;
+  // De pijl hoort bij de tegel erna: zo staat er nooit een pijl alleen aan
+  // het eind van een regel.
+  const dan = t => `<span class="stap"><span class="s" aria-hidden="true">›</span>${t}</span>`;
+  let pad = "", go = "", later = "Oké";
+  if (st === "knop") { go = "Zet erop"; later = "Nu niet"; }
+  else if (st === "ios")
+    pad = deelAchterMeer()
+      ? tegel("•••", "meer") + dan(tegel(teken("i-deel"), "deel")) + dan(tegel(teken("i-erbij") + "Zet op beginscherm"))
+      : tegel(teken("i-deel"), "deel") + dan(tegel(teken("i-erbij") + "Zet op beginscherm"));
+  else if (st === "menu") pad = tegel("⋮", "menu") + dan(tegel("App installeren"));
+  else if (st === "mac") pad = tegel("Archief") + dan(tegel("Voeg toe aan Dock"));
+  else if (st === "inapp") {
+    pad = '<span class="los">Open in</span>' + tegel(isIOS() ? "Safari" : "Chrome");
+    go = "Kopieer link"; later = "Nu niet";
+  }
+  $("#ivKop").textContent = st === "mac" ? "In je Dock" : "Op je beginscherm";
+  $("#ivPad").innerHTML = pad;
+  $("#ivGo").hidden = !go;
+  $("#ivGo").textContent = go;
+  $("#ivLater").textContent = later;
+}
+
+/* Openen vanaf de rij zet de focus op de knop van het vel; de eerste start
+   niet, want dan opent de app met een focusring die niemand vroeg. */
+let velReturn = null;
+function openVel(focus) {
+  paintVel();
+  velReturn = focus ? document.activeElement : null;
+  $("#installVel").hidden = false;
+  screensInert(true);
+  if (focus) ($("#ivGo").hidden ? $("#ivLater") : $("#ivGo")).focus({ preventScroll: true });
+}
+function sluitVel() {
+  if ($("#installVel").hidden) return;
+  $("#installVel").hidden = true;
+  screensInert(false);
+  if (velReturn && velReturn.isConnected) velReturn.focus({ preventScroll: true });
+  velReturn = null;
+}
+
+/* Eén keer, bij de eerste start in een browser, als er een weg is: dan is
+   het bijna altijd de volwassene die net de link kreeg. Alleen op de titel,
+   nooit over een bewaard potje (dat opent op de overdracht). De vlag gaat
+   bij het tonen aan, niet bij het wegtikken: ook wie meteen op spelen tikt,
+   ziet het niet terug. Kan er niets bewaard worden, dan niet tonen: anders
+   komt het elke keer. */
+function welkom() {
+  if (!started || current !== "title" || !VEL_STANDEN.includes(installStand)) return;
+  if (!$("#installVel").hidden) return;
+  try {
+    if (localStorage.getItem("tijdisom.welkom")) return;
+    localStorage.setItem("tijdisom.welkom", "1");
+  } catch (e) { return; }
+  openVel(false);
+}
+
+$("#btnInstall").addEventListener("click", () => openVel(true));
+$("#ivLater").addEventListener("click", sluitVel);
+// Naast het vel tikken is "nu niet": de titel eronder reageert dan niet.
+$("#installVel").addEventListener("click", e => { if (e.target === $("#installVel")) sluitVel(); });
+$("#ivGo").addEventListener("click", () => {
+  if (installStand === "inapp") kopieerLink();
+  else if (installStand === "knop") { sluitVel(); installeer(); }
+});
+
+// Zonder ?debug en zonder anker: wat je doorgeeft is de app, niet het
+// scherm waar je toevallig op staat.
+const appUrl = () => location.href.replace(/[?#].*$/, "");
+
+/* Het klembord, en waar dat geweigerd wordt het deelmenu van het toestel.
+   Lukt geen van beide, dan schudt de knop. */
+async function kopieerLink() {
+  const knop = $("#ivGo");
+  let ok = false;
+  try { await navigator.clipboard.writeText(appUrl()); ok = true; } catch (e) {}
+  if (!ok && navigator.share) {
+    try { await navigator.share({ url: appUrl() }); ok = true; } catch (e) {}
+  }
+  if (ok) { knop.textContent = "Gekopieerd"; Tril.klik(); }
+  else nudge(knop);
 }
 
 /* Weggetikt is geen fout: de knop blijft dan gewoon staan, want delen is
@@ -8332,9 +8516,7 @@ $("#btnDelen").addEventListener("click", async () => {
          ervoor: alleen hier, want dit komt als bericht in een chat terecht.
          U+23F3 is geen ZWJ-reeks en valt op een oud toestel niet uiteen. */
       text: "⏳ " + $('meta[name="description"]').content,
-      // Zonder ?debug en zonder anker: wat je doorgeeft is de app, niet
-      // het scherm waar je toevallig op staat.
-      url: location.href.replace(/[?#].*$/, "")
+      url: appUrl()
     });
   } catch (e) { /* weggetikt, of het toestel wilde niet */ }
 });
@@ -8346,11 +8528,10 @@ window.addEventListener("beforeinstallprompt", e => {
   toonInstall("knop");
 });
 
-/* De knop verdwijnt pas als er echt geïnstalleerd is, niet bij de tik: anders
-   springt de pagina omhoog nog voor de dialoog er staat, en is de knop na een
-   afwijzing weg (beforeinstallprompt vuurt niet opnieuw). Afgewezen: de weg
-   via het menu van de browser, die werkt nog. */
-$("#btnInstall").addEventListener("click", async () => {
+/* De rij verdwijnt pas als er echt geïnstalleerd is, niet bij de tik: anders
+   is ze na een afwijzing weg (beforeinstallprompt vuurt niet opnieuw).
+   Afgewezen: de weg via het menu, die werkt nog. */
+async function installeer() {
   if (!deferredInstall) return;
   const prompt = deferredInstall;
   deferredInstall = null;
@@ -8364,26 +8545,37 @@ $("#btnInstall").addEventListener("click", async () => {
     keuze = await prompt.userChoice;
   } catch (e) { /* dialoog ging niet open */ }
   toonInstall(keuze && keuze.outcome === "accepted" ? "weg" : "menu");
-});
+}
 
 // Ook als de installatie via de eigen UI van de browser liep in plaats van
-// deze knop (adresbalk-icoon e.d.), moet het veld hier alsnog dicht.
+// het vel (adresbalk-icoon e.d.), moet de rij hier alsnog weg.
 window.addEventListener("appinstalled", () => {
   deferredInstall = null;
   toonInstall("weg");
 });
 
-/* Draait de app geinstalleerd, dan valt er niets te installeren -- en is de
-   deelknop juist de enige weg die er nog is. Anders: op iOS de weg met de
-   hand, en op de rest wacht het veld op beforeinstallprompt. */
+/* Draait de app geïnstalleerd, dan valt er niets te installeren -- en is de
+   deelknop juist de enige weg die er nog is. Anders kiest het toestel; op
+   Chrome en Edge wacht de rij op beforeinstallprompt. */
 function kiesInstallStand() {
   if (inAppModus()) toonInstall(navigator.share ? "delen" : "weg");
-  else if (isIOS()) toonInstall("zetop");
+  else if (inAppBrowser()) toonInstall("inapp");
+  else if (isIOS()) toonInstall("ios");
+  else if (isMacSafari()) toonInstall("mac");
+  else toonInstall(deferredInstall ? "knop" : "weg");
 }
 kiesInstallStand();
 
+/* Op Android heeft elke browser de weg via zijn menu, maar niet elke browser
+   geeft het signaal (Firefox, het tabblad binnen WhatsApp), en Chrome geeft
+   het pas na wat gebruik. Drie tellen zonder signaal: de weg via het menu.
+   Komt het signaal later toch, dan wordt het de knop. */
+if (isAndroid()) setTimeout(() => {
+  if (installStand === "weg" && !inAppModus()) toonInstall("menu");
+}, 3000);
+
 /* Luisteren naar display-mode: wie installeert terwijl dit scherm openstaat,
-   krijgt meteen de deelknop in plaats van de installatieknop. */
+   krijgt meteen de deelknop in plaats van de installatierij. */
 ["(display-mode: standalone)", "(display-mode: fullscreen)"].forEach(q =>
   matchMedia(q).addEventListener("change", kiesInstallStand));
 
@@ -8412,6 +8604,7 @@ Promise.race([eigenKlaar, new Promise(ok => setTimeout(ok, 1000))]).then(() => {
   else if (hervat) { G = hervat.G; handoff(hervat.mode); }
   else show("title");
   started = true;
+  welkom();
 });
 
 // Alleen voor de tests: inkijk in de lopende stand (?debug in de URL).
@@ -8432,7 +8625,7 @@ if (location.search.indexOf("debug") !== -1) {
     get settings() { return settings; },
     get screen() { return current; },
     Spel, DECKS, TIER_ORDER, poolFor, bakFor, canHide, MIN_BAK, shuffle, drawDeck, total,
-    stopClock, paintClock, sizeCard, winner, timeUp, Snd, Tril, toonInstall,
+    stopClock, paintClock, sizeCard, winner, timeUp, Snd, Tril, toonInstall, openVel,
     saveGame, loadGame, clearGame, KEY_GAME, GAME_MAX_AGE,
     get eigen() { return eigen; }, beelden, eigenKlaar, openMaker,
     // De lock op de overdracht is anders alleen te controleren door er drie
