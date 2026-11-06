@@ -1370,11 +1370,12 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
    schijf; de tegels hebben daarom één en dezelfde huid. Elke ronde staat zo
    één keer in beeld, en er is niets te ontcijferen. De rij is altijd zo hoog
    als de schijf, zodat de kaart niet verspringt als de schijf doorschuift.
-   --vak groeit mee met --schijf, met een ondergrens: liggend wordt de schijf
-   62 px, en een tegel onder 30 px is geen teken meer. */
+   De tegels zijn --tap groot: met een derde van de schijf werden ze 30 tot
+   37 px, met een teken van 17 tot 22 px, en dat las je niet in één blik.
+   De schijf blijft ruim twee keer zo groot en goud, dus "nu" wint nog. */
 .ronderij {
   --schijf: min(16vh, 30vw, 132px);
-  --vak: max(30px, calc(var(--schijf) * .3));
+  --vak: var(--tap);
   display: flex; align-items: center; justify-content: center;
   gap: var(--s-3); height: var(--schijf); flex: 0 0 auto;
 }
@@ -1383,7 +1384,7 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
   width: var(--vak); height: var(--vak);
   background: var(--paper-2); border: var(--line-2) solid var(--ink);
 }
-.ronderij .vak svg { width: 72%; height: 72%; display: block; }
+.ronderij .vak svg { width: 74%; height: 74%; display: block; }
 .ronderij .vak.nu {
   width: var(--schijf); height: var(--schijf);
   border-radius: 50%; border-width: 5px; background: var(--go);
@@ -2355,7 +2356,12 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
   /* Liggend staan de vakken naast elkaar; een kaart die haar volle 24rem
      opeist zou de rij van het scherm duwen. Hier weer op haar natuurlijke
      breedte. */
-  .roundcard.big { width: auto; }
+  /* Liggend kromp de kaart tot haar inhoud: een kolom van 198 px, een schijf
+     van 62 px en de cijfers van de stand groter dan de ronde. Nu een vaste
+     breedte en een schijf naar de hoogte, en de cijfers een maat kleiner. */
+  .roundcard.big { width: min(46vw, 22rem); max-width: min(46vw, 22rem); }
+  .ronderij { --schijf: min(22vh, 96px); }
+  #s-handoff #hoTally .side b { font-size: var(--fs-5); }
   #s-handoff .mini-score .side.up .head > svg { width: 36px; height: 36px; }
 
   /* Liggend rekent het merk met vh: de kortste zijde bepaalt de maat. In vw

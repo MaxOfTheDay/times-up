@@ -673,6 +673,21 @@ is geprobeerd in de mockup, en gaf in ronde 2 drie looks naast elkaar (zwart,
 goud, papier). Dat is niet nodig: de plek links of rechts van de schijf zegt
 het al. De rij is zo hoog als de schijf, zodat de kaart niet verspringt.
 
+**De maat van de rij.** De tegels waren een derde van de schijf: 30 tot 37 px
+op een telefoon, met een teken van 17 tot 22 px, kleiner dan de cijfers van
+de stand en te klein om "veel woorden" van "één woord" te onderscheiden in
+één blik. Nu zijn ze `--tap` (48 px) met het teken op 74% (zo'n 31 px), en
+de schijf blijft ruim twee keer zo groot en goud (`min(16vh, 30vw, 132px)`),
+dus "nu" wint nog. Geprobeerd: tegels op 42% van de schijf, met een kleinere
+schijf. Dat schaalde mee op een tablet, maar op 320 px bleef de tegel net
+onder tapmaat, en het verschil tussen nu en de rest werd kleiner.
+
+Liggend (844x390) kromp de kaart tot 198 px breed: ze had `width: auto` onder
+een `max-height`, en de inhoud bepaalde de breedte. De schijf werd 62 px en
+de cijfers van de stand (40 px) waren groter dan de ronde. Nu heeft de kaart
+liggend een vaste breedte (`min(46vw, 22rem)`, zo'n 350 px), de schijf
+`min(22vh, 96px)` en de cijfers `--fs-5`.
+
 Bij een rondewissel vanuit het spel staat eerst de vorige ronde als schijf;
 als de omgedraaide kaart geland is (`RIJ_WACHT`), krimpt ze tot tegel en
 groeit de volgende tot schijf, die dan haar regel twee keer voorspeelt. Dat
