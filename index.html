@@ -1882,7 +1882,7 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
 }
 /* De stapel onder de kaart hoort bij het spel: in de pauze ligt er één
    kaart. Bij beperkte beweging gaat het spel meteen van het bord. */
-#s-play.pauze .cardslot .under { visibility: hidden; }
+#s-play.pauze:not(.stapel-om) .cardslot .under { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) {
   #s-play.pauze .play-top .who, #s-play.pauze .roundchip,
   #s-play.pauze .btn-good, #s-play.pauze .btn-skip { visibility: hidden; }
@@ -2065,10 +2065,9 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
 #s-play.over .btn-good, #s-play.leeg .btn-good,
 #s-play.over .btn-skip, #s-play.leeg .btn-skip {
   pointer-events: none; background: var(--paper-2); box-shadow: 0 0 0 var(--ink);
-  transition: transform calc(var(--t-press) * var(--dur)) var(--e-uit),
-              box-shadow calc(var(--t-press) * var(--dur)) var(--e-uit),
-              background-color calc(var(--t-press) * var(--dur)) var(--e-uit);
-  transition-delay: calc(.12s * var(--dur));
+  transition: transform calc(var(--t-press) * var(--dur)) var(--e-uit) calc(.12s * var(--dur)),
+              box-shadow calc(var(--t-press) * var(--dur)) var(--e-uit) calc(.12s * var(--dur)),
+              background-color 0s linear calc((.12s + var(--t-press)) * var(--dur));
 }
 #s-play.over .btn-good, #s-play.leeg .btn-good { transform: translate(var(--lift-2), var(--lift-2)); }
 #s-play.over .btn-skip, #s-play.leeg .btn-skip { transform: translate(var(--lift-1), var(--lift-1)); }
@@ -6430,6 +6429,7 @@ function countdown(done) {
   terugK.focus({ preventScroll: true });
   $("#btnPauze").inert = true;
   veldCd.aan();
+  veldCd.neem(veldHo.rimpels(), $("#hoVeld"), $("#cdVeld"));
   const vanKaart = goKaart;
   goKaart = null;
   countRaf = 1;
@@ -6502,13 +6502,23 @@ function handOffCountdown(done) {
 /* Afbreken op het aftellen: de tegel rechtsboven en de terugveeg (terug())
    doen hetzelfde. De grond blijft, de kaart draait terug naar de opdracht. */
 $("#cdBack").addEventListener("click", breekAftellenAf);
+/* Eerst de eerste helft van het omdraaien, zoals bij de start: de kaart en
+   de stapel vouwen tot een rand, de volgende tel valt niet meer. Zonder die
+   helft verdween de kaart met balk en knoppen in één beeld en stond er twee
+   beelden lang niets. */
+let breekt = false;
 function breekAftellenAf() {
-  if (countRaf === null) return;
-  const kaart = $("#card").getBoundingClientRect();
-  stopCountdown();
-  releaseWake();
-  handoff(handoffMode, 0, 0, true);
-  terugNaarOpdracht(kaart);
+  if (countRaf === null || breekt) return;
+  telTimers.forEach(clearTimeout); telTimers = [];
+  breekt = true;
+  draaiOm(p => {
+    breekt = false;
+    if (countRaf === null || current !== "play") return;
+    stopCountdown();
+    releaseWake();
+    handoff(handoffMode, 0, 0, true);
+    terugNaarOpdracht(p);
+  });
 }
 function terugNaarOpdracht(p) {
   if (stilAan()) return;
@@ -7166,7 +7176,15 @@ function stipveld(cv, opt) {
       onthul = { x, y, van, tot, kleur, ms, klaar, t: performance.now() };
       wek();
     },
-    eindOnthul
+    eindOnthul,
+    rimpels() { return rimpels.slice(); },
+    /* Rimpels van een andere grond nemen het over, in de maat van dit veld. */
+    neem(lijst, van, naar) {
+      if (stilAan() || !lijst.length) return;
+      const a = van.getBoundingClientRect(), b = naar.getBoundingClientRect();
+      lijst.forEach(r => rimpels.push({ ...r, x: r.x + a.left - b.left, y: r.y + a.top - b.top }));
+      wek();
+    }
   };
 }
 
@@ -7367,7 +7385,7 @@ function kaartSpook(soort, naar) {
   Pen.kopieer(kaart, k);
   k.removeAttribute("id");
   k.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
-  k.querySelectorAll(".timerframe, .stempel").forEach(e => e.remove());
+  k.querySelectorAll(".stempel").forEach(e => e.remove());
   k.classList.remove("seen", "terug");
   k.classList.add("kaart-spook");
   let frames, opties;
@@ -7481,7 +7499,14 @@ function kleurUitKaart(scherm, veld, cv, kaart, hex, zet) {
   const k = kaart.getBoundingClientRect(), v = cv.getBoundingClientRect();
   if (!k.width || !v.width) { zet(); return; }
   const nr = ++vloedNr;
-  veld.onthul(k.left + k.width / 2 - v.left, k.top + k.height / 2 - v.top,
+  let n = 0;
+  const wacht = () => {
+    if (nr !== vloedNr) return;
+    if (kaart.getBoundingClientRect().width < k.width * .3 && n++ < 8) { requestAnimationFrame(wacht); return; }
+    begin();
+  };
+  requestAnimationFrame(wacht);
+  const begin = () => veld.onthul(k.left + k.width / 2 - v.left, k.top + k.height / 2 - v.top,
     Math.min(k.width, k.height) / 2, hex, 450, () => {
       if (nr !== vloedNr) return;
       scherm.style.transition = "none";
@@ -8051,16 +8076,27 @@ function draaiPauze() {
   if (stilAan() || !k.animate) return;
   kaartOm = k.animate([{ transform: "scaleX(1)" }, { transform: "scaleX(0)" }],
     { duration: OMDRAAI, easing: curve("weg"), fill: "forwards" });
+  if (k === $("#card")) {
+    $("#s-play").classList.add("stapel-om");
+    stapelOm = $$("#cardslot .under").map(u => u.animate([{ scale: "1 1" }, { scale: "0 1" }],
+      { duration: OMDRAAI, easing: curve("weg"), fill: "forwards" }));
+  }
   $("#pauze .panel").animate([{ transform: "scaleX(0)" }, { transform: "none" }],
     { duration: 180, delay: OMDRAAI, easing: curve("uit"), fill: "backwards" });
 }
+let stapelOm = [];
 function kaartBoven(draai) {
   if (!kaartOm) return;
   const k = kaartOm.effect.target;
   kaartOm.cancel(); kaartOm = null;
-  if (draai && !stilAan()) k.animate(
-    [{ transform: "scaleX(0)" }, { transform: "none" }],
-    { duration: 180, easing: curve("uit") });
+  stapelOm.forEach(a => a.cancel()); stapelOm = [];
+  $("#s-play").classList.remove("stapel-om");
+  if (draai && !stilAan()) {
+    k.animate([{ transform: "scaleX(0)" }, { transform: "none" }],
+      { duration: 180, easing: curve("uit") });
+    if (k === $("#card")) $$("#cardslot .under").forEach(u => u.animate(
+      [{ scale: "0 1" }, { scale: "1 1" }], { duration: 180, easing: curve("uit") }));
+  }
 }
 
 const PAUZE_NEER = ["#btnPauze"];
