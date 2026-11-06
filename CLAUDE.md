@@ -123,7 +123,8 @@ bij één ervan. Toets een nieuw onderdeel eerst aan deze vier.
    bewegen.** Stukken zakken in en veren terug als je drukt; de klok drukt
    ook (het aftellen, de zandloper) en wiebelt de kaart de laatste vijf tellen. Alleen de dieren bewegen uit zichzelf:
    knipperen, ademen, juichen, rek en klets. Elke beweging pakt een lengte
-   en een curve uit `:root` (`--t-press/los/kom/groot`, `--e-uit/los/weg/vloei`).
+   en een curve uit `:root` (`--t-press/los/kom/groot`, `--e-uit/los/weg/vloei`),
+   in JS via `duur()` en `curve()`.
    (De klok, Vasthouden, Eén kaart twee kanten, Worp, Grond, Vertrekken, Beloning, Eén label)
 4. **Stem: één betekenis per kleur, klank en trilling, nooit één kanaal.**
    Rood is Vos, blauw is Uil, goud is "dit, nu", groen is geraden. Geen
@@ -158,8 +159,8 @@ beweging).
 
 **Papier heeft twee randen, geen drie.** Tel bij elk vlak de rechthoeken in
 het silhouet, met de stapel eronder weggehaald (`.cardslot .under` op
-`display: none`). `--mis` staat overal op doorzichtig; zet hem nooit op
-`--ink` of op één los vlak. Een inkt-vlak krijgt één verschoven laag: de
+`display: none`). Een papieren vlak heeft één schaduw, de inktschaduw
+naar rechtsonder. Een inkt-vlak krijgt één verschoven laag: de
 gouden plaat als schaduw naar rechtsonder. Een contour die je niet wilt is
 `border: 0`, geen kleur die toevallig wegvalt.
 

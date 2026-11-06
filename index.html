@@ -167,7 +167,6 @@
   --line-2: 3px;   /* verzonken vlakken en hulpknoppen */
   --lift-1: 4px;   /* bijzaak: hulpknoppen én stilstaande vlakken */
   --lift-2: 6px;   /* de handeling waar dit scherm voor bestaat */
-  --shift:  3px;   /* misregistratie van de kleurlaag */
 
   /* ---- ruimte ---- */
   --s-1: 4px; --s-2: 8px;  --s-3: 12px;
@@ -180,7 +179,6 @@
      zakt op een laag scherm door tot een maat die niemand gekozen heeft. Twee
      gedeelde tekststemmen (bijschrift en uitleg), dus twee ondergrenzen. */
   --type-label: 12px;   /* alles wat je in één blik leest: woord, label   */
-  --type-note:  13px;   /* uitleg, en alles wat je echt moet kunnen lezen */
 
   /* ---- letter en maat ----
      Twee letters: de systeemletter voor wat je leest (het instellingenscherm),
@@ -385,20 +383,14 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 
 /* ============================================================
    2. OPPERVLAK — één regel voor elk stuk papier.
-   Harde schaduwen zonder blur: de kleurplaat (--mis) naar linksboven,
-   de inktschaduw naar rechtsonder. Bewust geen pseudo-element met
-   z-index:-1: elk element dat een stacking context maakt, zou de
-   kleurlaag dan bovenop de kaart leggen.
+   Een harde inktschaduw zonder blur naar rechtsonder, en verder niets:
+   een tweede laag naar linksboven gaf een derde rand.
    ============================================================ */
-/* --mis staat standaard op doorzichtig en geen vlak zet hem. Zet hem nooit op
-   --ink (dan lijkt de kaart drie randen te hebben) en nooit op één los vlak. */
 .surface {
   position: relative;
   background: var(--paper);
   border: var(--line) solid var(--ink);
-  box-shadow:
-    calc(var(--shift) * -1) calc(var(--shift) * -1) 0 0 var(--mis, transparent),
-    var(--lift-1) var(--lift-1) 0 0 var(--ink);
+  box-shadow: var(--lift-1) var(--lift-1) 0 0 var(--ink);
 }
 
 /* ============================================================
@@ -1785,9 +1777,7 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
 @media (prefers-reduced-motion: reduce) {
   .overlay[hidden].uit { display: none !important; }
 }
-/* Een gewoon stuk papier, zoals de kaart: crème, inkt-rand, inktschaduw. Geen
-   --mis: een gouden rand zou hier een derde betekenis voor goud zijn, naast
-   de wijzerplaat en de verder-knop. */
+/* Een gewoon stuk papier, zoals de kaart: crème, inkt-rand, inktschaduw. */
 .overlay .panel {
   display: flex; flex-direction: column; align-items: center; gap: var(--s-4);
   padding: var(--s-5) var(--s-6);
@@ -5534,7 +5524,7 @@ $("#mkBewaar").addEventListener("click", async () => {
     tegel.scrollIntoView({ block: "nearest", inline: "nearest" });
     if (!kaart && !stilAan() && tegel.animate)
       tegel.animate([{ transform: "scale(.6) rotate(-6deg)" }, { transform: "none" }],
-                    { duration: 280, easing: curve("los") });
+                    { duration: duur("kom"), easing: curve("los") });
   }
 });
 
@@ -6121,6 +6111,15 @@ function timerColour(ms) {
   return ms <= 5000 ? "var(--time-1)" : ms <= 10000 ? "var(--time-2)" : "var(--time-3)";
 }
 
+/* Wat de klok het vorige beeld schreef. De band schuift elk beeld; de rest
+   verandert hoogstens een paar keer per seconde, en elke schrijfbeurt
+   kostte een stijl- en opmaakronde, zestig keer per seconde. */
+let klokStand = {};
+function zet(el, sleutel, waarde, schrijf) {
+  if (klokStand[sleutel] === waarde) return;
+  klokStand[sleutel] = waarde;
+  schrijf(el, waarde);
+}
 function paintClock(ms, totalMs) {
   lastMs = ms; lastTotal = totalMs;
   const p = Math.max(0, Math.min(1, ms / totalMs));
@@ -6132,16 +6131,15 @@ function paintClock(ms, totalMs) {
   $("#timerBand").style.strokeDashoffset = framePerim * (1 - p);
   /* De kleur van de rand staat in CSS, niet hier: één blok waar alle drie
      de standen naast elkaar staan, in plaats van een ternary in JS. */
-  $("#card").dataset.time = timerStage(ms);
+  zet($("#card"), "fase", timerStage(ms), (el, v) => { el.dataset.time = v; });
   /* Het cijfer blijft gedempt tot het ertoe doet; dan de klokkleur. De haast
      zit vooral in de rand, de klop van de kaart en het tempo van de tik. */
   const secs = Math.ceil(ms / 1000), dig = $("#clockDigits");
-  dig.textContent = secs;
-  dig.style.setProperty("--tcol",
-    ms <= 10000 ? timerColour(ms) : "var(--ink-2)");
+  zet(dig, "secs", secs, (el, v) => { el.textContent = v; });
+  zet(dig, "kleur", ms <= 10000 ? timerColour(ms) : "var(--ink-2)", (el, v) => el.style.setProperty("--tcol", v));
   /* Ook op nul blijft het cijfer groot: die nul is het laatste woord van de
      beurt. De klop blijft op ms > 0. */
-  dig.classList.toggle("crit", ms <= 5000);
+  zet(dig, "crit", ms <= 5000, (el, v) => el.classList.toggle("crit", v));
   /* Eén klop per hele seconde, en alleen in de laatste vijf: daarbuiten
      zou een cijfer dat elke seconde beweegt de hele beurt lang trekken aan
      een blik die op de kaart hoort. De reflow ertussen is nodig, anders
@@ -6154,7 +6152,7 @@ function paintClock(ms, totalMs) {
        niet per klok-tik (die loopt onder vijf seconden op 4 Hz). */
     if (secs > 0 && secs <= 3) Tril.tel();
   }
-  $("#cardslot").classList.toggle("hurry", ms > 0 && ms <= 5000);
+  zet($("#cardslot"), "haast", ms > 0 && ms <= 5000, (el, v) => el.classList.toggle("hurry", v));
 }
 
 /* Het spelscherm komt meteen in beeld, maar de klok wacht op het aftellen
@@ -6222,12 +6220,12 @@ function rukBand(van, naar) {
 /* De klok drukt de kaart in: dezelfde beweging als een vinger op een knop. */
 function drukKaart() {
   if (stilAan()) return;
-  const l = "var(--lift-1)";
+  const l = "var(--lift-1)", in_ = duur("press"), uit = duur("los");
   $("#card").animate([
     { transform: "none", boxShadow: l + " " + l + " 0 0 var(--ink)", easing: curve("uit") },
-    { transform: "translate(" + l + ", " + l + ")", boxShadow: "0 0 0 0 var(--ink)", offset: .27, easing: curve("los") },
+    { transform: "translate(" + l + ", " + l + ")", boxShadow: "0 0 0 0 var(--ink)", offset: in_ / (in_ + uit), easing: curve("los") },
     { transform: "none", boxShadow: l + " " + l + " 0 0 var(--ink)" }
-  ], { duration: 220 });
+  ], { duration: in_ + uit });
 }
 /* De kaart, gemeten in de maat van het veld van het aftellen. */
 function kaartIn() {
@@ -6269,7 +6267,7 @@ function countdown(done) {
       rukBand(n / COUNT_FROM, (n + 1) / COUNT_FROM);
       num.textContent = COUNT_FROM - n;
       drukKaart();
-      if (!stilAan()) num.animate([{ scale: "1.18" }, { scale: "1" }], { duration: 160, easing: curve("uit") });
+      if (!stilAan()) num.animate([{ scale: "1.18" }, { scale: "1" }], { duration: duur("los"), easing: curve("uit") });
       Snd.tick(2200, .05); Snd.count(n); Tril.tel();
       /* Bij het terugveren, en elke tel iets sterker. */
       setTimeout(() => { if (countRaf !== null) veldCd.rimpelRand(kaartIn(), .7 + n * .15); }, 60);
@@ -6528,11 +6526,15 @@ function landFly() {
 function curve(naam) {
   return getComputedStyle(document.documentElement).getPropertyValue("--e-" + naam).trim() || "ease";
 }
-function vlucht() {
-  const v = getComputedStyle(document.documentElement).getPropertyValue("--t-fly");
+/* Een lengte uit :root (--t-press, --t-los, --t-kom, --t-groot, --t-fly) in
+   ms, zoals curve() de curve geeft: wie de lengtes in CSS bijstelt, stelt
+   ook de beweging in JS bij. */
+function duur(naam) {
+  const v = getComputedStyle(document.documentElement).getPropertyValue("--t-" + naam);
   const n = parseFloat(v);
-  return n ? (v.indexOf("ms") > -1 ? n : n * 1000) : 220;
+  return n ? (v.indexOf("ms") > -1 ? n : n * 1000) : 0;
 }
+function vlucht() { return duur("fly") || 220; }
 
 /* Waar de teller straks staat, zonder hem nu al te tonen: vooruit schilderen,
    meten, terugzetten. Daartussen tekent de browser niet. */
@@ -7139,7 +7141,7 @@ function draaiGlas() {
     else a.cancel();
   });
   glas.animate([{ rotate: nu + "deg" }, { rotate: doel + "deg" }],
-    { duration: 450, easing: curve("los") });
+    { duration: duur("groot"), easing: curve("los") });
 }
 
 /* De kaart als losse kopie, voor ze plaatsmaakt voor de volgende. Ze blijft
@@ -7269,7 +7271,7 @@ function papierUitKaart() {
   v.animate([
     { clipPath: `circle(${r0}px at ${x}px ${y}px)` },
     { clipPath: `circle(${R}px at ${x}px ${y}px)` }
-  ], { duration: 450, easing: curve("uit") });
+  ], { duration: duur("groot"), easing: curve("uit") });
 }
 /* En de ploegkleur groeit op de overdracht en de eindstand uit de kaart die
    net landde, op het canvas van die grond (onthul()); daarna staat ze op
@@ -7634,7 +7636,7 @@ function winner() {
     const dy = h.getBoundingClientRect().height * .34;
     h.querySelectorAll(".mascot-sm, .crown").forEach(m => m.animate(
       [{ translate: "0 " + dy + "px" }, { translate: "0 0" }],
-      { duration: 450, delay: OPTEL, easing: curve("los"), fill: "backwards" }));
+      { duration: duur("groot"), delay: OPTEL, easing: curve("los"), fill: "backwards" }));
   });
   nums.forEach(n => { n.textContent = "0"; });
   const t0 = performance.now();
@@ -7740,7 +7742,7 @@ function groeiUit(ti, van, k, sluier) {
   const a = ti.animate([
     { clipPath: `circle(${k.width / 2}px at ${x}px ${y}px)` },
     { clipPath: `circle(${R}px at ${x}px ${y}px)` }
-  ], { duration: 450, easing: curve("uit") });
+  ], { duration: duur("groot"), easing: curve("uit") });
   a.onfinish = a.oncancel = () => {
     van.classList.remove("blijft");
     if (sluier) sluier.classList.remove("blijft");
@@ -7783,7 +7785,7 @@ function openPause() {
      band krijgt; en de haast eraf, anders wiebelen haar randen onder het
      paneel uit. runClock() zet die er bij verder weer op. */
   paintClock(pauseMs, G.secs * 1000);
-  $("#cardslot").classList.remove("hurry");
+  $("#cardslot").classList.remove("hurry"); klokStand.haast = false;
   /* De speelkaart draait om, met haar klok op de achterkant. */
   $("#pauze").classList.remove("kaart");
   $("#pauze").classList.add("klok");

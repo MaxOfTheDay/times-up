@@ -166,6 +166,11 @@ van de klok.
 linksboven (`--mis`, de misregistratie van de pers) en de inktschaduw naar
 rechtsonder. Samen met de eigen contour geeft dat twee zichtbare randen.
 
+`--mis` is weg (code-gezondheid, november 2026): geen enkel vlak zette hem
+nog, en een laag die altijd doorzichtig is, is een regel om te onthouden
+voor niets. Wat er over hem gezegd werd, blijft staan voor wie ooit weer
+een tweede laag wil:
+
 `--mis` staat standaard op doorzichtig, en dat is inmiddels overal zo: geen
 enkel vlak zet 'm nog. Het merk en het pauzepaneel deden dat samen, tot het
 merk zijn plaat als slagschaduw ging dragen (zie hieronder) -- en toen was
@@ -2842,7 +2847,8 @@ van 12 tot 30 px, vaak een pixel uit elkaar (15, 16, 17; 19, 20, 22). Nu
 zes stappen, `--fs-1` tot `--fs-6`: 12, 14, 16, 20, 28, 40. Wat met het
 scherm meeschaalt (klok, totalen, woordmerk, aftelcijfer) houdt zijn eigen
 `min()`/`max()`, maar neemt zijn ondergrens van de trap. `--type-label` en
-`--type-note` blijven de bodems voor tekst die meeschaalt. Letterspatiëring
+`--type-note` waren de bodems voor tekst die meeschaalt; `--type-note`
+werd nergens meer gebruikt en is weg (november 2026). Letterspatiëring
 was er in vijf maten (.01 tot .1em); nu twee: 0 voor zin-tekst en
 `--track-caps` (.06em) voor hoofdletters.
 
