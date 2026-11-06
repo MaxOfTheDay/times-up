@@ -188,8 +188,9 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     await noteCard();
     const geraden = await game(() => window.__tijd.G.card);
     const scoreBefore = await game(() => window.__tijd.G.scores[window.__tijd.G.team][window.__tijd.G.round - 1]);
-    await page.click('#btnGoed');
-    await page.click('#btnGoed');
+    // In één beweging: twee losse page.click() wachten tussendoor tot de
+    // knop stilligt, en de knop zakt bij elke druk in (.tik).
+    await page.click('#btnGoed', { clickCount: 2 });
     await page.waitForTimeout(320);
     const scoreAfter = await game(() => window.__tijd.G.scores[window.__tijd.G.team][window.__tijd.G.round - 1]);
     ok(scoreAfter - scoreBefore === 1,
@@ -543,10 +544,11 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(await screen() === 'title', 'het huisje op de overdracht vasthouden komt niet op de titel uit');
   ok(!await game(() => !!window.__tijd.G), 'het huisje op de overdracht gooit het potje niet weg');
 
-  // --- een tik die schuift, of met een tweede vinger op het glas, telt ---
-  // Met click gingen die verloren: de browser maakte van een schuivende
-  // vinger een veeg, en twee vingers geven geen klik (een duim die de
-  // telefoon vasthoudt). Echte aanraking via CDP, op een touch-toestel.
+  // --- tikken op goed: schuivend, met een tweede vinger, bij het neerzetten,
+  // op de ring ---
+  // Met click gingen de eerste twee verloren: de browser maakte van een
+  // schuivende vinger een veeg, en twee vingers geven geen klik (een duim die
+  // de telefoon vasthoudt). Echte aanraking via CDP, op een touch-toestel.
   {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
     const tp = await ctx.newPage();
@@ -583,6 +585,19 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     await raak('touchEnd', [duim]); await wacht(100);
     await raak('touchEnd', []); await wacht(500);
     ok(await punten() === voor + 1, 'een tik op goed met een duim op de rand van het scherm, telt niet');
+
+    // De tik telt bij het neerzetten, niet pas bij het loslaten.
+    voor = await punten();
+    await raak('touchStart', [vinger(x, y, 3)]); await wacht(120);
+    const terwijlNeer = await punten();
+    await raak('touchEnd', []); await wacht(500);
+    ok(terwijlNeer === voor + 1, 'goed telt pas bij het loslaten, niet bij het neerzetten');
+
+    // De onzichtbare ring van 20 px om goed telt mee.
+    voor = await punten();
+    await raak('touchStart', [vinger(x, b.y - 12, 4)]); await wacht(60);
+    await raak('touchEnd', []); await wacht(500);
+    ok(await punten() === voor + 1, 'een tik 12 px boven goed telt niet');
     await ctx.close();
   }
 

@@ -467,11 +467,21 @@ Bij snel spelen kwam een tik soms niet aan. Gemeten met echte aanraking
 schoof, werd een veeg (`pointercancel`, geen `click`), en een tik terwijl
 er ergens anders een vinger op het glas lag (de duim die de telefoon
 vasthoudt, een tweede kind) gaf helemaal geen `click`. Allebei precies wat
-er gebeurt in de laatste tellen. Daarom tellen goed, pas en het +N via
-`tikKnop()`: elke vinger apart, met `touch-action: none` op die knoppen,
-en een tik telt bij het loslaten binnen `TIK_RUIM` (24 px) van de knop.
-Het toetsenbord komt via `click` met `detail` 0 binnen. De dubbeltik van
-280 ms (`acts()`) blijft. De test staat in `test/game.test.js`.
+er gebeurt in de laatste tellen. En een `click` komt pas bij het loslaten:
+bij een stevige druk kwamen de toon, de trilling en de vlucht laat.
+
+Daarom tellen goed, pas en het +N via `tikKnop()` op het neerzetten van
+de vinger (`pointerdown`), elke vinger apart, met `touch-action: none` op
+die knoppen. Je kunt een tik niet meer afbreken door weg te schuiven; een
+te vroege goed neem je terug op het +N. Elke druk laat de knop minstens
+`TIK_NEER` (70 ms) ingezakt zien (`.tik`), ook een vluchtige tik die
+`:active` anders overslaat. Om goed ligt een onzichtbare ring van 20 px
+(`.btn-good::after`): wie uitbeeldt, kijkt naar de ander en niet naar de
+knop. Pas krijgt geen ring, hij is de mindere keuze en ligt ver weg. Het
+toetsenbord komt via `click` met `detail` 0 binnen. De dubbeltik van 280 ms
+(`acts()`) blijft. Proef: de tiktest uit de review (goed-tik.html), met de
+oude klik, loslaten en neerzetten naast elkaar. De test staat in
+`test/game.test.js`.
 
 ### Starten is een tik
 

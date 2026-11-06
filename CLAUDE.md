@@ -184,8 +184,10 @@ spelscherm, want die worden tien keer per beurt ingedrukt naast de kaart. Glijdt
 punten, dan neemt hij zijn golf mee: zwakke ringen vanaf zijn rand zolang
 hij onderweg is (`golfMee()`), geen tweede rimpel bij de landing. Vervormen (rek en klets) is alleen
 voor Vos en Uil: een knop zakt in, hij knijpt nooit. Goed, pas en het +N tellen via
-`tikKnop()`, nooit via `click`: een schuivende vinger of een tweede vinger
-op het glas gaf geen klik.
+`tikKnop()` op het neerzetten van de vinger, nooit via `click` (een
+schuivende vinger of een tweede vinger op het glas gaf geen klik); elke
+druk zakt minstens `TIK_NEER` in (`.tik`), en om goed ligt een onzichtbare
+ring van 20 px.
 
 **De hoek van het scherm is geen rechte hoek.** Elk blijvend rechthoekig vlak
 houdt `--corner` (32 px) van beide schermranden. Tel `env(safe-area-inset-*)`
