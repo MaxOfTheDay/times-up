@@ -3432,6 +3432,17 @@ code: een foto of tekening en het woord, in Instellingen.
   emoji. Om een vrije vorm is dat een lijn, geen kader. Aanpassen
   tekent verder op het bewaarde beeld; een stap terug haalt alleen wat er in
   deze beurt bij kwam.
+- **Alles weg is een stap.** De prullenbak duwt `{ wis }` op de stappen in
+  plaats van ze te legen, zodat een stap terug de tekening teruggeeft, ook
+  het bewaarde beeld van een kaart die je aanpast. Eén tik van een kind op
+  de prullenbak kostte de hele tekening. Wat er nu op het vel ligt, en dus
+  of Bewaren mag, rekent `opVel()` vanaf de laatste wis.
+- **Een lijn is een bocht, geen veelhoek.** Een telefoon geeft één
+  `pointermove` per beeld; een snelle cirkel van een tiende seconde werd zo
+  een twaalfhoek. De lijn neemt alle punten van de vinger
+  (`getCoalescedEvents()`) en loopt als bocht door de middens ertussen.
+  Tijdens het tekenen gaat het vel van vóór de streek terug en komt de hele
+  streek erop, zodat hij er net zo uitziet als na terug of bewaren.
 
 ## Toveren
 

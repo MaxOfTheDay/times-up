@@ -5037,7 +5037,7 @@ let toverOp = false;       // het dagbudget is op: de zandloper, tot herladen
 function tekenStaf() {
   const midden = $("#mkStaf"), rij = $("#mkStafRij");
   const kan = !!TOVER_URL && !!mk && mk.soort === "tekening";
-  const leeg = kan && !mk.acties.length && !mk.basis;
+  const leeg = kan && !opVel().vol;
   midden.hidden = !(kan && leeg);
   rij.hidden = !(kan && !leeg);
   const bezig = $("#mkTovert").hidden;
@@ -5271,7 +5271,7 @@ function keurMaker() {
   $("#mkAl").classList.toggle("aan", !!gewoon);
   if (gewoon) $("#mkAl .mk-al-teken").textContent = gewoon[0];
   const knop = $("#mkBewaar");
-  const beeld = mk.soort === "tekening" ? !!(mk.acties.length || mk.basis) : !!(mk.img && !mk.live);
+  const beeld = mk.soort === "tekening" ? opVel().vol : !!(mk.img && !mk.live);
   /* Goud zodra er een beeld is. Zonder woord wijst een tik de woordregel
      aan (zie de klik), in plaats van een grijze knop die niets zegt. */
   knop.disabled = !(beeld && !dubbel);
@@ -5507,19 +5507,35 @@ $("#mkStap").addEventListener("click", () => {
   if (!mk || !mk.acties.length) { nudge($("#mkStap")); return; }
   mk.acties.pop(); mk.nieuw = true; tekenDoek(); keurMaker();
 });
+/* Alles weg is zelf een stap ({ wis }), zodat terug hem ongedaan maakt:
+   één tik op de prullenbak kost geen tekening, ook niet die er al was. */
 $("#mkLeeg").addEventListener("click", () => {
-  if (!mk || (!mk.acties.length && !mk.basis)) { nudge($("#mkLeeg")); return; }
-  mk.acties = []; mk.basis = null; mk.nieuw = true; tekenDoek(); keurMaker();
+  if (!mk || !opVel().vol) { nudge($("#mkLeeg")); return; }
+  mk.acties.push({ wis: true }); mk.nieuw = true; tekenDoek(); keurMaker();
 });
+/* Wat er nu op het vel ligt: de stappen na de laatste wis, en of de
+   tekening die er al was nog meetelt. */
+function opVel() {
+  let i = mk.acties.length;
+  while (i-- && !mk.acties[i].wis);
+  const acties = mk.acties.slice(i + 1), basis = i < 0 && !!mk.basis;
+  return { acties: acties, basis: basis, vol: basis || acties.length > 0 };
+}
 
+/* Een lijn loopt als bocht door de middens tussen de punten, met de punten
+   als knik: een snelle cirkel wordt rond, geen veelhoek. */
 function lijn(g, a) {
+  const p = a.punten, n = p.length;
   g.save();
   g.globalCompositeOperation = a.gum ? "destination-out" : "source-over";
   g.strokeStyle = a.kleur; g.lineWidth = a.dikte;
   g.lineCap = g.lineJoin = "round";
   g.beginPath();
-  a.punten.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y));
-  if (a.punten.length === 1) g.lineTo(a.punten[0][0] + .1, a.punten[0][1]);
+  g.moveTo(p[0][0], p[0][1]);
+  if (n === 1) g.lineTo(p[0][0] + .1, p[0][1]);
+  for (let i = 1; i < n - 1; i++)
+    g.quadraticCurveTo(p[i][0], p[i][1], (p[i][0] + p[i + 1][0]) / 2, (p[i][1] + p[i + 1][1]) / 2);
+  if (n > 1) g.lineTo(p[n - 1][0], p[n - 1][1]);
   g.stroke();
   g.restore();
 }
@@ -5562,8 +5578,9 @@ function tekenDoek() {
   g.clearRect(0, 0, DOEK, DOEK);
   if (mk && mk.basis) g.drawImage(mk.basis, 0, 0, DOEK, DOEK);
   if (mk) mk.acties.forEach(a => {
-    if (a.beeld) {               // een getoverde tekening vervangt het vel
+    if (a.beeld || a.wis) {      // een getoverde tekening vervangt het vel
       g.clearRect(0, 0, DOEK, DOEK);
+      if (a.wis) return;
       g.drawImage(a.beeld, 0, 0, DOEK, DOEK);
     } else if (a.vul) vul(g, a.x, a.y, a.kleur);
     else lijn(g, a);
@@ -5587,14 +5604,30 @@ function penNeer(e) {
   const gum = mk.gereed === "gum";
   streek = { id: e.pointerId, a: { gum: gum, kleur: mk.kleur, punten: [[x, y]],
               dikte: gum ? PEN.gum : mk.dik ? PEN.dik : PEN.dun } };
+  /* Het vel van vóór de streek: bij elke beweging gaat dat terug en komt de
+     hele streek erop, zodat hij er tijdens het tekenen net zo uitziet als
+     na terug of bewaren. */
+  const onder = document.createElement("canvas");
+  onder.width = onder.height = DOEK;
+  onder.getContext("2d").drawImage($("#mkDoek"), 0, 0);
+  streek.onder = onder;
   mk.acties.push(streek.a); mk.nieuw = true;
   lijn(doek(), streek.a);
 }
+/* Alle punten die de vinger gaf, niet alleen die van het beeld: zonder de
+   tussenpunten (getCoalescedEvents) wordt een snelle lijn hoekig. */
 function penVerder(e) {
   if (!streek || e.pointerId !== streek.id) return;
-  const a = streek.a, vorige = a.punten[a.punten.length - 1], nu = doekPunt(e);
-  a.punten.push(nu);
-  lijn(doek(), { ...a, punten: [vorige, nu] });
+  const a = streek.a, k = a.dikte / 8;
+  const evs = (e.getCoalescedEvents && e.getCoalescedEvents()) || [];
+  for (const ev of evs.length ? evs : [e]) {
+    const nu = doekPunt(ev), vorige = a.punten[a.punten.length - 1];
+    if (Math.hypot(nu[0] - vorige[0], nu[1] - vorige[1]) >= Math.min(2, k)) a.punten.push(nu);
+  }
+  const g = doek();
+  g.clearRect(0, 0, DOEK, DOEK);
+  g.drawImage(streek.onder, 0, 0);
+  lijn(g, a);
 }
 function penOp(e) {
   if (!streek || e.pointerId !== streek.id) return;
@@ -5641,7 +5674,7 @@ $("#mkBewaar").addEventListener("click", async () => {
   /* Een getoverde tekening heeft haar eigen zwarte lijn; de pen van .glyph
      erom gaf een dubbele, vlekkerige rand. Ze ligt kaal, zoals een foto. */
   const getoverd = mk.soort === "tekening" &&
-    (mk.acties.some(a => a.beeld) || (!!mk.basis && !!(kaart && kaart.getoverd)));
+    (opVel().acties.some(a => a.beeld) || (opVel().basis && !!(kaart && kaart.getoverd)));
   if (kaart) { kaart.woord = woord; kaart.soort = mk.soort; kaart.getoverd = getoverd; }
   else { eigen.kaarten.push({ id: id, woord: woord, laatst: 0, soort: mk.soort, getoverd: getoverd }); onthoudSoort(mk.soort); }
   bewaarEigen();
