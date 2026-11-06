@@ -2402,16 +2402,27 @@ Chromium met een tweede versie op de server: de verborgen titel herlaadt naar
 de nieuwe versie, een pagina met een lopend potje niet. Op een echt toestel
 nog niet bekeken.
 
-### Installeren en doorgeven, vijf standen
+### Installeren en doorgeven, zeven standen
 
-Het veld op de instellingen heeft vijf standen en er staat er altijd
-hoogstens één:
+Het veld op de instellingen heeft zeven standen en er staat er altijd
+hoogstens één. Vijf zijn de rij "Op je beginscherm", die het vel opent
+(zie "Eén vel, twee ingangen" hieronder); ze verschillen alleen in wat er
+op dat vel staat:
 
 - **knop** -- het toestel biedt zelf een installatie aan
-  (`beforeinstallprompt`).
-- **zetop** -- iOS: de weg via het deelmenu, met het deel-teken (`#i-deel`)
-  in de zin.
-- **menu** -- de dialoog is weggetikt en de knop is opgebruikt.
+  (`beforeinstallprompt`): een gouden knop die de dialoog opent.
+- **ios** -- de weg via het deelmenu, als tegels: het deel-teken
+  (`#i-deel`) en het plus-vierkant (`#i-erbij`) met "Zet op beginscherm",
+  op Safari 26 met ••• ervoor.
+- **menu** -- de weg via het menu van de browser (⋮, App installeren): de
+  dialoog is weggetikt, of een Android-browser gaf geen signaal.
+- **inapp** -- de browser van een andere app (Instagram, Facebook): open in
+  Safari of Chrome, met een knop die de link kopieert.
+- **mac** -- Safari op de Mac: Archief, Voeg toe aan Dock. De rij heet dan
+  "In je Dock".
+
+En twee zonder vel:
+
 - **delen** -- de app draait geïnstalleerd; dan valt er niets te
   installeren en juist wel iets door te geven.
 - **weg** -- het veld dicht.
@@ -2474,7 +2485,9 @@ ziet de aanwijzing dus staan. Dat is de goede kant om op te raden: een
 aanwijzing te veel kost één regel op het scherm van de volwassene, een
 aanwijzing te weinig kost de installatie. Zet er dus geen vlag in
 `localStorage` voor -- die weet niet of de app er nog staat, en dan
-verdwijnt de weg voorgoed voor wie hem van zijn beginscherm veegt.
+verdwijnt de weg voorgoed voor wie hem van zijn beginscherm veegt. (De
+vlag `tijdisom.welkom` hieronder zegt iets anders: alleen dat het vel al
+eens vanzelf opkwam.)
 
 De knop draagt de plaat zelf, en dat is geen versiering: dít vlak komt na
 een tik op het beginscherm te staan. Het was de enige knop in het hele
@@ -2482,6 +2495,77 @@ bestand met alleen tekst erop, op het scherm waar elk ander vlak een
 tekening draagt. De plaat krijgt géén eigen schaduw en géén contour -- ze
 ligt ín een knop die haar lift al draagt, en reliëf op reliëf leest als een
 knop op een knop.
+
+### Eén vel, twee ingangen
+
+Installeren was alleen te vinden als je het tandwiel aantikte, en dan
+stond er per toestel een andere zin onder de rij. Drie toestellen kregen
+een weg die niet werkte of niets:
+
+- **Safari 26 op de iPhone** zet de deelknop in de standaardweergave achter
+  •••. "Tik op het deel-teken" wees naar een knop die er niet staat. Het
+  OS-nummer helpt niet om dat te zien (iOS 26 meldt zich als 18_6); het
+  `Version/26` van Safari wel. Chrome, Firefox en Edge op de iPhone hebben
+  de deelknop gewoon in beeld en krijgen de weg zonder •••.
+- **De browser in een andere app** (Instagram, Facebook, TikTok, een
+  Android WebView) kent geen weg naar het beginscherm. Op de iPhone stond
+  daar toch de uitleg van Safari, op Android niets. Juist daar komt een
+  doorgestuurde link binnen. Het tabblad van Chrome binnen WhatsApp of
+  Gmail is aan niets te herkennen; dat krijgt de weg via het menu, waar
+  "Openen in Chrome" ook staat.
+- **Android zonder signaal**: Firefox geeft `beforeinstallprompt` nooit,
+  Chrome pas na wat gebruik, en dan stond er niets terwijl de weg via het
+  menu wel werkt. Na drie tellen zonder signaal wordt het `menu`; komt het
+  signaal later, dan wordt het `knop`. Staat de app al op het toestel, dan
+  zegt Chrome in dat menu "Openen in app" in plaats van "App installeren";
+  dat is niet te zien van binnen een tabblad, en de rij staat er dan te
+  veel. De goede kant om op te raden, om dezelfde reden als op iOS.
+
+Safari op de Mac kan het sinds 17 (Archief, Voeg toe aan Dock) en kreeg
+ook niets. Dat is de minst belangrijke van de vier, maar kost één regel.
+
+Het antwoord is **één vel** (`#installVel`) met **twee ingangen**: de rij
+in Instellingen, en één keer vanzelf bij de eerste start in een browser
+(`welkom()`). Het vel is altijd hetzelfde -- de plaat, "Op je
+beginscherm", knoppen onderaan -- en alleen het midden hangt af van het
+toestel (`paintVel()`). Zo leert de volwassene het één keer.
+
+**De rij heeft geen zin meer eronder.** Een zin met een teken erin
+("Tik op [teken] en kies ...") las als een gebruiksaanwijzing. De weg
+staat nu op het vel, als tegels met een pijl: wat je op het toestel
+aantikt, met het teken dat je daar ziet, en alleen op de laatste tegel het
+woord uit het menu. De pijl hoort bij de tegel erna (`.stap`), zodat er
+op een smalle telefoon nooit een pijl alleen aan het eind van een regel
+staat. De prijs: op Android met signaal kost installeren nu een tik meer
+(rij, dan Zet erop). Eén vel voor alle toestellen is dat waard.
+
+**Eén keer vanzelf, en alleen op de titel.** De eerste start is bijna
+altijd de volwassene die net de link kreeg, en dat is het enige moment
+waarop installeren echt telt. Het vel komt alleen op de titel (een bewaard
+potje opent op de overdracht), alleen als er een weg is, en de vlag
+`tijdisom.welkom` gaat aan bij het tonen, niet bij het wegtikken: ook wie
+meteen naast het vel op spelen tikt, ziet het niet terug. Kan er niets
+bewaard worden (een privévenster dat `localStorage` weigert), dan niet
+tonen, anders komt het bij elke start. In de geïnstalleerde app nooit.
+
+Afgewogen en niet gekozen: een gouden stip op het tandwiel (zegt niet wát
+er te doen is, en kinderen tikken er als eerste op), en de eigen balk van
+Chrome toelaten door `preventDefault()` weg te halen (alleen Chrome op
+Android, en Chrome kiest het moment, ook midden in een beurt).
+
+**De titel heeft twee dingen, en dit vel is geen derde.** Het is voor de
+volwassene, zoals Instellingen, en het komt één keer; daarom mag er tekst
+op. Het ligt onder de sluier van het losse paneel (82% inkt): zonder
+sluier lag het als een vierde kaart tussen de rijen van Instellingen en
+half over de startknop. Een tik op de sluier is "nu niet", zodat een kind
+dat op spelen tikt het vel wegdoet en niet per ongeluk een spel start. Het
+vel komt van achter de onderrand op (`velOp`, `--t-kom`, `--e-los`), zoals
+de startknop na zijn tik daar achter wegzakt; weg is meteen weg.
+
+In de browser van een andere app is de gouden knop "Kopieer link": het
+klembord, en waar dat geweigerd wordt het deelmenu van het toestel. Lukt
+geen van beide, dan schudt de knop. Gelukt zegt de knop "Gekopieerd" met de
+klik-trilling.
 
 ### Het veld staat in Deze telefoon
 
@@ -2557,8 +2641,11 @@ van Deze telefoon, en het woord op de rij zegt het al (zie Instellingen).
 
 De standen zijn niet af te dwingen in een test -- `beforeinstallprompt`
 vuurt alleen in een echte browser met een echt profiel, en iOS al helemaal
-niet. `toonInstall` staat daarom onder `?debug` in `window.__tijd`, zodat je
-ze allemaal kunt fotograferen zonder opstartvlaggen.
+niet. `toonInstall` en `openVel` staan daarom onder `?debug` in
+`window.__tijd`, zodat je ze allemaal kunt fotograferen zonder
+opstartvlaggen. De herkenning zelf test je met een user-agent op de
+context (Playwright `userAgent`): het vel van de eerste start komt dan
+vanzelf.
 
 ## Een lege stapel speelt door
 

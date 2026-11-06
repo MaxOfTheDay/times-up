@@ -396,9 +396,16 @@ Pictogrammen en manifest-screenshots worden gegenereerd, nooit overgetypt
 is cache eerst, ververs erachter, met `res.ok` vóór `cache.put` en
 `cache: "no-cache"` bij het verversen. Geen melding over een nieuwe versie; wel een stille herlaadbeurt als de
 pagina verborgen raakt op de titel zonder bewaard potje (`meldNieuw()`).
-Het installeerveld heeft vijf standen (`knop`, `zetop`, `menu`, `delen`,
-`weg`), is hoogstens één rij in de lijst van Deze telefoon (zonder
-uitlegzin), en levert alleen de weg die het platform heeft weggenomen.
+Installeren is één vel (`#installVel`, `paintVel()`) met twee ingangen:
+de rij "Op je beginscherm" in Deze telefoon (zonder uitlegzin), en één keer
+vanzelf over de titel bij de eerste start in een browser (`welkom()`,
+`tijdisom.welkom`). Het veld heeft zeven standen (`knop`, `ios`, `menu`,
+`inapp`, `mac` openen het vel; `delen`, `weg` niet); het vel wisselt per
+stand alleen zijn midden: een gouden knop, of de weg als tegels met een
+pijl, het teken dat je op het toestel ziet en alleen het laatste woord uit
+het menu. Herkenning gaat op de user-agent (Safari 26 heeft de deelknop
+achter •••). De app levert alleen de weg die het platform heeft
+weggenomen.
 
 **Eén letter voor cijfers en koppen.** Fredoka, ingebakken als base64 in de
 `@font-face`, vast op 700, met cijfers die even breed zijn. Hij staat op wat
