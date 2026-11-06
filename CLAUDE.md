@@ -431,7 +431,9 @@ De titel komt binnen zonder `screenIn`. Wie een dier aantikt, laat het wippen
 en het andere antwoordt (`wipOpRand()`); de landing van zo'n wip rimpelt de
 punten. Wat de dieren uit zichzelf doen, rimpelt niet. Een tik op de plaat
 zelf draait de zandloper meteen om (`draaiGlas()`, op `rotate`); de plaat
-zakt niet in en er komt geen rimpel.
+zakt niet in en er komt geen rimpel. In de punten onderaan (liggend rechtsonder) staat
+MAX, de maker, als rastertoon: dezelfde punten, groter en iets voller
+(`merkMax()`, `opt.merk`), geen tekst en geen stuk.
 
 **Het instellingenscherm.** Vier groepen, elk één vraag: Potje (hoe lang
 een potje loopt: Aantal kaarten met de telling van de menging op de regel

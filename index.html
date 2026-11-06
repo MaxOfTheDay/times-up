@@ -6935,7 +6935,9 @@ function stipveld(cv, opt) {
         /* Een vol bord: elk punt op volle dekking. opt.masker (0 tot 1 per
            punt) blijft als haak voor wie later toch een verloop wil. */
         const m = opt.masker ? opt.masker(x, y, W, H) : 1;
-        if (m > .01) { rooster[r * NX + c] = punten.length; punten.push({ x, y, m, r, c }); }
+        /* opt.merk: de punten die de handtekening vormen (zie merkMax()). */
+        const mk = opt.merk ? opt.merk(r, c, x0, y0, W, H) : false;
+        if (m > .01) { rooster[r * NX + c] = punten.length; punten.push({ x, y, m, r, c, mk }); }
       }
       const n = punten.length;
       px = new Float32Array(n); py = new Float32Array(n); prad = new Float32Array(n);
@@ -7021,6 +7023,9 @@ function stipveld(cv, opt) {
         const hoek = Math.atan2(p.y - H / 2, p.x - W / 2) - draai;
         if ((((hoek % vak) + vak) % vak) < vak / 2) { r0 = R0 * 1.75; A0 *= 1.25; }
       }
+      /* De handtekening is rastertoon: een punt groter en iets voller, op
+         hetzelfde raster, en een rimpel duwt hem mee zoals elke punt. */
+      if (p.mk) { r0 *= 1.6; A0 *= 1.4; }
       let rad = Math.max(.5, r0 + golf * 3 - dal * r0 * .8);
       if (tg) {
         const q = Math.min(1, Math.max(0, (Math.hypot(p.x - tg.x, p.y - tg.y) - tg.R) / 120));
@@ -7160,9 +7165,26 @@ function stipveld(cv, opt) {
 
 /* Elke grond is een vol bord: de stukken liggen erop, en wat eronder ligt
    zie je niet. Een rimpel loopt onder een kaart door en verdwijnt daar. */
+/* De handtekening van de maker: MAX in de punten van de titel, onderaan in
+   het midden, liggend rechtsonder (onder de knop is dan geen plaats). Vijf
+   rijen op het raster van 12 px, de onderste rij 36 px boven de rand. Geen
+   woord voor de spelers: wie het niet ziet, ziet een bord. */
+const MERK = { M: ["X...X", "XX.XX", "X.X.X", "X...X", "X...X"],
+               A: [".XXX.", "X...X", "XXXXX", "X...X", "X...X"],
+               X: ["X...X", ".X.X.", "..X..", ".X.X.", "X...X"] };
+function merkMax(r, c, x0, y0, W, H) {
+  const CEL = 12, RIJEN = 5, woord = "MAX";
+  const breed = woord.length * 6 - 1;
+  const r0 = Math.floor((H - 36 - y0) / CEL) - RIJEN + 1;
+  const xt = W > H ? W - 36 - (breed - 1) * CEL : W / 2 - (breed - 1) * CEL / 2;
+  const rr = r - r0, cc = c - Math.round((xt - x0) / CEL);
+  if (rr < 0 || rr >= RIJEN || cc < 0 || cc >= breed || cc % 6 === 5) return false;
+  return MERK[woord[Math.floor(cc / 6)]][rr][cc % 6] === "X";
+}
 /* Titel: inkt op papier, want de titel is van allebei de ploegen. */
 const veldTi = stipveld($("#tiVeld"), {
   inkt: true,
+  merk: merkMax,
   zichtbaar: () => $("#s-title").classList.contains("on")
 });
 const veldHo = stipveld($("#hoVeld"), {
