@@ -1891,6 +1891,7 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
 #pauze[data-time="warn"] .timerframe .band { stroke: var(--time-2); }
 #pauze[data-time="crit"] .timerframe .band { stroke: var(--time-1); stroke-width: 18; }
 #pauze.kaart[data-time="crit"] .panel { background: var(--paper-hot); }
+#pauze.kaart[data-time="crit"] .timerframe .track { stroke: var(--paper-hot); }
 
 /* Klein en gedempt: de rand om de kaart is de klok, dit is het cijfer erbij.
    In de laatste tien seconden neemt het de kleur van de klok over (6,6 / 5,0
@@ -2033,8 +2034,12 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
    band is een goede hoeveelheid en een zwak alarm: het signaal is het kleinst
    als de spanning het hoogst is, en geluid kan uit staan. Het papier is het
    grootste vlak (leesbaar vanuit een ooghoek), staat stil, breekt de baan
-   niet en leent geen ploegkleur. De baan blijft --paper-2. */
+   niet en leent geen ploegkleur. De lege baan warmt mee: bleef ze
+   --paper-2, dan lag er een bleke lijst tussen de inkt en het warme papier,
+   een derde rand, en was "op" ineens lichter dan de kaart. Wat er dan nog
+   telt is het stukje pruim dat over is, niet wat al op is. */
 .card[data-time="crit"] { background: var(--paper-hot); }
+.card[data-time="crit"] .timerframe .track { stroke: var(--paper-hot); }
 
 /* ---- de beurt is om ----
    timeUp() houdt het spelscherm een adem lang vast (BEURT_ADEM, 1 s),

@@ -280,6 +280,15 @@ anders (de band verkleurt, en het cijfer ernaast verkleurt mee, wat hetzelfde
 kanaal twee keer is). Wie dat ooit wil repareren, zoekt iets stils — de band
 die dikker wordt, bijvoorbeeld — en niet iets dat beweegt of opbreekt.
 
+**De lege baan warmt mee.** Onder vijf seconden wordt het papier van de
+kaart warm (`--paper-hot`). De lege baan bleef `--paper-2`, en dan lag er
+een bleke lijst tussen de inktrand en het warme papier: een derde rand op
+het spannendste moment, en "op" was ineens lichter dan de kaart in plaats
+van erin gezonken. Nu warmt de baan mee, op de kaart en op de achterkant in
+de pauze. Wat er dan nog telt is het stukje pruim dat over is; hoeveel er al
+op is, hoeft niemand in die vijf tellen te zien. Bij tijd om sluit de baan
+in `--ink-2` zoals altijd.
+
 ## Vorm zegt wat het is, diepte hoe zwaar
 
 Drie kanalen, en ze doen elk één ding:
