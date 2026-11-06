@@ -82,6 +82,11 @@ Regels voor die grens:
   eerst of de app nog in beeld is. Uit beeld zwijgt `Snd` (`Snd.stil()`).
 - Een `<img>` neemt geen aanraking aan (`pointer-events: none`), anders
   opent een lange druk het beeldmenu van Chrome over het spel.
+- **Een latere stap van een overgang loopt via `na(ms, stap, af)`**, geen
+  kale `setTimeout`. Hij hoort bij het scherm waarop hij begon: verlaat je
+  dat eerder, dan breekt `show()` hem af en loopt `af()`, dat terugzet wat
+  de stap had moeten opruimen. Een eigen timer alleen met een eigen clear
+  (`randTimer`, `telTimers`).
 
 ## De harde eis
 

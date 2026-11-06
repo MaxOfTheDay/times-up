@@ -4291,7 +4291,29 @@ function paintChrome(kleur) {
 /* Elk stipveld() meldt hier zijn ruimOp(): na een schermwissel geeft een
    grond die niet meer in beeld is zijn canvas terug. */
 const VELDEN = [];
+
+/* De volgende stap van een overgang, ms later, en alleen op het scherm
+   waarop hij begon. Verlaat je dat scherm eerder, dan breekt show() hem af
+   en loopt af() in zijn plaats: wat de stap had moeten terugzetten (een
+   klasse, een gevouwen kaart, vertrekt), zet af() terug. Zo hoeft een
+   nieuwe overgang zijn eigen `if (current === ...)` niet te onthouden.
+   Een eigen timer (randTimer, telTimers) alleen met een eigen clear. */
+const overgangen = new Set();
+function na(ms, stap, af) {
+  const o = { scherm: current, af };
+  o.t = setTimeout(() => { overgangen.delete(o); stap(); }, ms);
+  overgangen.add(o);
+}
+function breekAf(name) {
+  for (const o of [...overgangen]) {
+    if (o.scherm === name) continue;
+    clearTimeout(o.t); overgangen.delete(o);
+    if (o.af) o.af();
+  }
+}
+
 function show(name) {
+  breekAf(name);
   current = name;
   $$(".screen").forEach(s => s.classList.toggle("on", s.id === "s-" + name));
   VELDEN.forEach(f => f());
@@ -5935,11 +5957,11 @@ function handoff(mode, freshA, freshB, zelfdeGrond) {
   /* De kleur groeit als cirkel uit de kaart die hier landt. */
   if (vloed) kleurUitKaart($("#s-handoff"), veldHo, $("#hoVeld"), $("#hoRoundCard"), t.hex,
     () => $("#s-handoff").style.setProperty("--team", t.color));
-  if (wissel) setTimeout(() => {
+  if (wissel) na(RIJ_WACHT, () => {
     if (!G) return;
     $("#hoRondes").classList.add("wissel");
     paintRij(G.round - 1);
-  }, RIJ_WACHT);
+  });
   wakeOverdracht();
 }
 
@@ -5973,15 +5995,16 @@ $("#btnStartTurn").addEventListener("click", () => {
   draaiWeg([kaart, $("#hoTally")], OMDRAAI);
   knop.animate([{ translate: "0 0" }, { translate: "0 " + (innerHeight - kn.top + 20) + "px" }],
     { duration: OMDRAAI, easing: curve("weg"), fill: "forwards" });
-  setTimeout(() => {
-    vertrekt = false;
+  const terug = () => { vertrekt = false; zetTerug([kaart, $("#hoTally"), knop]); };
+  na(OMDRAAI, () => {
     /* Uit beeld geraakt tijdens het omdraaien: dan niet beginnen. Het scherm
        heette nog "handoff", dus er werd niets gepauzeerd, en het aftellen en
        de beurt zouden op hun timers in de achtergrond verder lopen. De kaart
        komt terug, zoals bij een afgebroken aftellen. */
-    if (current === "handoff" && $("#pauze").hidden && !document.hidden) startTurn();
+    vertrekt = false;
+    if ($("#pauze").hidden && !document.hidden) startTurn();
     zetTerug([kaart, $("#hoTally"), knop]);
-  }, OMDRAAI);
+  }, terug);
 });
 
 /* ---------- de klok ---------- */
@@ -7046,11 +7069,13 @@ $$(".gluur").forEach(g => g.addEventListener("pointerdown", () => {
      spelen samen, en wie wacht tot de volwassene klaar is, tikt zo twintig
      keer. */
   const ander = $$(".gluur").find(x => x !== g);
-  setTimeout(() => {
+  na(230, () => {
+    /* .gluur staat ook op de overdracht en de eindstand; alleen op de titel
+       antwoordt de ander. */
     if (current !== "title") return;
     wipOpRand(ander, 1);
     zetGezicht(ander.querySelector("svg"), "-blij", 400);
-  }, 230);
+  });
 }));
 /* Een wip die een vinger begon, landt op de rand van het merk, en die
    landing drukt op het bord: een rimpel vanaf onder haar voeten, op het
@@ -7060,12 +7085,12 @@ $$(".gluur").forEach(g => g.addEventListener("pointerdown", () => {
 function wipOpRand(g, n) {
   mascotte(g.querySelector("svg"), "wip", n);
   if (stilAan()) return;
-  setTimeout(() => {
+  na(265, () => {
     if (current !== "title") return;
     const r = g.getBoundingClientRect(), s = $("#s-title").getBoundingClientRect();
     const voet = r.bottom - r.height * .24;          // de rand: 100% min --zak
     veldTi.rimpel(r.left + r.width / 2 - s.left, voet - s.top, n > 3 ? .7 : .45, r.width * .3);
-  }, 265);
+  });
 }
 
 /* Een tik op de plaat draait de zandloper om: de klok is, met de vinger en
@@ -7259,7 +7284,7 @@ function timeUp() {
   /* Even laten staan: de tafel roept nog, en de ploeg die speelde krijgt
      haar stempel en haar buit nog te zien (zie #s-play.over). Er valt niets
      stuk te tikken, want G.card staat al op null. */
-  setTimeout(turnEnd, BEURT_ADEM);
+  na(BEURT_ADEM, turnEnd);
 }
 
 /* De bouwer voor de stand op de overdracht. De ids (hoSideA, hoScoreB, ...)
@@ -7427,8 +7452,9 @@ function endRound(rest) {
   $("#s-play").classList.add("leeg");
   papierUitKaart();
   mascotte(balkMascotte(), "juich");
-  setTimeout(() => {
-    if (!G || current !== "play") { $("#s-play").classList.remove("leeg"); return; }
+  const afgebroken = () => $("#s-play").classList.remove("leeg");
+  na(BEURT_ADEM, () => {
+    if (!G) { afgebroken(); return; }
     draaiOm(p => {
       $("#s-play").classList.remove("leeg");
       if (!G || current !== "play") return;
@@ -7439,7 +7465,7 @@ function endRound(rest) {
       handoff("round", vers[0], vers[1]);
       landOm($("#hoRoundCard"), p);
     });
-  }, BEURT_ADEM);
+  }, afgebroken);
 }
 
 
@@ -7525,11 +7551,9 @@ function vuurwerk() {
   if (stilAan()) return;
   const s = $("#s-winner").getBoundingClientRect(), k = $("#wnPiles").getBoundingClientRect();
   [[.2, .14], [.8, .18], [.18, .88], [.82, .86]].forEach(([fx, fy], i) =>
-    setTimeout(() => { if (current === "winner") veldWn.rimpel(fx * s.width, fy * s.height, 1.8); }, i * 130));
-  setTimeout(() => {
-    if (current === "winner")
-      veldWn.rimpel(k.left + k.width / 2 - s.left, k.top + k.height / 2 - s.top, 1.2, Math.max(k.width, k.height) / 2);
-  }, 550);
+    na(i * 130, () => veldWn.rimpel(fx * s.width, fy * s.height, 1.8)));
+  na(550, () =>
+    veldWn.rimpel(k.left + k.width / 2 - s.left, k.top + k.height / 2 - s.top, 1.2, Math.max(k.width, k.height) / 2));
 }
 
 function winner() {
@@ -7603,7 +7627,7 @@ function winner() {
     if (waarde !== vorig && waarde % 3 === 0) Snd.tick(1500 + waarde * 6, .04);
     vorig = waarde;
     if (p < 1) requestAnimationFrame(stap);
-    else setTimeout(() => { if (current === "winner") feest(); }, 300);
+    else na(300, feest);
   };
   requestAnimationFrame(stap);
 }
@@ -7665,7 +7689,7 @@ $("#btnAgain").addEventListener("click", () => {
   if (stilAan() || !m.width) { verder(); return; }
   vertrekt = true;
   draaiWeg([stand], OMDRAAI);
-  setTimeout(verder, OMDRAAI);
+  na(OMDRAAI, verder, () => { vertrekt = false; zetTerug([stand]); });
 });
 $("#btnHome").addEventListener("click", () => {
   const k = $("#btnHome").getBoundingClientRect();
@@ -8193,7 +8217,7 @@ $("#btnStart").addEventListener("click", () => {
   if (stilAan() || !m.width) { verder(); return; }
   vertrekt = true;
   draaiWeg([merk], OMDRAAI);
-  setTimeout(verder, OMDRAAI);
+  na(OMDRAAI, verder, () => { vertrekt = false; zetTerug([merk]); });
 });
 
 /* ==============================================================

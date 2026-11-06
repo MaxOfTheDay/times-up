@@ -3348,3 +3348,23 @@ beeldmenu van Chrome (downloaden, delen) over het lopende spel. Beelden
 nemen daarom geen aanraking aan; de druk valt door naar de kaart of knop
 eronder. Draaien vastzetten tijdens een beurt (`screen.orientation.lock`) is
 voorgesteld en voorlopig niet gedaan.
+
+## Een latere stap loopt via na()
+
+Bij de code-gezondheidscheck van november 2026 waren acht van de laatste
+twintig pull requests een overgang die op het verkeerde moment afging
+(#178, #179, #180, #183, #184, #191, #195, #197). Elke overgang was een
+kale `setTimeout` met een eigen bewaker, zoals `if (current === "winner")`
+of `if (!G || current !== "play") { ...opruimen...; return; }`, en een
+vergeten bewaker was de fout. Twee echte gaten zaten er nog: Spelen op de
+titel en Nog een keer op de eindstand riepen `newGame()` na `OMDRAAI` ook
+als je in die 140 ms al naar de instellingen of naar huis was gegaan.
+
+`na(ms, stap, af)` onthoudt het scherm waarop hij begon; `show()` naar een
+ander scherm breekt hem af en roept `af()`. Geen toestandsmachine: die zou
+het hele spelverloop herschrijven voor een winst die de helper ook geeft.
+Een stap die vaker opnieuw begint op hetzelfde scherm (de dieren op de rand
+van de overdracht, de tellen van het aftellen) houdt zijn eigen timer met
+een eigen clear. Een willekeurige tik-test (3.450 stappen: tikken, lang
+drukken, terugvegen, herladen, wegklikken) vond voor en na geen fout.
+
