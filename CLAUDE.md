@@ -227,9 +227,10 @@ elk onder zijn dier. De wake lock blijft hier aan, begrensd op
 `WAKE_MAX`.
 
 **Eén pen voor tekening en mascotte.** Het teken op de kaart (en in
-`#kijk`) krijgt de inktlijn van Vos en Uil: vier `drop-shadow`s zonder
-vervaging, 4 px (2 px op de kleine plaatjes). Niet vlakker maken met een
-filter. De mascottes en de rondetekens nemen voor hun lijn
+`#kijk`) krijgt de inktlijn van Vos en Uil, 4 px (2 px op de kleine
+plaatjes), één keer getekend op een canvas door `Pen` via `zetTeken()`,
+nooit als CSS-filter: dat rekent elk beeld opnieuw en gaf gaten en trapjes.
+Niet vlakker maken met een filter. De mascottes en de rondetekens nemen voor hun lijn
 `max(eigen dikte, min(var(--pen), plafond))`; `penLijn()` zet `--pen` per
 svg, zodat geen lijn dunner wordt dan 2,3 px op het scherm. Een nieuw
 gebruik buiten `svgUse()` meld je daar aan.

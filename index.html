@@ -1090,7 +1090,6 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
    inktlijn van .glyph; een foto ligt kaal op het papier (.kaal), want een
    kader om een vierkant is een derde rechthoek op de kaart. */
 .glyph.foto { line-height: 0; }
-.glyph.foto.kaal, .kijk-grid span.foto.kaal { filter: none; }
 .glyph.foto img {
   display: block; width: calc(var(--glyph, 20vmin) * 1.18); height: calc(var(--glyph, 20vmin) * 1.18);
   object-fit: cover;
@@ -2086,22 +2085,14 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
    door sizeCard() van de gemeten kaart afgeleid. */
 .glyph { font-size: var(--glyph, 20vmin); line-height: 1; }
 
-/* De inktlijn van Vos en Uil, om de omtrek van het teken. Een emoji is
-   verloop en schaduw, de mascottes zijn vlakke kleur in een dikke inktlijn;
-   met dezelfde lijn eromheen ligt de tekening in dezelfde wereld, op elk
-   toestel en elke emoji-set. Vier schaduwen zonder vervaging, elk naar één
-   kant: na elkaar gezet wordt dat één gesloten contour. 4 px is de lijn van
-   de kaartrand; op de kleine plaatjes van #kijk de helft. Waarom niet ook
-   vlakker maken: docs/ontwerp.md, "Eén pen voor tekening en
-   mascotte". */
-.glyph, .kijk-grid span {
-  --omtrek: 4px;
-  filter: drop-shadow(var(--omtrek) 0 0 var(--ink))
-          drop-shadow(calc(-1 * var(--omtrek)) 0 0 var(--ink))
-          drop-shadow(0 var(--omtrek) 0 var(--ink))
-          drop-shadow(0 calc(-1 * var(--omtrek)) 0 var(--ink));
+/* De inktlijn van Vos en Uil om het teken tekent Pen, één keer per teken
+   en maat (zie daar). Het canvas beslaat het vak van de tekst; de tekst
+   zelf staat er onzichtbaar bij, voor wie voorleest. */
+.glyph canvas.pen, .kijk-grid span canvas.pen { display: block; }
+.vh {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
 }
-.kijk-grid span { --omtrek: 2px; }
 
 /* Het woord onder het teken. Een emoji is dubbelzinnig (luiaard of beertje,
    zeehond of dolfijn), en de omschrijver moet weten welk woord telt. Het
@@ -4819,20 +4810,132 @@ const eigenKlaar = (async () => {
   paintEigen();
 })();
 
-/* Het teken op een kaart: een emoji als tekst, een eigen kaart als beeld.
-   Een tekening krijgt de inktlijn van .glyph zoals een emoji; een foto niet
-   (.kaal): om een vierkant wordt die lijn een kader, een derde rand. */
-function zetTeken(el, kaart) {
+/* De pen van .glyph: de inktlijn van Vos en Uil om het teken, één keer
+   getekend per teken en maat, niet elk beeld opnieuw. Een filter met
+   schaduwen rekende de lijn bij elk beeld van de kaart uit (de klokband
+   tekent de kaart zestig keer per seconde), en met genoeg schaduwen voor een
+   lijn zonder gaten haalde de kaart geen 60 beelden meer. Nu: het teken op
+   een eigen canvas, daaromheen kopieën tot de dikte van de lijn, alles in
+   inkt, het teken erbovenop.
+   Een ronde lijn van gelijke dikte, zonder trapjes. Zie docs/ontwerp.md,
+   "Eén pen voor tekening en mascotte". */
+const Pen = (() => {
+  const cache = new Map();          // sleutel -> canvas, de laatste MAX
+  const MAX = 6;
+  const kras = document.createElement("canvas");   // het kale teken
+  let inktKleur = null;
+  const inkt = () => inktKleur ||
+    (inktKleur = getComputedStyle(document.documentElement).getPropertyValue("--ink").trim() || "#1A1714");
+  const dpr = () => Math.min(3, Math.max(1, window.devicePixelRatio || 1));
+  /* Kopieën op een ring van straal r, hoogstens 2 schermpixels uit
+     elkaar. */
+  function ring(r) {
+    const n = Math.max(8, Math.ceil(Math.PI * r));
+    const uit = [];
+    for (let i = 0; i < n; i++) uit.push([Math.round(r * Math.cos(2 * Math.PI * i / n)), Math.round(r * Math.sin(2 * Math.PI * i / n))]);
+    return uit;
+  }
+  /* Maat: font (de CSS-font van het element), px (de lettergrootte), lh (de
+     regelhoogte), lijn (de dikte van de pen), allemaal CSS-pixels. Het canvas
+     beslaat precies het vak dat de tekst zou beslaan (breedte van het teken,
+     hoogte van de regel), plus een rand voor wat buiten de regel tekent en
+     voor de lijn; die rand valt weg in een negatieve marge. */
+  function teken(bron, m) {
+    const s = dpr(), sleutel = (typeof bron === "string" ? bron : bron.src) + "|" + m.px + "|" + m.lh + "|" + m.lijn + "|" + s;
+    if (cache.has(sleutel)) {
+      const c = cache.get(sleutel);
+      cache.delete(sleutel); cache.set(sleutel, c);   // weer de nieuwste
+      return c;
+    }
+    const kx = kras.getContext("2d");
+    let w, h, basis = 0;
+    const pad = Math.ceil(m.lijn + 1 + (typeof bron === "string" ? m.px * .14 : 0));
+    if (typeof bron === "string") {
+      kx.font = m.font;
+      const mt = kx.measureText(bron);
+      w = mt.width; h = m.lh;
+      basis = (m.lh - (mt.fontBoundingBoxAscent + mt.fontBoundingBoxDescent)) / 2 + mt.fontBoundingBoxAscent;
+    } else { w = h = m.px; }
+    const W = Math.ceil((w + 2 * pad) * s), H = Math.ceil((h + 2 * pad) * s);
+    kras.width = W; kras.height = H;   // wist ook de stand
+    kx.setTransform(s, 0, 0, s, 0, 0);
+    if (typeof bron === "string") {
+      kx.font = m.font; kx.textBaseline = "alphabetic"; kx.textAlign = "left";
+      kx.fillText(bron, pad, pad + basis);
+    } else {
+      kx.drawImage(bron, pad, pad, w, h);
+    }
+    const c = document.createElement("canvas");
+    c.width = W; c.height = H;
+    const cx = c.getContext("2d");
+    /* Twee ringen, de hele lijn en de halve: samen dicht genoeg dat ook een
+       dun pootje een gesloten lijn krijgt. */
+    for (const [dx, dy] of ring(m.lijn * s).concat(ring(m.lijn * s / 2)))
+      cx.drawImage(kras, dx, dy);
+    cx.globalCompositeOperation = "source-in";
+    cx.fillStyle = inkt();
+    cx.fillRect(0, 0, W, H);
+    cx.globalCompositeOperation = "source-over";
+    cx.drawImage(kras, 0, 0);
+    /* Tekst in em, zodat het meeschaalt tot sizeCard() een nieuwe maat
+       geeft; een beeld in px. */
+    const em = v => typeof bron === "string" ? (v / m.px) + "em" : v + "px";
+    Object.assign(c.style, { width: em(W / s), height: em(H / s), margin: em(-pad) });
+    c.className = "pen";
+    c.setAttribute("aria-hidden", "true");
+    cache.set(sleutel, c);
+    while (cache.size > MAX) cache.delete(cache.keys().next().value);
+    return c;
+  }
+  /* De maat van een element dat in de pagina hangt. */
+  function maat(el, lijn) {
+    const cs = getComputedStyle(el);
+    const px = parseFloat(cs.fontSize);
+    const lh = cs.lineHeight === "normal" ? px * 1.2 : parseFloat(cs.lineHeight);
+    return { font: cs.fontStyle + " " + cs.fontWeight + " " + px + "px " + cs.fontFamily, px, lh, lijn };
+  }
+  /* Een canvas mag maar op één plek hangen; een kopie van de kaart
+     (kaartSpook) krijgt een kopie van het beeld. */
+  function kopieer(van, naar) {
+    const a = van.querySelectorAll("canvas.pen"), b = naar.querySelectorAll("canvas.pen");
+    b.forEach((c, i) => { if (a[i]) c.getContext("2d").drawImage(a[i], 0, 0); });
+  }
+  return { teken, maat, kopieer };
+})();
+
+/* Het teken op een kaart: een emoji, een eigen kaart als beeld. Een emoji
+   en een tekening krijgen de pen (Pen), een foto niet (.kaal): om een
+   vierkant wordt die lijn een kader, een derde rand. De emoji staat er ook
+   als tekst, onzichtbaar, voor wie voorleest. lijn: de dikte van de pen. */
+function zetTeken(el, kaart, lijn = 4) {
   const id = Spel.eigenId(kaart);
   el.classList.toggle("foto", id !== null);
   const k = id === null ? null : eigen.kaarten.find(k => k.id === id);
-  el.classList.toggle("kaal", id !== null && !(k && k.soort === "tekening" && !k.getoverd));
-  if (id === null) { el.textContent = kaart[0]; return; }
+  const kaal = id !== null && !(k && k.soort === "tekening" && !k.getoverd);
+  el.classList.toggle("kaal", kaal);
+  el.dataset.teken = id === null ? kaart[0] : "";
+  if (id === null) {
+    el.textContent = kaart[0];
+    if (!el.isConnected) return;
+    const c = Pen.teken(kaart[0], Pen.maat(el, lijn));
+    el.textContent = "";
+    el.append(c, Object.assign(document.createElement("span"), { className: "vh", textContent: kaart[0] }));
+    return;
+  }
   el.textContent = "";
   const img = document.createElement("img");
   img.alt = ""; img.draggable = false;
   if (beelden.has(id)) img.src = beelden.get(id);
   el.appendChild(img);
+  /* Een tekening krijgt de pen zodra het beeld er is. */
+  if (!kaal && img.src && el.isConnected) {
+    const r = img.getBoundingClientRect().width || 0;
+    img.decode().then(() => {
+      if (img.parentNode !== el || !r) return;
+      const m = { px: r, lh: r, lijn };
+      el.replaceChild(Pen.teken(img, m), img);
+    }).catch(() => {});
+  }
 }
 
 /* ---- het veld in Instellingen ---- */
@@ -6154,7 +6257,12 @@ function sizeCard() {
    pas na de wissel uitgemeten kan worden. */
 function remeasure() {
   if (current !== "play") return;
+  const was = $("#glyph").style.fontSize + getComputedStyle($("#glyph")).fontSize;
   sizeCard(); repaintClock();
+  /* Een andere maat: de pen opnieuw, op de nieuwe maat. */
+  if (G && G.card !== null && $("#glyph").dataset.teken &&
+      $("#glyph").style.fontSize + getComputedStyle($("#glyph")).fontSize !== was)
+    zetTeken($("#glyph"), G.deck[G.card]);
   /* Tijdens het aftellen windt de band op, los van de klok. */
   if (countRaf !== null) zetBand(bandNu);
 }
@@ -6242,6 +6350,7 @@ function startTurn() {
   $("#s-play").classList.remove("over");
   show("play");
   sizeCard();                  // pas ná show(): daarvoor heeft de kaart geen maat
+  penVooruit();                // de eerste kaart door de pen, onder het aftellen
   /* De klok van deze beurt staat er al onder het aftellen. Anders ligt er de
      klok van de vorige beurt, op nul: de warme kaart met de pruimen rand,
      die bij het opengaan van de schijf nog een tel afkoelt. */
@@ -6453,6 +6562,23 @@ function paintCard(how) {
   if (G.card === null) return;
   zetTeken($("#glyph"), G.deck[G.card]);
   $("#cardWord").textContent = G.deck[G.card][1];
+  penVooruit();
+}
+/* De volgende kaart alvast door de pen, als de telefoon even niets doet:
+   dan kost goed of pas niets meer dan het ophangen van een klaar beeld.
+   Alleen een emoji; een tekening wacht toch op haar beeld. */
+let penWacht = null;
+function penVooruit() {
+  const rust = window.requestIdleCallback || (f => setTimeout(f, 50));
+  if (penWacht !== null) return;
+  penWacht = rust(tijd => {
+    penWacht = null;
+    /* Te weinig rust over (de klok tekent elk beeld): de volgende keer. */
+    if (tijd && !tijd.didTimeout && tijd.timeRemaining() < 8) { penVooruit(); return; }
+    if (!G || !G.pile.length || current !== "play") return;
+    const kaart = G.deck[G.pile[0]], g = $("#glyph");
+    if (Spel.eigenId(kaart) === null && g.isConnected) Pen.teken(kaart[0], Pen.maat(g, 4));
+  }, { timeout: 1000 });
 }
 
 /* Twee tikken binnen 280 ms op dezelfde knop zijn één enthousiaste vinger. De
@@ -7233,6 +7359,7 @@ function kaartSpook(soort, naar) {
   const r = kaart.getBoundingClientRect();
   if (!r.width) return;
   const k = kaart.cloneNode(true);
+  Pen.kopieer(kaart, k);
   k.removeAttribute("id");
   k.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
   k.querySelectorAll(".timerframe, .stempel").forEach(e => e.remove());
@@ -8027,9 +8154,9 @@ let kijkReturn = null;
 $("#hoCards").addEventListener("click", () => {
   if (!G || G.round < 2 || current !== "handoff") return;
   const frag = document.createDocumentFragment();
-  G.pile.map(i => G.deck[i])
-    .sort((a, b) => a[1].localeCompare(b[1], "nl"))
-    .forEach(kaart => {
+  const kijkKaarten = G.pile.map(i => G.deck[i])
+    .sort((a, b) => a[1].localeCompare(b[1], "nl"));
+  kijkKaarten.forEach(kaart => {
       const d = document.createElement("div");
       d.innerHTML = "<span></span><small></small>";
       zetTeken(d.querySelector("span"), kaart);
@@ -8039,6 +8166,8 @@ $("#hoCards").addEventListener("click", () => {
   const grid = $("#kijkGrid");
   grid.textContent = "";
   grid.appendChild(frag);
+  /* De pen pas nu: Pen meet de letter van het element in de pagina. */
+  grid.querySelectorAll("div > span").forEach((sp, i) => zetTeken(sp, kijkKaarten[i], 2));
   kijkReturn = document.activeElement;
   screensInert(true);
   $("#kijk").hidden = false;
@@ -8625,7 +8754,7 @@ if (location.search.indexOf("debug") !== -1) {
     get settings() { return settings; },
     get screen() { return current; },
     Spel, DECKS, TIER_ORDER, poolFor, bakFor, canHide, MIN_BAK, shuffle, drawDeck, total,
-    stopClock, paintClock, sizeCard, winner, timeUp, Snd, Tril, toonInstall, openVel,
+    stopClock, paintClock, sizeCard, winner, timeUp, Snd, Tril, toonInstall, openVel, zetTeken,
     saveGame, loadGame, clearGame, KEY_GAME, GAME_MAX_AGE,
     get eigen() { return eigen; }, beelden, eigenKlaar, openMaker,
     // De lock op de overdracht is anders alleen te controleren door er drie
