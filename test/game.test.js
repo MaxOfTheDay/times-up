@@ -478,6 +478,25 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(!await paneelOpen() && await game(() => window.__tijd.G.card) !== null,
      'verder na wegklikken hervat de beurt niet');
 
+  // Wegklikken in de 0,3 s waarin de kaart na verder dichtdraait: het paneel
+  // stond dan nog open, dus er werd niet gepauzeerd, en na het omdraaien liep
+  // de klok buiten beeld.
+  await page.click('#btnPauze');
+  await page.waitForTimeout(450);
+  await page.click('#btnResume');
+  await page.waitForTimeout(60);
+  await zicht('hidden');
+  const halverwege = await page.evaluate(() => document.querySelector('#timerBand').style.strokeDashoffset);
+  await page.waitForTimeout(900);
+  ok(await paneelOpen(), 'wegklikken terwijl verder de kaart omdraait, laat de beurt doorlopen');
+  ok(await page.evaluate(() => document.querySelector('#timerBand').style.strokeDashoffset) === halverwege,
+     'de klok liep verder na wegklikken tijdens het dichtdraaien van de pauze');
+  await zicht('visible');
+  await page.waitForTimeout(300);
+  ok(await paneelOpen(), 'na wegklikken tijdens het dichtdraaien is het paneel bij terugkomst weg');
+  if (await paneelOpen()) await page.click('#btnResume');
+  await page.waitForTimeout(400);
+
   // Tijdens het aftellen: afbreken, zoals een tik op het vlak. Anders telde
   // het in de achtergrond uit en begon de beurt op het eerste beeld terug.
   // Wachten tot de kaart is omgedraaid: het huisje staat in de hoek van de
@@ -497,6 +516,20 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   await page.waitForTimeout(300);
   ok(await screen() === 'handoff', 'wegklikken tijdens het aftellen gaat niet terug naar de overdracht');
   ok(await game(() => window.__tijd.G.card) === null, 'wegklikken tijdens het aftellen begon toch een beurt');
+
+  // Wegklikken in de 0,3 s waarin start de opdrachtkaart wegdraait, nog vóór
+  // het aftellen: het scherm heette dan nog overdracht, en het aftellen en de
+  // beurt begonnen op hun timers buiten beeld.
+  await page.waitForTimeout(400);
+  await page.click('#btnStartTurn');
+  await page.waitForTimeout(80);
+  await zicht('hidden');
+  await page.waitForTimeout(1500);
+  await zicht('visible');
+  await page.waitForTimeout(300);
+  ok(await screen() === 'handoff', 'wegklikken terwijl start de kaart omdraait, begint toch het aftellen');
+  ok(await page.getAttribute('#countdown', 'hidden') !== null, 'het aftellen staat in beeld na wegklikken tijdens het omdraaien');
+  ok(await game(() => window.__tijd.G.card) === null, 'wegklikken tijdens het omdraaien van start begon toch een beurt');
 
   // --- het huisje op de overdracht vasthouden stopt het potje ---
   await hold(page, '#btnStopHo', 1400);

@@ -3275,3 +3275,26 @@ als `"uit"`, en de app opent daarop weer op de eindstand tot je dat scherm
 verlaat (huisje, terug of "nog een keer"). Trillen wacht dan op een eerste
 tik, want zonder tik weigert de browser `navigator.vibrate` met een
 waarschuwing.
+
+### Wegklikken midden in een omdraai
+
+Twee keer 0,3 s waarin wegklikken de beurt liet lopen (gevonden in de review
+van 6 november, met een nagebootste `visibilitychange`). Na verder draait de
+pauzekaart dicht en pas dan loopt de klok; het paneel stond nog open, dus
+`openPause()` deed niets en de klok liep na het omdraaien buiten beeld. Na
+start draait de opdrachtkaart weg en pas dan begint het aftellen; het scherm
+heette nog `handoff`, dus er werd niets afgebroken, en aftellen en beurt
+liepen op hun timers in de achtergrond. Nu breekt wegklikken het dichtdraaien
+af (`stopPauzeDicht()`, het paneel blijft liggen) en begint start niet als de
+app uit beeld is (de kaart komt terug, zoals bij een afgebroken aftellen).
+
+`Snd.stil()` zet de audiocontext stil zodra de app uit beeld raakt: anders
+speelde de staart van de fanfare of de ploegklank van een beurt die in de
+adem na tijd-om afliep in je broekzak verder. `ac()` maakt hem bij de
+volgende cue weer wakker, zoals na een telefoongesprek.
+
+Een lange druk op een `<img>` (een eigen kaart) opende op Android het
+beeldmenu van Chrome (downloaden, delen) over het lopende spel. Beelden
+nemen daarom geen aanraking aan; de druk valt door naar de kaart of knop
+eronder. Draaien vastzetten tijdens een beurt (`screen.orientation.lock`) is
+voorgesteld en voorlopig niet gedaan.

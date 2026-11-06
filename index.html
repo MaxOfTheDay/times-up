@@ -272,6 +272,11 @@ html, body {
   -webkit-user-select: none; user-select: none;
   touch-action: manipulation;
 }
+/* Een beeld neemt geen aanraking aan. Een lange druk op een <img> opent op
+   Android het menu van Chrome (afbeelding downloaden, delen) over het spel,
+   terwijl de klok loopt, en de duim van wie uitbeeldt rust op de kaart. Zo
+   valt de druk door naar de kaart of knop eronder. */
+img { pointer-events: none; -webkit-touch-callout: none; }
 
 /* Papierkorrel over álles, ook over het gekleurde overdrachtscherm:
    zonder korrel leest een scherm digitaal-glad, als uit een andere app. */
@@ -3943,6 +3948,13 @@ const Snd = (() => {
      bus daarom op bij de eerste aanraking, met een toon ver onder de
      gehoordrempel. */
   return {
+    /* Uit beeld: de context stil. Anders speelt wat al gepland stond (de
+       staart van de fanfare, de ploegklank van een beurt die in de adem na
+       tijd-om op de achtergrond afloopt) in je broekzak verder. De volgende
+       cue maakt hem via ac() weer wakker. */
+    stil() {
+      try { if (ctx && ctx.state === "running") ctx.suspend(); } catch (e) {}
+    },
     unlock() {
       const c = ac();
       if (c && !bus) tone(100, .05, "sine", .00001, 0);
@@ -5904,7 +5916,11 @@ $("#btnStartTurn").addEventListener("click", () => {
     { duration: OMDRAAI, easing: curve("weg"), fill: "forwards" });
   setTimeout(() => {
     vertrekt = false;
-    if (current === "handoff" && $("#pauze").hidden) startTurn();
+    /* Uit beeld geraakt tijdens het omdraaien: dan niet beginnen. Het scherm
+       heette nog "handoff", dus er werd niets gepauzeerd, en het aftellen en
+       de beurt zouden op hun timers in de achtergrond verder lopen. De kaart
+       komt terug, zoals bij een afgebroken aftellen. */
+    if (current === "handoff" && $("#pauze").hidden && !document.hidden) startTurn();
     zetTerug([kaart, $("#hoTally"), knop]);
   }, OMDRAAI);
 });
@@ -7996,6 +8012,11 @@ document.addEventListener("visibilitychange", () => {
   /* Tijdens het aftellen: afbreken, terug naar de overdracht. Er is nog geen
      beurt begonnen, en het aftellen zou anders op de achtergrond doorlopen. */
   if (countRaf !== null) { stopCountdown(); releaseWake(); handoff(handoffMode); return; }
+  /* Net op verder getikt en de kaart draait nog dicht: het paneel staat dan
+     nog open, dus openPause() hieronder doet niets, en zodra het omdraaien
+     klaar is loopt de klok, buiten beeld. Het omdraaien afbreken laat het
+     paneel liggen waar het lag. */
+  if (pauzeDicht) stopPauzeDicht();
   /* openPause() slaat zelf over wat geen lopende beurt is: een paneel dat
      al openstaat, de adem na tijd-om en de vlucht van de laatste kaart. */
   openPause();
@@ -8004,6 +8025,7 @@ document.addEventListener("visibilitychange", () => {
 /* Herladen en sluiten melden zich hier, ook als de pagina nooit verborgen
    raakte. Dubbel met de tak hierboven is onschuldig: dezelfde kopie. */
 addEventListener("pagehide", bewaarBeurt);
+document.addEventListener("visibilitychange", () => { if (document.hidden) Snd.stil(); });
 
 /* ==============================================================
    8. START
