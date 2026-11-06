@@ -3991,20 +3991,22 @@ const Snd = (() => {
       tone(660 * s, .07, "triangle", .2, 0); tone(990 * s, .10, "triangle", .2, .07);
     },
     /* Overslaan: neutraal, kort en lager dan goed(), met een veeg omlaag.
-       Triangle rond 500 Hz: een sinus van 200 Hz speelt een
-       telefoonluidspreker niet af, en dan viel overslaan ruim 30 dB weg
-       onder "goed geraden". Zachter dan goed(), nooit luider. */
-    pas()   { tone(520, .09, "triangle", .17, 0, 390); },
+       Triangle van 620 naar 470 Hz: lager zakte hij in het telefoonmodel
+       10 dB onder goed() en ging hij in een volle kamer verloren; nu 6.
+       Zachter dan goed(), nooit luider. */
+    pas()   { tone(620, .09, "triangle", .17, 0, 470); },
     /* Geweigerd: de laatste kaart kun je niet overslaan. Twee gelijke lage
        noten, vlak en zonder veeg -- alles in deze app glijdt of stijgt, dus
        vlak is hier vrij en betekent precies één ding: dit kan niet. Nooit
        hetzelfde geluid als pas(), want dat is een ander bericht. */
-    nee()   { tone(466, .06, "triangle", .2, 0); tone(466, .06, "triangle", .2, .12); },
+    nee()   { tone(554, .06, "triangle", .2, 0); tone(554, .06, "triangle", .2, .12); },
     tick(f, v) { tone(f || 1600, .022, "square", v || .08, 0); },
-    /* Halverwege de lange druk op stoppen: een zachte klik naast Tril.ijk(),
-       want op iOS bestaat trillen niet. Square, als een grendel die
-       overslaat; de klok zit drie octaven hoger. */
-    ijk()   { tone(150, .03, "square", .10, 0); },
+    /* Halverwege de lange druk op stoppen: een klik naast Tril.ijk(), want
+       op iOS bestaat trillen niet en is dit het enige teken dat de druk
+       werkt. Square, als een grendel die overslaat. Op 150 Hz was hij op
+       een telefoon de stilste cue van de app (-35 dB); op 750 Hz 9 dB
+       luider, en nog ruim onder de klok (1600). */
+    ijk()   { tone(750, .03, "square", .10, 0); },
     /* Het aftellen is de klok niet: drie triangle-noten die klimmen naar go()
        toe, één opbouw van "zet je klaar" naar "daar gaat ie". Eén geluid, één
        betekenis -- wie uitbeeldt, kijkt niet naar het scherm. */
@@ -4021,7 +4023,7 @@ const Snd = (() => {
     /* Stoppen voltooid: één lage noot die omlaag valt, een deur die dichtgaat.
        Het enige onomkeerbare in de app krijgt het enige vallende geluid
        naast timeUp(), en klinkt nergens anders. */
-    dicht() { tone(330, .2, "square", .1, 0, 110); },
+    dicht() { tone(660, .22, "square", .1, 0, 220); },
     /* Afdrukken: een droge klik (twee scheve squares, net na elkaar: dat
        ratelt als een veer en klinkt anders dan de enkele tik van de klok),
        en als de sluiter opengaat een rondere klak, lager en omlaag. */
@@ -4030,15 +4032,24 @@ const Snd = (() => {
       tone(3150, .012, "square", .06, .006);
       tone(1050, .045, "triangle", .17, klakNa || .12, 700);
     },
-    /* Wie aan de beurt is, zonder lezen: Vos helder en vlug (twee korte
-       noten omhoog), Uil rond en laag (een kleine terts omlaag, een
-       oehoe). Alleen op drie plekken: als de worp landt, als de overdracht
-       opent, en aan het eind van de fanfare. Niet in het aftellen, dat is
-       één opbouw. */
-    ploeg(t, at) {
-      const a = at || 0;
-      if (t === 0) { tone(880, .07, "triangle", .18, a); tone(1319, .11, "triangle", .18, a + .08); }
-      else { tone(587, .16, "triangle", .2, a, 560); tone(494, .24, "triangle", .2, a + .2, 470); }
+    /* De stem van Vos en Uil: Vos helder en vlug (twee korte noten
+       omhoog), Uil rond en lager (een kleine terts omlaag, een oehoe). Uil
+       zong op 587/494 Hz en kwam op een telefoon 4 dB zachter uit dan Vos;
+       een kwart hoger is hij even luid en nog steeds de lagere. Ze klinkt
+       waar het dier zelf iets doet: de worp landt, de overdracht opent, na
+       de fanfare, en een tik op het dier op de titel (zacht, `v`). Niet in
+       het aftellen, dat is één opbouw. */
+    ploeg(t, at, v) {
+      const a = at || 0, s = v || 1;
+      if (t === 0) { tone(880, .07, "triangle", .18 * s, a); tone(1319, .11, "triangle", .18 * s, a + .08); }
+      else { tone(784, .16, "triangle", .2 * s, a, 740); tone(659, .24, "triangle", .2 * s, a + .2, 622); }
+    },
+    /* Eén noot van die stem: het antwoord van het andere dier op de titel,
+       en elke stap van de worp, waar de kant die oplicht zo klinkt. */
+    roep(t, at, v) {
+      const a = at || 0, s = v || 1;
+      if (t === 0) tone(1319, .06, "triangle", .12 * s, a);
+      else tone(784, .08, "triangle", .12 * s, a, 740);
     },
     /* Een nieuwe ronde: zoveel klokjes als het rondenummer, hoog en
        zacht, samen met de tekening die opkomt. Geeft terug hoe lang ze
@@ -4048,14 +4059,19 @@ const Snd = (() => {
       for (let i = 0; i < k; i++) tone(1568, .3, "triangle", .14, a + i * .2);
       return a + (k - 1) * .2 + .34;
     },
-    timeUp(){ tone(420, .55, "sawtooth", .22, 0, 90); tone(210, .6, "square", .12, .05, 60); },
+    /* Tijd om: een zoemer die valt. Hij viel tot 90 Hz en zat zo grotendeels
+       onder wat een telefoon afspeelt, zachter dan één goed(); een octaaf
+       hoger, tot 220 Hz, is hij daar 3 dB luider dan goed(). */
+    timeUp(){ tone(840, .55, "sawtooth", .2, 0, 220); tone(420, .6, "square", .12, .05, 140); },
     /* De buit van de hele beurt in één cue; de omvang zit in het interval
-       (twee kaarten een kleine terts, een dozijn een octaaf). Alleen via
-       turnEnd(), BEURT_ADEM na timeUp(); bij een lege stapel speelt leeg(). */
+       (twee kaarten een kleine terts, een dozijn een octaaf), vanaf de
+       grondtoon van goed(): een kleine buit viel op 523 Hz 5 dB weg op een
+       telefoon. Alleen via turnEnd(), BEURT_ADEM na timeUp(); bij een lege
+       stapel speelt leeg(). */
     haul(n) {
       if (!n) return;
-      const top = 523 * Math.pow(2, Math.min(n, 12) / 12);
-      tone(523, .10, "triangle", .18, 0); tone(top, .22, "triangle", .18, .09);
+      const top = 659 * Math.pow(2, Math.min(n, 12) / 12);
+      tone(659, .10, "triangle", .18, 0); tone(top, .22, "triangle", .18, .09);
     },
     /* De stapel leeggespeeld: tot nu toe het enige einde van een beurt
        zonder eigen geluid, terwijl het de beste uitkomst is -- het loont om
@@ -4100,12 +4116,12 @@ const Tril = (() => {
     nee()   { buzz([20, 40, 20]); },          // geweigerd -- de enige "nee" in de app
     zag()   { buzz([20, 110, 20]); },         // dubbele tik, niet geteld: trager dan nee()
     tel()   { buzz(20); },                    // 3 - 2 - 1
-    go()    { buzz(35); },                    // de klok loopt
+    go()    { buzz(60); },                    // de klok loopt -- ver van pas (40)
     ijk()   { buzz(20); },                    // lange druk, halverwege
     doe()   { buzz(50); },                    // lange druk voltooid
     klik()  { buzz(30); },                    // foto genomen, als de sluiter dicht is
     om()    { buzz([60, 70, 60]); },          // tijd om
-    leeg()  { buzz([20, 50, 20, 50, 40]); },  // stapel leeg
+    leeg()  { buzz([30, 50, 30, 50, 60]); },  // stapel leeg, op de noten van Snd.leeg (0, 80, 160 ms)
     /* Gewonnen: een puls op elke uitbarsting van het vuurwerk (de noten
        van de fanfare, 130 ms uit elkaar) en een lange op de slotring (550). */
     feest() { buzz([40, 90, 40, 90, 40, 90, 40, 120, 120]); }
@@ -7059,7 +7075,10 @@ document.addEventListener("touchstart", () => {}, { passive: true });
 
 $$(".gluur").forEach(g => g.addEventListener("pointerdown", () => {
   Snd.unlock();
-  Snd.goed(g.dataset.team === "0" ? 0 : 4);
+  /* Het dier roept zijn eigen stem, zacht; het andere antwoordt hieronder
+     met één noot. Niet goed(): dat betekent een geraden kaart. */
+  const wie = g.dataset.team === "0" ? 0 : 1;
+  Snd.ploeg(wie, 0, .72);
   /* Een hoge wip met een blij gezicht, geen salto: wie achter een rand
      gluurt, draait daar niet rond, en een salto werd door de rand doorsneden. */
   wipOpRand(g, 7);
@@ -7073,6 +7092,7 @@ $$(".gluur").forEach(g => g.addEventListener("pointerdown", () => {
     /* .gluur staat ook op de overdracht en de eindstand; alleen op de titel
        antwoordt de ander. */
     if (current !== "title") return;
+    Snd.roep(1 - wie);
     wipOpRand(ander, 1);
     zetGezicht(ander.querySelector("svg"), "-blij", 400);
   });
@@ -7385,8 +7405,10 @@ function tossTeams() {
     const nu = (G.team + stappen - i) % 2;
     $("#hoSideA").classList.toggle("up", nu === 0);
     $("#hoSideB").classList.toggle("up", nu === 1);
-    // Stijgt mee met het uitlopen, zoals een rad dat tot stilstand komt.
-    Snd.tick(900 + i * 90, .06);
+    /* Elke stap klinkt als de kant die oplicht, één noot van zijn stem, en
+       vertraagt mee tot hij landt op de hele roep. Niet de tik: die is van
+       de klok. */
+    Snd.roep(nu);
     i++;
     if (i > stappen) {
       tossTimer = null;

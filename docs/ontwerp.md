@@ -2101,13 +2101,17 @@ Chromium met een `OfflineAudioContext`, na de opwarmtoon van `unlock()`, met
 de piek en het luidste RMS-venster van 20 ms. Een telefoonluidspreker is
 nagebootst met een hoogdoorlaat van 600 Hz, 24 dB per octaaf. Dat is een
 model, geen luidspreker: de getallen zeggen hoe cues zich tot elkaar
-verhouden, niet hoe luid het in de kamer is.
+verhouden, niet hoe luid het in de kamer is. Let op bij het namaken: een
+`BiquadFilterNode` van het type `highpass` neemt zijn Q in dB. Twee filters
+met Q 0,707 geven elk 3,7 dB opslag op de kantelfrequentie; vlak
+(Butterworth) is Q -3,01. De getallen hieronder vanaf "Elke cue haalt de
+kamer" zijn zo gemeten.
 
 **Overslaan en weigeren vielen weg op een telefoon.** Het waren sinussen van
 200 en 220 Hz. Over het volle bereik even luid als "goed", in het
 telefoonmodel 32 en 25 dB zachter: op een telefoon was overslaan stil. Nu
 zijn het triangles rond 500 Hz, nog steeds lager en doffer dan `goed()`, en
-in het model 7 en 9 dB eronder.
+in het model 7 en 9 dB eronder (sinds 6 november 6 en 8, zie "Elke cue haalt de kamer").
 
 **Luider.** Met de bus op .9 piekte de luidste cue (fanfare, timeUp) op
 -11,7 dBFS en zat "goed" rond -22 dBFS RMS. Op 1.6 piekt het zwaarste
@@ -2123,11 +2127,50 @@ elke stand behalve `"running"` en `"closed"`.
 
 **De ploeg klinkt.** Kleur en vorm zeiden al wie er aan zet is, het geluid
 niet, en de worp landde stil. Vos is helder en vlug (twee korte noten
-omhoog), Uil rond en laag (een kleine terts omlaag). Drie plekken: de worp
+omhoog), Uil rond en lager (een kleine terts omlaag). Drie plekken: de worp
 landt, de overdracht opent (na de buit, met de mascotte die opkomt), en na de
 fanfare voor wie won, bij gelijkspel allebei. Niet in `handoff()`: dat opent
 ook na een afgebroken aftelling en na herladen, waar niets nieuws te melden
 is, en bij herladen is er nog geen aanraking geweest die geluid toelaat.
+
+**De ploeg is een stem.** Twee klanken waren geleend. Een tik op Vos of Uil
+op de titel speelde `goed()`, het geluid van een geraden kaart, en de worp
+tikte met de tik van de klok. Nu is `ploeg` de stem van het dier en `roep`
+één noot ervan, en ze klinken waar het dier zelf iets doet: wie je aantikt
+roept zacht (`ploeg(t, 0, .72)`), de ander antwoordt met `roep` op het
+moment dat hij wipt, en elke stap van de worp klinkt als de kant die
+oplicht, vertragend tot de hele roep bij de landing. Zo betekent de stem
+overal hetzelfde: dit is Vos, dit is Uil.
+
+**Elke cue haalt de kamer.** Gemeten in het telefoonmodel, het luidste
+venster van 20 ms, met `goed()` op -18,3 dB als ijkpunt:
+
+| Cue | Was | Nu | Wat er veranderde |
+|---|---|---|---|
+| Uil (`ploeg(1)`) | -22,0 | -18,3 | 587/494 naar 784/659 Hz: even luid als Vos (-17,9), nog steeds de lagere |
+| `timeUp()` | -19,4 | -16,5 | valt van 840 naar 220 Hz in plaats van 420 naar 90: het grootste einde was zachter dan één goed |
+| `haul(3)` | -20,9 | -18,1 | grondtoon 659 (die van `goed()`) in plaats van 523 |
+| `ijk()` | -34,8 | -26,0 | 750 in plaats van 150 Hz; op iOS het enige teken dat de lange druk werkt |
+| `dicht()` | -24,7 | -20,8 | valt van 660 naar 220 Hz in plaats van 330 naar 110 |
+| `pas()` | -28,0 | -24,7 | 620 naar 470 Hz: nog zachter dan goed, maar 6 dB in plaats van 10 |
+| `nee()` | -29,7 | -26,3 | twee vlakke noten op 554 in plaats van 466 Hz |
+
+De regel die daaruit volgt: geen cue zakt meer dan 8 dB onder `goed()`,
+behalve de tik van de klok, die bewust op de achtergrond loopt.
+
+**Trillengtes liggen uit elkaar.** Trillen kent alleen duur en ritme. Het
+startsein (35 ms) lag 5 ms van overslaan (40), het tegenovergestelde
+bericht; nu is het 60. De ladder: 20 licht (goed, een tel, halverwege), 30
+de sluiter, 40 dof (overslaan), 50 de deur (stoppen voltooid), 60 het
+startsein (ook verder). De trilling van een lege stapel liep naast haar
+noten (pulsen op 0, 70 en 140 ms, noten op 0, 80 en 160); `[30, 50, 30, 50,
+60]` valt op elke noot, met de lange op de hoogste.
+
+**Niet gedaan.** Een tik-tak van twee toonhoogtes in de laatste tien
+seconden (twee hoogtes lezen als twee betekenissen) en zand bij het
+omdraaien van de zandloper (de titel heeft twee dingen en krijgt er niets
+bij). Allebei geprobeerd in de review van 6 november; de laatste seconden
+en de titel werken zonder.
 
 **De ronde klinkt.** Een rondewissel verandert de regels, maar opende stil na
 `leeg()`. Nu zoveel klokjes als het rondenummer, samen met de tekening die

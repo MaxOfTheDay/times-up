@@ -372,10 +372,16 @@ hij je niet verder.
 **Geluid en trilling.** Eén betekenis per cue, nooit het enige kanaal.
 Alle cues lopen door `Snd` en `Tril`, naar één bus met compressor. Geen
 muziek. Elke cue moet op een telefoonluidspreker hoorbaar zijn: geen sinus
-onder 400 Hz als drager, meet met het telefoonmodel uit `docs/ontwerp.md`.
-De ploeg klinkt (`Snd.ploeg`) alleen waar de worp landt, waar een beurt of
-ronde overgaat (in `turnEnd`/`endRound`, niet in `handoff()`) en na de
-fanfare. Een trilling duurt minstens 20 ms. Een rimpel trilt niet: de
+onder 400 Hz als drager, en geen cue die in het telefoonmodel uit
+`docs/ontwerp.md` meer dan 8 dB onder `goed()` zakt (de klok uitgezonderd).
+Leen geen klank: een cue klinkt alleen waar haar betekenis geldt.
+`Snd.ploeg` en `Snd.roep` zijn de stem van Vos en Uil en klinken alleen
+waar het dier zelf iets doet: de worp (elke stap `roep`, de landing
+`ploeg`), waar een beurt of ronde overgaat (in `turnEnd`/`endRound`, niet
+in `handoff()`), na de fanfare, en een tik op het dier op de titel. Een
+trilling duurt minstens 20 ms en heeft één van vijf lengtes (20 licht, 30
+de sluiter, 40 dof, 50 de deur, 60 het startsein) of een eigen ritme; twee
+betekenissen liggen nooit minder dan 10 ms uit elkaar. Een rimpel trilt niet: de
 trilling hoort bij de gebeurtenis (een tel, het startsein, het vuurwerk),
 niet bij het beeld van een druk.
 
