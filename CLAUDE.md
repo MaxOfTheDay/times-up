@@ -523,7 +523,7 @@ vandaan kwam). De lijst staat in `tijdisom.eigen`, de beelden in IndexedDB
   dicht en open (`sluitPlaten()`), met `Snd.klik()` en `Tril.klik()`; de
   foto wisselt achter de dichte platen. De camera gaat uit bij afdrukken, sluiten en
   verbergen (`stopCam()`); de voorcamera spiegelt alleen in de zoeker.
-- Of je tekent haar in hetzelfde vierkant (`mkDoek`): zes tekenkleuren
+- Of je tekent haar in hetzelfde vierkant (`mkDoek`): acht tekenkleuren
   zijn inhoud, geen betekenis. Een tekening is een doorzichtige PNG en
   krijgt de pen van `.glyph`, geen kader.
 

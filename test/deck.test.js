@@ -280,9 +280,10 @@ const ok = (c, m) => { if (!c) fails.push(m); };
      'de staf blijft niet ingedrukt op de punten terwijl hij tovert');
   await page.waitForFunction(() => document.querySelector('#mkStaf').hidden && !document.querySelector('#mkStafRij').hidden);
   const vel = await page.evaluate(() => {
-    const g = document.querySelector('#mkDoek').getContext('2d');
-    return { hoek: g.getImageData(4, 4, 1, 1).data[3], midden: g.getImageData(256, 256, 1, 1).data[3],
-             rand: g.getImageData(30, 256, 1, 1).data[3],
+    // Punten in eenheden van 512; het vel zelf tekent groter (VEL).
+    const c = document.querySelector('#mkDoek'), g = c.getContext('2d'), k = c.width / 512;
+    const px = (x, y) => g.getImageData(Math.round(x * k), Math.round(y * k), 1, 1).data[3];
+    return { hoek: px(4, 4), midden: px(256, 256), rand: px(30, 256),
              bewaar: !document.querySelector('#mkBewaar').disabled };
   });
   ok(vel.rand > 0, 'de getoverde tekening is niet bijgesneden tot de rand van het vel');
