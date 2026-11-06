@@ -26,7 +26,9 @@ een controle vooraf gevraagd wordt.
   px, een derde rechthoek om het merk, een kroon door de bovenrand, een
   stapel fiches die de startknop van het scherm duwde. Maak bij elke
   zichtbare wijziging screenshots (staand 390x844, liggend 844x390, klein
-  320x568) en kijk ernaar.
+  320x568) en kijk ernaar: `npm run foto` zet elf standen per maat op een
+  contactblad in `foto/` en meldt een knop buiten beeld, een svg van 0 bij
+  0 en een bedekte hoofdknop. Een stand die hij niet heeft, maak je erbij.
 - Alles staat in `index.html`: geen build, geen externe assets, werkt met de
   wifi uit. Houd dat zo. Het enige andere bestand dat de app nodig heeft is
   `sw.js`.
@@ -536,6 +538,11 @@ net, of als het dagbudget op is, werkt alles behalve de staf.
 - `test/game.test.js` speelt een volledig potje in een echte browser, zo'n
   anderhalve tot twee minuten. Hij klikt bewust trager dan 280 ms, omdat
   een dubbele tik op "goed" met opzet als één telt.
+
+Buiten `npm test`: `npm run test:chaos` (`test/chaos.test.js`) tikt een
+paar minuten willekeurig op een vaste reeks (zaad en aantal als argument)
+en toetst na elke stap dat er één scherm aan is, het juiste. Draai hem met
+een paar zaden na een wijziging aan de overgangen.
 
 De browser komt uit `test/browser.js`: `CHROME` als die gezet is, anders
 Playwright, anders een voorgeïnstalleerde Chromium onder `/opt/pw-browsers`.
