@@ -1339,6 +1339,15 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 }
 .iv-pad .k svg { width: 20px; height: 20px; }
 .iv-pad .los { font-weight: 400; }
+/* Op 320 breed past de iOS-weg (deelknop, pijl, "Zet op beginscherm") net
+   niet op één regel en viel de deelknop alleen op de eerste. */
+@media (max-width: 359px) {
+  .iv-vel { padding: var(--s-3); }
+  .iv-pad { font-size: var(--fs-2); gap: var(--s-1); }
+  .iv-pad .stap { gap: var(--s-1); }
+  .iv-pad .k { padding: 0 var(--s-1); }
+  .iv-pad .k svg { width: 18px; height: 18px; }
+}
 .iv-knoppen { display: flex; gap: var(--s-3); }
 .iv-knoppen .btn-plain { justify-content: center; padding: 0 var(--s-3); white-space: nowrap; }
 .iv-go { flex: 1 1 auto; background: var(--go); }
@@ -1549,7 +1558,7 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
 #kijk.kaart .panel {
   position: fixed; margin: 0; box-sizing: border-box;
   left: var(--kx); top: var(--ky); width: var(--kw); min-height: var(--kh);
-  max-height: calc(100dvh - 2 * var(--s-4));
+  max-height: var(--kmax, calc(100dvh - 2 * var(--s-4)));
   min-width: 0; animation: none;
 }
 .kijk-grid {
@@ -8303,12 +8312,19 @@ function legKijk() {
   if (!k.width) return;
   const marge = 16;
   const w = k.width >= 280 ? k.width : Math.min(innerWidth * .92, 560);
+  const x = k.left + k.width / 2 - w / 2;
   pn.style.setProperty("--kw", w + "px");
   pn.style.setProperty("--kh", k.height + "px");
-  pn.style.setProperty("--kx", (k.left + k.width / 2 - w / 2) + "px");
+  pn.style.setProperty("--kx", x + "px");
   pn.style.setProperty("--ky", k.top + "px");
-  const h = Math.min(Math.max(pn.scrollHeight, k.height), innerHeight - 2 * marge);
-  const y = Math.max(marge, Math.min(k.top, innerHeight - marge - h));
+  /* Omhoog schuiven stopt onder het huisje in de hoek: op een klein scherm
+     sneed het paneel anders de onderkant van die tegel weg. */
+  const huis = $("#btnStopHo").getBoundingClientRect();
+  const boven = huis.width && huis.left < x + w && huis.right > x
+    ? Math.max(marge, huis.bottom + marge) : marge;
+  pn.style.setProperty("--kmax", (innerHeight - marge - boven) + "px");
+  const h = Math.min(Math.max(pn.scrollHeight, k.height), innerHeight - marge - boven);
+  const y = Math.max(boven, Math.min(k.top, innerHeight - marge - h));
   pn.style.setProperty("--ky", y + "px");
   if (stilAan() || !pn.animate) return;
   draaiWeg([kaart], OMDRAAI);
