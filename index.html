@@ -3356,7 +3356,13 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
     <button class="btn-skip" id="btnPas" aria-label="Overslaan">
       <svg viewBox="0 0 100 100" aria-hidden="true">
         <use href="#i-pass"/>
-        <path class="bar" d="M12 12 L88 88" stroke="#14110F" stroke-width="11" stroke-linecap="round"/>
+        <!-- De streep snijdt door de pijlen: eronder een rand in de kleur
+             van de knop, anders liep ze in het zwart over en las de staart
+             rechtsonder als een muispijl. -->
+        <g class="bar" stroke-linecap="round">
+          <path d="M12 12 L88 88" style="stroke: var(--paper-2)" stroke-width="25"/>
+          <path d="M12 12 L88 88" stroke="#14110F" stroke-width="11"/>
+        </g>
       </svg>
     </button>
     <button class="btn-good" id="btnGoed" aria-label="Geraden">
