@@ -3206,7 +3206,7 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
         <span class="rij-naam">Uitbeelden<small>Niet praten.</small></span></li>
     </ol>
     <p class="regel-zin">Goed geraden: <b>1 punt</b>. Passen mag. Is de stapel leeg, dan
-      begint de andere ploeg de volgende ronde.</p>
+      speel je door in de volgende ronde, met de tijd die je nog had.</p>
     <p class="regel-zin">Te vroeg op goed getikt? Tik op het groene <span class="nb"><b>+</b>-getal</span> bovenaan.</p>
   </div>
   <button class="btn-icon" id="btnRegelsTerug" aria-label="Terug naar Instellingen">
@@ -3538,8 +3538,9 @@ const Spel = (() => {
   /* Een potje duurt een avond; na twee uur hoort het niet meer terug
      te komen. */
   const GAME_MAX_AGE = 2 * 60 * 60 * 1000;
-  /* Een onderbroken beurt komt terug met minstens zoveel tijd: na drie
-     tellen aftellen is een beurt van een halve seconde geen beurt. */
+  /* Een onderbroken beurt, en de rest van een beurt die een ronde
+     leegspeelde, komt terug met minstens zoveel tijd: na drie tellen
+     aftellen is een beurt van een halve seconde geen beurt. */
   const MIN_REST = 5000;
 
   function shuffle(a, rnd) {
@@ -3702,18 +3703,19 @@ const Spel = (() => {
     return vers;
   }
 
-  /* De stapel is leeg. De andere ploeg opent de volgende ronde, met een
-     volle beurt: wie de stapel leeg speelde, mocht niet ook nog de volgende
-     ronde beginnen, anders zat één ploeg soms drie rondes te kijken. Na de
-     laatste ronde is het potje uit. */
-  function rondeEinde(G, rnd) {
+  /* De stapel is leeg. Dezelfde ploeg speelt door in de volgende ronde,
+     met de tijd die ze nog had, zoals in het bordspel: wie snel raadt, wint
+     daar tijd mee. Minstens MIN_REST, want na drie tellen aftellen is een
+     beurt van een halve seconde geen beurt. Na de laatste ronde is het
+     potje uit. */
+  function rondeEinde(G, rnd, restMs) {
     const vers = [G.team === 0 ? G.gained : 0, G.team === 1 ? G.gained : 0];
     G.pendingMs = 0;
     G.card = null;
     G.vorige = null;
     if (G.round >= ROUNDS) return { uit: true, vers: vers };
     G.round++;
-    G.team = 1 - G.team;
+    G.pendingMs = Math.max(MIN_REST, Math.round(restMs || 0));
     G.pile = shuffle(G.deck.map((_, i) => i), rnd);
     return { uit: false, vers: vers };
   }
@@ -5857,7 +5859,8 @@ function handoff(mode, freshA, freshB, zelfdeGrond) {
   /* Wat je meekrijgt: kaarten op de stapel en seconden, altijd in beeld,
      zodat het teken elke keer hetzelfde betekent. Bij een rondewissel staat
      er de hele bak; tussen twee beurten telt hij af. Elke beurt is vol,
-     behalve een die onderbroken werd: die gaat verder met haar resttijd. */
+     behalve een die onderbroken werd of de vorige ronde leegspeelde: die gaat
+     verder met haar resttijd. */
   const secs = Math.ceil(Spel.beurtMs(G) / 1000);
   $("#hoSecs").querySelector("span").textContent = secs;
   $("#hoCards").querySelector("span").textContent = G.pile.length;
@@ -6481,9 +6484,10 @@ $("#btnGoed").addEventListener("click", () => {
        en openPause() op letten, zodat er niets tussen kan komen terwijl het
        kaart onderweg is. De klok gaat hier al stil: liep de tijd tijdens de
        vlucht af, dan kwamen er anders twee eindes voor één beurt. */
+    const rest = remaining();
     stopClock();
-    if (flyAnim) flyAnim.onfinish = () => { landFly(); endRound(); };
-    else endRound();
+    if (flyAnim) flyAnim.onfinish = () => { landFly(); endRound(rest); };
+    else endRound(rest);
     return;
   }
   paintCard("goed");
@@ -7272,10 +7276,10 @@ function turnEnd() {
   });
 }
 
-function endRound() {
+function endRound(rest) {
   stopClock(); releaseWake();
-  /* De andere ploeg opent de volgende ronde (zie Spel.rondeEinde). */
-  const { uit, vers } = Spel.rondeEinde(G);
+  /* Dezelfde ploeg speelt door met wat ze nog had (zie Spel.rondeEinde). */
+  const { uit, vers } = Spel.rondeEinde(G, Math.random, rest);
   /* Een tel voor de stapel die leeg is: de plek van de kaart is leeg, de
      mascotte juicht. Daarna de overdracht, of bij de laatste ronde de
      eindstand -- de fanfare van winner() moet dan alleen klinken. */

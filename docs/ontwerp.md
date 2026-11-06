@@ -543,9 +543,9 @@ over.
 De twee wissels vragen het tegenovergestelde, en dát is wat het verschil
 tussen de twee standen moet dragen. Bij een **beurtwissel** gaat het toestel
 écht van hand: `turnEnd()` draait `G.team` om, en "wie krijgt hem" is dan het
-enige waar het scherm voor bestaat. Bij een **rondewissel** gaat het toestel
-ook van hand -- de andere ploeg opent de nieuwe ronde (zie "Een nieuwe ronde
-opent de andere ploeg") -- maar is de nieuwe regel het grootste nieuws.
+enige waar het scherm voor bestaat. Bij een **rondewissel** blijft het
+toestel in dezelfde handen -- wie de stapel leeg speelde, speelt door (zie
+"Een lege stapel speelt door") -- en is de nieuwe regel het grootste nieuws.
 
 Het verschil zat lang in de **dichtheid van vak 2**: compact bij een
 beurtwissel, uitgeklapt bij een rondewissel. Dat kanaal zegt over de handeling
@@ -698,7 +698,8 @@ kan een tegel niet tot schijf groeien.
 
 Aan de voet van de kaart staat wat er nog ligt (`#i-stapel`) en hoeveel
 seconden de beurt krijgt (`#i-zand`), altijd allebei: een volle beurt is 30,
-een onderbroken beurt gaat verder met haar resttijd. Ze staan aan de
+een onderbroken beurt of een beurt die de vorige ronde leegspeelde gaat
+verder met haar resttijd. Ze staan aan de
 vóét omdat ze over de beurt gaan die de knop eronder start; in de kop lazen
 ze als bijschrift bij de ronde erboven. `#i-glass` kon daar niet staan, want
 dat is de merkplaat -- gouden zandloper op crème contour, getekend om op een
@@ -2493,19 +2494,20 @@ vuurt alleen in een echte browser met een echt profiel, en iOS al helemaal
 niet. `toonInstall` staat daarom onder `?debug` in `window.__tijd`, zodat je
 ze allemaal kunt fotograferen zonder opstartvlaggen.
 
-## Een nieuwe ronde opent de andere ploeg
+## Een lege stapel speelt door
 
-De resterende tijd ging bij een lege stapel mee naar dezelfde ploeg, zoals in
-het bordspel. Aan een tafel met kleine kinderen pakte dat slecht uit: wie de
-stapel leeg speelde, opende ook de volgende ronde, en in een gespeeld potje op
-de telefoon begon Vos alle drie de rondes en won met 43 tegen 5, terwijl Uil
-één korte beurt had. Stilzitten is voor een kind van vijf de snelste manier
-om af te haken.
+Speelt een ploeg de stapel leeg, dan speelt ze de volgende ronde door met
+de tijd die ze nog had, zoals in het bordspel: snel raden wint tijd.
+`Spel.rondeEinde(G, rnd, restMs)` houdt `G.team` en zet `G.pendingMs` op de
+rest, gemeten op de tik op de laatste kaart (vóór de vlucht naar de buit),
+met `MIN_REST` (vijf tellen) als ondergrens: na drie tellen aftellen is een
+beurt van een halve seconde geen beurt. De overdracht toont die seconden
+aan de voet (`#hoSecs`); de beurt daarna is weer vol.
 
-Nu draait `Spel.rondeEinde()` de ploeg om en geeft een volle beurt; de rest
-van de tijd vervalt. Dat haalt ook `MIN_CARRY` weg, de ondergrens van drie
-tellen voor een beurt die anders na het aftellen al om was. De overdracht
-toont bij elke wissel dezelfde volle seconden.
+Een tijd lang ging de ronde naar de andere ploeg, met een volle beurt, omdat
+één ploeg in een gespeeld potje alle drie de rondes opende. In november 2026
+koos Max weer voor de regel van het bordspel, die de spelers kennen; hij
+vond de simulaties achter die afwijking niet representatief.
 
 ## Een geraden kaart kun je terugnemen
 

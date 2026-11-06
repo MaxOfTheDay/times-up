@@ -159,17 +159,28 @@ test('beurtwissel: de andere ploeg, een volle beurt', () => {
   assert.equal(Spel.beurtMs(G), 30000);
 });
 
-test('ronde-einde: de andere ploeg opent de volgende ronde, met een volle beurt', () => {
+test('ronde-einde: dezelfde ploeg speelt door, met de tijd die ze nog had', () => {
   const G = potje(2);
   G.team = 1;
   Spel.trek(G); Spel.geraden(G); Spel.geraden(G);
-  const r = Spel.rondeEinde(G, rng(5));
+  const r = Spel.rondeEinde(G, rng(5), 12345);
   assert.deepEqual(r, { uit: false, vers: [0, 2] });
   assert.equal(G.round, 2);
-  assert.equal(G.team, 0, 'wie de stapel leeg speelde, opent niet ook de volgende ronde');
-  assert.equal(G.pendingMs, 0);
-  assert.equal(Spel.beurtMs(G), 30000);
+  assert.equal(G.team, 1, 'wie de stapel leeg speelde, speelt door');
+  assert.equal(Spel.beurtMs(G), 12345);
   assert.deepEqual(inSpel(G), [0, 1], 'de hele greep ligt weer op de stapel');
+  Spel.beurtKlaar(G); Spel.trek(G); Spel.tijdOm(G);
+  Spel.beurtWissel(G);
+  assert.equal(Spel.beurtMs(G), 30000, 'de beurt daarna is weer vol');
+});
+
+test('ronde-einde: op de bel nog minstens MIN_REST', () => {
+  for (const rest of [0, 400, undefined]) {
+    const G = potje(1);
+    Spel.trek(G); Spel.geraden(G);
+    Spel.rondeEinde(G, rng(5), rest);
+    assert.equal(Spel.beurtMs(G), Spel.MIN_REST, 'rest ' + rest);
+  }
 });
 
 test('terug: het laatste punt eraf, de kaart weer in beeld', () => {
@@ -324,7 +335,7 @@ test('een heel potje: elke kaart drie keer geraden, niets dubbel', () => {
       else if (k < .75) Spel.terug(G);
       else Spel.passen(G);
     }
-    if (einde === 'leeg') uit = Spel.rondeEinde(G, rand).uit;
+    if (einde === 'leeg') uit = Spel.rondeEinde(G, rand, rand() * 30000).uit;
     else { Spel.tijdOm(G); Spel.beurtWissel(G); }
     assert.ok(beurten < 1000, 'het potje eindigt');
     if (!uit) {
