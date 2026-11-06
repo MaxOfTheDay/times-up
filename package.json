@@ -9,6 +9,8 @@
     "test:tover": "node test/tover.test.js",
     "test:kaarten": "node test/deck.test.js",
     "test:spel": "node test/game.test.js",
+    "test:chaos": "node test/chaos.test.js",
+    "foto": "node tools/foto.js",
     "pictogrammen": "node tools/pictogrammen.js",
     "schermen": "node tools/schermen.js"
   },
