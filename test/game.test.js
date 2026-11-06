@@ -226,7 +226,13 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     const st = await screen();
     ok(st === (round < 3 ? 'handoff' : 'winner'), `ronde ${round} eindigde op ${st}`);
     if (round < 3) {
-      ok(await game(() => window.__tijd.G.pendingMs) === 0, 'een nieuwe ronde begint niet met een volle beurt');
+      // Dezelfde ploeg speelt door met de tijd die ze nog had, en de
+      // overdracht toont die seconden.
+      const rest = await game(() => window.__tijd.G.pendingMs);
+      ok(rest >= 5000 && rest < await game(() => window.__tijd.G.secs * 1000),
+         `ronde ${round + 1} krijgt de resttijd niet mee (${rest} ms)`);
+      ok(await page.textContent('#hoSecs span') === String(Math.ceil(rest / 1000)),
+         'de secondenteller toont de resttijd niet');
       // Het "+N" is weg; wat een rondewissel nu meldt zijn de twee tellers.
       // De stapel is opnieuw geschud, dus die staat weer op de hele bak.
       ok(await page.textContent('#hoCards span') === '16',
@@ -421,13 +427,13 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(await screen() === 'handoff', 'laatste kaart op de bel: niet op het overdrachtscherm');
   ok(await game(() => window.__tijd.G.round) === 2,
      'laatste kaart op de bel: de ronde is niet (precies één keer) doorgeschoven');
-  ok(await game(() => window.__tijd.G.team) === 1 - team,
-     'laatste kaart op de bel: de andere ploeg opent de volgende ronde niet');
+  ok(await game(() => window.__tijd.G.team) === team,
+     'laatste kaart op de bel: dezelfde ploeg speelt de volgende ronde niet door');
   ok(await page.$('#s-handoff.mode-round') !== null,
      'laatste kaart op de bel: de rondewissel werd een beurtwissel');
-  // Er gaat geen tijd mee: de andere ploeg krijgt een volle beurt.
-  ok(await page.textContent('#hoSecs span') === String(await game(() => window.__tijd.G.secs)),
-     'de secondenteller toont geen volle beurt na een rondewissel');
+  // Op de bel gaat er nog MIN_REST mee: na het aftellen is minder geen beurt.
+  ok(await page.textContent('#hoSecs span') === '5',
+     'de secondenteller toont na een rondewissel op de bel niet MIN_REST');
 
   await lastCardAtBuzzer(3);
   ok(await screen() === 'winner', 'laatste kaart op de bel in ronde 3: geen winnaarsscherm');
