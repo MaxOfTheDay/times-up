@@ -1501,6 +1501,23 @@ pakt start per ongeluk), de instellingen openen (die zijn voor de
 volwassene, achter het tandwiel), en beide dieren laten wippen (dat doet een
 tik op een dier al).
 
+### De handtekening zit in de punten
+
+Max wilde zijn naam op het titelscherm, klein, onderaan. Vergeleken zijn
+drie versies in de punten: grotere en vollere punten, weggelaten punten,
+en punten die alleen in een rimpel opzwellen. Gekozen is de eerste. Ze is
+gemaakt van wat het bord al is (toon uit het raster, regel 1), je leest
+haar als je kijkt, en een rimpel duwt de letters mee zoals elke punt.
+Weggelaten punten lezen in rust als een drukfout; alleen in de rimpel vindt
+niemand haar. Een geschreven naam viel af: het enige woord op een scherm
+zonder woorden.
+
+`merkMax()` zet MAX in een letter van vijf bij vijf punten op het raster
+van 12 px, de onderste rij 36 px boven de rand, in het midden. Liggend is
+onder de knop geen 60 px vrij, dus staat ze daar rechtsonder. Een punt van
+de handtekening is 1,6 keer zo groot en 1,4 keer zo vol (`opt.merk` in
+`stipveld()`); dat geldt ook als de worp de punten papier maakt.
+
 ## Elke kaart draait om
 
 Tussen twee beurten stond een harde knip: de gestempelde kaart bleef een
