@@ -204,8 +204,10 @@ groot onder hun dier. Aan de voet, als bijzaak, wat er nog ligt (`#hoCards`)
 en de seconden van de beurt (`#hoSecs`), altijd allebei: elk een teken en
 een getal in `--ink-2`, zonder kader (met een kader leest de teller als een
 rondetegel). De drie rondes staan
-als één rij: nu is de schijf, de andere zijn gelijke papieren tegels, en de
-plek links of rechts zegt geweest of nog te komen. Geen kroon, geen "+N", geen
+als één rij: nu is de schijf, de andere zijn gelijke papieren tegels op
+tapmaat (`--vak: var(--tap)`, het teken 74%), en de plek links of rechts
+zegt geweest of nog te komen. Liggend is de kaart een vaste breedte
+(`min(46vw, 22rem)`), nooit `width: auto`. Geen kroon, geen "+N", geen
 fiche per punt op dit scherm. Vos en Uil zitten op de bovenrand van de
 opdrachtkaart zoals op het merk (`.gluur`): wie aan zet is rechtop en
 ademend, de ander gluurt tot de ogen; in de stand staan alleen de cijfers,
