@@ -543,7 +543,9 @@ vandaan kwam). De lijst staat in `tijdisom.eigen`, de beelden in IndexedDB
 
 **Toveren.** De toverstaf vraagt een tekening aan een Cloudflare Worker
 (`worker/tover.mjs`, uitgerold door `.github/workflows/worker.yml`, adres in
-`TOVER_URL`; leeg is geen staf). Het is de enige plek waar de app het net op
+`TOVER_URL`; leeg is geen staf). **De staf staat uit**: `TOVER_URL` is
+leeg en het adres staat in `TOVER_ADRES`; alleen de test zet hem aan
+(`__tijd.zetTover()`). Het is de enige plek waar de app het net op
 gaat, alleen op een tik van de volwassene, en alleen met het woord. Zonder
 net, of als het dagbudget op is, werkt alles behalve de staf.
 

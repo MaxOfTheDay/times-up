@@ -253,6 +253,8 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     g.beginPath(); g.arc(128, 128, 70, 0, 7); g.fill(); g.stroke();
     return c.toDataURL('image/jpeg', .9);
   });
+  // De staf staat uit voor spelers; hier zetten we hem aan.
+  await page.evaluate(() => window.__tijd.zetTover(true));
   let antwoord = { beeld: nepBeeld };
   let vragen = 0;
   await page.route('**/teken', async route => {
