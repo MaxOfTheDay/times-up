@@ -1343,6 +1343,37 @@ met dezelfde maten als ervoor: raster 12 px op het midden, straal 2 px op
   bij 150% zonder vertraging 3 tot 6 ms, waar het 6 tot 30 was. Elk beeld
   is naast een volledig getekend beeld gelegd: hetzelfde op randpixels na,
   hoogstens 33/255 dekking op een enkele pixel van een punt in beweging.
+- **Op de grafische kaart** (november 2026, dezelfde avond): snel en veel
+  tikken op de titel schokte op een desktop nog steeds. Twaalf tikken in
+  anderhalve tel op 1920x1080 bij 125% kostten op de hoofddraad tot 6 ms
+  per beeld, en 26 ms met de CPU 4x vertraagd: elke rimpel is een band
+  van duizenden punten, en elke punt is een cirkel die het canvas
+  rastert. Nu rekent en tekent een vertex-shader elke punt
+  (`stipGpu()`): de punten liggen één keer in een buffer, per beeld gaan
+  alleen de rimpels, de onthulling, de toon en de stralen als een handvol
+  getallen mee, en het hele veld is één tekenopdracht. De hoofddraad zakte
+  naar 0,4 ms per beeld (2,5 ms vertraagd), wat er ook rimpelt.
+  - *Dezelfde rekensom twee keer*: de shader is `reken()` in GLSL, en de
+    2D-weg blijft voor een toestel zonder kaart. `test/stip.test.js` legt
+    de twee over elkaar op een stilgezette klok (rimpels rond en vanaf een
+    rand, onthullen, toon, stralen, de handtekening; op 1x, 1,5x en 3x) en
+    vergelijkt elke pixel: hoogstens een paar tientallen op 255 op de
+    zachte rand. Die test vond meteen een fout in de 2D-weg: een toon die
+    op een trage telefoon meer dan zijn band van 120 px per beeld sprong,
+    liet gaten achter. Hij markeert nu ook wat de rand sinds het vorige
+    beeld overstak (`vorTgR`).
+  - *Geen nagebootste kaart*: zonder echte kaart (SwiftShader, llvmpipe,
+    versnelling uit) tekent Chrome WebGL op de CPU, en dan wint het
+    2D-canvas, dat alleen tekent wat verandert. `stipGlKan()` proeft dat
+    één keer op een los canvas, met dezelfde shaders, want een canvas met
+    WebGL krijgt daarna geen 2D meer. De headless browser van de tests
+    heeft alleen SwiftShader; `echteKaart()` in `test/browser.js` laat die
+    doorgaan, voor de test en voor `STIP=gl npm run foto`.
+  - *Geen instancing*: elke punt is zes hoeken met de hele punt erbij.
+    Met `drawArraysInstanced` tekende SwiftShader punt voor punt, 300 ms
+    per beeld; zo is het 22 ms, en in WebGL 1 is er geen extensie nodig.
+  - *Een vaste bovengrens*: de shader kent `STIP_MAX_RIMPELS` (32)
+    rimpels tegelijk; meer, en de oudste vallen weg, ook op het 2D-canvas.
 - **Canvas terug**: een grond die 1,2 s uit beeld is, zet zijn canvas op
   0 bij 0 (`ruimOp()`, via `VELDEN` in `show()`). Drie grondcanvassen van
   1170x2532 hielden samen 37 MB vast; nu ~1 MB. Die 1,2 s is er voor de

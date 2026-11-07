@@ -315,10 +315,14 @@ een golf vanuit de rand van de kaart, in haar vorm (`rimpelRand()`), op de
 eindstand barst het vuurwerk in de punten (`vuurwerk()`). Na een beurt
 groeien ze op de overdracht als rastertoon terug vanuit de kaart
 (`toon()`). Er loopt alleen een lus zolang er iets beweegt; bij beperkte
-beweging één stilstaand beeld. Per beeld rekent en tekent het veld alleen
-waar iets beweegt (`band()`, de vuile vakken in `teken()`): een groot
-scherm heeft 25.000 punten. Een nieuwe beweging van de punten meldt daar
-haar band aan, anders blijft ze staan.
+beweging één stilstaand beeld. Het veld tekent op de grafische kaart
+(`stipGpu()`: elke punt rekent zichzelf uit in een shader, de hoofddraad
+geeft per beeld alleen de rimpels en de rest als getallen mee), behalve
+zonder echte kaart (`stipGlKan()`); dan rekent en tekent het 2D-canvas
+alleen waar iets beweegt (`band()`, de vuile vakken in `teken()`): een
+groot scherm heeft 25.000 punten. Een nieuwe beweging van de punten komt
+in allebei, in de shader én in `reken()` met haar band, en
+`test/stip.test.js` legt ze naast elkaar.
 
 **Vertrekken mag, als er niets achter wacht.** Geen vertrekanimaties, behalve
 de startknop die na zijn tik achter de onderrand wegzakt, het oplossen van
@@ -585,7 +589,7 @@ net, of als het dagbudget op is, werkt alles behalve de staf.
 
 ## Tests
 
-`npm test` draait vier suites, en CI draait ze op elke pull request, in het
+`npm test` draait vijf suites, en CI draait ze op elke pull request, in het
 Docker-image van Playwright. Wie playwright in `package-lock.json` ophoogt,
 zet het image in `.github/workflows/test.yml` op dezelfde versie (CI breekt
 anders meteen af):
@@ -595,6 +599,8 @@ anders meteen af):
 - `test/tover.test.js` toetst de toverstaf-Worker met een nagebootste
   Workers AI (`npm run test:tover`).
 - `test/deck.test.js` bewaakt de kaartregels in een echte browser.
+- `test/stip.test.js` legt het stippenvlak op de grafische kaart en op het
+  2D-canvas over elkaar en vergelijkt elke pixel (`npm run test:stip`).
 - `test/game.test.js` speelt een volledig potje in een echte browser, zo'n
   anderhalve tot twee minuten. Hij klikt bewust trager dan 280 ms, omdat
   een dubbele tik op "goed" met opzet als één telt.

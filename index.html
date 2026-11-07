@@ -7474,6 +7474,268 @@ function balkMascotte() { return $("#plMascot"); }
    alleen dat beeld. */
 /* Papier op de ploegkleur, per ploeg: Vos rood, Uil blauw. */
 const STIP_PAPIER = [.23, .16];
+/* ---------- de punten op de grafische kaart ----------
+   Hetzelfde stipveld, maar elke punt rekent zichzelf uit in een
+   vertex-shader: plek, maat, dekking en kleur, uit zijn vaste plek op het
+   raster en een handvol getallen per beeld (de rimpels, de onthulling, de
+   toon, de stralen). Per beeld kost dat de hoofddraad niets meer dan die
+   getallen; 25.000 punten en twintig rimpels tegelijk zijn voor de kaart
+   niets. teken() in stipveld() is dezelfde rekensom in JavaScript; die
+   blijft voor een toestel zonder grafische kaart voor WebGL (zie
+   stipGlKan()), en wie de een verandert, verandert de ander. Meer dan
+   STIP_MAX_RIMPELS rimpels tegelijk: de oudste vallen weg, in beide. Een cirkel krijgt zijn zachte rand zoals op een canvas: per
+   schermpixel de dekking van straal min afstand plus een halve pixel. */
+const STIP_MAX_RIMPELS = 32;
+const STIP_VS = `
+  precision highp float;
+  attribute vec2 hoek;          // de hoek van het vierkant om de punt, -1..1
+  attribute vec2 plek;          // de plek op het raster, in CSS-pixels
+  attribute vec3 eigen;         // dekking van het masker, handtekening, hoek vanaf het midden
+  uniform vec2 maat;            // W, H
+  uniform float dpr;
+  uniform vec4 rim[${STIP_MAX_RIMPELS}];   // x, y, hw, hh
+  uniform vec4 kam[${STIP_MAX_RIMPELS}];   // R, demp
+  uniform int nRim;
+  uniform float inkt;           // 1: inkt op papier, 0: papier op ploegkleur
+  uniform vec3 onthul;          // x, y, straal (straal < 0: geen)
+  uniform float papierA;
+  uniform vec2 stralen;         // aan (1/0), draai
+  uniform vec4 toon;            // x, y, R, weg (1/0)
+  uniform float toonAan;
+  varying vec2 v_d;             // afstand tot het midden, in schermpixels
+  varying float v_r;            // straal in schermpixels
+  varying vec4 v_kleur;         // voorvermenigvuldigd
+  void main() {
+    float golf = 0.0, dal = 0.0;
+    vec2 e = vec2(0.0);
+    for (int k = 0; k < ${STIP_MAX_RIMPELS}; k++) {
+      if (k >= nRim) break;
+      vec4 r = rim[k];
+      vec2 d2 = plek - r.xy;
+      if (r.z > 0.0) d2 = sign(d2) * max(abs(d2) - r.zw, 0.0);
+      float d = length(d2);
+      if (d == 0.0) d = 1.0;
+      float z = (d - kam[k].x) / 32.0;
+      if (z < -4.0 || z > 4.0) continue;
+      float pak = exp(-z * z) * cos(z * 2.4);
+      float demp = kam[k].y;
+      e += d2 / d * pak * demp * 12.0;
+      golf = max(golf, min(1.6, max(0.0, pak) * demp));
+      dal = max(dal, min(1.0, max(0.0, -pak) * demp));
+    }
+    vec2 o = plek - onthul.xy;
+    bool papier = inkt < 0.5 || (onthul.z >= 0.0 && dot(o, o) < onthul.z * onthul.z);
+    float a0 = papier ? papierA : 0.12;
+    float licht = papier ? 0.45 : 0.16;
+    float r0 = 2.0;
+    if (stralen.x > 0.5) {
+      float vak = 6.2832 / 12.0;
+      if (mod(eigen.z - stralen.y, vak) < vak / 2.0) { r0 *= 1.75; a0 *= 1.25; }
+    }
+    if (eigen.y > 0.5) { r0 *= 1.6; a0 *= 1.4; }
+    float rad = max(0.5, r0 + golf * 3.0 - dal * r0 * 0.8);
+    if (toonAan > 0.5) {
+      float q = clamp((length(plek - toon.xy) - toon.z) / 120.0, 0.0, 1.0);
+      rad *= toon.w > 0.5 ? q : 1.0 - q;
+    }
+    float a = min(1.0, (a0 + golf * licht) * eigen.x);
+    vec3 kleur = papier ? vec3(244.0, 235.0, 218.0) / 255.0 : vec3(20.0, 17.0, 15.0) / 255.0;
+    if (rad < 0.2) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
+    float rand = rad + 1.0 / dpr;
+    vec2 p = plek + e + hoek * rand;
+    v_d = hoek * rand * dpr; v_r = rad * dpr;
+    v_kleur = vec4(kleur * a, a);
+    gl_Position = vec4(p.x / maat.x * 2.0 - 1.0, 1.0 - p.y / maat.y * 2.0, 0.0, 1.0);
+  }`;
+const STIP_FS = `
+  precision mediump float;
+  varying vec2 v_d;
+  varying float v_r;
+  varying vec4 v_kleur;
+  void main() {
+    float dekking = clamp(v_r - length(v_d) + 0.5, 0.0, 1.0);
+    if (dekking <= 0.0) discard;
+    gl_FragColor = v_kleur * dekking;
+  }`;
+/* De onthulling: één schijf in de ploegkleur over het hele doek. */
+const SCHIJF_VS = `
+  precision highp float;
+  attribute vec2 hoek;
+  uniform vec2 maat;
+  uniform float dpr;
+  varying vec2 v_p;
+  void main() {
+    v_p = (hoek * 0.5 + 0.5) * maat * dpr;
+    gl_Position = vec4(hoek.x, -hoek.y, 0.0, 1.0);
+  }`;
+const SCHIJF_FS = `
+  precision highp float;
+  varying vec2 v_p;
+  uniform vec3 schijf;          // x, y, straal, in schermpixels
+  uniform vec4 kleur;
+  void main() {
+    float dekking = clamp(schijf.z - length(v_p - schijf.xy) + 0.5, 0.0, 1.0);
+    if (dekking <= 0.0) discard;
+    gl_FragColor = kleur * dekking;
+  }`;
+function stipProgramma(gl, vs, fs) {
+  const p = gl.createProgram();
+  for (const [soort, bron] of [[gl.VERTEX_SHADER, vs], [gl.FRAGMENT_SHADER, fs]]) {
+    const sh = gl.createShader(soort);
+    gl.shaderSource(sh, bron); gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS) && !gl.isContextLost()) throw new Error(gl.getShaderInfoLog(sh));
+    gl.attachShader(p, sh);
+  }
+  gl.linkProgram(p);
+  if (!gl.getProgramParameter(p, gl.LINK_STATUS) && !gl.isContextLost()) throw new Error(gl.getProgramInfoLog(p));
+  const u = {}, a = {};
+  for (let i = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS) - 1; i >= 0; i--) {
+    const naam = gl.getActiveUniform(p, i).name.replace("[0]", "");
+    u[naam] = gl.getUniformLocation(p, naam);
+  }
+  for (let i = gl.getProgramParameter(p, gl.ACTIVE_ATTRIBUTES) - 1; i >= 0; i--) {
+    const naam = gl.getActiveAttrib(p, i).name;
+    a[naam] = gl.getAttribLocation(p, naam);
+  }
+  return { p, u, a };
+}
+/* Welke WebGL dit toestel echt op een grafische kaart draait: een keer
+   geproefd op een los canvas, met dezelfde shaders. Een canvas dat eenmaal
+   WebGL heeft, krijgt geen 2D meer; daarom niet op het canvas van het veld.
+   Geen kaart maar een nagebootste (SwiftShader, llvmpipe, versnelling uit):
+   dan is het 2D-canvas sneller, en blijft het daarbij. */
+const STIP_GL_OPTIES = { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false,
+                         preserveDrawingBuffer: false, powerPreference: "low-power", failIfMajorPerformanceCaveat: true };
+let stipGlSoort;
+function stipGlKan() {
+  if (stipGlSoort !== undefined) return stipGlSoort;
+  stipGlSoort = null;
+  for (const soort of ["webgl2", "webgl"]) {
+    let gl = null;
+    try {
+      gl = document.createElement("canvas").getContext(soort, STIP_GL_OPTIES);
+      if (!gl) continue;
+      const info = gl.getExtension("WEBGL_debug_renderer_info");
+      const kaart = String(gl.getParameter(info ? info.UNMASKED_RENDERER_WEBGL : gl.RENDERER));
+      if (/swiftshader|llvmpipe|softpipe|software|basic render/i.test(kaart)) break;
+      stipProgramma(gl, STIP_VS, STIP_FS); stipProgramma(gl, SCHIJF_VS, SCHIJF_FS);
+      stipGlSoort = soort;
+      break;
+    } catch (e) {
+      continue;
+    } finally {
+      const weg = gl && gl.getExtension("WEBGL_lose_context");
+      if (weg) weg.loseContext();
+    }
+  }
+  return stipGlSoort;
+}
+function stipGpu(cv) {
+  const soort = stipGlKan();
+  const gl = soort && cv.getContext(soort, STIP_GL_OPTIES);
+  if (!gl) return null;
+  /* Per punt zes hoeken (twee driehoeken), elk met de hele punt erbij:
+     hoek, plek, eigen; 7 getallen. Geen instancing: dat is in WebGL 1 een
+     extensie, en een nagebootste kaart tekent het punt voor punt. */
+  const PER = 7, HOEKEN = [-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1];
+  let stip, schijf, vierkant, puntBuf, n = 0, laatst = null;
+  function bouw() {
+    stip = stipProgramma(gl, STIP_VS, STIP_FS);
+    schijf = stipProgramma(gl, SCHIJF_VS, SCHIJF_FS);
+    vierkant = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vierkant);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    puntBuf = gl.createBuffer();
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+  }
+  /* Dezelfde shaders compileerden al in stipGlKan(). */
+  bouw();
+  /* Een kaart die de context kwijtraakt (slaapstand, een nieuwe driver),
+     bouwt alles opnieuw zodra hij terug is; tot dan staat er niets. */
+  cv.addEventListener("webglcontextlost", e => e.preventDefault());
+  cv.addEventListener("webglcontextrestored", () => { bouw(); if (laatst) zet(laatst); });
+  function zet(punten) {
+    laatst = punten; n = punten.length;
+    const v = new Float32Array(n * 6 * PER);
+    let o = 0;
+    for (const p of punten) for (let h = 0; h < 12; h += 2) {
+      v[o++] = HOEKEN[h]; v[o++] = HOEKEN[h + 1];
+      v[o++] = p.x; v[o++] = p.y;
+      v[o++] = p.m; v[o++] = p.mk ? 1 : 0; v[o++] = p.hoek;
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER, puntBuf); gl.bufferData(gl.ARRAY_BUFFER, v, gl.STATIC_DRAW);
+  }
+  /* Bindt de attributen van een programma aan een buffer: [naam, grootte]. */
+  function attributen(prog, buf, lijst) {
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    const stap = lijst.reduce((s, [, g]) => s + g, 0) * 4;
+    let van = 0;
+    for (const [naam, g] of lijst) {
+      const a = prog.a[naam];
+      if (a !== undefined && a >= 0) {
+        gl.enableVertexAttribArray(a);
+        gl.vertexAttribPointer(a, g, gl.FLOAT, false, stap, van);
+      }
+      van += g * 4;
+    }
+  }
+  function uit(prog) { for (const a of Object.values(prog.a)) gl.disableVertexAttribArray(a); }
+  const RIM = new Float32Array(STIP_MAX_RIMPELS * 4), KAM = new Float32Array(STIP_MAX_RIMPELS * 4);
+  const kleuren = new Map();
+  function rgb(css) {
+    if (!kleuren.has(css)) {
+      const c = document.createElement("canvas").getContext("2d");
+      c.fillStyle = css; c.fillRect(0, 0, 1, 1);
+      const d = c.getImageData(0, 0, 1, 1).data;
+      kleuren.set(css, [d[0] / 255, d[1] / 255, d[2] / 255]);
+    }
+    return kleuren.get(css);
+  }
+  return {
+    zet,
+    leeg() {
+      gl.viewport(0, 0, cv.width, cv.height);
+      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+    },
+    /* b: W, H, dpr, kammen ([{ r, R, demp }]), inkt, onthul en straal,
+       papierA, draai (of -1), tg. */
+    teken(b) {
+      if (gl.isContextLost()) return;
+      gl.viewport(0, 0, cv.width, cv.height);
+      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+      if (b.onthul && b.straal >= 0) {
+        gl.useProgram(schijf.p);
+        attributen(schijf, vierkant, [["hoek", 2]]);
+        gl.uniform2f(schijf.u.maat, b.W, b.H); gl.uniform1f(schijf.u.dpr, b.dpr);
+        gl.uniform3f(schijf.u.schijf, b.onthul.x * b.dpr, b.onthul.y * b.dpr, b.straal * b.dpr);
+        const [r, g, bl] = rgb(b.onthul.kleur);
+        gl.uniform4f(schijf.u.kleur, r, g, bl, 1);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        uit(schijf);
+      }
+      if (!n) return;
+      gl.useProgram(stip.p);
+      attributen(stip, puntBuf, [["hoek", 2], ["plek", 2], ["eigen", 3]]);
+      const u = stip.u, km = b.kammen.slice(-STIP_MAX_RIMPELS);
+      km.forEach(({ r, R, demp }, k) => {
+        RIM.set([r.x, r.y, r.hw || 0, r.hh || 0], k * 4);
+        KAM[k * 4] = R; KAM[k * 4 + 1] = demp;
+      });
+      gl.uniform2f(u.maat, b.W, b.H); gl.uniform1f(u.dpr, b.dpr);
+      gl.uniform4fv(u.rim, RIM); gl.uniform4fv(u.kam, KAM); gl.uniform1i(u.nRim, km.length);
+      gl.uniform1f(u.inkt, b.inkt ? 1 : 0);
+      gl.uniform3f(u.onthul, b.onthul ? b.onthul.x : 0, b.onthul ? b.onthul.y : 0, b.onthul ? b.straal : -1);
+      gl.uniform1f(u.papierA, b.papierA);
+      gl.uniform2f(u.stralen, b.draai >= 0 ? 1 : 0, Math.max(0, b.draai));
+      gl.uniform4f(u.toon, b.tg ? b.tg.x : 0, b.tg ? b.tg.y : 0, b.tg ? b.tg.R : 0, b.tg && b.tg.weg ? 1 : 0);
+      gl.uniform1f(u.toonAan, b.tg ? 1 : 0);
+      gl.drawArrays(gl.TRIANGLES, 0, n * 6);
+      uit(stip);
+    }
+  };
+}
+
 function stipveld(cv, opt) {
   /* Op ploegkleur papier, op papier (de titel, de worp) inkt op 12%. Per
      punt, want tijdens het onthullen ligt de grens midden in het veld. De
@@ -7483,7 +7745,9 @@ function stipveld(cv, opt) {
   const INKT = [.12, "20, 17, 15", .16], PAPIER = [.16, "244, 235, 218", .45];
   const CEL = 12, R0 = 2, LEEF = 2100;
   const STRAAL_RONDE = 26000, STRALEN = 12;
-  const cx = cv.getContext("2d");
+  /* Op de grafische kaart als het kan (stipGpu()), anders op een
+     canvas, met de rekensom hieronder en alleen wat verandert. */
+  const gpu = stipGpu(cv), cx = gpu ? null : cv.getContext("2d");
   let W = 0, H = 0, punten = [], rimpels = [], raf = 0;
   let inkt = !!opt.inkt, onthul = null, stralen = -1, toon = null, leeg = false;
   /* Wat het vorige beeld tekende, zodat een rimpel alleen de punten
@@ -7491,7 +7755,7 @@ function stipveld(cv, opt) {
   let NX = 0, NY = 0, X0 = 0, Y0 = 0, DPR = 1, rooster = null, px, py, prad, pa, pk, lx, ly, lrad, la, lk;
   /* Per vak van het raster: wordt het dit beeld gewist en overgetekend
      (zie teken())? En hoe ver de onthulling het vorige beeld was. */
-  let celVuil, celReken, celVorig, rekenLijst, vorOnthul = null, vorToon = null, vorStraal = -1;
+  let celVuil, celReken, celVorig, rekenLijst, vorOnthul = null, vorToon = null, vorStraal = -1, vorTgR = 0;
   /* Per punt de kleur als getal (soort * 1001 + dekking in duizendsten),
      de volgorde waarin ze getekend worden (per kleur bij elkaar), en of hij
      dit beeld overgetekend wordt. */
@@ -7506,7 +7770,8 @@ function stipveld(cv, opt) {
     if (r.width !== W || r.height !== H || cv.width !== Math.round(r.width * dpr)) {
       W = r.width; H = r.height;
       cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
-      cx.setTransform(dpr, 0, 0, dpr, 0, 0); DPR = dpr;
+      if (cx) cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      DPR = dpr;
       punten = [];
       /* Op het midden uitgelijnd, zoals background-position: center. */
       const x0 = W / 2 - CEL * Math.floor(W / 2 / CEL), y0 = H / 2 - CEL * Math.floor(H / 2 / CEL);
@@ -7529,6 +7794,7 @@ function stipveld(cv, opt) {
       kleurNr = new Uint16Array(n); volgorde = new Int32Array(n); over = new Uint8Array(n);
       celVuil = new Uint8Array(NX * NY); celReken = new Uint8Array(NX * NY); celVorig = new Uint8Array(NX * NY);
       rekenLijst = new Int32Array(n);
+      if (gpu) gpu.zet(punten);
       vol = true;
     }
     return true;
@@ -7546,7 +7812,7 @@ function stipveld(cv, opt) {
     if (klaar) klaar();
   }
   function teken(nu) {
-    rimpels = rimpels.filter(r => nu - r.t < LEEF);
+    rimpels = rimpels.filter(r => nu - r.t < LEEF).slice(-STIP_MAX_RIMPELS);
     /* Rastertoon die komt of gaat (toon()): een rand die vanaf (x, y) naar
        buiten loopt; erbinnen zijn de punten weg (of er al), erbuiten nog
        niet. In een band van 120 px krimpt of groeit een punt, hij vervaagt
@@ -7557,7 +7823,7 @@ function stipveld(cv, opt) {
       tg = { x: toon.x, y: toon.y, weg: toon.weg, R: -120 + (toon.tot + 120) * e };
       if (t >= 1) { leeg = toon.weg; toon = null; tg = null; }
     }
-    if (leeg && !tg) { cx.clearRect(0, 0, W, H); vol = true; return; }
+    if (leeg && !tg) { if (gpu) gpu.leeg(); else cx.clearRect(0, 0, W, H); vol = true; return; }
     let straal = -1;
     if (onthul) {
       const t = Math.min(1, (nu - onthul.t) / onthul.ms), e = 1 - Math.pow(1 - t, 3);
@@ -7567,6 +7833,13 @@ function stipveld(cv, opt) {
     const papierA = ploeg === null || ploeg === undefined ? PAPIER[0] : STIP_PAPIER[ploeg];
     const draai = stralen < 0 ? 0 : (stilAan() ? 0 : (nu - stralen) / STRAAL_RONDE * 6.2832);
     const vak = 6.2832 / STRALEN;
+    if (gpu) {
+      gpu.teken({ W, H, dpr: DPR, inkt, onthul, straal, papierA, tg,
+                  draai: stralen < 0 ? -1 : draai,
+                  kammen: rimpels.map(r => { const rt = (nu - r.t) / 1000;
+                    return { r, R: r.van + rt * 360, demp: Math.exp(-rt * 1.7) * r.sterk }; }) });
+      return;
+    }
     /* Een rimpel, een onthulling, de toon en de stralen veranderen maar een
        deel van de punten; de rest ligt waar hij het vorige beeld lag. Dan
        worden alleen de veranderde punten overgetekend (zie onder). Elke
@@ -7595,7 +7868,9 @@ function stipveld(cv, opt) {
     } else {
       celReken.fill(0);
       for (const { r, R } of kammen) band(r.x, r.y, r.hw || 0, r.hh || 0, R - 128, R + 128);
-      if (tg) band(tg.x, tg.y, 0, 0, tg.R, tg.R + 120);
+      /* Ook wat de rand sinds het vorige beeld overstak: op een trage
+         telefoon springt hij meer dan zijn band van 120 px per beeld. */
+      if (tg) band(tg.x, tg.y, 0, 0, Math.min(vorTgR, tg.R), tg.R + 120);
       if (onthul) band(onthul.x, onthul.y, 0, 0, Math.min(vorStraal, straal), Math.max(vorStraal, straal));
       for (let j = 0; j < celReken.length; j++) {
         if (!celReken[j] && !celVorig[j]) continue;
@@ -7604,6 +7879,7 @@ function stipveld(cv, opt) {
       }
       celVorig.set(celReken);
     }
+    vorTgR = tg ? tg.R : 0;
     function reken(i) {
       const p = punten[i], m = p.m;
       let golf = 0, dal = 0, ex = 0, ey = 0;
