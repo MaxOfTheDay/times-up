@@ -209,7 +209,10 @@ duim heen en niet eronder (`thuisGluur()`), met één toon die meeloopt
 is dat de cirkel van `naarTitel()`. Loslaten laat haar in `--t-kom`
 terugkrimpen, hoe ver je ook was; een tik en de terugveeg op de overdracht
 laten huis een kwart gluren (`HOUD_PIEK`). Bij beperkte beweging vult de
-tegel zich met inkt. Starten is een
+tegel zich met inkt. De vinger wordt vastgehouden (`setPointerCapture`,
+`touch-action: none`) en mag `LOS_PX` rollen, om de tegel ligt een ring van
+12 px, en de klik van het loslaten na een voltooide druk wordt ingeslikt
+(`slikKlik()`: op de titel ligt daar het tandwiel). Starten is een
 tik; het aftellen van drie tellen vangt een strijkende vinger op. Afbreken
 kan tijdens het aftellen alleen via de tegel rechtsboven (`#cdBack`), met
 het pauzeteken, niet via het hele vlak.
