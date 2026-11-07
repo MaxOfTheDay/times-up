@@ -477,6 +477,23 @@ onder `goed()` en op het hoogste even luid. De korte klik halverwege
 (`Snd.ijk()`) is daarmee weg: de toon zegt het de hele druk lang. Op vol
 klinkt de deur (`dicht()`), de toon valt dan in 40 ms weg.
 
+**Een duim rolt.** Max zag dat vasthouden niet altijd lukte. Gemeten met
+echte aanraking (CDP, touch-toestel): een vinger die tijdens de 1,1 s 16 px
+of meer schoof, werd door de browser als veeg overgenomen
+(`pointercancel`), en de druk brak af terwijl niemand losliet. Wie stevig
+drukt, rolt met de duim. Nu heeft het huisje `touch-action: none`, houdt
+het de vinger vast (`setPointerCapture`) en breekt het pas af als de vinger
+`LOS_PX` (40 px) van zijn begin is: wie echt wegschuift, kan nog terug. Om
+de tegel ligt een onzichtbare ring van 12 px, zoals die van 20 px om goed.
+Een tweede vinger elders op het glas telt niet mee.
+
+**De klik na de druk.** Na een voltooide druk ligt de vinger nog op het
+glas, en op de titel ligt het tandwiel precies onder het huisje van de
+overdracht: op een touchscherm opende het loslaten Instellingen. Met het
+toetsenbord drukte de herhaalde toets op Beginnen, waar de focus heen gaat.
+`slikKlik()` slikt de klik tot 60 ms na het loslaten in; een nieuwe tik
+komt nooit zo snel. Allebei staan in `test/game.test.js`.
+
 Bij beperkte beweging geen cirkel: de tegel loopt vol met inkt van onder
 naar boven en het teken keert halverwege om naar papier, zoals voorheen.
 
