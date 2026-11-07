@@ -285,10 +285,12 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     const k = document.querySelector('#mkKleuren').getBoundingClientRect();
     const t = [...document.querySelectorAll('#mkTeken .mk-gereedschap .mk-tg:not([hidden])')].map(b => b.getBoundingClientRect());
     return { links: t[0].left - k.left, rechts: k.right - t[t.length - 1].right,
+             groep: document.querySelector('#mkStap').getBoundingClientRect().left - document.querySelector('#mkGum').getBoundingClientRect().right,
              vierkant: t.every(r => Math.abs(r.width - r.height) < 1) };
   });
   ok(Math.abs(rij.links) < 1 && Math.abs(rij.rechts) < 1, `het gereedschap is niet zo breed als de kleuren (${rij.links}, ${rij.rechts})`);
   ok(rij.vierkant, 'de tegels van het gereedschap zijn niet vierkant');
+  ok(rij.groep >= 32, `tekenen en stap terug/weg staan niet als twee groepen (${rij.groep} px)`);
   await page.focus('#mkWoord');
   const vak = await page.locator('#mkVak').boundingBox();
   await page.mouse.move(vak.x + vak.width * .3, vak.y + vak.height * .3);

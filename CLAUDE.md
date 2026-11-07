@@ -546,7 +546,9 @@ vandaan kwam). De lijst staat in `tijdisom.eigen`, de beelden in IndexedDB
   knoppen (`#mkDun`, `#mkDik`), en hun stippen en de verf in de emmer
   (`--verf`) dragen de kleur van nu, met een inktrand. Het gereedschap is
   zes vierkante tegels over de breedte van de kleuren, met altijd 8 px
-  ertussen. Staat het toetsenbord op, dan sluit de
+  ertussen, in twee groepen die lucht scheidt (minstens 32 px, geen streep):
+  hoe je tekent (dun, dik, emmer, gum) en wat iets doet met wat er staat
+  (stap terug, weg). Staat het toetsenbord op, dan sluit de
   eerste aanraking op het vel het alleen, zonder streep. Het teken van een
   gewone kaart met hetzelfde woord staat ook in de woordregel
   (`#mkWoordTeken`), want `#mkAl` ligt onder het toetsenbord; de zin zelf

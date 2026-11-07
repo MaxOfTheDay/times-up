@@ -3551,6 +3551,14 @@ code: een foto of tekening en het woord, in Instellingen.
   vierkante tegels van hoogstens 44 px met tekens van 62%, verdeeld over de
   breedte; is de rij smal (256 px, op 320 en liggend), dan krimpen ze zodat
   er 8 px tussen blijft, anders ligt een schaduw op de buurtegel.
+- **Twee groepen, gescheiden door lucht.** Dun, dik, emmer en gum zijn vier
+  manieren om te tekenen, je kiest er één; de gum hoort er dus bij. Stap
+  terug en weg doen iets met wat er al staat en staan rechts. Een grijs
+  streepje ertussen las als een losse veeg. Eén strook met inktlijnen
+  (zoals Foto/Tekenen) was ook duidelijk, maar een nieuw soort stuk; lucht
+  houdt gewone tegels. Alleen lucht was op 320 px te weinig (12 px tegen
+  8), dus krimpen de tegels daar tot 32 px, zodat er tussen de groepen
+  minstens 32 px ligt.
 - **De kleur van nu staat op de knoppen.** De stippen van dun en dik en de
   verf in de emmer (de onderkant en de druppel, via `--verf`) dragen de
   gekozen kleur, met een inktrand: een gouden stip viel weg op de gouden
