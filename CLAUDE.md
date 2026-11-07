@@ -202,8 +202,14 @@ overdracht (`#btnStopHo`) en op de achterkant van de speelkaart
 (`#btnStop`). Er staat nooit een huisje dat een tweede huisje opent. Het
 teken is het huisje, nooit een kruis (een kruis betekent "sluit dit
 paneel"), zonder stippellijn of ander teken in rust: een losse tik doet de
-druk voor in plaats van te weigeren, en dat leert de knop. Loslaten laat de
-vloed leeglopen; de terugveeg op de overdracht doet de druk voor. Starten is een
+druk voor in plaats van te weigeren, en dat leert de knop. De druk laat
+zien waar je heen gaat: de titel groeit als cirkel uit het huisje, om de
+duim heen en niet eronder (`thuisGluur()`), met één toon die meeloopt
+(`Snd.houdAan()`) en een lichte trilling op een derde en twee derde; op vol
+is dat de cirkel van `naarTitel()`. Loslaten laat haar in `--t-kom`
+terugkrimpen, hoe ver je ook was; een tik en de terugveeg op de overdracht
+laten huis een kwart gluren (`HOUD_PIEK`). Bij beperkte beweging vult de
+tegel zich met inkt. Starten is een
 tik; het aftellen van drie tellen vangt een strijkende vinger op. Afbreken
 kan tijdens het aftellen alleen via de tegel rechtsboven (`#cdBack`), met
 het pauzeteken, niet via het hele vlak.
@@ -307,7 +313,8 @@ de startknop die na zijn tik achter de onderrand wegzakt, het oplossen van
 de sluier van het losse pauzepaneel bij hervatten (`.uit`; alleen de
 sluier, `.overlay::before`, het paneel vervaagt nooit), de eerste helft
 van het omdraaien (`draaiOm()`, `draaiWeg()`, `draaiPauze()`, `closePause()`, `sluitKijk()`), het scherm
-onder de titelcirkel (`naarTitel()`) en de kopie
+onder de titelcirkel (`naarTitel()`), de titel die terugkrimpt in het
+huisje als je loslaat (`thuisGluur()`) en de kopie
 van de kaart die naar de teller krimpt of onderop gaat
 (`kaartSpook()`: eerst bóven de stapel omlaag, dan erachter terug in): de volgende kaart ligt er dan al onder. `hidden` gaat
 meteen aan; `inert` pas na het verzetten van de focus.

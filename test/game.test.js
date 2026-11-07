@@ -325,7 +325,9 @@ const ok = (c, m) => { if (!c) fails.push(m); };
      'de terugveeg op de overdracht opent een pauzepaneel');
   ok(await screen() === 'handoff' && await game(() => !!window.__tijd.G),
      'de terugveeg op de overdracht verlaat het potje');
-  ok(await page.evaluate(() => /scaleY\(0\.[1-9]/.test(document.querySelector('#btnStopHo i').style.transform)),
+  // Huis gluurt uit het huisje (thuisGluur()); bij beperkte beweging de vloed.
+  ok(await page.evaluate(() => document.querySelector('#s-title').classList.contains('gluurt')
+       || /scaleY\(0\.[1-9]/.test(document.querySelector('#btnStopHo i').style.transform)),
      'de terugveeg op de overdracht doet de druk op het huisje niet voor');
   await page.waitForTimeout(1300);
 

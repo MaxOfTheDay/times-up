@@ -437,11 +437,54 @@ vond het lelijk. Wat de knop echt uitlegt is de tik: die doet de druk voor
 meer dan een teken dat je eerst moet kennen.
 
 De knop draagt nu dezelfde huid als pauze, huisje en terug (papier,
-inkt-rand, `--lift-1`), zonder eigen teken in rust. Onderweg twee tekens: de
-inkt die van onder naar boven volloopt tijdens het houden, en het teken dat
-halverwege omkeert naar papier zodra die vloed het inhaalt. Dat omslagpunt
-is het enige ijkpunt onderweg (de kleur is inkt, zie "Stoppen heeft geen
-eigen kleur").
+inkt-rand, `--lift-1`), zonder eigen teken in rust.
+
+### Huis groeit uit het huisje
+
+Max (7 november): het vasthouden is niet duidelijk voor spelers. Wat er
+misging, gekeken op de overdracht en de pauze:
+
+- In rust ziet het huisje eruit als pauze en terug, die je alleen tikt.
+- Het voordoen van een tik speelde zich af in een tegel van 48 px: een
+  inktbalk die een kwart opliep en weer zakte. Het las als "deed het niet".
+- Tijdens het houden lag de enige voortgang onder de duim, en de vloed van
+  inkt zei niet waar je heen ging.
+
+Nu laat de druk zien waar hij heen gaat: de titel groeit als cirkel uit het
+huisje (`thuisGluur()`), dezelfde grond die `naarTitel()` bij aankomst laat
+groeien. De cirkel begint net buiten de tegel, dus de eerste ring ligt om
+de duim heen. Hij groeit met p^1,5: eerst traag (een blik op huis), dan
+sneller; op vol is hij de cirkel naar huis, zonder tweede beweging. In de
+titel zit een gat op de plek van de knop, in de vorm van de knop zoals hij
+op dat moment ligt (vlak plus schaduw, of ingezakt alleen het vlak); een
+vast gat liet een rand van de oude grond zien. Het tandwiel van de titel,
+op dezelfde hoek als het huisje van de overdracht, is tijdens het gluren
+weg. Merk, startknop en dieren staan in de cirkel op het eerste beeld van
+hun binnenkomst, zodat die gewoon doorloopt als je thuis bent.
+
+Loslaten laat huis terugkrimpen in `--t-kom` (280 ms) op `--e-uit`,
+altijd even lang. Vergeleken in de mockup: 160 ms (`--t-los`) las als een
+snauw, "nee!", 450 ms en meer leek nog op weg naar huis. Een tik laat huis
+een kwart gluren (`HOUD_PIEK`), wacht even en krimpt terug; de terugveeg op
+de overdracht doet hetzelfde. Een nieuwe druk gaat verder waar de cirkel
+staat.
+
+Geluid en trilling lopen mee: één triangle-toon (`Snd.houdAan()`,
+`houdNaar()`, `houdUit()`) die een octaaf stijgt van 520 Hz terwijl je
+houdt en weer daalt als huis terugkrimpt, en `Tril.ijk()` op een derde en
+twee derde. In het telefoonmodel ligt de toon op het laagste punt 6 dB
+onder `goed()` en op het hoogste even luid. De korte klik halverwege
+(`Snd.ijk()`) is daarmee weg: de toon zegt het de hele druk lang. Op vol
+klinkt de deur (`dicht()`), de toon valt dan in 40 ms weg.
+
+Bij beperkte beweging geen cirkel: de tegel loopt vol met inkt van onder
+naar boven en het teken keert halverwege om naar papier, zoals voorheen.
+
+Alternatieven die in de mockup lagen: twee tikken (de eerste maakt het
+huisje goud met een lont van 3 s), en één tik naar huis met een gouden
+tegel om terug te gaan (5 s). Allebei zonder vasthouden, maar een kind tikt
+net zo makkelijk twee keer, en een losse tik midden in het spel gooide
+iedereen naar de titel.
 
 ### Het huisje op de overdracht is zelf de uitgang
 
@@ -515,8 +558,9 @@ iets kost, zegt de lange druk (en de tik die hem voordoet), niet het teken.
 **Een tik is een vraag, geen fout.** Wie er alleen op tikt, wil weten wat de
 knop doet. Een schud en een nee-trilling vertelden alleen dát het niet
 mocht. Nu doet de knop de druk voor: hij blijft ingezakt (`.voordoen`)
-terwijl de vloed een kwart oploopt, veert dan terug en loopt weer leeg
-(`holdButton()`, korter dan 250 ms telt als tik).
+terwijl huis een kwart uit het huisje gluurt, veert dan terug en huis
+krimpt weer in (`holdButton()`, korter dan 250 ms telt als tik; zie "Huis
+groeit uit het huisje").
 
 **Geen getekende hand.** Er stond een hand bij die op het huisje drukte. Ze
 zei hetzelfde als de knop die ingedrukt blijft, met een figuur die nergens
@@ -2274,7 +2318,7 @@ venster van 20 ms, met `goed()` op -18,3 dB als ijkpunt:
 | Uil (`ploeg(1)`) | -22,0 | -18,3 | 587/494 naar 784/659 Hz: even luid als Vos (-17,9), nog steeds de lagere |
 | `timeUp()` | -19,4 | -16,5 | valt van 840 naar 220 Hz in plaats van 420 naar 90: het grootste einde was zachter dan één goed |
 | `haul(3)` | -20,9 | -18,1 | grondtoon 659 (die van `goed()`) in plaats van 523 |
-| `ijk()` | -34,8 | -26,0 | 750 in plaats van 150 Hz; op iOS het enige teken dat de lange druk werkt |
+| `ijk()` | -34,8 | -26,0 | 750 in plaats van 150 Hz; op iOS het enige teken dat de lange druk werkt (sinds 7 november vervangen door `houdAan()`, zie "Huis groeit uit het huisje") |
 | `dicht()` | -24,7 | -20,8 | valt van 660 naar 220 Hz in plaats van 330 naar 110 |
 | `pas()` | -28,0 | -24,7 | 620 naar 470 Hz: nog zachter dan goed, maar 6 dB in plaats van 10 |
 | `nee()` | -29,7 | -26,3 | twee vlakke noten op 554 in plaats van 466 Hz |
@@ -2284,7 +2328,7 @@ behalve de tik van de klok, die bewust op de achtergrond loopt.
 
 **Trillengtes liggen uit elkaar.** Trillen kent alleen duur en ritme. Het
 startsein (35 ms) lag 5 ms van overslaan (40), het tegenovergestelde
-bericht; nu is het 60. De ladder: 20 licht (goed, een tel, halverwege), 30
+bericht; nu is het 60. De ladder: 20 licht (goed, een tel, een derde en twee derde van de lange druk), 30
 de sluiter, 40 dof (overslaan), 50 de deur (stoppen voltooid), 60 het
 startsein (ook verder). De trilling van een lege stapel liep naast haar
 noten (pulsen op 0, 70 en 140 ms, noten op 0, 80 en 160); `[30, 50, 30, 50,

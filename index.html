@@ -357,6 +357,17 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .screen.blijft { display: flex; z-index: 0; pointer-events: none; }
 .overlay[hidden].blijft { display: grid !important; pointer-events: none; }
 #s-title.groei { z-index: 9; background: var(--paper); }
+/* Gluren naar huis (thuisGluur()): de titel ligt al over het scherm, in een
+   cirkel uit het huisje, en reageert nog nergens op. Merk, knop en dieren
+   staan op het eerste beeld van hun binnenkomst, zodat die binnenkomst
+   gewoon doorloopt als je echt thuis bent. */
+#s-title.gluurt { display: flex; z-index: 9; background: var(--paper); pointer-events: none; }
+#s-title.gluurt > .wordmark { transform: translateY(8px) rotate(-2deg); }
+#s-title.gluurt #btnStart { transform: translateY(8px); }
+#s-title.gluurt .gluur svg { translate: 0 100%; }
+/* Het tandwiel ligt op dezelfde hoek als het huisje van de overdracht: zijn
+   rand zou als een tweede tegel om het ingezakte huisje heen staan. */
+#s-title.gluurt #btnGear { visibility: hidden; }
 #s-handoff.groei { z-index: 9; }
 
 /* EEN VLAK IN EEN KETEN VERVAAGT MAAR OP ÉÉN PLEK.
@@ -594,13 +605,12 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
    op de achterkant van de speelkaart (#btnStop). Dezelfde huid als pauze,
    huisje en terug (papier, inkt-rand, --lift-1), en in rust niets eigens:
    de knop leert het zelf, want een losse tik doet de druk voor: hij blijft
-   ingezakt terwijl de vloed een kwart oploopt, alsof je hem nog vasthoudt,
-   en veert dan terug. Geen getekende hand: de knop die zelf ingedrukt blijft
-   zegt al "blijf duwen". Twee tekens onderweg:
-   - tijdens het houden loopt de inkt van onder naar boven vol, per frame
-     getekend door holdButton();
-   - halverwege haalt die vloed het teken in en keert het om naar papier: het
-     enige ijkpunt onderweg.
+   ingezakt terwijl huis een kwart uit het huisje gluurt, alsof je hem nog
+   vasthoudt, en veert dan terug. Geen getekende hand: de knop die zelf
+   ingedrukt blijft zegt al "blijf duwen". Wat de druk tekent is de titel
+   die als cirkel uit het huisje groeit (thuisGluur()). Alleen bij beperkte
+   beweging de vloed (i): inkt die van onder naar boven volloopt, en het
+   teken dat halverwege omkeert naar papier.
 
    Alles in inkt, geen eigen kleur: een donkerrood las naast Vos als een
    vuile Vos. */
@@ -3968,6 +3978,8 @@ const Snd = (() => {
   let ctx = null;
   let bus = null;                // één uitgang, zodat gestapelde cues niet klippen
   let on = true;                 // te wisselen in de instellingen
+  let houd = null;               // de toon van de lange druk (houdAan())
+  const HOUD_F = 520, HOUD_VOL = .1;
   function ac() {
     if (!ctx) {
       /* Op een iPhone volgt Web Audio standaard de stilteschakelaar, en
@@ -4052,12 +4064,44 @@ const Snd = (() => {
        hetzelfde geluid als pas(), want dat is een ander bericht. */
     nee()   { tone(554, .06, "triangle", .2, 0); tone(554, .06, "triangle", .2, .12); },
     tick(f, v) { tone(f || 1600, .022, "square", v || .08, 0); },
-    /* Halverwege de lange druk op stoppen: een klik naast Tril.ijk(), want
-       op iOS bestaat trillen niet en is dit het enige teken dat de druk
-       werkt. Square, als een grendel die overslaat. Op 150 Hz was hij op
-       een telefoon de stilste cue van de app (-35 dB); op 750 Hz 9 dB
-       luider, en nog ruim onder de klok (1600). */
-    ijk()   { tone(750, .03, "square", .10, 0); },
+    /* De lange druk op stoppen: één toon die met de cirkel naar huis
+       meeloopt, een octaaf omhoog terwijl je houdt (HOUD_F tot 2x) en weer
+       omlaag als huis terugkrimpt. Op iOS bestaat trillen niet, en dan is
+       dit het enige teken dat de druk werkt. Triangle, zacht: hij klinkt
+       zolang je drukt, en de deur (dicht()) moet erboven uitkomen. */
+    houdAan(p) {
+      if (!on) return;
+      const c = ac(); if (!c) return;
+      const t = c.currentTime;
+      if (!houd) {
+        const o = c.createOscillator(), g = c.createGain();
+        o.type = "triangle";
+        o.frequency.setValueAtTime(HOUD_F * Math.pow(2, p || 0), t);
+        g.gain.setValueAtTime(0.0001, t);
+        o.connect(g).connect(out() || c.destination);
+        o.start(t);
+        houd = { o, g, stop: 0 };
+      }
+      clearTimeout(houd.stop);
+      houd.g.gain.cancelScheduledValues(t);
+      houd.g.gain.setValueAtTime(Math.max(0.0001, houd.g.gain.value), t);
+      houd.g.gain.exponentialRampToValueAtTime(HOUD_VOL, t + .03);
+    },
+    houdNaar(p) {
+      if (houd && ctx) houd.o.frequency.setTargetAtTime(HOUD_F * Math.pow(2, p), ctx.currentTime, .012);
+    },
+    houdUit(ms) {
+      if (!houd || !ctx) return;
+      const h = houd, t = ctx.currentTime, s = Math.max(.03, (ms || 0) / 1000);
+      h.g.gain.cancelScheduledValues(t);
+      h.g.gain.setValueAtTime(Math.max(0.0001, h.g.gain.value), t);
+      h.g.gain.exponentialRampToValueAtTime(0.0001, t + s);
+      clearTimeout(h.stop);
+      h.stop = setTimeout(() => {
+        try { h.o.stop(); } catch (e) {}
+        if (houd === h) houd = null;
+      }, s * 1000 + 60);
+    },
     /* Het aftellen is de klok niet: drie triangle-noten die klimmen naar go()
        toe, één opbouw van "zet je klaar" naar "daar gaat ie". Eén geluid, één
        betekenis -- wie uitbeeldt, kijkt niet naar het scherm. */
@@ -4168,7 +4212,7 @@ const Tril = (() => {
     zag()   { buzz([20, 110, 20]); },         // dubbele tik, niet geteld: trager dan nee()
     tel()   { buzz(20); },                    // 3 - 2 - 1
     go()    { buzz(60); },                    // de klok loopt -- ver van pas (40)
-    ijk()   { buzz(20); },                    // lange druk, halverwege
+    ijk()   { buzz(20); },                    // lange druk, op een derde en twee derde
     doe()   { buzz(50); },                    // lange druk voltooid
     klik()  { buzz(30); },                    // foto genomen, als de sluiter dicht is
     om()    { buzz([60, 70, 60]); },          // tijd om
@@ -5908,63 +5952,85 @@ $$(".setup-scroll").forEach(sc => sc.addEventListener("scroll", e =>
    toets. Een CSS-overgang zou bij prefers-reduced-motion meteen op
    vol springen (een knop die "klaar" meldt terwijl hij het niet is),
    en een aparte toetsenbordtak zou het vasthouden overslaan.
-   ============================================================== */
-function holdButton(el, ms, run, paint) {
-  /* raf loopt tijdens het houden, weg tijdens het voordoen en leeglopen.
-     p is waar de vloed nu staat: een nieuwe druk gaat daar verder, in
-     plaats van terug op nul te springen. */
-  let raf = null, weg = null, t0 = 0, druk = 0, p = 0;
-  const TIK_MS = 250;                       // korter dan dit is een tik, geen druk
-  const draw = v => { p = v; if (paint) paint(v); };
 
-  /* Van waar de vloed staat naar `naar`, in `duur` ms; daarna eventueel
+   Wat de voortgang tekent is paint(p): voor stoppen groeit de titel als
+   cirkel uit het huisje (thuisGluur()). Eén toon loopt met p mee
+   (Snd.houdAan/houdNaar/houdUit), en op een derde en twee derde een
+   lichte trilling, alleen zolang er echt gehouden wordt.
+   ============================================================== */
+const HOUD_PIEK = .25;                      // zo ver gluurt een losse tik
+function holdButton(el, ms, run, paint) {
+  /* raf loopt tijdens het houden, weg tijdens het voordoen en terugkrimpen.
+     p is waar de voortgang nu staat: een nieuwe druk gaat daar verder, in
+     plaats van terug op nul te springen. */
+  let raf = null, weg = null, wacht = 0, t0 = 0, druk = 0, p = 0;
+  const TIK_MS = 250;                       // korter dan dit is een tik, geen druk
+  const draw = v => { p = v; Snd.houdNaar(v); if (paint) paint(v); };
+  const uit = kromme("uit");
+
+  /* Van waar p staat naar `naar`, in `lang` ms op --e-uit; daarna eventueel
      verder. Eén lus, zodat een nieuwe druk hem altijd kan afbreken. */
-  function loop(naar, duur, daarna) {
+  function loop(naar, lang, daarna) {
     cancelAnimationFrame(weg);
     const van = p, s = performance.now();
     const stap = n => {
-      const k = Math.min(1, (n - s) / duur);
-      draw(van + (naar - van) * k);
+      const k = Math.min(1, (n - s) / lang);
+      draw(van + (naar - van) * uit(k));
       if (k < 1) weg = requestAnimationFrame(stap);
       else { weg = null; if (daarna) daarna(); }
     };
     weg = requestAnimationFrame(stap);
   }
+  /* Terug naar nul: dezelfde lengte als iets dat binnenkomt (--t-kom). Een
+     snap (--t-los) las als "nee!", langer leek nog op weg naar huis. Vast,
+     hoe ver je ook was: wie op 90% loslaat, wacht niet langer. */
+  function terug() {
+    el.classList.remove("voordoen");
+    Snd.houdUit(duur("kom"));
+    loop(0, duur("kom"));
+  }
 
   function start() {
     if (raf !== null) return;               // al bezig (toets die herhaalt)
-    cancelAnimationFrame(weg); weg = null;
+    cancelAnimationFrame(weg); weg = null; clearTimeout(wacht);
     el.classList.remove("voordoen");
     druk = performance.now();
     t0 = druk - p * ms;
+    Snd.houdAan(p);
     raf = requestAnimationFrame(step);
   }
   function step(now) {
-    const v = Math.min(1, (now - t0) / ms);
+    const was = p, v = Math.min(1, (now - t0) / ms);
     draw(v);
-    if (v >= 1) { raf = null; draw(0); Snd.dicht(); Tril.doe(); run(); }
+    if ((was < 1 / 3 && v >= 1 / 3) || (was < 2 / 3 && v >= 2 / 3)) Tril.ijk();
+    if (v >= 1) {
+      raf = null; Snd.houdUit(40); Snd.dicht(); Tril.doe();
+      /* Eerst run(): de titel staat dan al vol in beeld, en draw(0) ruimt
+         de cirkel pas op als er niets meer te zien is. */
+      run(); p = 0; if (paint) paint(0);
+    }
     else raf = requestAnimationFrame(step);
   }
   /* Losgelaten voor het vol was. Een tik is geen fout maar een vraag
-     ("wat doet dit?"), dus geen nee: de knop doet de druk voor -- hij blijft
-     ingezakt terwijl de vloed een kwart oploopt, veert dan terug en de vloed
-     loopt weer leeg. Wie
-     wél hield en te vroeg losliet, ziet het rood weglopen in plaats van
-     verdwijnen: bijna, niet kapot. */
+     ("wat doet dit?"), dus geen nee: de knop doet de druk voor. Wie wél
+     hield en te vroeg losliet, ziet huis terugkrimpen in het huisje:
+     bijna, niet kapot. */
   function cancel() {
     if (raf === null) return;
     cancelAnimationFrame(raf); raf = null;
     if (performance.now() - druk < TIK_MS) voordoen();
-    else loop(0, 300);
+    else terug();
   }
+  /* Het voordoen: de knop blijft ingezakt terwijl huis een kwart uit het
+     huisje gluurt, wacht even, en krimpt dan terug. */
   function voordoen() {
     if (raf !== null) return;
+    clearTimeout(wacht);
     el.classList.add("voordoen");
-    loop(.28, 300, () => setTimeout(() => {
-      if (raf !== null) return;
-      el.classList.remove("voordoen");
-      loop(0, 600);
-    }, 250));
+    Snd.houdAan(p);
+    loop(Math.max(p, HOUD_PIEK), duur("kom"), () => {
+      wacht = setTimeout(() => { if (raf === null) terug(); }, duur("kom") - 30);
+    });
   }
 
   /* Een lange druk opent op een tablet het eigen menu van het toestel
@@ -5986,19 +6052,61 @@ function holdButton(el, ms, run, paint) {
   return { voordoen };
 }
 
-/* Een vulling die van onder naar boven loopt: stoppen. Halverwege haalt ze
-   het teken in -- het staat gecentreerd, dus op p = .5 ligt het rood er tot
-   aan het hart van het kruis -- en dan keert het teken om naar papier. Dat
-   omslag is het enige ijkpunt onderweg: voorbij de helft. */
-const fillY = (el, btn) => p => {
-  el.style.transform = "scaleY(" + p + ")";
-  if (btn) {
-    const was = btn.classList.contains("flooded"), now = p > .5;
-    // Het omslagpunt hoort bij de overgang zelf, niet bij elk frame erna.
-    if (now && !was) { Snd.ijk(); Tril.ijk(); }
-    btn.classList.toggle("flooded", now);
+/* Gluren naar huis: de titel groeit als cirkel uit het huisje zolang je
+   het vasthoudt, en krimpt terug als je loslaat. Op vol is dat precies de
+   cirkel van naarTitel(), dus naar huis gaan is geen tweede beweging. De
+   cirkel begint net buiten de tegel, zodat de eerste ring om de duim heen
+   te zien is en niet eronder; hij groeit eerst traag (een blik op huis)
+   en dan sneller (p^1.5). In de titel zit een gat op de plek van de knop:
+   die ligt in zijn eigen scherm en blijft zo boven de cirkel.
+   Bij beperkte beweging geen cirkel maar de vloed van inkt in de tegel,
+   met het teken dat halverwege omkeert naar papier. */
+function thuisGluur(knop) {
+  const ti = $("#s-title"), vloed = knop.querySelector("i");
+  let open = null;
+  function dicht() {
+    if (!open) return;
+    open = null;
+    ti.classList.remove("gluurt");
+    ti.style.clipPath = "";
   }
-};
+  return p => {
+    if (stilAan()) {
+      dicht();
+      vloed.style.transform = "scaleY(" + p + ")";
+      knop.classList.toggle("flooded", p > .5);
+      return;
+    }
+    if (p <= 0 || ti.classList.contains("on")) { dicht(); return; }
+    /* Het gat volgt de knop zoals hij nu ligt: ingezakt is hij precies zijn
+       eigen vlak, in rust zijn vlak plus de schaduw. Een vast gat liet
+       rond de ingezakte knop een rand van de oude grond zien. */
+    const r = knop.getBoundingClientRect();
+    const m = new DOMMatrixReadOnly(getComputedStyle(knop).transform);
+    if (!open) {
+      const lift = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--lift-1")) || 4;
+      /* Het midden van de rustplek, zonder de duw van :active of .voordoen. */
+      const x = r.left - m.m41 + r.width / 2, y = r.top - m.m42 + r.height / 2;
+      open = {
+        x, y, lift,
+        r0: Math.hypot(r.width, r.height) / 2 + lift + 4,
+        R: Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))
+      };
+      ti.classList.add("gluurt");
+      veldTi.aan();
+    }
+    const { x, y, lift, r0, R } = open;
+    /* De schaduw is het vlak zelf, d naar rechtsonder: samen een
+       achthoek, geen rechthoek, anders vallen er twee hoekjes oude grond. */
+    const d = Math.max(0, lift - m.m41), { left: l, top: o, right: re, bottom: on } = r;
+    const gat = `M${l} ${o}H${re}V${o + d}H${re + d}V${on + d}H${l + d}V${on}H${l}Z`;
+    const s = r0 + (R - r0) * Math.pow(Math.min(1, p), 1.5);
+    ti.style.clipPath = `path(evenodd, "M${x - s} ${y}a${s} ${s} 0 1 0 ${2 * s} 0a${s} ${s} 0 1 0 ${-2 * s} 0Z${gat}")`;
+  };
+}
+/* Is de titel al helemaal opengegroeid uit het huisje? Dan hoeft naarTitel()
+   niet nog eens een cirkel te laten groeien. */
+const thuisOpen = () => $("#s-title").classList.contains("gluurt");
 
 /* Eén tik: instellingen openen is niets onomkeerbaars, en het tandwiel
    bestaat alleen op dit scherm. */
@@ -6917,6 +7025,22 @@ function duur(naam) {
   return n ? (v.indexOf("ms") > -1 ? n : n * 1000) : 0;
 }
 function vlucht() { return duur("fly") || 220; }
+/* Een curve uit :root als functie van 0..1 naar 0..1, voor een lus die zelf
+   per frame tekent (holdButton()). Zoekt t bij x door te halveren: twintig
+   stappen is ruim binnen een duizendste. */
+function kromme(naam) {
+  const m = curve(naam).match(/cubic-bezier\(([^)]+)\)/);
+  if (!m) return k => k;
+  const [x1, y1, x2, y2] = m[1].split(",").map(parseFloat);
+  const b = (a, c, t) => 3 * a * t * (1 - t) * (1 - t) + 3 * c * t * t * (1 - t) + t * t * t;
+  return k => {
+    if (k <= 0) return 0;
+    if (k >= 1) return 1;
+    let lo = 0, hi = 1, t = k;
+    for (let i = 0; i < 20; i++) { t = (lo + hi) / 2; if (b(x1, x2, t) < k) lo = t; else hi = t; }
+    return b(y1, y2, t);
+  };
+}
 
 /* Waar de teller straks staat, zonder hem nu al te tonen: vooruit schilderen,
    meten, terugzetten. Daartussen tekent de browser niet. */
@@ -7394,7 +7518,7 @@ function merkMax(r, c, x0, y0, W, H) {
 const veldTi = stipveld($("#tiVeld"), {
   inkt: true,
   merk: merkMax,
-  zichtbaar: () => $("#s-title").classList.contains("on")
+  zichtbaar: () => $("#s-title").classList.contains("on") || $("#s-title").classList.contains("gluurt")
 });
 const veldHo = stipveld($("#hoVeld"), {
   zichtbaar: () => $("#s-handoff").classList.contains("on"),
@@ -8184,8 +8308,10 @@ $("#btnHome").addEventListener("click", () => {
    bij beperkte beweging: meteen. */
 function naarTitel(k, sluier) {
   const van = $(".screen.on");
+  /* Uit het huisje gegroeid (thuisGluur()): de titel staat al vol in beeld. */
+  const al = thuisOpen();
   show("title");
-  groeiUit($("#s-title"), van, k, sluier);
+  if (!al) groeiUit($("#s-title"), van, k, sluier);
 }
 /* Het scherm naar (al getoond) groeit als cirkel uit knop k over het scherm
    van, dat zolang blijft staan. */
@@ -8543,9 +8669,9 @@ function stopPotje(knop) {
   naarTitel(k, paneel ? $("#pauze") : null);
 }
 holdButton($("#btnStop"), 1100, () => stopPotje($("#btnStop")),
-  fillY($("#btnStop i"), $("#btnStop")));
+  thuisGluur($("#btnStop")));
 const stopHo = holdButton($("#btnStopHo"), 1100, () => stopPotje($("#btnStopHo")),
-  fillY($("#btnStopHo i"), $("#btnStopHo")));
+  thuisGluur($("#btnStopHo")));
 
 /* ==============================================================
    6b. DE TERUGVEEG — één invoer in de geschiedenis als vangnet
