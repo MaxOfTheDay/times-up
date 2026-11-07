@@ -1075,6 +1075,11 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
   box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
 }
 .pv span { font-size: 30px; line-height: 1.1; }
+/* In de lijst van alle kaarten (tot 275) maakt de browser alleen de tegels
+   op die bijna in beeld zijn: de lijst opent zo bijna twee keer sneller.
+   49 px is de inhoud van een tegel met een woord op één regel (zonder
+   padding en rand); daarna onthoudt hij de echte maat (auto). */
+#cbAll .pv { content-visibility: auto; contain-intrinsic-size: auto 49px; }
 .pv small {
   /* Dezelfde bodem als elk label: --type-label. */
   font-size: var(--type-label); font-weight: 800; text-transform: uppercase; letter-spacing: var(--track-caps);
@@ -7746,8 +7751,20 @@ function stipveld(cv, opt) {
   const CEL = 12, R0 = 2, LEEF = 2100;
   const STRAAL_RONDE = 26000, STRALEN = 12;
   /* Op de grafische kaart als het kan (stipGpu()), anders op een
-     canvas, met de rekensom hieronder en alleen wat verandert. */
-  const gpu = stipGpu(cv), cx = gpu ? null : cv.getContext("2d");
+     canvas, met de rekensom hieronder en alleen wat verandert. Pas als de
+     grond voor het eerst in beeld komt (maat()): bij het opstarten kostte
+     een context per grond samen 150 ms op een trage telefoon, voor
+     schermen die je dan nog niet ziet. */
+  let gpu = null, cx = null, context = false;
+  /* De maat in CSS-pixels, van een ResizeObserver: elk beeld
+     getBoundingClientRect() lezen dwong midden in een animatie de opmaak
+     af. 0: nog niet gemeten of niet in beeld; dan wel meten. */
+  let maatW = 0, maatH = 0;
+  if (window.ResizeObserver) new ResizeObserver(lijst => {
+    const b = lijst[lijst.length - 1].contentRect;
+    maatW = b.width; maatH = b.height;
+    if (maatW && maatH && opt.zichtbaar()) wek();
+  }).observe(cv);
   let W = 0, H = 0, punten = [], rimpels = [], raf = 0;
   let inkt = !!opt.inkt, onthul = null, stralen = -1, toon = null, leeg = false;
   /* Wat het vorige beeld tekende, zodat een rimpel alleen de punten
@@ -7763,8 +7780,9 @@ function stipveld(cv, opt) {
   const perKleur = new Int32Array(2 * 1001 + 1), KLEUREN = [], GEEN = 0xffff;
   let vol = true, vorSleutel = "", laatstStralen = 0, slaap = 0;
   function maat() {
-    const r = cv.getBoundingClientRect();
+    const r = maatW && maatH ? { width: maatW, height: maatH } : cv.getBoundingClientRect();
     if (!r.width || !r.height) return false;
+    if (!context) { context = true; gpu = stipGpu(cv); cx = gpu ? null : cv.getContext("2d"); }
     /* Tot 3: op een scherm van 3x is een punt op 2x zacht aan de rand. */
     const dpr = Math.min(3, window.devicePixelRatio || 1);
     if (r.width !== W || r.height !== H || cv.width !== Math.round(r.width * dpr)) {
