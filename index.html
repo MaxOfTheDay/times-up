@@ -1266,19 +1266,21 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
   transform: translate(-2px, -3px); box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
   outline: var(--line-2) solid var(--paper); outline-offset: -7px;
 }
-/* Zes vierkante tegels over de breedte van de kleuren: de eerste en de
-   laatste staan onder de eerste en laatste kleur. */
-.mk-teken .mk-gereedschap { justify-content: space-between; gap: 0; }
-/* 44 px, of kleiner als de rij smal is (256 px op 320 en liggend): er
-   blijft altijd 8 px tussen, anders ligt een schaduw op de buurtegel. Het
-   raakvlak groeit dan mee met ::after. */
+/* Zes vierkante tegels over de breedte van de kleuren, in twee groepen:
+   links hoe je tekent (dun, dik, emmer, gum: je kiest er één), rechts wat
+   iets doet met wat er staat (stap terug, weg). Lucht scheidt ze, geen
+   streep. */
+.mk-teken .mk-gereedschap { justify-content: flex-start; gap: 8px; }
+.mk-teken #mkStap { margin-left: auto; }
+/* 44 px, of kleiner als de rij smal is (256 px op 320 en liggend): tussen
+   de tegels blijft 8 px, anders ligt een schaduw op de buurtegel, en tussen
+   de groepen minstens 32 px. Het raakvlak groeit mee met ::after. */
 .mk-teken .mk-tg {
-  position: relative; width: min(44px, (100% - 3px - 5 * 8px) / 6);
+  position: relative; width: min(44px, (100% - 64px) / 6);
   height: auto; min-height: 0; aspect-ratio: 1;
 }
 .mk-teken .mk-tg::after { content: ""; position: absolute; inset: -4px; }
 .mk-teken .mk-tg svg { width: 62%; }
-.mk-teken .mk-scheid { margin-inline: 0; }
 
 /* De toverstaf. Midden op het lege vel: de fiche van Tekenen, zoals de
    sluiter die van Foto. Gestippeld en grijs tot er een woord staat, dan goud
@@ -1310,7 +1312,6 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
    geen draaiend wieltje. */
 .mk-tovert { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
 .mk-tg[aria-pressed="true"] { background: var(--go); }
-.mk-scheid { width: var(--line-2); align-self: stretch; margin: 6px 2px; background: var(--rule); }
 /* De stip draagt de kleur van nu, met een inktrand: een gouden stip viel
    anders weg op de gouden knop van de pen die aan staat. */
 .mk-stip { display: block; box-sizing: border-box; width: 10px; height: 10px; border-radius: 50%; background: var(--ink); border: 2px solid var(--ink); }
@@ -3539,7 +3540,6 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
           <button class="btn-plain mk-tg mk-staf-rij" id="mkStafRij" aria-label="Nog een tekening van het woord" hidden><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-staf"/></svg>
             <i class="mk-staf-teken wifi" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-wifi"/></svg></i>
             <i class="mk-staf-teken zand" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></i></button>
-          <span class="mk-scheid" aria-hidden="true"></span>
           <button class="btn-plain mk-tg" id="mkStap" aria-label="Laatste stap weg"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-stap"/></svg></button>
           <button class="btn-plain mk-tg" id="mkLeeg" aria-label="Alles weg"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-prul"/></svg></button>
         </div>
