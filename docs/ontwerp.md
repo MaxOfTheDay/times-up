@@ -492,7 +492,10 @@ glas, en op de titel ligt het tandwiel precies onder het huisje van de
 overdracht: op een touchscherm opende het loslaten Instellingen. Met het
 toetsenbord drukte de herhaalde toets op Beginnen, waar de focus heen gaat.
 `slikKlik()` slikt de klik tot 60 ms na het loslaten in; een nieuwe tik
-komt nooit zo snel. Allebei staan in `test/game.test.js`.
+komt nooit zo snel. De knop die eronder ligt
+(het tandwiel) zakt al ingedrukt in onder de vinger (`.onder`) en veert pas
+op bij het loslaten, zoals een stuk waar je op drukt; anders sprong hij
+onder de duim omhoog. Allebei staan in `test/game.test.js`.
 
 Bij beperkte beweging geen cirkel: de tegel loopt vol met inkt van onder
 naar boven en het teken keert halverwege om naar papier, zoals voorheen.
@@ -544,6 +547,29 @@ toetsenbord komt via `click` met `detail` 0 binnen. De dubbeltik van 280 ms
 (`acts()`) blijft. Proef: de tiktest uit de review (goed-tik.html), met de
 oude klik, loslaten en neerzetten naast elkaar. De test staat in
 `test/game.test.js`.
+
+### Elke knop telt een rollende tik
+
+Dezelfde meting op de andere knoppen (Beginnen, start, afbreken, verder,
+het tandwiel, de uitgangen): een tik die 20 px rolde of een duim die op het
+glas lag, gaf geen `click`, net als goed vóór `tikKnop()`. Die knoppen
+houden hun `click` (ze moeten bij het loslaten gebeuren, en een veeg over
+een lijst mag niet tellen), maar krijgen een vangnet: een aanraking die op
+een knop begon en binnen `TIK_ROL` (24 px) loslaat, klikt hem alsnog als de
+browser na 80 ms geen eigen `click` gaf. Op de knoppen van het bord staat
+`touch-action: none`, zodat een rollende duim geen veeg wordt; in een
+scrollende lijst niet. Goed, pas, het +N en het huisje doen het zelf
+(`TIK_ZELF`).
+
+Een dubbeltik landde op de knop van het volgende scherm: het tandwiel en de
+uitgang van Instellingen liggen op dezelfde plek, dus twee snelle tikken
+openden en sloten Instellingen, en zo ook pauze en verder. Een klik binnen
+`SPOOK_MS` (300 ms) na een schermwissel, op 32 px van de klik die hem
+veroorzaakte, telt niet (`spookTik()`). Een bedoelde tweede tik komt
+zelden zo snel op dezelfde plek.
+
+De teller van wat er nog ligt (`#hoCards`) was 24 px hoog; om hem ligt nu
+een onzichtbare ring van 12 px, zoals om het huisje.
 
 ### Starten is een tik
 
