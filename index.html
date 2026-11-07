@@ -1300,7 +1300,9 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 .mk-tovert { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
 .mk-tg[aria-pressed="true"] { background: var(--go); }
 .mk-scheid { width: var(--line-2); align-self: stretch; margin: 6px 2px; background: var(--rule); }
-.mk-stip { display: block; width: 8px; height: 8px; border-radius: 50%; background: var(--ink); }
+/* De stip draagt de kleur van nu, met een inktrand: een gouden stip viel
+   anders weg op de gouden knop van de pen die aan staat. */
+.mk-stip { display: block; box-sizing: border-box; width: 10px; height: 10px; border-radius: 50%; background: var(--ink); border: 2px solid var(--ink); }
 .mk-stip.dik { width: 20px; height: 20px; }
 
 .mk-gereedschap { display: flex; justify-content: center; gap: var(--s-3); }
