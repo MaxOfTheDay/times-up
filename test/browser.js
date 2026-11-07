@@ -55,4 +55,21 @@ async function hold(page, sel, ms) {
   await page.mouse.up();
 }
 
-module.exports = { launch, APP_URL, hold };
+// De headless browser heeft geen grafische kaart maar SwiftShader, en daar
+// laat stipGlKan() het stippenvlak op het 2D-canvas. Dit laat SwiftShader
+// doorgaan voor een kaart, zodat de WebGL-weg ook te testen en te
+// fotograferen is (test/stip.test.js, STIP=gl npm run foto).
+async function echteKaart(ctx) {
+  await ctx.addInitScript(() => {
+    for (const C of [window.WebGLRenderingContext, window.WebGL2RenderingContext]) {
+      if (!C) continue;
+      const lees = C.prototype.getParameter;
+      C.prototype.getParameter = function (x) {
+        const v = lees.call(this, x);
+        return typeof v === 'string' ? v.replace(/SwiftShader/gi, 'Testkaart') : v;
+      };
+    }
+  });
+}
+
+module.exports = { launch, APP_URL, hold, echteKaart };
