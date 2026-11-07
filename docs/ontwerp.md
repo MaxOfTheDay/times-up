@@ -3534,19 +3534,42 @@ code: een foto of tekening en het woord, in Instellingen.
   `pagehide`, anders blijft het lampje branden. Komt de app terug terwijl de
   zoeker openstond, dan gaat hij weer aan.
 - **Of je tekent haar.** Niet elk ding heeft een foto, en een kind tekent
-  zelf graag. De potloodtegel opent de maker op een vel in hetzelfde vierkant. Eén pen
-  die met een tweede tik dik of dun wordt, een emmer, een gum, een stap terug
-  en alles weg: genoeg voor een kind van vier, zonder menu. Wie de gum pakt,
+  zelf graag. De potloodtegel opent de maker op een vel in hetzelfde vierkant. Een
+  dunne en een dikke pen, een emmer, een gum, een stap terug en alles weg:
+  genoeg voor een kind van vier, zonder menu. Wie de gum pakt,
   heeft geen kleur meer gekozen; een tik op een kleur pakt de pen weer.
   Een nieuwe tekening begint op de dikke pen (26 op 512): met de dunne (10)
   werd een lijn op de tegel in Eigen kaarten ongeveer 2 px, en een kind
-  tekent grof. Fijn tekenen is één tik op de pen.
+  tekent grof. Fijn tekenen is één tik op de kleine stip.
+- **Dun en dik zijn twee knoppen.** Eerst was het één pen die bij een
+  tweede tik van dikte wisselde; dat vond je alleen per toeval. Met de staf
+  uit was er plek: twee knoppen met een kleine en een grote stip in de
+  kleur van nu, goud is wat geldt. Zes knoppen, zoals met de staf, dus het
+  past op 320 px.
+- **Het lege vel zegt "teken hier".** Een leeg papieren vlak met een rand
+  in `--paper-2` las als niets. Leeg krijgt het vel wat het lege fotovak
+  heeft: een gestippelde rand en het teken van de knop, hier het potlood
+  (`.blanco`). De rand is een laag erboven (`::after`), geen border, zodat
+  het doek niet verschuift. De eerste aanraking haalt hem weg; na alles weg
+  of een stap terug tot leeg komt hij terug.
 - **Het vierkant krimpt tot Bewaren in beeld is.** Onder het vierkant staat
   met tekenen 470 px; de ondergrens van 240 duwde Bewaren op 360x640 en
   375x667 onder de rand. Nu 180: vanaf 640 px hoog past alles, op 320x568
   rol je nog even, want kleiner wordt tekenen te krap. Het toetsenbord
   telt niet mee: op Chrome (sinds 108) en Safari schuift het over de
   pagina en verkleint het de layout niet.
+- **De eerste aanraking sluit het toetsenbord.** Gemeten: met de focus op
+  het woord verzet een tik de focus, een streep niet. Het toetsenbord bleef
+  dan op en lag over de kleuren en Bewaren. Een streep die het toetsenbord
+  meteen sluit gaat ook mis: het scherm schuift terug onder de vinger en de
+  lijn veegt mee. Dus sluit de eerste aanraking op het vel alleen het
+  toetsenbord, zonder streep. Een tik op het gereedschap sluit het ook en
+  doet wat de knop doet (Safari geeft een knop geen focus, dus expliciet).
+- **"Staat al in het spel" staat ook in de woordregel.** De zin onder het
+  woord ligt op een iPhone onder het toetsenbord, juist terwijl je typt.
+  Het teken van de gewone kaart staat daarom ook rechts in de regel
+  (`#mkWoordTeken`), die de browser altijd in beeld houdt; de tekst wijkt
+  aan beide kanten even ver, zodat hij in het midden blijft.
 - **Acht tekenkleuren zijn inhoud, geen betekenis.** Inkt, rood, oranje,
   goud, groen, blauw, roze en bruin. Oranje en roze kwamen erbij omdat een
   vos, een varken, een wortel of een flamingo zonder ze niet te tekenen is.
