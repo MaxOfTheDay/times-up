@@ -185,6 +185,8 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   // de maker opent.
   ok(await page.evaluate(() => document.querySelector('#kaartEigen').classList.contains('leeg')),
     'de rij Eigen toont geen lege plek zonder eigen kaarten');
+  ok(await page.evaluate(() => getComputedStyle(document.querySelector('#eigenTel')).display === 'none'),
+    'de rij Eigen toont een getal zonder eigen kaarten');
   await page.click('#rijEigen');
   await page.setInputFiles('#mkBestand', { name: 'hond.png', mimeType: 'image/png', buffer: png });
   await page.waitForFunction(() => document.querySelector('#mkVak').classList.contains('vol'));

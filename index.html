@@ -947,6 +947,9 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 .rij-naam small { font-size: var(--fs-1); font-weight: 700; color: var(--ink-2); }
 .rij-naam small:empty { display: none; }
 .rij-tal { font-size: var(--fs-4); line-height: 1; font-variant-numeric: tabular-nums; }
+/* Leeg is de rij van Eigen een uitnodiging, geen telling: een "0" las als
+   een lege lijst naast "Maak je eerste kaart". */
+.rij-tal:empty { display: none; }
 .rij-pijl { flex: none; width: 16px; height: 16px; }
 /* De schakelaar: een vierkante knop die schuift, goud als hij aan staat.
    Uit verbleekt het teken ervoor ook. */
@@ -3052,8 +3055,8 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
           <span class="rij-tal" id="cbCount"></span>
           <svg class="rij-pijl" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-verder"/></svg>
         </button>
-        <!-- Zonder eigen kaarten een gestippelde plus, en dan opent een tik
-             meteen de maker. -->
+        <!-- Zonder eigen kaarten een gestippelde plus en geen getal, en dan
+             opent een tik meteen de maker. -->
         <button class="rij" id="rijEigen">
           <span class="rij-kaart" id="kaartEigen" aria-hidden="true"></span>
           <span class="rij-naam">Eigen<small id="eigSub"></small></span>
@@ -4965,7 +4968,7 @@ function paintEigen() {
   $("#rijEigen").setAttribute("aria-label", n
     ? "Eigen kaarten: " + n + (uit ? ", uit" : "")
     : "Nieuwe eigen kaart");
-  $("#eigenTel").textContent = n;
+  $("#eigenTel").textContent = n || "";
   $("#eigSub").textContent = !n ? "Maak je eerste kaart" : uit ? "uit" : eigenAantal() + " in elk potje";
   const voor = $("#kaartEigen");
   voor.textContent = "";
