@@ -435,8 +435,10 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 
 /* Knoppen die je moet vasthouden negeren een tik. Zonder terugkoppeling
    lijkt het toestel dan stuk, dus schudt de knop even: "blijf duwen".
-   Bij beperkte beweging valt de schud weg; daarom zit er een tweede,
-   stilstaand signaal onder: heel even een tweede inktring om de knop. */
+   Bij beperkte beweging valt de schud weg; alleen dan komt er een
+   stilstaand signaal voor in de plaats: heel even een tweede inktring om
+   de knop. Mét schud is die ring een derde rand om het stuk, die bovendien
+   meeschudt. */
 @keyframes nudge {
   0%, 100% { transform: translateX(0) rotate(0); }
   20% { transform: translateX(-9px) rotate(-3deg); }
@@ -444,7 +446,9 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
   80% { transform: translateX(-5px) rotate(-2deg); }
 }
 .nudge { animation: nudge calc(var(--t-groot) / max(var(--dur), .001)) var(--e-vloei); }
-.refuse { outline: var(--line-2) solid var(--ink); outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  .refuse { outline: var(--line-2) solid var(--ink); outline-offset: 4px; }
+}
 
 /* ---- de grote ronde "verder"-knop ----
    Titel, overdracht (vasthouden), opnieuw, verder na pauze: allemaal
@@ -5917,9 +5921,9 @@ function toetsModus() {
 }
 toetsModus();
 
-/* Te vroeg losgelaten: schudden, én de rand even in waarschuwingskleur.
-   Dat tweede is er voor wie beperkte beweging aan heeft: daar valt de
-   schud weg, en dan bleef er niets over. */
+/* Geweigerd: schudden, en trillen. Bij beperkte beweging valt de schud
+   weg; dan zet .refuse heel even een inktring om de knop, zodat er toch
+   iets te zien is. */
 /* Eén "nee" in de app, op elke plek waar iets geweigerd wordt: hier zit de
    trilling daarom centraal, niet bij elke aanroeper apart. */
 function nudge(el) {
