@@ -276,6 +276,19 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(await page.evaluate(() => document.querySelector('#mkDun').getAttribute('aria-pressed') === 'true'
     && document.querySelector('#mkDik').getAttribute('aria-pressed') === 'false'), 'de dunne pen gaat niet aan');
   await page.click('#mkDik');
+  // De emmer draagt de kleur van nu, net als de stippen.
+  await page.click('#mkKleuren .mk-kleur:nth-child(2)');
+  ok(await page.evaluate(() => document.querySelector('#mkEmmer').style.getPropertyValue('--verf')
+    === document.querySelector('#mkKleuren .mk-kleur:nth-child(2)').dataset.kleur), 'de emmer neemt de gekozen kleur niet');
+  // Het gereedschap blijft binnen de breedte van de kleuren.
+  const rij = await page.evaluate(() => {
+    const k = document.querySelector('#mkKleuren').getBoundingClientRect();
+    const t = [...document.querySelectorAll('#mkTeken .mk-gereedschap .mk-tg:not([hidden])')].map(b => b.getBoundingClientRect());
+    return { links: t[0].left - k.left, rechts: k.right - t[t.length - 1].right,
+             vierkant: t.every(r => Math.abs(r.width - r.height) < 1) };
+  });
+  ok(Math.abs(rij.links) < 1 && Math.abs(rij.rechts) < 1, `het gereedschap is niet zo breed als de kleuren (${rij.links}, ${rij.rechts})`);
+  ok(rij.vierkant, 'de tegels van het gereedschap zijn niet vierkant');
   await page.focus('#mkWoord');
   const vak = await page.locator('#mkVak').boundingBox();
   await page.mouse.move(vak.x + vak.width * .3, vak.y + vak.height * .3);

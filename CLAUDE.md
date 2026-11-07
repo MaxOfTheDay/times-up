@@ -530,7 +530,7 @@ vandaan kwam). De lijst staat in `tijdisom.eigen`, de beelden in IndexedDB
   opent in de soort van de vorige keer (`tijdisom.soort`). Een bestaande
   kaart heeft die keuze niet. Er is geen Aan/Uit: 0 bij "In elk potje"
   is uit, en dan staat "uit" in de rij.
-- Is het woord al een gewone kaart, dan zegt een regel onder het woord dat
+- Is het woord al een gewone kaart, dan zegt een regel onder Bewaren dat
   (`#mkAl`, `gewoneKaart()`); bewaren mag nog steeds.
 - Bewaren is goud zodra er een beeld is; zonder woord wijst een tik de
   woordregel aan (`nudge()` en focus). Weggooien kost twee tikken; een niet
@@ -543,10 +543,14 @@ vandaan kwam). De lijst staat in `tijdisom.eigen`, de beelden in IndexedDB
 - Of je tekent haar in hetzelfde vierkant (`mkDoek`): acht tekenkleuren
   zijn inhoud, geen betekenis. Leeg is het vel gestippeld met het potlood
   (`.blanco`), zoals het lege fotovak met het album; dun en dik zijn twee
-  knoppen (`#mkDun`, `#mkDik`). Staat het toetsenbord op, dan sluit de
+  knoppen (`#mkDun`, `#mkDik`), en hun stippen en de verf in de emmer
+  (`--verf`) dragen de kleur van nu, met een inktrand. Het gereedschap is
+  zes vierkante tegels over de breedte van de kleuren, met altijd 8 px
+  ertussen. Staat het toetsenbord op, dan sluit de
   eerste aanraking op het vel het alleen, zonder streep. Het teken van een
   gewone kaart met hetzelfde woord staat ook in de woordregel
-  (`#mkWoordTeken`), want `#mkAl` ligt onder het toetsenbord. Een tekening is een doorzichtige PNG en
+  (`#mkWoordTeken`), want `#mkAl` ligt onder het toetsenbord; de zin zelf
+  staat onder Bewaren, zodat er boven de kleuren geen lege sleuf ligt. Een tekening is een doorzichtige PNG en
   krijgt de pen van `.glyph`, geen kader; die pen ligt in de maker al om
   het vel zodra de vinger loslaat (`tekenRand()`, `#mkRand`). De emmer
   houdt een kier tot de dikke pen voor dicht (`KIER`), en elke emmer
