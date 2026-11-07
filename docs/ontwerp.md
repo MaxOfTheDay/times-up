@@ -3459,11 +3459,32 @@ code: een foto of tekening en het woord, in Instellingen.
   bord; wat er op een kaart staat is inhoud, net als de kleuren van een
   emoji. De knoppen zelf houden de regel: gekozen is goud.
 - **Een tekening is doorzichtig en krijgt de pen.** Bewaard als PNG zonder
-  achtergrond, zodat het papier van de kaart erdoor komt en de vier
-  `drop-shadow`s van `.glyph` om elke lijn een inktrand leggen, zoals om een
-  emoji. Om een vrije vorm is dat een lijn, geen kader. Aanpassen
-  tekent verder op het bewaarde beeld; een stap terug haalt alleen wat er in
-  deze beurt bij kwam.
+  achtergrond, zodat het papier van de kaart erdoor komt en `Pen` om elke
+  lijn een inktrand legt, zoals om een emoji. Om een vrije vorm is dat een
+  lijn, geen kader. Aanpassen tekent verder op het bewaarde beeld; een stap
+  terug haalt alleen wat er in deze beurt bij kwam.
+- **De pen ligt al op het vel.** Zonder die rand in de maker gaf de kaart een
+  verrassing: een rode lijn werd rood in zwart, een zwarte werd dikker, een
+  vlak kreeg een omtrek. `tekenRand()` legt dezelfde twee ringen als `Pen`
+  op een canvas onder het vel (`#mkRand`), in verhouding tot de kaart (4 px
+  op een teken van zo'n 262 px: `RAND_DEEL`). Hij komt erom als de vinger
+  loslaat, na een emmer en na een stap terug, niet tijdens de streek: dat
+  kost op een vertraagde browser (zes keer) zo'n 50 ms, te veel per
+  beweging. Een getoverde tekening ligt kaal, dus hier ook (`getoverdVel()`).
+  Een foto krijgt geen pen: om een vierkant is dat een kader.
+- **De emmer lekt niet door een kier.** Een kind sluit een lijn zelden; door
+  het kleinste gaatje werd het hele vel geel, en op de kaart was dat een
+  vierkant met een rand. Een kier tot de dikke pen (`KIER`, 13 op 512 als
+  straal) telt als dicht: de emmer vult eerst wat verder dan `KIER` van een
+  lijn ligt, en groeit dan binnen dezelfde kleur terug tot tegen de lijnen,
+  hoogstens anderhalve `KIER` ver, zodat ook de hoeken vol komen. In de
+  kier zelf steekt de verf een paar pixels naar buiten; de inktrand dekt
+  dat. Tik je in een stuk smaller dan de kier, dan vult hij gewoon.
+- **Stap terug begint bij de laatste emmer.** Opnieuw tekenen deed elke
+  vulling opnieuw: na twintig emmers 1,3 s op een zes keer vertraagde
+  browser. Elke emmer bewaart nu het vel erna (`a.na`, de laatste `NA_MAX`,
+  zes, want elke kopie is 4 MB); `tekenDoek()` begint bij de laatste kopie.
+  Nu zo'n 70 ms, de rand inbegrepen.
 - **Alles weg is een stap.** De prullenbak duwt `{ wis }` op de stappen in
   plaats van ze te legen, zodat een stap terug de tekening teruggeeft, ook
   het bewaarde beeld van een kaart die je aanpast. Eén tik van een kind op
@@ -3474,8 +3495,7 @@ code: een foto of tekening en het woord, in Instellingen.
   Het canvas is nu `VEL` (1024) groot; de stappen rekenen in punten van
   512 en `doekBlob()` verkleint bij het bewaren, zodat de kaart precies
   blijft wat ze was. De emmer vult per pixel van het vel: zo'n 10 ms in
-  plaats van 2,5, en een stap terug na een paar vlakken blijft onder de
-  50 ms.
+  plaats van 2,5.
 - **Een lijn is een bocht, geen veelhoek.** Een telefoon geeft één
   `pointermove` per beeld; een snelle cirkel van een tiende seconde werd zo
   een twaalfhoek. De lijn neemt alle punten van de vinger

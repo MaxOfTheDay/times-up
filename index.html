@@ -3438,6 +3438,7 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
         <img id="mkFoto" alt="" hidden draggable="false">
         <video id="mkZoeker" playsinline muted hidden></video>
         <i class="mk-plaat boven" aria-hidden="true"></i><i class="mk-plaat onder" aria-hidden="true"></i>
+        <canvas class="mk-rand" id="mkRand" width="1024" height="1024" hidden aria-hidden="true"></canvas>
         <canvas id="mkDoek" width="1024" height="1024" hidden></canvas>
         <!-- Toveren: de staf ligt midden op het lege vel; tijdens het tekenen
              stuurt hij ringen door de punten. Zie docs/ontwerp.md, Toveren. -->
@@ -5269,7 +5270,7 @@ function tekenMaker() {
   vak.tabIndex = teken ? -1 : 0;
   foto.hidden = !heeft;
   $("#mkZoeker").hidden = !live;
-  $("#mkDoek").hidden = !teken;
+  $("#mkDoek").hidden = $("#mkRand").hidden = !teken;
   if (heeft && foto.src !== mk.img.src) foto.src = mk.img.src;
   $("#mkCamRij").hidden = !live;
   $("#mkGereedschap").hidden = !heeft;
@@ -5576,10 +5577,15 @@ function lijn(g, a) {
   g.restore();
 }
 /* Vullen vanaf een punt: alles wat er (in kleur en doorzichtigheid) op lijkt
-   en eraan vast zit. Daarna één pixel groeien, anders blijft er een lichte
-   rand langs de zachte kant van de lijnen. */
+   en eraan vast zit. Een kier tot zo breed als de dikke pen telt als dicht
+   (KIER): eerst vult de emmer alleen wat verder dan KIER van een lijn ligt,
+   dan groeit de verf terug tot tegen de lijnen, hoogstens anderhalve KIER,
+   zodat ook de hoekjes vol komen. Tik je in een smal stukje, dan vult hij
+   gewoon. Daarna één pixel groeien, anders blijft er een lichte rand langs
+   de zachte kant van de lijnen. */
+const KIER = 13;                 // in punten van DOEK: een kier tot 26 is dicht
 function vul(g, x, y, kleur) {
-  const M = VEL;                 // vullen gaat per pixel van het vel
+  const M = VEL, MM = M * M;     // vullen gaat per pixel van het vel
   x = Math.floor(x * VK); y = Math.floor(y * VK);
   if (x < 0 || y < 0 || x >= M || y >= M) return;
   const im = g.getImageData(0, 0, M, M), d = im.data;
@@ -5587,41 +5593,139 @@ function vul(g, x, y, kleur) {
   const r0 = d[s], g0 = d[s + 1], b0 = d[s + 2], a0 = d[s + 3];
   const [r, gr, b] = [1, 3, 5].map(i => parseInt(kleur.slice(i, i + 2), 16));
   if (a0 === 255 && Math.abs(r0 - r) + Math.abs(g0 - gr) + Math.abs(b0 - b) < 12) return;
-  const lijkt = j => Math.abs(d[j] - r0) + Math.abs(d[j + 1] - g0) +
-                     Math.abs(d[j + 2] - b0) + Math.abs(d[j + 3] - a0) * 2 < 160;
-  const vol = new Uint8Array(M * M), stapel = [x + y * M];
-  while (stapel.length) {
-    const p = stapel.pop();
-    if (vol[p] || !lijkt(p * 4)) continue;
-    vol[p] = 1;
+  const lijkt = new Uint8Array(MM);
+  for (let p = 0, j = 0; p < MM; p++, j += 4)
+    lijkt[p] = Math.abs(d[j] - r0) + Math.abs(d[j + 1] - g0) +
+               Math.abs(d[j + 2] - b0) + Math.abs(d[j + 3] - a0) * 2 < 160 ? 1 : 0;
+  /* Afstand tot de dichtstbijzijnde lijn, in twee vegen (3 recht, 4 schuin). */
+  const D = new Uint16Array(MM), K = KIER * VK * 3;
+  for (let p = 0; p < MM; p++) D[p] = lijkt[p] ? 65535 : 0;
+  for (let p = 0; p < MM; p++) {
+    let v = D[p]; if (!v) continue;
     const px = p % M;
-    if (px > 0) stapel.push(p - 1);
-    if (px < M - 1) stapel.push(p + 1);
-    if (p >= M) stapel.push(p - M);
-    if (p < M * (M - 1)) stapel.push(p + M);
+    if (px > 0 && D[p - 1] + 3 < v) v = D[p - 1] + 3;
+    if (p >= M) {
+      if (D[p - M] + 3 < v) v = D[p - M] + 3;
+      if (px > 0 && D[p - M - 1] + 4 < v) v = D[p - M - 1] + 4;
+      if (px < M - 1 && D[p - M + 1] + 4 < v) v = D[p - M + 1] + 4;
+    }
+    D[p] = v;
   }
-  for (let p = 0; p < vol.length; p++) {
+  for (let p = MM - 1; p >= 0; p--) {
+    let v = D[p]; if (!v) continue;
+    const px = p % M;
+    if (px < M - 1 && D[p + 1] + 3 < v) v = D[p + 1] + 3;
+    if (p < MM - M) {
+      if (D[p + M] + 3 < v) v = D[p + M] + 3;
+      if (px < M - 1 && D[p + M + 1] + 4 < v) v = D[p + M + 1] + 4;
+      if (px > 0 && D[p + M - 1] + 4 < v) v = D[p + M - 1] + 4;
+    }
+    D[p] = v;
+  }
+  const kern = D[y * M + x] > K;
+  /* vol: 1 gevuld. Vullen met een eigen stapel van getallen, geen array. */
+  const vol = new Uint8Array(MM), stapel = new Int32Array(MM + 1);
+  let mag = lijkt;
+  if (kern) { mag = new Uint8Array(MM); for (let p = 0; p < MM; p++) mag[p] = D[p] > K ? 1 : 0; }
+  let n = 0;
+  stapel[n++] = x + y * M; vol[x + y * M] = 1;
+  while (n) {
+    const p = stapel[--n], px = p % M;
+    if (px > 0 && !vol[p - 1] && mag[p - 1]) { vol[p - 1] = 1; stapel[n++] = p - 1; }
+    if (px < M - 1 && !vol[p + 1] && mag[p + 1]) { vol[p + 1] = 1; stapel[n++] = p + 1; }
+    if (p >= M && !vol[p - M] && mag[p - M]) { vol[p - M] = 1; stapel[n++] = p - M; }
+    if (p < MM - M && !vol[p + M] && mag[p + M]) { vol[p + M] = 1; stapel[n++] = p + M; }
+  }
+  if (kern) {
+    /* Terug groeien binnen wat lijkt, ring na ring. De rand van de kern ligt
+       waar D net boven K zit; alleen vandaar kan het groeien. */
+    let rand = new Int32Array(MM), nr = 0, volgende = new Int32Array(MM);
+    for (let p = 0; p < MM; p++) if (vol[p] && D[p] <= K + 12) rand[nr++] = p;
+    const stappen = Math.ceil(KIER * VK * 1.5);
+    for (let k = 0; k < stappen && nr; k++) {
+      let nv = 0;
+      const schuin = k % 2 === 1;  // om en om recht en schuin: bijna rond
+      for (let i = 0; i < nr; i++) {
+        const p = rand[i], px = p % M, l = px > 0, rt = px < M - 1, o = p >= M, on = p < MM - M;
+        const zet = q => { if (!vol[q] && lijkt[q]) { vol[q] = 1; volgende[nv++] = q; } };
+        if (l) zet(p - 1); if (rt) zet(p + 1); if (o) zet(p - M); if (on) zet(p + M);
+        if (schuin) {
+          if (l && o) zet(p - M - 1); if (rt && o) zet(p - M + 1);
+          if (l && on) zet(p + M - 1); if (rt && on) zet(p + M + 1);
+        }
+      }
+      const t = rand; rand = volgende; volgende = t; nr = nv;
+    }
+  }
+  for (let p = 0; p < MM; p++) {
     const px = p % M;
     const rand = vol[p] || (px > 0 && vol[p - 1] === 1) || (px < M - 1 && vol[p + 1] === 1) ||
-                 (p >= M && vol[p - M] === 1) || (p < M * (M - 1) && vol[p + M] === 1);
+                 (p >= M && vol[p - M] === 1) || (p < MM - M && vol[p + M] === 1);
     if (!rand) continue;
     const j = p * 4;
     d[j] = r; d[j + 1] = gr; d[j + 2] = b; d[j + 3] = 255;
   }
   g.putImageData(im, 0, 0);
 }
+/* Stap terug tekent het vel opnieuw. Een emmer kost een vulling van het
+   hele vel, en na twintig vlakken haperde terug meer dan een seconde op een
+   oudere telefoon. Daarom krijgt elke emmer een kopie van het vel erna
+   (a.na), de laatste NA_MAX; opnieuw tekenen begint bij de laatste kopie. */
+const NA_MAX = 6;
+function kopieNa(a) {
+  const c = document.createElement("canvas");
+  c.width = c.height = VEL;
+  c.getContext("2d").drawImage($("#mkDoek"), 0, 0);
+  a.na = c;
+  const met = mk.acties.filter(x => x.na);
+  met.slice(0, Math.max(0, met.length - NA_MAX)).forEach(x => { x.na = null; });
+}
 function tekenDoek() {
   const g = doek();
   g.clearRect(0, 0, VEL, VEL);
-  if (mk && mk.basis) g.drawImage(mk.basis, 0, 0, VEL, VEL);
-  if (mk) mk.acties.forEach(a => {
+  let i = mk ? mk.acties.length : 0;
+  while (i-- && !mk.acties[i].na);
+  if (i >= 0) g.drawImage(mk.acties[i].na, 0, 0);
+  else if (mk && mk.basis) g.drawImage(mk.basis, 0, 0, VEL, VEL);
+  if (mk) mk.acties.slice(i + 1).forEach(a => {
     if (a.beeld || a.wis) {      // een getoverde tekening vervangt het vel
       g.clearRect(0, 0, VEL, VEL);
       if (a.wis) return;
       g.drawImage(a.beeld, 0, 0, VEL, VEL);
-    } else if (a.vul) vul(g, a.x, a.y, a.kleur);
+    } else if (a.vul) { vul(g, a.x, a.y, a.kleur); kopieNa(a); }
     else lijn(g, a);
   });
+  tekenRand();
+}
+/* De pen van de kaart, al op het vel: op de kaart krijgt een tekening de
+   inktlijn van Vos en Uil (Pen), en zonder die lijn hier gaf de kaart een
+   verrassing (rood werd rood in zwart, zwart werd dikker). Dezelfde twee
+   ringen, in verhouding: 4 px op een teken van zo'n 262 px. Hij komt erom
+   als de vinger loslaat, niet tijdens de streek. Een getoverde tekening
+   heeft haar eigen lijn en ligt kaal, dus hier ook. */
+const RAND_DEEL = 4 / 262;
+function getoverdVel() {
+  const v = opVel();
+  return v.acties.some(a => a.beeld) || (v.basis && !!(mk.kaart && mk.kaart.getoverd));
+}
+const randKras = document.createElement("canvas");
+function tekenRand() {
+  const c = $("#mkRand"), g = c.getContext("2d");
+  g.clearRect(0, 0, VEL, VEL);
+  if (!mk || mk.soort !== "tekening" || getoverdVel()) return;
+  randKras.width = randKras.height = VEL;
+  const k = randKras.getContext("2d");
+  k.drawImage($("#mkDoek"), 0, 0);
+  k.globalCompositeOperation = "source-in";
+  k.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--ink").trim() || "#14110F";
+  k.fillRect(0, 0, VEL, VEL);
+  const r = VEL * RAND_DEEL;
+  for (const straal of [r, r / 2]) {
+    const n = Math.max(8, Math.ceil(Math.PI * straal));
+    for (let i = 0; i < n; i++)
+      g.drawImage(randKras, Math.round(straal * Math.cos(2 * Math.PI * i / n)),
+                            Math.round(straal * Math.sin(2 * Math.PI * i / n)));
+  }
 }
 const doekPunt = e => {
   const r = $("#mkDoek").getBoundingClientRect(), k = DOEK / r.width;
@@ -5633,7 +5737,7 @@ function penNeer(e) {
   if (mk.gereed === "emmer") {
     const a = { vul: true, x: x, y: y, kleur: mk.kleur };
     mk.acties.push(a); mk.nieuw = true;
-    vul(doek(), x, y, a.kleur); keurMaker();
+    vul(doek(), x, y, a.kleur); kopieNa(a); tekenRand(); keurMaker();
     return;
   }
   if (streek) return;             // één vinger tekent, een tweede niet
@@ -5669,7 +5773,7 @@ function penVerder(e) {
 function penOp(e) {
   if (!streek || e.pointerId !== streek.id) return;
   streek = null;
-  keurMaker();
+  tekenRand(); keurMaker();
 }
 /* Bewaard op 512, zoals elke eigen kaart. */
 function doekBlob() {
@@ -5718,8 +5822,7 @@ $("#mkBewaar").addEventListener("click", async () => {
   }
   /* Een getoverde tekening heeft haar eigen zwarte lijn; de pen van .glyph
      erom gaf een dubbele, vlekkerige rand. Ze ligt kaal, zoals een foto. */
-  const getoverd = mk.soort === "tekening" &&
-    (opVel().acties.some(a => a.beeld) || (opVel().basis && !!(kaart && kaart.getoverd)));
+  const getoverd = mk.soort === "tekening" && getoverdVel();
   if (kaart) { kaart.woord = woord; kaart.soort = mk.soort; kaart.getoverd = getoverd; }
   else { eigen.kaarten.push({ id: id, woord: woord, laatst: 0, soort: mk.soort, getoverd: getoverd }); onthoudSoort(mk.soort); }
   bewaarEigen();

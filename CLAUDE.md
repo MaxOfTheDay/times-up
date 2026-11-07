@@ -529,7 +529,10 @@ vandaan kwam). De lijst staat in `tijdisom.eigen`, de beelden in IndexedDB
   verbergen (`stopCam()`); de voorcamera spiegelt alleen in de zoeker.
 - Of je tekent haar in hetzelfde vierkant (`mkDoek`): acht tekenkleuren
   zijn inhoud, geen betekenis. Een tekening is een doorzichtige PNG en
-  krijgt de pen van `.glyph`, geen kader.
+  krijgt de pen van `.glyph`, geen kader; die pen ligt in de maker al om
+  het vel zodra de vinger loslaat (`tekenRand()`, `#mkRand`). De emmer
+  houdt een kier tot de dikke pen voor dicht (`KIER`), en elke emmer
+  bewaart het vel erna (`a.na`), zodat stap terug niet alles overdoet.
 
 **Toveren.** De toverstaf vraagt een tekening aan een Cloudflare Worker
 (`worker/tover.mjs`, uitgerold door `.github/workflows/worker.yml`, adres in
