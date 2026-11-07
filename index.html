@@ -6440,6 +6440,28 @@ function zetOpRand(team) {
   $("#hoSideB").classList.toggle("up", team === 1);
 }
 
+/* Na de bel tikt een vinger vaak nog door op goed. Lag de knop van het
+   volgende scherm daar, dan begon die tik de beurt van de andere ploeg
+   (of op de eindstand een nieuw potje). Dus komt die knop ingedrukt aan
+   (.neer: nog niet) en veert hij pas op als zijn kaart geland is
+   (RUST_MS) en er STIL_MS lang geen vinger op het glas kwam. Wie
+   doortikt, houdt hem ingedrukt; wie stopt, ziet hem meteen opkomen. */
+const RUST_MS = 600, STIL_MS = 500;
+let laatsteVinger = -1e9;
+addEventListener("pointerdown", () => { laatsteVinger = performance.now(); },
+  { capture: true, passive: true });
+function rustKnop(knoppen) {
+  const los = () => knoppen.forEach(k => k.classList.remove("neer"));
+  knoppen.forEach(k => k.classList.add("neer"));
+  const t0 = performance.now();
+  const kijk = () => {
+    const nu = performance.now();
+    const wacht = Math.max(t0 + RUST_MS, laatsteVinger + STIL_MS) - nu;
+    if (wacht > 0) na(wacht, kijk, los); else los();
+  };
+  na(RUST_MS, kijk, los);
+}
+
 function handoff(mode, freshA, freshB, zelfdeGrond) {
   const round = mode === "round";
   /* Wat in een pauze ingedrukt bleef (zie PAUZE_NEER), ligt hier weer op. */
@@ -6526,7 +6548,9 @@ function handoff(mode, freshA, freshB, zelfdeGrond) {
      altijd een beurt die nog moet beginnen. De enige andere plek is
      bewaarBeurt(), en die rondt eerst af tot zo'n grens. */
   saveGame(handoffMode);
+  const naBeurt = current === "play" && !zelfdeGrond;
   show("handoff");
+  if (naBeurt) rustKnop([$("#btnStartTurn")]);
   veldHo.aan();
   /* Na een beurt of ronde stroomt de kleur vanaf papier, en de punten
      groeien vanuit de kaart naar de rand: het vlakke spelscherm eindigt waar
@@ -6562,8 +6586,8 @@ function draaiWeg(els, ms) {
     { duration: ms, easing: curve("weg"), fill: "forwards" }));
 }
 function zetTerug(els) { els.forEach(el => el && el.getAnimations().forEach(a => a.cancel())); }
-$("#btnStartTurn").addEventListener("click", () => {
-  if (vertrekt) return;
+$("#btnStartTurn").addEventListener("click", e => {
+  if (vertrekt || e.currentTarget.classList.contains("neer")) return;
   Snd.unlock();
   const kaart = $("#hoRoundCard"), k = kaart.getBoundingClientRect();
   goKaart = k.width > 0 ? k : null;
@@ -8366,7 +8390,9 @@ function winner() {
      "nog een keer" ruimen hem op. */
   saveGame("uit");
   G = null;
+  const naSpel = current === "play";
   show("winner");
+  if (naSpel) rustKnop([$("#btnAgain"), $("#btnHome")]);
   veldWn.aan();
   if (vloed) kleurUitKaart(scherm, veldWn, $("#wnVeld"), $("#wnPiles"), TEAMS[win].hex,
     () => scherm.style.setProperty("--wn-grond", TEAMS[win].color));
@@ -8474,8 +8500,8 @@ function clearConfetti() {
    Terug naar de titel is een eigen knop geworden. */
 /* Net zo: de eindstand draait om naar de eerste opdracht van het nieuwe
    potje. */
-$("#btnAgain").addEventListener("click", () => {
-  if (vertrekt) return;
+$("#btnAgain").addEventListener("click", e => {
+  if (vertrekt || e.currentTarget.classList.contains("neer")) return;
   const k = $("#btnAgain").getBoundingClientRect();
   const stand = $("#wnPiles"), m = stand.getBoundingClientRect();
   clearConfetti(); Snd.unlock();
@@ -8497,7 +8523,8 @@ $("#btnAgain").addEventListener("click", () => {
   draaiWeg([stand], OMDRAAI);
   na(OMDRAAI, verder, () => { vertrekt = false; zetTerug([stand]); });
 });
-$("#btnHome").addEventListener("click", () => {
+$("#btnHome").addEventListener("click", e => {
+  if (e.currentTarget.classList.contains("neer")) return;
   const k = $("#btnHome").getBoundingClientRect();
   clearConfetti(); clearGame(); naarTitel(k);
 });

@@ -86,7 +86,8 @@ achtste regel in de tabel, met haar ene betekenis.
 - **Drukken** is van de vinger en de klok. De klok drukt de kaart in bij
   elke tel van het aftellen, precies zoals een vinger een knop indrukt.
 - **Ingedrukt blijven** is stilstand: goed en pas tijdens het aftellen
-  (nog niet) en na het stempel (niet meer), en alles wat stilstaat in de
+  (nog niet) en na het stempel (niet meer), de startknop die na de bel
+  even ingedrukt aankomt (nog niet), en alles wat stilstaat in de
   pauze. Nooit vervagen; een tint op een stromende grond mengt kleuren
   buiten het palet.
 - **Rimpelen** heeft de vorm van wat drukte: een cirkel vanaf de rand van
@@ -879,6 +880,27 @@ Let op de `visibilitychange`-handler: die keerde terug tenzij `current` op
 `"play"` stond. De browser laat de lock los zodra het document verborgen
 raakt, dus zonder een eigen tak voor de overdracht komt hij daar nooit meer
 terug -- en valt het scherm alsnog uit op precies het verkeerde moment.
+
+### Na de bel tikt de vinger door
+
+Gemeten (CDP-touch, 390x844, 360x780 en 320x568): een kind dat na de bel
+blijft tikken op goed, raakt zo'n 1,9 s later de startknop van de
+overdracht, die staand het bovenste stuk van goed overlapt (11 tot 17%
+van de knop). Dat startte het aftellen van de andere ploeg terwijl het
+toestel nog bij de vorige lag, en op 320x568 landde dezelfde tik op
+"nog een keer" van de eindstand: een nieuw potje, en de stand was weg.
+Liggend overlappen ze niet. `spookTik()` vangt dit niet: die kijkt alleen
+300 ms na een klik die het scherm wisselde.
+
+Daarom komt de knop na een beurt of ronde ingedrukt aan (`.neer`, "nog
+niet") en veert hij op als zijn kaart geland is (`RUST_MS`, 600 ms) en er
+`STIL_MS` (500 ms) geen vinger op het glas kwam (`rustKnop()`). Wie
+doortikt, houdt hem ingedrukt; wie stopt, ziet hem meteen opkomen. Een
+onzichtbaar slot van een vaste seconde was het alternatief: dan ziet de
+knop er klaar uit en doet hij niets, en dat leest als bevroren. Een
+hersteld potje en een afgebroken aftelling krijgen geen rust: daar tikte
+niemand door. Op de eindstand rusten ook nog een keer en het huisje, dat op
+de plek van de pauzetegel ligt.
 
 ## Eén kaart, twee kanten
 
