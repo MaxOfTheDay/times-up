@@ -619,7 +619,13 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
   border: var(--line-2) solid var(--ink); background: var(--paper-2);
   box-shadow: var(--lift-1) var(--lift-1) 0 var(--ink);
 }
-.btn-houd { color: var(--ink); }
+.btn-houd { color: var(--ink); touch-action: none; }
+/* Een ring van 12 px om het huisje die meetelt, zoals om goed: wie
+   vasthoudt drukt stevig en rolt met de duim, en een tegel van 48 px is
+   dan krap. Geen veeg en geen zoom vanaf het huisje (touch-action: none):
+   anders nam de browser een vinger die 16 px schoof over, en brak de druk
+   af zonder dat iemand losliet. */
+.btn-houd::after { content: ""; position: absolute; inset: -12px; }
 .btn-danger { position: relative; }
 .btn-houd .mark { width: 22px; position: relative; z-index: 1; }
 .btn-danger .mark { width: 32px; }
@@ -5964,7 +5970,11 @@ function holdButton(el, ms, run, paint) {
      p is waar de voortgang nu staat: een nieuwe druk gaat daar verder, in
      plaats van terug op nul te springen. */
   let raf = null, weg = null, wacht = 0, t0 = 0, druk = 0, p = 0;
+  let vinger = null, x0 = 0, y0 = 0;
   const TIK_MS = 250;                       // korter dan dit is een tik, geen druk
+  /* Zo ver mag de vinger tijdens het houden glijden. Een duim die stevig
+     drukt rolt een centimeter; pas wie echt wegschuift, breekt af. */
+  const LOS_PX = 40;
   const draw = v => { p = v; Snd.houdNaar(v); if (paint) paint(v); };
   const uit = kromme("uit");
 
@@ -6000,11 +6010,21 @@ function holdButton(el, ms, run, paint) {
     raf = requestAnimationFrame(step);
   }
   function step(now) {
+    /* Het scherm ging weg terwijl de vinger nog lag (start werd net
+       ingedrukt, en het aftellen nam het over): de vastgehouden vinger houdt
+       dan niets meer vast. Zonder dit stopte het potje midden in het
+       aftellen, en liep dat daarna door op een leeg spel. */
+    if (!el.getClientRects().length) {
+      vinger = null; raf = null;
+      el.classList.remove("voordoen"); Snd.houdUit(60); draw(0);
+      return;
+    }
     const was = p, v = Math.min(1, (now - t0) / ms);
     draw(v);
     if ((was < 1 / 3 && v >= 1 / 3) || (was < 2 / 3 && v >= 2 / 3)) Tril.ijk();
     if (v >= 1) {
       raf = null; Snd.houdUit(40); Snd.dicht(); Tril.doe();
+      slikKlik();
       /* Eerst run(): de titel staat dan al vol in beeld, en draw(0) ruimt
          de cirkel pas op als er niets meer te zien is. */
       run(); p = 0; if (paint) paint(0);
@@ -6040,9 +6060,26 @@ function holdButton(el, ms, run, paint) {
      menu. Zonder deze twee kom je nooit bij de 1100 ms. */
   el.style.webkitTouchCallout = "none";
   el.addEventListener("contextmenu", e => e.preventDefault());
-  el.addEventListener("pointerdown", e => { e.preventDefault(); Snd.unlock(); start(); });
-  ["pointerup", "pointerleave", "pointercancel"].forEach(ev =>
-    el.addEventListener(ev, cancel));
+  /* De vinger wordt vastgehouden (setPointerCapture): hij mag over de rand
+     van de tegel glijden zonder dat de druk stopt, tot LOS_PX van waar hij
+     neerkwam. Een tweede vinger elders op het glas telt niet mee. */
+  el.addEventListener("pointerdown", e => {
+    e.preventDefault(); Snd.unlock();
+    if (vinger !== null && vinger !== e.pointerId) return;
+    vinger = e.pointerId; x0 = e.clientX; y0 = e.clientY;
+    try { el.setPointerCapture(e.pointerId); } catch (err) {}
+    start();
+  });
+  el.addEventListener("pointermove", e => {
+    if (e.pointerId === vinger && Math.hypot(e.clientX - x0, e.clientY - y0) > LOS_PX) los(e);
+  });
+  const los = e => {
+    if (e.pointerId !== vinger) return;
+    vinger = null;
+    cancel();
+  };
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach(ev =>
+    el.addEventListener(ev, los));
   el.addEventListener("keydown", e => {
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); Snd.unlock(); start(); }
   });
@@ -6050,6 +6087,27 @@ function holdButton(el, ms, run, paint) {
   /* Hetzelfde voordoen als een losse tik, voor wie de knop niet aanraakte
      maar wel zocht: de terugveeg op de overdracht (zie terug()). */
   return { voordoen };
+}
+
+/* Na een voltooide lange druk ligt de vinger nog op het glas, en op de
+   titel ligt het tandwiel precies onder het huisje van de overdracht. Op
+   een touchscherm kwam de klik van het loslaten daar terecht, en ging je
+   naar Instellingen in plaats van naar huis; met het toetsenbord drukte de
+   herhaling van de toets op Beginnen, waar de focus heen gaat. De eerste
+   klik tot 60 ms na het loslaten wordt daarom ingeslikt: de klik van een
+   tik komt meteen na het loslaten, een nieuwe tik nooit zo snel. */
+function slikKlik() {
+  const slik = e => { e.preventDefault(); e.stopPropagation(); };
+  const klaar = () => {
+    removeEventListener("pointerup", later, true);
+    removeEventListener("keyup", later, true);
+    setTimeout(() => removeEventListener("click", slik, true), 60);
+  };
+  const later = () => klaar();
+  addEventListener("click", slik, true);
+  addEventListener("pointerup", later, true);
+  addEventListener("keyup", later, true);
+  setTimeout(klaar, 4000);                  // nooit langer dan dit
 }
 
 /* Gluren naar huis: de titel groeit als cirkel uit het huisje zolang je

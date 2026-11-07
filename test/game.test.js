@@ -603,6 +603,40 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     await ctx.close();
   }
 
+  // --- het huisje vasthouden met een echte vinger ---
+  // Een duim die stevig drukt, rolt: de browser nam een vinger die 16 px
+  // schoof over als veeg, en de druk brak af. En na een voltooide druk kwam
+  // de klik van het loslaten op het tandwiel van de titel terecht.
+  {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    const tp = await ctx.newPage();
+    tp.on('pageerror', e => errs.push('PAGEERROR ' + e.message));
+    await tp.goto(APP_URL);
+    await tp.evaluate(() => localStorage.clear());
+    await tp.reload();
+    await tp.waitForTimeout(400);
+    await tp.tap('#btnStart');
+    await tp.waitForFunction(() => window.__tijd.screen === 'handoff', null, { timeout: 8000 });
+    await tp.waitForTimeout(2500);
+    const cdp = await ctx.newCDPSession(tp);
+    const b = await tp.locator('#btnStopHo').boundingBox();
+    const x = b.x + b.width / 2, y = b.y + b.height / 2;
+    const raak = (type, pts) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts });
+    await raak('touchStart', [{ x, y, id: 0 }]);
+    for (let i = 1; i <= 10; i++) {
+      await raak('touchMove', [{ x: x - 2 * i, y: y + 2 * i, id: 0 }]);
+      await tp.waitForTimeout(40);
+    }
+    await tp.waitForTimeout(1000);
+    await raak('touchEnd', []);
+    await tp.waitForTimeout(700);
+    const waar = await tp.evaluate(() => window.__tijd.screen);
+    ok(waar !== 'handoff', 'het huisje vasthouden met een duim die 28 px rolt, breekt af');
+    ok(waar !== 'setup', 'loslaten na het huisje vasthouden opent Instellingen');
+    ok(waar === 'title', 'het huisje vasthouden met een echte vinger komt niet op de titel uit: ' + waar);
+    await ctx.close();
+  }
+
   ok(!errs.length, 'consolefouten: ' + errs.join(' | '));
 
   await browser.close();
