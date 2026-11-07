@@ -187,7 +187,9 @@ voor Vos en Uil: een knop zakt in, hij knijpt nooit. Goed, pas en het +N tellen 
 `tikKnop()` op het neerzetten van de vinger, nooit via `click` (een
 schuivende vinger of een tweede vinger op het glas gaf geen klik); elke
 druk zakt minstens `TIK_NEER` in (`.tik`), en om goed ligt een onzichtbare
-ring van 20 px.
+ring van 20 px. Elke andere knop houdt `click`, met een vangnet voor een
+rollende of tweede vinger (`TIK_ROL`), en een klik binnen `SPOOK_MS` na een
+schermwissel op de plek van de vorige klik telt niet (`spookTik()`).
 
 **De hoek van het scherm is geen rechte hoek.** Elk blijvend rechthoekig vlak
 houdt `--corner` (32 px) van beide schermranden. Tel `env(safe-area-inset-*)`
@@ -212,7 +214,8 @@ laten huis een kwart gluren (`HOUD_PIEK`). Bij beperkte beweging vult de
 tegel zich met inkt. De vinger wordt vastgehouden (`setPointerCapture`,
 `touch-action: none`) en mag `LOS_PX` rollen, om de tegel ligt een ring van
 12 px, en de klik van het loslaten na een voltooide druk wordt ingeslikt
-(`slikKlik()`: op de titel ligt daar het tandwiel). Starten is een
+(`slikKlik()`: op de titel ligt daar het tandwiel, dat ingedrukt landt en
+bij het loslaten opveert, `.onder`). Starten is een
 tik; het aftellen van drie tellen vangt een strijkende vinger op. Afbreken
 kan tijdens het aftellen alleen via de tegel rechtsboven (`#cdBack`), met
 het pauzeteken, niet via het hele vlak.

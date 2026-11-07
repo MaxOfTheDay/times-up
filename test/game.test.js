@@ -46,8 +46,11 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   // starten op de titel -- meteen de controle of de keuzes meegaan zonder
   // dat er iets te bevestigen viel.
   async function setup({ tier, size, secs }) {
+    // Het tandwiel ligt op de hoek van de uitgang waarmee je hier kwam: een
+    // tik daar binnen 300 ms na de wissel is een spook (spookTik).
+    await page.waitForTimeout(350);
     await page.click('#btnGear');
-    await page.waitForTimeout(150);
+    await page.waitForTimeout(350);           // een tweede tik op die hoek binnen 300 ms is een spook (spookTik)
     if (await screen() !== 'setup') throw new Error('instellingenscherm ging niet open');
     // De moeilijkheid staat bovenaan de gewone kaarten, op #s-kaarten.
     await page.click('#rijGewoon');
@@ -55,11 +58,11 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     if (await screen() !== 'kaarten') throw new Error('de rij Gewone opende de kaarten niet');
     await page.click(`#tierChips .chip[data-tier="${tier}"]`);
     await page.click('#btnKaartenTerug');
-    await page.waitForTimeout(150);
+    await page.waitForTimeout(350);
     await page.click(`#sizeChips .chip[data-size="${size}"]`);
     await page.click(`#secsChips .chip[data-secs="${secs}"]`);
     await page.click('#btnBack');
-    await page.waitForTimeout(150);
+    await page.waitForTimeout(350);
     if (await screen() !== 'title') throw new Error('het huisje kwam niet op de titel uit');
     await page.click('#btnStart');
     await page.waitForTimeout(300);           // het merk draait eerst om
@@ -73,10 +76,10 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   // Het tandwiel is een gewone tik: instellingen openen is niets
   // onomkeerbaars, en het tandwiel bestaat toch al alleen op dit scherm.
   await page.click('#btnGear');
-  await page.waitForTimeout(120);
+  await page.waitForTimeout(350);
   ok(await screen() === 'setup', 'een tik op het tandwiel opent de instellingen niet');
   await page.click('#btnBack');
-  await page.waitForTimeout(120);
+  await page.waitForTimeout(350);
   ok(await screen() === 'title', 'terug vanuit de instellingen komt niet op de titel uit');
 
   await setup({ tier: 'klein', size: 16, secs: 60 });
@@ -634,6 +637,50 @@ const ok = (c, m) => { if (!c) fails.push(m); };
     ok(waar !== 'handoff', 'het huisje vasthouden met een duim die 28 px rolt, breekt af');
     ok(waar !== 'setup', 'loslaten na het huisje vasthouden opent Instellingen');
     ok(waar === 'title', 'het huisje vasthouden met een echte vinger komt niet op de titel uit: ' + waar);
+    await ctx.close();
+  }
+
+  // --- het tikvangnet: rollen, een duim op het glas, een dubbele tik ---
+  // Een click kwam niet bij een tik die 20 px rolde of met een duim op de
+  // rand, en een dubbele tik op het tandwiel opende Instellingen en sloot ze.
+  {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    const tp = await ctx.newPage();
+    tp.on('pageerror', e => errs.push('PAGEERROR ' + e.message));
+    await tp.goto(APP_URL);
+    await tp.evaluate(() => localStorage.clear());
+    await tp.reload();
+    await tp.waitForTimeout(600);
+    const cdp = await ctx.newCDPSession(tp);
+    const raak = (type, pts) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts });
+    const v = (x, y, id) => ({ x, y, id, radiusX: 8, radiusY: 8, force: 1 });
+    const midden = async sel => { const b = await tp.locator(sel).boundingBox(); return [b.x + b.width / 2, b.y + b.height / 2]; };
+    const waar = () => tp.evaluate(() => window.__tijd.screen);
+
+    let [x, y] = await midden('#btnGear');
+    for (let i = 0; i < 2; i++) { await raak('touchStart', [v(x, y, 1)]); await tp.waitForTimeout(40); await raak('touchEnd', []); await tp.waitForTimeout(120); }
+    await tp.waitForTimeout(800);
+    ok(await waar() === 'setup', 'een dubbele tik op het tandwiel komt niet op Instellingen uit: ' + await waar());
+    await tp.click('#btnBack');
+    await tp.waitForTimeout(800);
+
+    [x, y] = await midden('#btnStart');
+    await raak('touchStart', [v(x, y, 2)]); await tp.waitForTimeout(30);
+    await raak('touchMove', [v(x + 14, y + 14, 2)]); await tp.waitForTimeout(30);
+    await raak('touchEnd', []);
+    await tp.waitForTimeout(800);
+    ok(await waar() === 'handoff', 'een tik op start die 20 px rolt, begint geen potje');
+    await tp.waitForTimeout(2200);
+
+    [x, y] = await midden('#btnStartTurn');
+    const duim = v(6, 600, 3);
+    await raak('touchStart', [duim]); await tp.waitForTimeout(100);
+    await raak('touchStart', [duim, v(x, y, 4)]); await tp.waitForTimeout(60);
+    await raak('touchEnd', [duim]); await tp.waitForTimeout(60);
+    await raak('touchEnd', []);
+    await tp.waitForTimeout(800);
+    ok(await tp.evaluate(() => !document.querySelector('#countdown').hidden),
+       'beginnen met een duim op de rand van het scherm begint het aftellen niet');
     await ctx.close();
   }
 
