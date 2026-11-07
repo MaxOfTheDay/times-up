@@ -311,6 +311,44 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(await page.evaluate(() => !document.querySelector('#mkStaf').classList.contains('klaar')), 'de staf blijft goud met het dagbudget op');
   await page.click('#mkDicht');
 
+  /* ------------------------------------------------------------------
+   * De emmer: een kier tot de dikke pen telt als dicht, een wijd gat niet;
+   * stap terug na een emmer geeft het vel van ervoor; de inktrand van de
+   * kaart ligt al op het vel.
+   * ------------------------------------------------------------------ */
+  await page.click('#btnEigenNieuw');
+  await page.click('#mkSoort [data-soort="tekening"]');
+  const emmer = await page.evaluate(() => {
+    const T = window.__tijd || {};
+    const vak = (kier) => {
+      // een vierkant van 100 tot 300 met in de bovenkant een gat van kier breed
+      const d = 10, l = 200 - kier / 2 - d / 2, r = 200 + kier / 2 + d / 2;
+      // dicht bij elkaar, anders rondt de bocht door de middens de hoeken af
+      const hoeken = [[l, 100], [100, 100], [100, 300], [300, 300], [300, 100], [r, 100]], punten = [];
+      hoeken.slice(1).forEach(([x, y], i) => { const [x0, y0] = hoeken[i];
+        for (let t = 0; t < 1; t += .05) punten.push([x0 + (x - x0) * t, y0 + (y - y0) * t]); });
+      punten.push(hoeken[hoeken.length - 1]);
+      mk.acties = [{ kleur: '#14110F', dikte: d, punten }];
+      mk.acties.push({ vul: true, x: 200, y: 200, kleur: '#F2B705' });
+      tekenDoek();
+      const g = document.querySelector('#mkDoek').getContext('2d'), k = 2;
+      return { binnen: g.getImageData(200 * k, 200 * k, 1, 1).data[3], buiten: g.getImageData(20 * k, 20 * k, 1, 1).data[3],
+               hoek: g.getImageData(110 * k, 290 * k, 1, 1).data[3] };
+    };
+    const smal = vak(16), wijd = vak(60);
+    mk.acties.pop(); tekenDoek();
+    const terug = document.querySelector('#mkDoek').getContext('2d').getImageData(400, 400, 1, 1).data[3];
+    const rand = document.querySelector('#mkRand').getContext('2d').getImageData(200 * 2 - 96 * 2 - 20, 400, 40, 1).data;
+    let inkt = 0; for (let i = 3; i < rand.length; i += 4) if (rand[i] > 200) inkt++;
+    return { smal, wijd, terug, inkt };
+  });
+  ok(emmer.smal.binnen === 255 && emmer.smal.hoek === 255, 'de emmer vult een vak met een smalle kier niet tot in de hoek');
+  ok(emmer.smal.buiten === 0, 'de emmer loopt door een kier zo smal als de dikke pen');
+  ok(emmer.wijd.buiten === 255, 'de emmer houdt een wijd gat voor dicht');
+  ok(emmer.terug === 0, 'stap terug na de emmer laat de verf liggen');
+  ok(emmer.inkt > 0, 'de inktrand van de kaart ligt niet op het vel');
+  await page.click('#mkDicht');
+
   await browser.close();
   if (fails.length) { console.log('\nFOUT:\n' + fails.map(f => ' - ' + f).join('\n')); process.exit(1); }
   console.log('  kaarten in orde');
