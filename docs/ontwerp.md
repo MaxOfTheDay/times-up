@@ -3302,6 +3302,15 @@ code gezet. Dat het spel van jullie is, is wat kinderen het hardst laat
 gieren: oma uitbeelden, of de hond. Eigen kaarten maken dat mogelijk zonder
 code: een foto of tekening en het woord, in Instellingen.
 
+- **Leeg nodigt de rij uit, ze telt niet.** Zonder eigen kaarten is de
+  rij Eigen de enige wenk naar een eigen kaart: een gestippelde plus en
+  "Maak je eerste kaart", en een tik opent meteen de maker. Er stond een
+  "0 ›" naast, en dat las als een lege lijst in plaats van een uitnodiging;
+  het getal komt pas met de eerste kaart. Meer wenk is overwogen en niet
+  gedaan: voorbeelden op de regel ("Oma, de hond, de knuffel") zei niets wat
+  de maker niet meteen laat zien, een lege kaart achteraan Gewone ziet na 90
+  tegels niemand, en een stip op het tandwiel zet iets op de titel, die
+  alleen het merk en de knop heeft.
 - **Een vast aantal, de langst niet getrokken eerst.** Je kiest 0, 2, 4
   of 8 ("In elk potje", bovenaan Eigen), standaard 4. Een aantal en geen
   deel: eerst was het ⅛, ¼ of ½ van het potje, en dan stond er op de

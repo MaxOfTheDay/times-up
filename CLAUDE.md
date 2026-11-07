@@ -508,7 +508,7 @@ vandaan kwam). De lijst staat in `tijdisom.eigen`, de beelden in IndexedDB
 - Elk teken op een kaart gaat door `zetTeken()`. Een foto ligt kaal op het
   papier (`.kaal`, geen inktlijn: om een vierkant is dat een derde rand);
   een tekening houdt de pen van `.glyph`, behalve een getoverde.
-- Zonder eigen kaarten heeft de rij Eigen een gestippelde plus en opent
+- Zonder eigen kaarten heeft de rij Eigen een gestippelde plus, geen getal, en opent
   ze meteen de maker; na bewaren staat `#s-kaarten` open op Eigen. Daar
   staan de kaarten in hetzelfde raster als de gewone, met vooraan één lege kaart met een plus (`#btnEigenNieuw`),
   gestippeld en plat; nooit een rij die opzij schuift.
