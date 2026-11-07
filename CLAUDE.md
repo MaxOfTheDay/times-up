@@ -236,7 +236,10 @@ als één rij: nu is de schijf, de andere zijn gelijke papieren tegels op
 tapmaat (`--vak: var(--tap)`, het teken 74%), en de plek links of rechts
 zegt geweest of nog te komen. Liggend is de kaart een vaste breedte
 (`min(46vw, 22rem)`), nooit `width: auto`. Geen kroon, geen "+N", geen
-fiche per punt op dit scherm. Vos en Uil zitten op de bovenrand van de
+fiche per punt op dit scherm. Na een beurt of ronde komt de startknop
+ingedrukt aan en veert op na `RUST_MS` en `STIL_MS` zonder vinger op het
+glas (`rustKnop()`; op de eindstand ook nog een keer en het huisje): een
+vinger die na de bel doortikt op goed, start anders de andere ploeg. Vos en Uil zitten op de bovenrand van de
 opdrachtkaart zoals op het merk (`.gluur`): wie aan zet is rechtop en
 ademend, de ander gluurt tot de ogen; in de stand staan alleen de cijfers,
 elk onder zijn dier. De wake lock blijft hier aan, begrensd op

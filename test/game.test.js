@@ -270,7 +270,21 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(await screen() === 'handoff', 'na start niet op het overdrachtscherm');
   await startTurn();
   const teamBefore = await game(() => window.__tijd.G.team);
-  await page.waitForTimeout(21500);   // 20 s plus de adem na tijd-om (BEURT_ADEM)
+  // Een vinger die na de bel doortikt, start de andere ploeg niet: de
+  // startknop komt ingedrukt aan en veert pas op als het glas even stil
+  // was (rustKnop).
+  await page.waitForFunction(() => window.__tijd.screen === 'handoff', null, { timeout: 25000, polling: 20 });
+  ok(await page.$('#btnStartTurn.neer') !== null, 'de startknop komt na de bel niet ingedrukt aan');
+  const sb = await page.locator('#btnStartTurn').boundingBox();
+  for (let i = 0; i < 3; i++) {
+    await page.mouse.click(sb.x + sb.width / 2, sb.y + sb.height / 2);
+    await page.waitForTimeout(250);
+  }
+  ok(await page.getAttribute('#countdown', 'hidden') !== null,
+     'een doortikkende vinger na de bel start de beurt van de andere ploeg');
+  ok(await page.$('#btnStartTurn.neer') !== null, 'de startknop veert op terwijl er nog getikt wordt');
+  await page.waitForTimeout(700);
+  ok(await page.$('#btnStartTurn.neer') === null, 'de startknop veert niet op als het glas stil is');
   ok(await screen() === 'handoff', 'na tijd om niet op het overdrachtscherm');
   ok(await game(() => window.__tijd.G.team) !== teamBefore, 'ploeg wisselt niet na tijd om');
   ok(await game(() => {
