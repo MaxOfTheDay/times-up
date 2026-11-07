@@ -1374,6 +1374,25 @@ met dezelfde maten als ervoor: raster 12 px op het midden, straal 2 px op
     per beeld; zo is het 22 ms, en in WebGL 1 is er geen extensie nodig.
   - *Een vaste bovengrens*: de shader kent `STIP_MAX_RIMPELS` (32)
     rimpels tegelijk; meer, en de oudste vallen weg, ook op het 2D-canvas.
+- **Opstarten, de maat en de kaartenlijst** (november 2026, daarna):
+  wat er na de punten op de kaart nog overbleef, gemeten op 390x844 bij 3x
+  met de CPU 6x vertraagd.
+  - Elke grond maakte bij het laden zijn WebGL-context en shaders, vijf
+    tegelijk, ook voor schermen die je nog niet ziet. Nu pas bij het eerste
+    beeld (`maat()`): scripts bij het laden 340 → 135 ms, en één context
+    in plaats van vijf zolang je op de titel staat.
+  - `maat()` las elk beeld `getBoundingClientRect()`, en dat dwingt midden
+    in een animatie de opmaak af. De maat komt nu uit een ResizeObserver,
+    die ook de lus wekt als het scherm van maat verandert; alleen als er
+    nog geen maat is, wordt er gemeten.
+  - De lijst Gewone kaarten (tot 275 tegels) opende in ~175 ms, allemaal
+    opmaak. Met `content-visibility: auto` op de tegels maakt de browser
+    alleen op wat bijna in beeld is: ~120 ms. De geschatte maat is de
+    inhoud van een tegel met één regel (49 px, zonder padding en rand);
+    een rij met een woord op twee regels groeit 14 px als ze in beeld komt.
+    De lijst wordt bij het eerste keer doorscrollen zo tot 4% langer
+    (liggend, waar meer woorden afbreken), onder de rand van het beeld:
+    wat je ziet springt niet.
 - **Canvas terug**: een grond die 1,2 s uit beeld is, zet zijn canvas op
   0 bij 0 (`ruimOp()`, via `VELDEN` in `show()`). Drie grondcanvassen van
   1170x2532 hielden samen 37 MB vast; nu ~1 MB. Die 1,2 s is er voor de

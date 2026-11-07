@@ -317,7 +317,8 @@ groeien ze op de overdracht als rastertoon terug vanuit de kaart
 (`toon()`). Er loopt alleen een lus zolang er iets beweegt; bij beperkte
 beweging één stilstaand beeld. Het veld tekent op de grafische kaart
 (`stipGpu()`: elke punt rekent zichzelf uit in een shader, de hoofddraad
-geeft per beeld alleen de rimpels en de rest als getallen mee), behalve
+geeft per beeld alleen de rimpels en de rest als getallen mee; de context
+pas bij het eerste beeld, de maat uit een ResizeObserver), behalve
 zonder echte kaart (`stipGlKan()`); dan rekent en tekent het 2D-canvas
 alleen waar iets beweegt (`band()`, de vuile vakken in `teken()`): een
 groot scherm heeft 25.000 punten. Een nieuwe beweging van de punten komt
