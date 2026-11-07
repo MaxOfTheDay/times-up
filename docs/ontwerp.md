@@ -3546,6 +3546,15 @@ code: een foto of tekening en het woord, in Instellingen.
   uit was er plek: twee knoppen met een kleine en een grote stip in de
   kleur van nu, goud is wat geldt. Zes knoppen, zoals met de staf, dus het
   past op 320 px.
+- **Het gereedschap is zo breed als de kleuren.** Het stond smaller en
+  gecentreerd onder een rij die van rand tot rand liep: twee randen. Nu zes
+  vierkante tegels van hoogstens 44 px met tekens van 62%, verdeeld over de
+  breedte; is de rij smal (256 px, op 320 en liggend), dan krimpen ze zodat
+  er 8 px tussen blijft, anders ligt een schaduw op de buurtegel.
+- **De kleur van nu staat op de knoppen.** De stippen van dun en dik en de
+  verf in de emmer (de onderkant en de druppel, via `--verf`) dragen de
+  gekozen kleur, met een inktrand: een gouden stip viel weg op de gouden
+  knop die aan staat.
 - **Het lege vel zegt "teken hier".** Een leeg papieren vlak met een rand
   in `--paper-2` las als niets. Leeg krijgt het vel wat het lege fotovak
   heeft: een gestippelde rand en het teken van de knop, hier het potlood
@@ -3554,8 +3563,9 @@ code: een foto of tekening en het woord, in Instellingen.
   of een stap terug tot leeg komt hij terug.
 - **Het vierkant krimpt tot Bewaren in beeld is.** Onder het vierkant staat
   met tekenen 470 px; de ondergrens van 240 duwde Bewaren op 360x640 en
-  375x667 onder de rand. Nu 180: vanaf 640 px hoog past alles, op 320x568
-  rol je nog even, want kleiner wordt tekenen te krap. Het toetsenbord
+  375x667 onder de rand. Nu 180, en kleiner wordt tekenen te krap. Sinds
+  de zin "Staat al in het spel" onder Bewaren staat, past Bewaren ook op
+  320x568. Het toetsenbord
   telt niet mee: op Chrome (sinds 108) en Safari schuift het over de
   pagina en verkleint het de layout niet.
 - **De eerste aanraking sluit het toetsenbord.** Gemeten: met de focus op
@@ -3569,7 +3579,10 @@ code: een foto of tekening en het woord, in Instellingen.
   woord ligt op een iPhone onder het toetsenbord, juist terwijl je typt.
   Het teken van de gewone kaart staat daarom ook rechts in de regel
   (`#mkWoordTeken`), die de browser altijd in beeld houdt; de tekst wijkt
-  aan beide kanten even ver, zodat hij in het midden blijft.
+  aan beide kanten even ver, zodat hij in het midden blijft. De zin zelf
+  staat onder Bewaren: onder het woord was zijn lege sleuf van twee regels
+  meestal een gat boven de kleuren. Zo past Bewaren ook op 320x568 zonder
+  rollen.
 - **Acht tekenkleuren zijn inhoud, geen betekenis.** Inkt, rood, oranje,
   goud, groen, blauw, roze en bruin. Oranje en roze kwamen erbij omdat een
   vos, een varken, een wortel of een flamingo zonder ze niet te tekenen is.
