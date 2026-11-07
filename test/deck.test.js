@@ -265,6 +265,29 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   });
   await page.click('#btnEigenNieuw');
   await page.click('#mkSoort [data-soort="tekening"]');
+  /* Het lege vel zegt "teken hier"; dun en dik zijn elk een knop; staat
+   * het toetsenbord op, dan sluit de eerste aanraking op het vel het alleen. */
+  const vel0 = await page.evaluate(() => ({
+    blanco: document.querySelector('#mkVak').classList.contains('blanco'),
+    potlood: document.querySelector('#mkVak .mk-leeg use').getAttribute('href'),
+  }));
+  ok(vel0.blanco && vel0.potlood === '#i-potlood', 'het lege tekenvel toont geen gestippelde rand met potlood');
+  await page.click('#mkDun');
+  ok(await page.evaluate(() => document.querySelector('#mkDun').getAttribute('aria-pressed') === 'true'
+    && document.querySelector('#mkDik').getAttribute('aria-pressed') === 'false'), 'de dunne pen gaat niet aan');
+  await page.click('#mkDik');
+  await page.focus('#mkWoord');
+  const vak = await page.locator('#mkVak').boundingBox();
+  await page.mouse.move(vak.x + vak.width * .3, vak.y + vak.height * .3);
+  await page.mouse.down();
+  await page.mouse.move(vak.x + vak.width * .6, vak.y + vak.height * .6, { steps: 5 });
+  await page.mouse.up();
+  const naToets = await page.evaluate(() => ({
+    focus: document.activeElement.id,
+    blanco: document.querySelector('#mkVak').classList.contains('blanco'),
+  }));
+  ok(naToets.focus !== 'mkWoord', 'een streep op het vel laat het toetsenbord open');
+  ok(naToets.blanco, 'de aanraking die het toetsenbord sluit, tekende toch een streep');
   const stafLeeg = await page.evaluate(() => {
     const b = document.querySelector('#mkStaf');
     return { zichtbaar: !b.hidden, klaar: b.classList.contains('klaar') };
@@ -278,6 +301,9 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   await page.fill('#mkWoord', 'zon');
   ok(await page.evaluate(() => document.querySelector('#mkAl').classList.contains('aan') && !!document.querySelector('#mkAl .mk-al-teken').textContent),
      '"al in het spel" ontbreekt bij een woord dat al een gewone kaart is');
+  ok(await page.evaluate(() => document.querySelector('#mkWoordRij').classList.contains('al')
+     && getComputedStyle(document.querySelector('#mkWoordTeken')).display !== 'none'),
+     'het teken van de gewone kaart staat niet in de woordregel');
   ok(await page.evaluate(() => document.querySelector('#mkStaf').classList.contains('klaar')), 'de staf wordt niet goud met een woord');
   await page.click('#mkStaf');
   ok(await page.evaluate(() => document.querySelector('#mkStaf').getAttribute('aria-busy') === 'true' && !document.querySelector('#mkTovert').hidden),

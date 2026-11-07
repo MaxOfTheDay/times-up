@@ -1172,6 +1172,16 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
   text-transform: uppercase; letter-spacing: var(--track-caps);
 }
 .mk-woord::placeholder { color: var(--ink-2); opacity: 1; }
+.mk-woordrij { position: relative; width: var(--mk); }
+.mk-woordrij .mk-woord { width: 100%; }
+/* Met het teken erin wijkt de tekst aan beide kanten even ver: ze blijft
+   in het midden en loopt niet onder het teken. */
+.mk-woordrij.al .mk-woord { padding-inline: 34px; }
+.mk-woord-teken {
+  position: absolute; right: 2px; top: 50%; translate: 0 -50%;
+  font-size: 24px; line-height: 1; pointer-events: none;
+}
+.mk-woordrij:not(.al) .mk-woord-teken { display: none; }
 /* Al in het spel: het teken van de gewone kaart en één zin, in de tweede
    inkt. Voor de volwassene, zoals alles in de maker. */
 .mk-al {
@@ -1223,6 +1233,16 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
    ze op de kaart de inktlijn van .glyph krijgt zoals een emoji. */
 .mk-vak.papier { border: 0; outline: var(--line-2) solid var(--paper-2); background: var(--paper); cursor: crosshair; }
 .mk-vak.papier .mk-leeg { display: none; }
+/* Leeg zegt het vel "teken hier", zoals het lege fotovak met het album: een
+   gestippelde rand en het potlood van de Tekenen-knop. De rand is een laag
+   erboven, geen border, zodat het doek niet verschuift als hij weggaat. De
+   eerste aanraking haalt hem weg (penNeer()). */
+.mk-vak.papier.blanco { background: var(--paper-2); }
+.mk-vak.papier.blanco::after {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  border: var(--line-2) dashed var(--ink);
+}
+.mk-vak.papier.blanco .mk-leeg { display: block; position: absolute; inset: 0; margin: auto; pointer-events: none; }
 .mk-vak canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .mk-teken { display: flex; flex-direction: column; gap: var(--s-3); }
 /* Acht kleuren op één rij, ook op 320 px: een staal is hoogstens 38 px en
@@ -1241,7 +1261,7 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 }
 .mk-teken .mk-gereedschap { gap: var(--s-2); }
 .mk-teken .mk-tg { width: 40px; }
-/* Met de staf erbij zijn het zes knoppen: op een smalle telefoon iets
+/* Zes knoppen (dun, dik, emmer, gum, terug, weg): op een smalle telefoon iets
    kleiner, met een groter raakvlak eromheen. */
 @media (max-width: 379px) {
   .mk-teken .mk-gereedschap { gap: 6px; }
@@ -3468,9 +3488,14 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
           <i class="mk-staf-teken zand" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#i-glass"/></svg></i>
         </button>
       </div>
-      <input class="mk-woord" id="mkWoord" maxlength="14" placeholder="woord"
-             autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="done"
-             aria-label="Het woord op de kaart">
+      <!-- Het teken van de gewone kaart met dit woord staat ook in de regel:
+           die is in beeld als het toetsenbord op is, de zin eronder niet. -->
+      <div class="mk-woordrij" id="mkWoordRij">
+        <input class="mk-woord" id="mkWoord" maxlength="14" placeholder="woord"
+               autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="done"
+               aria-label="Het woord op de kaart">
+        <span class="mk-woord-teken" id="mkWoordTeken" aria-hidden="true"></span>
+      </div>
       <!-- Het woord is al een gewone kaart: zeg het, en wat bewaren dan doet. -->
       <p class="mk-al" id="mkAl"><span class="mk-al-teken" aria-hidden="true"></span>Staat al in het spel. Jouw kaart neemt haar plaats in.</p>
     </div>
@@ -3492,7 +3517,8 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
       <div class="mk-teken" id="mkTeken" hidden>
         <div class="mk-kleuren" id="mkKleuren" role="radiogroup" aria-label="Kleur"></div>
         <div class="mk-gereedschap">
-          <button class="btn-plain mk-tg" id="mkPen" aria-label="Pen, nog een tik voor dik of dun" aria-pressed="true"><i class="mk-stip"></i></button>
+          <button class="btn-plain mk-tg" id="mkDun" aria-label="Dunne pen" aria-pressed="false"><i class="mk-stip"></i></button>
+          <button class="btn-plain mk-tg" id="mkDik" aria-label="Dikke pen" aria-pressed="true"><i class="mk-stip dik"></i></button>
           <button class="btn-plain mk-tg" id="mkEmmer" aria-label="Een vlak kleuren" aria-pressed="false"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-emmer"/></svg></button>
           <button class="btn-plain mk-tg" id="mkGum" aria-label="Gum" aria-pressed="false"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-gum"/></svg></button>
           <button class="btn-plain mk-tg mk-staf-rij" id="mkStafRij" aria-label="Nog een tekening van het woord" hidden><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-staf"/></svg>
@@ -5321,6 +5347,7 @@ function tekenMaker() {
   vak.classList.toggle("vol", heeft);
   vak.classList.toggle("live", live);
   vak.classList.toggle("papier", teken);
+  vak.querySelector(".mk-leeg use").setAttribute("href", teken ? "#i-potlood" : "#i-album");
   vak.setAttribute("aria-label", teken ? "Het tekenvel" : live ? "Foto nemen" :
     heeft ? "De foto: schuif om te verplaatsen" : "Foto kiezen");
   vak.tabIndex = teken ? -1 : 0;
@@ -5350,13 +5377,15 @@ function gewoneKaart(w) {
 function keurMaker() {
   if (!mk) return;
   tekenStaf();
+  $("#mkVak").classList.toggle("blanco", mk.soort === "tekening" && !streek && !opVel().vol);
   const w = $("#mkWoord").value.trim().toLocaleLowerCase("nl");
   const dubbel = !!w && eigen.kaarten.some(k =>
     k !== mk.kaart && k.woord.toLocaleLowerCase("nl") === w);
   /* Een gewone kaart met hetzelfde woord: zeggen, niet tegenhouden. */
   const gewoon = w && !dubbel ? gewoneKaart(w) : null;
   $("#mkAl").classList.toggle("aan", !!gewoon);
-  if (gewoon) $("#mkAl .mk-al-teken").textContent = gewoon[0];
+  if (gewoon) $("#mkAl .mk-al-teken").textContent = $("#mkWoordTeken").textContent = gewoon[0];
+  $("#mkWoordRij").classList.toggle("al", !!gewoon);
   const knop = $("#mkBewaar");
   const beeld = mk.soort === "tekening" ? opVel().vol : !!(mk.img && !mk.live);
   /* Goud zodra er een beeld is. Zonder woord wijst een tik de woordregel
@@ -5399,6 +5428,21 @@ $("#mkBestand").addEventListener("change", e => {
   };
   i.onerror = () => { URL.revokeObjectURL(url); nudge($("#mkVak")); };
   i.src = url;
+});
+
+/* Staat het toetsenbord op, dan sluit de eerste aanraking op het vel het
+   alleen, zonder streep: het scherm schuift terug terwijl het toetsenbord
+   zakt, en een streep die dan begint, veegt mee. Een streep laat de focus
+   anders op het woord (alleen een tik verzet hem), en dan teken je met de
+   kleuren en Bewaren onder het toetsenbord. Een tik op het gereedschap
+   sluit het ook: Safari geeft een knop geen focus. */
+$("#mkVak").addEventListener("pointerdown", e => {
+  if (!mk || mk.soort !== "tekening" || document.activeElement !== $("#mkWoord")) return;
+  $("#mkWoord").blur();
+  e.preventDefault(); e.stopImmediatePropagation();
+}, true);
+$("#mkTeken").addEventListener("pointerdown", () => {
+  if (document.activeElement === $("#mkWoord")) $("#mkWoord").blur();
 });
 
 /* Schuiven met één vinger, knijpen met twee. */
@@ -5575,11 +5619,11 @@ const doek = () => $("#mkDoek").getContext("2d", { willReadFrequently: true });
 function tekenGereedschap() {
   $$("#mkKleuren .mk-kleur").forEach(b =>
     b.setAttribute("aria-checked", String(b.dataset.kleur === mk.kleur && mk.gereed !== "gum")));
-  $("#mkPen").setAttribute("aria-pressed", String(mk.gereed === "pen"));
+  $("#mkDun").setAttribute("aria-pressed", String(mk.gereed === "pen" && !mk.dik));
+  $("#mkDik").setAttribute("aria-pressed", String(mk.gereed === "pen" && mk.dik));
   $("#mkEmmer").setAttribute("aria-pressed", String(mk.gereed === "emmer"));
   $("#mkGum").setAttribute("aria-pressed", String(mk.gereed === "gum"));
-  $("#mkPen .mk-stip").classList.toggle("dik", mk.dik);
-  $("#mkPen .mk-stip").style.background = mk.kleur;
+  $$("#mkTeken .mk-stip").forEach(i => { i.style.background = mk.kleur; });
 }
 $("#mkKleuren").addEventListener("click", e => {
   const b = e.target.closest(".mk-kleur"); if (!b || !mk) return;
@@ -5587,12 +5631,9 @@ $("#mkKleuren").addEventListener("click", e => {
   if (mk.gereed === "gum") mk.gereed = "pen";
   tekenGereedschap();
 });
-/* De pen is één knop: gekozen, dan wisselt nog een tik tussen dun en dik. */
-$("#mkPen").addEventListener("click", () => {
-  if (!mk) return;
-  if (mk.gereed === "pen") mk.dik = !mk.dik; else mk.gereed = "pen";
-  tekenGereedschap();
-});
+/* Dun en dik zijn elk een knop: de stip zegt hoe dik, in de kleur van nu. */
+$("#mkDun").addEventListener("click", () => { if (mk) { mk.gereed = "pen"; mk.dik = false; tekenGereedschap(); } });
+$("#mkDik").addEventListener("click", () => { if (mk) { mk.gereed = "pen"; mk.dik = true; tekenGereedschap(); } });
 $("#mkEmmer").addEventListener("click", () => { if (mk) { mk.gereed = "emmer"; tekenGereedschap(); } });
 $("#mkGum").addEventListener("click", () => { if (mk) { mk.gereed = "gum"; tekenGereedschap(); } });
 $("#mkStap").addEventListener("click", () => {
@@ -5789,6 +5830,7 @@ const doekPunt = e => {
 };
 let streek = null;
 function penNeer(e) {
+  $("#mkVak").classList.remove("blanco");
   const [x, y] = doekPunt(e);
   if (mk.gereed === "emmer") {
     const a = { vul: true, x: x, y: y, kleur: mk.kleur };

@@ -538,7 +538,12 @@ vandaan kwam). De lijst staat in `tijdisom.eigen`, de beelden in IndexedDB
   foto wisselt achter de dichte platen. De camera gaat uit bij afdrukken, sluiten en
   verbergen (`stopCam()`); de voorcamera spiegelt alleen in de zoeker.
 - Of je tekent haar in hetzelfde vierkant (`mkDoek`): acht tekenkleuren
-  zijn inhoud, geen betekenis. Een tekening is een doorzichtige PNG en
+  zijn inhoud, geen betekenis. Leeg is het vel gestippeld met het potlood
+  (`.blanco`), zoals het lege fotovak met het album; dun en dik zijn twee
+  knoppen (`#mkDun`, `#mkDik`). Staat het toetsenbord op, dan sluit de
+  eerste aanraking op het vel het alleen, zonder streep. Het teken van een
+  gewone kaart met hetzelfde woord staat ook in de woordregel
+  (`#mkWoordTeken`), want `#mkAl` ligt onder het toetsenbord. Een tekening is een doorzichtige PNG en
   krijgt de pen van `.glyph`, geen kader; die pen ligt in de maker al om
   het vel zodra de vinger loslaat (`tekenRand()`, `#mkRand`). De emmer
   houdt een kier tot de dikke pen voor dicht (`KIER`), en elke emmer
