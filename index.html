@@ -5108,7 +5108,10 @@ function openMaker(kaart) {
 /* ---- toveren ----
    Een tekening uit het woord, van de Worker in worker/tover.mjs. Leeg adres:
    geen staf. Zie docs/ontwerp.md, Toveren. */
-const TOVER_URL = "https://tijdisom-tover.maxheyrman.workers.dev/teken";
+const TOVER_ADRES = "https://tijdisom-tover.maxheyrman.workers.dev/teken";
+// De staf staat uit: de maker toont alleen Foto en Tekenen. Aanzetten is
+// TOVER_URL = TOVER_ADRES; de test doet dat via __tijd.zetTover().
+let TOVER_URL = "";
 const TOVER_MS = 30000;
 let toverOp = false;       // het dagbudget is op: de zandloper, tot herladen
 
@@ -9167,7 +9170,9 @@ if (location.search.indexOf("debug") !== -1) {
     get eigen() { return eigen; }, beelden, eigenKlaar, openMaker,
     // De lock op de overdracht is anders alleen te controleren door er drie
     // minuten voor te gaan zitten.
-    get wake() { return wake; }, zetWakeMax(ms) { WAKE_MAX = ms; }
+    get wake() { return wake; }, zetWakeMax(ms) { WAKE_MAX = ms; },
+    // De staf staat uit voor spelers; de test zet hem aan.
+    zetTover(aan) { TOVER_URL = aan ? TOVER_ADRES : ""; }
   };
 }
 </script>

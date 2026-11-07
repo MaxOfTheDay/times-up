@@ -3558,6 +3558,12 @@ code: een foto of tekening en het woord, in Instellingen.
 
 ## Toveren
 
+**Staat uit sinds 7 november 2026.** Max wilde de staf niet meer in de
+maker: Foto en Tekenen volstaan. De code en de Worker blijven; `TOVER_URL`
+is leeg, het adres staat in `TOVER_ADRES`, en `test/deck.test.js` zet de
+staf aan met `__tijd.zetTover(true)` zodat hij getoetst blijft. Weer aanzetten
+is één regel.
+
 Een tekening uit een woord: typ "kameel", tik op de toverstaf, en een
 tekening in de stijl van de app landt op het doek van de tekenmaker. Gekozen
 op 4 november 2026, na drie mockups (Tover een kaart, Foto tekenen of
