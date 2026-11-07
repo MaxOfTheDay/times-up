@@ -1726,6 +1726,10 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
 #s-handoff #hoTally .side.up .head > svg {
   translate: 0 0;
   transition: translate calc(var(--t-groot) * var(--dur)) var(--e-los);
+}
+/* De adem op het vak, om de lijn van de knip (zie .gluur op de titel). */
+#s-handoff #hoTally .side .head { transform-origin: 50% calc(100% - var(--zak) + var(--line) / 4); }
+#s-handoff #hoTally .side.up .head {
   animation: gluurAdem calc(2.8s / max(var(--dur), .001)) var(--e-vloei) infinite;
 }
 #s-handoff #hoTally .side b { min-width: 0; font-size: max(var(--fs-5), min(9vw, var(--fs-6))); line-height: 1; }
@@ -2365,7 +2369,8 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
 #wnPiles .kroon { transform-box: fill-box; transform-origin: 50% 100%; }
 /* Na het juichen ademt wie won, zoals wie op de overdracht aan zet is: het
    scherm komt tot rust en de stand is te lezen. */
-#wnPiles .tally.winner.adem .mascot-sm {
+#wnPiles .tally .head { transform-origin: 50% calc(100% - var(--zak) + var(--line) / 4); }
+#wnPiles .tally.winner.adem .head {
   animation: gluurAdem calc(2.8s / max(var(--dur), .001)) var(--e-vloei) infinite;
 }
 @media (max-height: 520px) {
@@ -2593,13 +2598,23 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
 @keyframes gluurOp { from { translate: 0 100%; } to { translate: 0 0; } }
 @keyframes gluurAdem { 0%, 100% { scale: 1; } 50% { scale: 1.05; } }
 #s-title.on .gluur svg {
-  animation: gluurOp calc(var(--t-groot) / max(var(--dur), .001)) var(--e-los) backwards,
-             gluurAdem calc(2.8s / max(var(--dur), .001)) var(--e-vloei) infinite;
-  animation-delay: calc(.32s / max(var(--dur), .001)), 0s;
+  animation: gluurOp calc(var(--t-groot) / max(var(--dur), .001)) var(--e-los) backwards;
+  animation-delay: calc(.32s / max(var(--dur), .001));
 }
 #s-title.on .gluur[data-team="1"] svg {
-  animation-delay: calc(.46s / max(var(--dur), .001)), -1.4s;
+  animation-delay: calc(.46s / max(var(--dur), .001));
 }
+/* De adem zit op het vak om de tekening, niet op de svg. Chrome laat een
+   svg met een eigen rotate of translate niet door de grafische kaart
+   bewegen: dan tekende de hoofddraad elk beeld opnieuw, zolang het scherm
+   openstond, en op een groot scherm kostte dat elk beeld het hele
+   stippenvlak. Het vak ademt om de lijn van de knip, zodat die stil blijft
+   liggen; de svg erin draait om hetzelfde punt. */
+.gluur { transform-origin: 50% calc(100% - var(--zak)); }
+#s-title.on .gluur {
+  animation: gluurAdem calc(2.8s / max(var(--dur), .001)) var(--e-vloei) infinite;
+}
+#s-title.on .gluur[data-team="1"] { animation-delay: -1.4s; }
 
 .teamchip svg { transform-origin: 50% 90%; }
 
@@ -7473,7 +7488,15 @@ function stipveld(cv, opt) {
   let inkt = !!opt.inkt, onthul = null, stralen = -1, toon = null, leeg = false;
   /* Wat het vorige beeld tekende, zodat een rimpel alleen de punten
      overtekent die hij raakt (zie teken()). */
-  let NX = 0, NY = 0, rooster = null, px, py, prad, pa, pk, lx, ly, lrad, la, lk, vuil;
+  let NX = 0, NY = 0, X0 = 0, Y0 = 0, DPR = 1, rooster = null, px, py, prad, pa, pk, lx, ly, lrad, la, lk;
+  /* Per vak van het raster: wordt het dit beeld gewist en overgetekend
+     (zie teken())? En hoe ver de onthulling het vorige beeld was. */
+  let celVuil, celReken, celVorig, rekenLijst, vorOnthul = null, vorToon = null, vorStraal = -1;
+  /* Per punt de kleur als getal (soort * 1001 + dekking in duizendsten),
+     de volgorde waarin ze getekend worden (per kleur bij elkaar), en of hij
+     dit beeld overgetekend wordt. */
+  let kleurNr, volgorde, over;
+  const perKleur = new Int32Array(2 * 1001 + 1), KLEUREN = [], GEEN = 0xffff;
   let vol = true, vorSleutel = "", laatstStralen = 0, slaap = 0;
   function maat() {
     const r = cv.getBoundingClientRect();
@@ -7483,11 +7506,11 @@ function stipveld(cv, opt) {
     if (r.width !== W || r.height !== H || cv.width !== Math.round(r.width * dpr)) {
       W = r.width; H = r.height;
       cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
-      cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cx.setTransform(dpr, 0, 0, dpr, 0, 0); DPR = dpr;
       punten = [];
       /* Op het midden uitgelijnd, zoals background-position: center. */
       const x0 = W / 2 - CEL * Math.floor(W / 2 / CEL), y0 = H / 2 - CEL * Math.floor(H / 2 / CEL);
-      NX = Math.ceil((W - x0) / CEL); NY = Math.ceil((H - y0) / CEL);
+      NX = Math.ceil((W - x0) / CEL); NY = Math.ceil((H - y0) / CEL); X0 = x0; Y0 = y0;
       rooster = new Int32Array(NX * NY).fill(-1);
       for (let r = 0, y = y0; y < H; y += CEL, r++) for (let c = 0, x = x0; x < W; x += CEL, c++) {
         /* Een vol bord: elk punt op volle dekking. opt.masker (0 tot 1 per
@@ -7495,13 +7518,17 @@ function stipveld(cv, opt) {
         const m = opt.masker ? opt.masker(x, y, W, H) : 1;
         /* opt.merk: de punten die de handtekening vormen (zie merkMax()). */
         const mk = opt.merk ? opt.merk(r, c, x0, y0, W, H) : false;
-        if (m > .01) { rooster[r * NX + c] = punten.length; punten.push({ x, y, m, r, c, mk }); }
+        /* De hoek vanaf het midden, voor de stralen (zie reken()). */
+        if (m > .01) { rooster[r * NX + c] = punten.length; punten.push({ x, y, m, r, c, mk, hoek: Math.atan2(y - H / 2, x - W / 2) }); }
       }
       const n = punten.length;
       px = new Float32Array(n); py = new Float32Array(n); prad = new Float32Array(n);
       pa = new Float32Array(n); pk = new Uint8Array(n);
       lx = new Float32Array(n); ly = new Float32Array(n); lrad = new Float32Array(n);
-      la = new Float32Array(n); lk = new Uint8Array(n); vuil = new Uint8Array(n);
+      la = new Float32Array(n); lk = new Uint8Array(n);
+      kleurNr = new Uint16Array(n); volgorde = new Int32Array(n); over = new Uint8Array(n);
+      celVuil = new Uint8Array(NX * NY); celReken = new Uint8Array(NX * NY); celVorig = new Uint8Array(NX * NY);
+      rekenLijst = new Int32Array(n);
       vol = true;
     }
     return true;
@@ -7540,45 +7567,73 @@ function stipveld(cv, opt) {
     const papierA = ploeg === null || ploeg === undefined ? PAPIER[0] : STIP_PAPIER[ploeg];
     const draai = stralen < 0 ? 0 : (stilAan() ? 0 : (nu - stralen) / STRAAL_RONDE * 6.2832);
     const vak = 6.2832 / STRALEN;
-    /* Een rimpel verandert maar een deel van de punten; de rest ligt waar
-       hij het vorige beeld lag. Dan worden alleen de veranderde punten
-       overgetekend. Op een trage telefoon is elke cirkel een rasterbeurt;
-       2.000 per beeld haalde het aftellen naar 30 beelden per seconde.
-       Onthullen, toon en de stralen (hun 24 randen raken samen bijna het
-       hele bord) tekenen alles. */
+    /* Een rimpel, een onthulling, de toon en de stralen veranderen maar een
+       deel van de punten; de rest ligt waar hij het vorige beeld lag. Dan
+       worden alleen de veranderde punten overgetekend (zie onder). Elke
+       cirkel is een rasterbeurt, en een groot scherm heeft er 25.000:
+       alles tekenen kostte daar 30 ms per beeld. */
     const sleutel = inkt + "|" + papierA;
-    const deel = !onthul && !tg && stralen < 0 && !vol && sleutel === vorSleutel;
-    vol = !!onthul || !!tg || stralen >= 0;
-    vorSleutel = sleutel;
+    const deel = !vol && sleutel === vorSleutel && onthul === vorOnthul && toon === vorToon;
+    vol = false;
+    vorSleutel = sleutel; vorOnthul = onthul; vorToon = toon;
     const n = punten.length;
-    for (let i = 0; i < n; i++) {
+    /* Per rimpel de kam van dit beeld (R) en de band van 128 px ervoor en
+       erachter waarbuiten hij niets doet; een punt daarbuiten kost zo één
+       vermenigvuldiging per rimpel in plaats van een wortel. */
+    const kammen = rimpels.map(r => {
+      const rt = (nu - r.t) / 1000, R = r.van + rt * 360;
+      return { r, R, demp: Math.exp(-rt * 1.7) * r.sterk, uit2: (R + 128) ** 2, in2: R - 128 > 1 ? (R - 128) ** 2 : -1 };
+    });
+    /* Uitrekenen hoeft alleen waar iets beweegt: in de band van een rimpel,
+       de toon of de rand van de onthulling, dit beeld of het vorige (daar
+       komt een punt terug tot rust). Elders ligt elke punt nog waar hij
+       lag. De stralen draaien over het hele bord; dan alles. */
+    let nReken = 0;
+    if (!deel || stralen >= 0) {
+      for (let i = 0; i < n; i++) reken(i);
+      nReken = -1;
+    } else {
+      celReken.fill(0);
+      for (const { r, R } of kammen) band(r.x, r.y, r.hw || 0, r.hh || 0, R - 128, R + 128);
+      if (tg) band(tg.x, tg.y, 0, 0, tg.R, tg.R + 120);
+      if (onthul) band(onthul.x, onthul.y, 0, 0, Math.min(vorStraal, straal), Math.max(vorStraal, straal));
+      for (let j = 0; j < celReken.length; j++) {
+        if (!celReken[j] && !celVorig[j]) continue;
+        const i = rooster[j];
+        if (i >= 0) { reken(i); rekenLijst[nReken++] = i; }
+      }
+      celVorig.set(celReken);
+    }
+    function reken(i) {
       const p = punten[i], m = p.m;
       let golf = 0, dal = 0, ex = 0, ey = 0;
       /* De rimpel moet je zien als antwoord op je tik: 12 px opzij, een punt
          tot ruim het dubbele. Met 4,5 px las hij op een telefoon als niets. */
-      for (const r of rimpels) {
-        const rt = (nu - r.t) / 1000;
+      for (let k = 0; k < kammen.length; k++) {
+        const { r, R, demp, uit2, in2 } = kammen[k];
         /* Een rimpel heeft de vorm van wat drukte: rond vanaf een knop, of
            een rechthoek vanaf de rand van de kaart (r.hw, r.hh). */
         let dx = p.x - r.x, dy = p.y - r.y;
         if (r.hw) { dx = Math.sign(dx) * Math.max(Math.abs(dx) - r.hw, 0); dy = Math.sign(dy) * Math.max(Math.abs(dy) - r.hh, 0); }
-        const d = Math.hypot(dx, dy) || 1;
-        const z = (d - (r.van + rt * 360)) / 32;
+        const d2 = dx * dx + dy * dy;
+        if (d2 > uit2 || d2 < in2) continue;
+        const d = Math.sqrt(d2) || 1;
+        const z = (d - R) / 32;
         if (z < -4 || z > 4) continue;
-        const pak = Math.exp(-z * z) * Math.cos(z * 2.4), demp = Math.exp(-rt * 1.7) * r.sterk;
+        const pak = Math.exp(-z * z) * Math.cos(z * 2.4);
         const duw = pak * demp * 12;
         ex += dx / d * duw; ey += dy / d * duw;
         golf = Math.max(golf, Math.min(1.6, Math.max(0, pak) * demp));
         dal = Math.max(dal, Math.min(1, Math.max(0, -pak) * demp));
       }
-      const papier = !inkt || (straal >= 0 && Math.hypot(p.x - onthul.x, p.y - onthul.y) < straal);
-      let [A0, , LICHT_R] = papier ? PAPIER : INKT;
-      if (papier) A0 = papierA;
+      const papier = !inkt || (straal >= 0 && (p.x - onthul.x) ** 2 + (p.y - onthul.y) ** 2 < straal * straal);
+      let A0 = papier ? papierA : INKT[0];
+      const LICHT_R = papier ? PAPIER[2] : INKT[2];
       /* In een straal is de punt groter en iets voller: toon uit het raster,
          geen vlak eroverheen. */
       let r0 = R0;
       if (stralen >= 0) {
-        const hoek = Math.atan2(p.y - H / 2, p.x - W / 2) - draai;
+        const hoek = p.hoek - draai;
         if ((((hoek % vak) + vak) % vak) < vak / 2) { r0 = R0 * 1.75; A0 *= 1.25; }
       }
       /* De handtekening is rastertoon: een punt groter en iets voller, op
@@ -7586,59 +7641,173 @@ function stipveld(cv, opt) {
       if (p.mk) { r0 *= 1.6; A0 *= 1.4; }
       let rad = Math.max(.5, r0 + golf * 3 - dal * r0 * .8);
       if (tg) {
-        const q = Math.min(1, Math.max(0, (Math.hypot(p.x - tg.x, p.y - tg.y) - tg.R) / 120));
+        const q = Math.min(1, Math.max(0, (Math.sqrt((p.x - tg.x) ** 2 + (p.y - tg.y) ** 2) - tg.R) / 120));
         rad *= tg.weg ? q : 1 - q;
       }
       px[i] = p.x + ex; py[i] = p.y + ey; prad[i] = rad;
       pa[i] = Math.min(1, (A0 + golf * LICHT_R) * m); pk[i] = papier ? 1 : 0;
     }
-    const stip = i => {
-      if (prad[i] < .2) return;
-      cx.fillStyle = `rgba(${pk[i] ? PAPIER[1] : INKT[1]}, ${pa[i].toFixed(3)})`;
-      cx.beginPath(); cx.arc(px[i], py[i], prad[i], 0, 6.2832); cx.fill();
-    };
-    const onthou = () => { lx.set(px); ly.set(py); lrad.set(prad); la.set(pa); lk.set(pk); };
-    if (!deel) {
-      cx.clearRect(0, 0, W, H);
-      if (onthul) {
-        cx.fillStyle = onthul.kleur;
-        cx.beginPath(); cx.arc(onthul.x, onthul.y, straal, 0, 6.2832); cx.fill();
+    /* Markeert de vakken waarvan de punt tussen r0 en r1 ligt van (x, y),
+       of van de rand van een rechthoek (hw, hh) om dat punt, met een vak
+       speling. Per rij hoogstens twee stukken. */
+    function band(x, y, hw, hh, r0, r1) {
+      r0 -= CEL; r1 += CEL;
+      if (r1 <= 0) return;
+      const rij0 = Math.max(0, Math.floor((y - hh - r1 - Y0) / CEL)), rij1 = Math.min(NY - 1, Math.ceil((y + hh + r1 - Y0) / CEL));
+      for (let r = rij0; r <= rij1; r++) {
+        const dy = Math.max(Math.abs(Y0 + r * CEL - y) - hh, 0);
+        if (dy > r1) continue;
+        const buiten = hw + Math.sqrt(r1 * r1 - dy * dy);
+        const binnen = r0 > dy ? hw + Math.sqrt(r0 * r0 - dy * dy) : -1;
+        const c0 = Math.max(0, Math.floor((x - buiten - X0) / CEL)), c1 = Math.min(NX - 1, Math.ceil((x + buiten - X0) / CEL));
+        for (let c = c0; c <= c1; c++) {
+          if (binnen > 0 && Math.abs(X0 + c * CEL - x) < binnen) { c = Math.max(c, Math.floor((x + binnen - X0) / CEL) - 1); continue; }
+          celReken[r * NX + c] = 1;
+        }
       }
-      for (let i = 0; i < n; i++) stip(i);
-      onthou();
-      return;
     }
-    /* Overtekenen binnen een masker: 22 px rond elke veranderde punt (12 px
-       opzij plus de grootste punt, in een straal en op de kam), gewist en
-       opnieuw getekend met alles wat erin kan vallen, vier vakken ver. Wat
-       buiten het masker ligt, staat er nog goed. */
-    vuil.fill(0);
-    cx.save(); cx.beginPath();
-    let iets = false;
-    for (let i = 0; i < n; i++) {
+    const onthou = () => { lx.set(px); ly.set(py); lrad.set(prad); la.set(pa); lk.set(pk); };
+    const volTekenen = () => {
+      cx.clearRect(0, 0, W, H);
+      if (onthul) schijf();
+      stippen(null);
+      onthou();
+    };
+    const schijf = () => {
+      cx.fillStyle = onthul.kleur;
+      cx.beginPath(); cx.arc(onthul.x, onthul.y, straal, 0, 6.2832); cx.fill();
+    };
+    if (!deel) { vorStraal = straal; volTekenen(); return; }
+    /* Overtekenen per vak van het raster (12 px rond elke punt). Vuil is
+       elk vak dat een veranderde punt raakt, waar hij lag en waar hij nu
+       ligt, en elk vak waar de rand van de onthulling overheen ging. Die
+       vakken worden gewist, binnen een masker van één rechthoek per
+       aaneengesloten stuk van een rij, en daarin wordt elke punt getekend
+       die erin reikt. Wat buiten het masker ligt, staat er nog goed. */
+    celVuil.fill(0); over.fill(0);
+    let vuil = 0;
+    for (let j = 0, tot = nReken < 0 ? n : nReken; j < tot; j++) {
+      const i = nReken < 0 ? j : rekenLijst[j];
       if (Math.abs(px[i] - lx[i]) < .02 && Math.abs(py[i] - ly[i]) < .02 && Math.abs(prad[i] - lrad[i]) < .02 &&
           Math.abs(pa[i] - la[i]) < .0005 && pk[i] === lk[i]) continue;
-      iets = true;
-      const p = punten[i];
-      cx.rect(p.x - 22, p.y - 22, 44, 44);
-      for (let r = Math.max(0, p.r - 4); r <= Math.min(NY - 1, p.r + 4); r++)
-        for (let c = Math.max(0, p.c - 4); c <= Math.min(NX - 1, p.c + 4); c++) {
-          const j = rooster[r * NX + c];
-          if (j >= 0) vuil[j] = 1;
-        }
+      over[i] = 1;
+      vuil += markeer(lx[i], ly[i], lrad[i]) + markeer(px[i], py[i], prad[i]);
     }
-    if (iets) {
-      cx.clip();
-      cx.clearRect(0, 0, W, H);
-      /* Alleen wat echt getekend is, telt als getekend: een punt die per
-         beeld minder dan de drempel schuift, wordt overgetekend zodra het
-         samen genoeg is. */
-      for (let i = 0; i < n; i++) if (vuil[i]) {
-        stip(i);
-        lx[i] = px[i]; ly[i] = py[i]; lrad[i] = prad[i]; la[i] = pa[i]; lk[i] = pk[i];
+    /* Zo ver van zijn midden kan de rand van de schijf een vak nog raken:
+       de halve diagonaal van een vak aan de rand van het doek (dat tot de
+       rand doorloopt), plus de zachte rand. */
+    if (onthul && straal !== vorStraal) {
+      const RAND = CEL * 1.6 + 1.5;
+      for (let r = 0; r < NY; r++) for (let c = 0; c < NX; c++) {
+        const d = Math.sqrt((X0 + c * CEL - onthul.x) ** 2 + (Y0 + r * CEL - onthul.y) ** 2);
+        if (d + RAND >= vorStraal && d - RAND <= straal && !celVuil[r * NX + c]) { celVuil[r * NX + c] = 1; vuil++; }
+      }
+      vorStraal = straal;
+    }
+    if (!vuil) return;
+    /* Een punt wordt heel overgetekend of niet: reikt hij in een vuil vak,
+       dan wordt alles wat hij beslaat ook vuil, waar hij lag en waar hij nu
+       ligt. Anders bleef de helft buiten het masker op een oudere stand
+       staan, en telde hij toch als getekend. Een punt die niet veranderde,
+       ligt binnen een fractie van een pixel waar hij lag: één toets met de
+       grootste van de twee cirkels is genoeg. Tot er niets meer bijkomt;
+       meestal na één ronde. */
+    for (let bij = 1; bij && vuil <= NX * NY * .6; ) {
+      bij = 0;
+      for (let i = 0; i < n; i++) {
+        const rad = Math.max(prad[i], lrad[i]);
+        if (over[i] || !raakt(px[i], py[i], rad)) continue;
+        over[i] = 1;
+        bij += markeer(px[i], py[i], rad);
+      }
+      vuil += bij;
+    }
+    /* Is het meeste vuil, dan is alles tekenen goedkoper dan een masker. */
+    if (vuil > NX * NY * .6) { volTekenen(); return; }
+    cx.save(); cx.beginPath();
+    for (let r = 0; r < NY; r++) {
+      const rij = r * NX;
+      for (let c = 0; c < NX; c++) {
+        if (!celVuil[rij + c]) continue;
+        const c0 = c;
+        while (c + 1 < NX && celVuil[rij + c + 1]) c++;
+        /* Op hele schermpixels, zodat de rand van het masker niets half
+           wist en half overtekent, en de buitenste vakken tot voorbij de
+           rand van het doek. */
+        const x = c0 ? opPixel(X0 + (c0 - .5) * CEL) : -CEL, y = r ? opPixel(Y0 + (r - .5) * CEL) : -CEL;
+        const x1 = c < NX - 1 ? opPixel(X0 + (c + .5) * CEL) : W + CEL, y1 = r < NY - 1 ? opPixel(Y0 + (r + .5) * CEL) : H + CEL;
+        cx.rect(x, y, x1 - x, y1 - y);
       }
     }
+    cx.clip();
+    cx.clearRect(0, 0, W, H);
+    if (onthul) schijf();
+    stippen(over);
     cx.restore();
+    /* Alleen wat echt getekend is, telt als getekend: een punt die per
+       beeld minder dan de drempel schuift, wordt overgetekend zodra het
+       samen genoeg is. */
+    for (let i = 0; i < n; i++) if (over[i]) {
+      lx[i] = px[i]; ly[i] = py[i]; lrad[i] = prad[i]; la[i] = pa[i]; lk[i] = pk[i];
+    }
+  }
+  /* De vakken die een punt raakt: zijn cirkel plus de zachte rand, met
+     speling voor de op hele pixels afgeronde randen van het masker. */
+  let vc0, vc1, vr0, vr1;
+  const opPixel = v => Math.round(v * DPR) / DPR;
+  function vakken(x, y, rad) {
+    const m = rad + 2;
+    vc0 = Math.max(0, Math.floor((x - m - X0) / CEL + .5)); vc1 = Math.min(NX - 1, Math.floor((x + m - X0) / CEL + .5));
+    vr0 = Math.max(0, Math.floor((y - m - Y0) / CEL + .5)); vr1 = Math.min(NY - 1, Math.floor((y + m - Y0) / CEL + .5));
+  }
+  function markeer(x, y, rad) {
+    if (rad < .2) return 0;
+    vakken(x, y, rad);
+    let nieuw = 0;
+    for (let r = vr0; r <= vr1; r++) for (let c = vc0; c <= vc1; c++) if (!celVuil[r * NX + c]) { celVuil[r * NX + c] = 1; nieuw++; }
+    return nieuw;
+  }
+  function raakt(x, y, rad) {
+    if (rad < .2) return false;
+    /* Meestal ligt een punt binnen zijn eigen vak: één blik. */
+    const c = Math.floor((x - X0) / CEL + .5), r = Math.floor((y - Y0) / CEL + .5), m = rad + 2;
+    if (c >= 0 && r >= 0 && c < NX && r < NY) {
+      const ox = X0 + c * CEL, oy = Y0 + r * CEL;
+      if (x - m >= ox - CEL / 2 && x + m < ox + CEL / 2 && y - m >= oy - CEL / 2 && y + m < oy + CEL / 2) return celVuil[r * NX + c] === 1;
+    }
+    vakken(x, y, rad);
+    for (let r = vr0; r <= vr1; r++) for (let c = vc0; c <= vc1; c++) if (celVuil[r * NX + c]) return true;
+    return false;
+  }
+  /* Tekent de punten (alle, of die in kies aan staan), gesorteerd op
+     kleur: één fillStyle per kleur in plaats van een kleurtekst per punt.
+     Elke punt houdt zijn eigen fill, zodat twee punten die elkaar in de kam
+     raken over elkaar vallen zoals altijd. */
+  function stippen(kies) {
+    const n = punten.length;
+    perKleur.fill(0);
+    let m = 0;
+    for (let i = 0; i < n; i++) {
+      if (prad[i] < .2 || (kies && !kies[i])) { kleurNr[i] = GEEN; continue; }
+      const k = pk[i] * 1001 + Math.round(pa[i] * 1000);
+      kleurNr[i] = k; perKleur[k]++; m++;
+    }
+    if (!m) return;
+    for (let k = 0, som = 0; k < perKleur.length; k++) { const t = perKleur[k]; perKleur[k] = som; som += t; }
+    for (let i = 0; i < n; i++) { const k = kleurNr[i]; if (k !== GEEN) volgorde[perKleur[k]++] = i; }
+    let vorig = -1;
+    for (let j = 0; j < m; j++) {
+      const i = volgorde[j], k = kleurNr[i];
+      if (k !== vorig) { cx.fillStyle = kleur(k); vorig = k; }
+      cx.beginPath(); cx.arc(px[i], py[i], prad[i], 0, 6.2832); cx.fill();
+    }
+  }
+  function kleur(k) {
+    if (!KLEUREN[k]) {
+      const papier = k > 1000, a = k - (papier ? 1001 : 0);
+      KLEUREN[k] = `rgba(${papier ? PAPIER[1] : INKT[1]}, ${(a / 1000).toFixed(3)})`;
+    }
+    return KLEUREN[k];
   }
   function stap(nu) {
     raf = 0;

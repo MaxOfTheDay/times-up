@@ -315,7 +315,10 @@ een golf vanuit de rand van de kaart, in haar vorm (`rimpelRand()`), op de
 eindstand barst het vuurwerk in de punten (`vuurwerk()`). Na een beurt
 groeien ze op de overdracht als rastertoon terug vanuit de kaart
 (`toon()`). Er loopt alleen een lus zolang er iets beweegt; bij beperkte
-beweging één stilstaand beeld.
+beweging één stilstaand beeld. Per beeld rekent en tekent het veld alleen
+waar iets beweegt (`band()`, de vuile vakken in `teken()`): een groot
+scherm heeft 25.000 punten. Een nieuwe beweging van de punten meldt daar
+haar band aan, anders blijft ze staan.
 
 **Vertrekken mag, als er niets achter wacht.** Geen vertrekanimaties, behalve
 de startknop die na zijn tik achter de onderrand wegzakt, het oplossen van
@@ -445,8 +448,10 @@ voor de volwassene blijft de systeemletter. Opnieuw maken met
 **Het titelscherm heeft twee dingen**: het merk en de knop. Vos en Uil zitten
 op de bovenrand van het merk (`.gluur` in `.wordmark`), niet ernaast, en
 komen bij binnenkomst van achter de rand omhoog. De knip staat stil; elke
-beweging heeft haar eigen eigenschap (`rotate`, `translate`, `scale`,
-`transform` voor `mascotte()`), om het punt op de rand. Zet er niets bij.
+beweging heeft haar eigen eigenschap (`rotate`, `translate`,
+`transform` voor `mascotte()`), om het punt op de rand; de adem (`scale`)
+zit op het vak om de svg (`.gluur`, `.head`), want een svg met een eigen
+`rotate` beweegt in Chrome niet op de grafische kaart. Zet er niets bij.
 De titel komt binnen zonder `screenIn`. Wie een dier aantikt, laat het wippen
 en het andere antwoordt (`wipOpRand()`); de landing van zo'n wip rimpelt de
 punten. Wat de dieren uit zichzelf doen, rimpelt niet. Een tik op de plaat

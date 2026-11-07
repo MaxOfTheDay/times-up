@@ -1309,10 +1309,40 @@ met dezelfde maten als ervoor: raster 12 px op het midden, straal 2 px op
   dan het vorige beeld, plus wat binnen 22 px daarvan valt, in een masker
   (`clip()`). Het aftellen haalt zo mediaan 60 beelden per seconde, met
   ~500 cirkels in plaats van 2.000; het beeld is gelijk op randpixels na
-  (hoogstens 7/255 dekking). De stralen raken met hun 24 randen bijna het
-  hele bord, dus die tekenen alles, maar met 20 beelden per seconde zolang
-  er niets anders beweegt: een punt springt er toch maar een paar keer
-  per seconde in of uit. Eindstand nu 36 beelden per seconde.
+  (hoogstens 7/255 dekking). De stralen tekenen met 20 beelden per seconde
+  zolang er niets anders beweegt: een punt springt er toch maar een paar
+  keer per seconde in of uit. Eindstand nu 36 beelden per seconde.
+- **Een groot scherm** (november 2026): op een desktop voelde de titel
+  traag. Een scherm van 2560x1440 heeft 25.000 punten, tien keer een
+  telefoon, en een rimpel die uitloopt tot 750 px raakt er duizenden.
+  Gemeten in Chromium, rekenen en tekenen van het veld per beeld, op
+  1920x1080 met 125% schaal (Windows) en de CPU 4x vertraagd: tikken op de
+  titel 17 ms, Spelen 24, tijd om 44 tot 50, de eindstand 80. Drie dingen
+  gingen er per beeld over het hele bord, waar alleen een band bewoog:
+  - *Uitrekenen*: alleen de punten in de band van een rimpel (de kam
+    ±128 px), van de toon of van de rand van de onthulling, dit beeld en
+    het vorige, waar een punt tot rust komt (`band()`, `celReken`). Elders
+    ligt elke punt nog waar hij lag. De stralen rekenen het hele bord, met
+    de hoek van elke punt één keer uitgerekend (`p.hoek`).
+  - *Overtekenen*: het masker volgt de vakken van het raster die een
+    veranderde punt echt raakt, zijn oude en zijn nieuwe cirkel, in plaats
+    van een vierkant van 44 px om elke punt en alles binnen vier vakken.
+    Een punt wordt heel overgetekend of niet: reikt hij in een vuil vak,
+    dan wordt alles wat hij beslaat ook vuil. Anders bleef de helft buiten
+    het masker op een oudere stand staan, en dat stapelde op. De randen van
+    het masker liggen op hele schermpixels, ook bij 125% en 150%: half
+    wissen en half overtekenen gaf daar lijnen in de schijf van de
+    onthulling. Onthullen, toon en stralen tekenen nu ook zo; wordt meer
+    dan 60% van de vakken vuil, dan alles.
+  - *Kleur*: de punten gaan per kleur, met één `fillStyle` per kleur in
+    plaats van een kleurtekst per punt. Elke punt houdt zijn eigen `fill`,
+    zodat twee punten die elkaar in de kam raken over elkaar vallen zoals
+    altijd.
+
+  Daarna: titel 8 ms, Spelen 11, tijd om 13, eindstand 12; op 2560x1440
+  bij 150% zonder vertraging 3 tot 6 ms, waar het 6 tot 30 was. Elk beeld
+  is naast een volledig getekend beeld gelegd: hetzelfde op randpixels na,
+  hoogstens 33/255 dekking op een enkele pixel van een punt in beweging.
 - **Canvas terug**: een grond die 1,2 s uit beeld is, zet zijn canvas op
   0 bij 0 (`ruimOp()`, via `VELDEN` in `show()`). Drie grondcanvassen van
   1170x2532 hielden samen 37 MB vast; nu ~1 MB. Die 1,2 s is er voor de
@@ -1562,6 +1592,17 @@ eigenschap: `rotate` de kanteling, `translate` het opkomen, `scale` de adem
 (`gluurAdem`), en `transform` blijft voor `mascotte()`. Ten derde ademden ze
 om hun onderkant, die onder de rand zit; dan schoof het stuk op de rand op
 en neer. Alles draait nu om het punt waar de tekening de rand raakt (76%).
+
+De adem zit op het vak om de tekening (`.gluur`, op de overdracht en de
+eindstand `.head`), niet op de svg. Chrome laat een svg met een eigen
+`rotate` of `translate` niet door de grafische kaart bewegen
+(`compositeFailed`, reden "SVG met losse transform-eigenschap"). Dan tekende
+de hoofddraad zolang de titel openstond elk beeld opnieuw, en zonder
+grafische kaart voor het canvas kopieerde hij daarbij elk beeld het hele
+stippenvlak: op 2560x1440 8 ms per beeld, terwijl er niets gebeurde. Het
+vak ademt om de lijn van de knip, zodat die stil blijft liggen; omdat de
+svg om hetzelfde punt draait, ziet het er hetzelfde uit. Nu tekent de
+hoofddraad in rust op de titel en de overdracht niets.
 
 Aantikken is een hoge wip met het blije gezicht, geen juich: de salto werd
 door de rand doorsneden, en wie achter een rand gluurt draait daar niet rond.
