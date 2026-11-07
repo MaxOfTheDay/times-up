@@ -155,8 +155,10 @@ de streep door de ballon van ronde 3 en de rand bij een weigering. Op een
 telefoon las het naast vermiljoen als een vuile Vos: een derde rood. De
 stopknop zei al wat hij is (huisje, vloed), dus
 vloeit hij nu in inkt met het huisje in papier (15,9:1), is de streep door de
-ballon inkt, en krijgt een geweigerde knop heel even een tweede inktring
-(het stilstaande signaal naast de schud, voor beperkte beweging). Het palet
+ballon inkt, en krijgt een geweigerde knop bij beperkte beweging heel even
+een tweede inktring (het stilstaande signaal in plaats van de schud). Mét
+schud stond die ring er ook, en was hij een derde rand om het stuk die
+meeschudde; daarom alleen nog onder `prefers-reduced-motion`. Het palet
 is daarmee: papier, inkt, Vos, Uil, goud, groen voor geraden, en de hitte
 van de klok.
 
