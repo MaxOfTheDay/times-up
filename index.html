@@ -2581,7 +2581,18 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
   display: block; cursor: pointer; -webkit-tap-highlight-color: transparent;
   /* De knip staat stil en snijdt alleen onderaan, op de rand van de plaat.
      Boven en opzij ruim, zodat een sprong of een kanteling nergens afknipt. */
-  clip-path: inset(-120% -60% var(--zak) -60%);
+  clip-path: inset(-120% -60% calc(var(--zak) - var(--diep)) -60%);
+}
+/* De knip ligt --diep ín de plaat, onder een strook inkt bovenaan de plaat.
+   De browser zet de rand van de plaat en de knip elk met hun eigen
+   gladde rand neer; lagen die twee op dezelfde lijn, dan scheen daartussen
+   een haarlijn papier door, die tijdens de adem flikkerde (de adem schaalt
+   het vak op de grafische kaart). Nu valt de knip onder de strook, en de
+   bovenkant van de strook is de bovenkant van de plaat zelf. */
+.wordmark { --diep: 3px; }
+.wordmark::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; z-index: 1;
+  height: calc(var(--diep) + 1px); background: var(--ink); pointer-events: none;
 }
 .gluur[data-team="0"] { left: var(--kant);  --kantel: -8deg; }
 .gluur[data-team="1"] { right: var(--kant); --kantel: 7deg; }

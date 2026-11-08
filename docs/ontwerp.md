@@ -1666,6 +1666,16 @@ van de plaat hun onderkant. De knip moet recht lopen, evenwijdig aan de
 plaat; daarom kantelt alleen de tekening (`rotate` op de svg) en niet het
 vak dat geknipt wordt, anders liep de knip schuin tegen de rand.
 
+De knip ligt `--diep` (3 px) ín de plaat, onder een strook inkt bovenaan de
+plaat (`.wordmark::before`, 4 px). Lag de knip precies op de bovenrand, dan
+zette de browser twee gladde randen op dezelfde lijn: de plaat dekte de
+randpixel half, het dier de andere helft niet, en daartussen scheen papier
+door. Op 393x852 bij 2,75 stond onder de uil over bijna de hele breedte
+een lichte haarlijn, en tijdens de adem flikkerde ze. Nu ligt het dier
+onder de randpixel van de strook, en die strook is even schuin als de
+plaat, want ze hoort erbij. Dezelfde oplossing als de strook op de
+overdracht (`#hoTally .side::after`).
+
 Het merk krijgt een marge bovenaan zo hoog als de mascottes, zodat de groep
 als geheel in het midden staat en op 320x568 niet tegen het tandwiel komt.
 
