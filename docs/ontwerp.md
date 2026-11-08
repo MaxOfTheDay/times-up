@@ -2557,6 +2557,17 @@ gemeten op elke hele seconde mee met het cijfer en het wiebelen (hooguit
   met het antwoord van de ander mee. Dat trilt bij elke tik; de rimpel van
   de landing trilt nog steeds niet.
 
+**Een vinger op de punten klinkt.** De rimpel van een tik op de grond was
+stil. Nu `Snd.plop()`: een triangle die in 50 ms van 720 naar 1500 Hz
+glijdt, met een korte sinus erachter (-23,1 dB in het telefoonmodel, 5 dB
+onder `goed()`). Steeds dezelfde plop, op de titel, de overdracht en de
+eindstand: dezelfde rimpel klinkt overal hetzelfde. Geprobeerd en niet
+gekozen: een xylofoon, waar de hoogte van de tik een van vijf noten kiest
+(een instrument erbij op een scherm met twee dingen). Niet bij de druk op
+Beginnen (de worp begint meteen met de stem van de dieren) en niet bij de
+landing van een dier (die tik klinkt al twee keer). Hoogstens één per
+`PLOP_MS` (70 ms), en geen trilling: een rimpel trilt niet.
+
 Niet gedaan: zand bij het omdraaien van de zandloper (opnieuw voorgesteld,
 opnieuw niet: het betekent niets), een eigen klank voor het stempel, en een
 klank voor de startknop die na de bel opveert (wachten is stil).

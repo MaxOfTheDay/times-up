@@ -4051,6 +4051,8 @@ const Snd = (() => {
   let bus = null;                // één uitgang, zodat gestapelde cues niet klippen
   let on = true;                 // te wisselen in de instellingen
   let houd = null;               // de toon van de lange druk (houdAan())
+  let laatstePlop = -1e9;        // zie plop()
+  const PLOP_MS = 70;
   const HOUD_F = 520, HOUD_VOL = .1;
   function ac() {
     if (!ctx) {
@@ -4228,6 +4230,17 @@ const Snd = (() => {
        kwint erboven, op de klets. Het vult de stilte tussen de telling en
        de fanfare; het klinkt nergens anders. */
     kroon() { tone(2093, .3, "triangle", .14, 0); tone(3136, .22, "triangle", .07, .025); },
+    /* Een vinger op de punten: een korte druppel die omhoog glijdt, steeds
+       dezelfde. Hij betekent één ding: je raakte het bord. Alleen bij een
+       tik op de grond zelf, niet bij de rimpel van een knop of een dier
+       (die hebben hun eigen klank of zijn een gevolg). Hoogstens één per
+       PLOP_MS: een roffel of twee vingers worden geen ratel. */
+    plop() {
+      const nu = performance.now();
+      if (nu - laatstePlop < PLOP_MS) return;
+      laatstePlop = nu;
+      tone(720, .05, "triangle", .16, 0, 1500); tone(1500, .03, "sine", .05, .03);
+    },
     /* Een nieuwe ronde: zoveel klokjes als het rondenummer, hoog en
        zacht, samen met de tekening die opkomt. Geeft terug hoe lang ze
        duren, zodat ploeg() erachter kan. */
@@ -8244,21 +8257,24 @@ const veldCd = stipveld($("#cdVeld"), {
 });
 
 /* De rimpel op de grond van de overdracht. Alleen een tik op de grond zelf,
-   niet op de kaart of de knoppen. */
+   niet op de kaart of de knoppen. Hij klinkt (Snd.plop()), maar trilt niet. */
 $("#s-handoff").addEventListener("pointerdown", e => {
   if (e.target !== e.currentTarget) return;
   const r = e.currentTarget.getBoundingClientRect();
   veldHo.rimpel(e.clientX - r.left, e.clientY - r.top, 1);
+  Snd.plop();
 });
 $("#s-winner").addEventListener("pointerdown", e => {
   if (e.target !== e.currentTarget) return;
   const r = e.currentTarget.getBoundingClientRect();
   veldWn.rimpel(e.clientX - r.left, e.clientY - r.top, 1);
+  Snd.plop();
 });
 $("#s-title").addEventListener("pointerdown", e => {
   if (e.target !== e.currentTarget) return;
   const r = e.currentTarget.getBoundingClientRect();
   veldTi.rimpel(e.clientX - r.left, e.clientY - r.top, 1);
+  Snd.plop();
 });
 
 /* Elke ronde knop op een stippengrond stuurt bij de druk een rimpel vanaf

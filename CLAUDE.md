@@ -419,7 +419,10 @@ in `handoff()`), na de fanfare, thuiskomen na een potje (`naarTitel()`,
 één `roep` per dier als zijn kop boven de rand komt) en een tik op het dier
 op de titel (een reeks snelle tikken klimt een halve toon per tik, tot
 zeven, zoals `goed()`). De eindstand telt op met `Snd.tel()`, niet met de
-tik van de klok; de kroon landt met `Snd.kroon()`. Een
+tik van de klok; de kroon landt met `Snd.kroon()`. Een vinger op de
+punten (een tik op de grond van de titel, de overdracht of de eindstand)
+klinkt als `Snd.plop()`, hoogstens één per `PLOP_MS`; de rimpel van een
+knop of van een landend dier niet. Een
 trilling duurt minstens 20 ms en heeft één van vijf lengtes (20 licht, 30
 de sluiter, 40 dof, 50 de deur, 60 het startsein) of een eigen ritme; twee
 betekenissen liggen nooit minder dan 10 ms uit elkaar. Het ritme van een
