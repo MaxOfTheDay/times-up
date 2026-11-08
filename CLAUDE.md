@@ -415,12 +415,18 @@ Leen geen klank: een cue klinkt alleen waar haar betekenis geldt.
 `Snd.ploeg` en `Snd.roep` zijn de stem van Vos en Uil en klinken alleen
 waar het dier zelf iets doet: de worp (elke stap `roep`, de landing
 `ploeg`), waar een beurt of ronde overgaat (in `turnEnd`/`endRound`, niet
-in `handoff()`), na de fanfare, en een tik op het dier op de titel. Een
+in `handoff()`), na de fanfare, thuiskomen na een potje (`naarTitel()`,
+één `roep` per dier als zijn kop boven de rand komt) en een tik op het dier
+op de titel (een reeks snelle tikken klimt een halve toon per tik, tot
+zeven, zoals `goed()`). De eindstand telt op met `Snd.tel()`, niet met de
+tik van de klok; de kroon landt met `Snd.kroon()`. Een
 trilling duurt minstens 20 ms en heeft één van vijf lengtes (20 licht, 30
 de sluiter, 40 dof, 50 de deur, 60 het startsein) of een eigen ritme; twee
-betekenissen liggen nooit minder dan 10 ms uit elkaar. Een rimpel trilt niet: de
-trilling hoort bij de gebeurtenis (een tel, het startsein, het vuurwerk),
-niet bij het beeld van een druk.
+betekenissen liggen nooit minder dan 10 ms uit elkaar. Het ritme van een
+einde (`Tril.om`, `Tril.leeg`) eindigt met een puls op het stempel dat
+landt. Een rimpel trilt niet: de
+trilling hoort bij de gebeurtenis (een tel, het startsein, het vuurwerk, een
+tik op een dier, de kroon), niet bij het beeld van een druk.
 
 **App-pictogram en installeerbaarheid.** Het manifest wordt in het geheugen
 gebouwd (blob-URL) met een expliciete `id`, `start_url` en `scope`. De zin
