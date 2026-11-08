@@ -3129,7 +3129,20 @@ groepen, elk één vraag:
   met de moeilijkheid onder de naam van Gewone en "4 in elk potje" onder
   de naam van Eigen.
 - **Deze telefoon**: Geluid, Trilling, installeren.
-- **Zo speel je**: één rij naar de regels op `#s-regels`.
+- **Zo speel je**: één rij naar de regels op `#s-regels`, met Contact
+  eronder.
+
+**Contact.** Een rij met een envelop onder Zo speel je, in dezelfde lijst.
+Een tik opent de mail-app van de telefoon met het adres van de maker en
+"Tijd is Om" als onderwerp (`MAIL_MAKER`, een `mailto:`). Geen formulier in
+de app en geen net: de mail wacht in de mail-app tot je hem verstuurt.
+Instellingen, omdat het het scherm voor de volwassene is: daar mag een
+woord, en een kind komt er niet per ongeluk. Gewogen: onderaan Zo speel je
+("Gemaakt door Max", warmer maar een scherm dieper) en vasthouden op MAX in
+de punten van de titel (verstopt, en vasthouden is alleen voor stoppen).
+De naam is "Contact", zonder het adres eronder: één woord, zoals de rij
+erboven. Wat het kost: op een toestel zonder mail-app gebeurt er niets, en
+het adres staat nergens.
 
 **Twee banen, twee schermen.** Het spel voor vanavond instellen (een paar
 tikken, elke avond) en je kaarten beheren (wegleggen, eigen maken, af en

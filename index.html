@@ -879,7 +879,7 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
        In elk potje bij Eigen); hun kaarten staan op #s-kaarten, met de
        moeilijkheid bovenaan Gewone.
      Deze telefoon -- geluid, trilling en installeren.
-     Zo speel je -- één rij naar de regels op #s-regels.
+     Zo speel je -- één rij naar de regels op #s-regels, en Contact eronder.
 
    Zet hier nooit een #s-setup h2 naast: die wint op zijn ID, ongeacht de
    volgorde, en dan zien de groepskoppen eruit als veldlabels. Geen goud: dat
@@ -2958,6 +2958,14 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
     </g>
   </symbol>
 
+  <!-- Contact: een envelop, in dezelfde pen als het vel van de regels. -->
+  <symbol id="i-post" viewBox="0 0 100 100">
+    <g fill="none" stroke="#14110F" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="12" y="24" width="76" height="54" stroke-width="9"/>
+      <path d="M14 28 L50 56 L86 28" stroke-width="8"/>
+    </g>
+  </symbol>
+
   <symbol id="i-vink" viewBox="0 0 100 100">
     <path d="M18 52 L40 74 L84 24" fill="none" stroke="#14110F" stroke-width="16"
           stroke-linecap="round" stroke-linejoin="round"/>
@@ -3191,11 +3199,18 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
 
     <!-- De regels op hun eigen scherm (#s-regels), als één rij: hetzelfde
          stuk als Gewone en Eigen. Onderaan, want wie het tandwiel aantikt
-         komt iets bijstellen. -->
+         komt iets bijstellen. Eronder Contact: een mail aan de maker, in de
+         mail-app van de telefoon (MAIL_MAKER). Eén woord, geen adres eronder:
+         zoals Zo speel je één regel. -->
     <div class="lijst">
       <button class="rij" id="rijRegels">
         <svg class="teken" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-regels"/></svg>
         <span class="rij-naam">Zo speel je</span>
+        <svg class="rij-pijl" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-verder"/></svg>
+      </button>
+      <button class="rij" id="rijContact">
+        <svg class="teken" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-post"/></svg>
+        <span class="rij-naam">Contact</span>
         <svg class="rij-pijl" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-verder"/></svg>
       </button>
     </div>
@@ -4881,6 +4896,11 @@ $("#rijRegels").addEventListener("click", () => {
   show("regels");
 });
 $("#btnRegelsTerug").addEventListener("click", () => show("setup"));
+/* Contact opent de mail-app van de telefoon, met het adres en het onderwerp
+   al ingevuld. De app zelf stuurt niets en gaat het net niet op: de mail
+   wacht in de mail-app tot je hem verstuurt. */
+const MAIL_MAKER = "mailto:maxmakes.app@gmail.com?subject=" + encodeURIComponent("Tijd is Om");
+$("#rijContact").addEventListener("click", () => { location.href = MAIL_MAKER; });
 
 /* ==============================================================
    EIGEN KAARTEN

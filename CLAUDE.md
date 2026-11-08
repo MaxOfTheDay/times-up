@@ -480,7 +480,8 @@ van de naam, Tijd per beurt), Kaarten (welke kaarten erin kunnen: een
 lijst met Gewone en Eigen, elk met haar stand onder de naam: de
 moeilijkheid, en hoeveel eigen kaarten er in elk potje gaan), Deze telefoon (Geluid en Trilling als schakelaars in een lijst,
 en de rij om te installeren of te delen), Zo speel je (één rij naar
-`#s-regels`). Een veldnaam
+`#s-regels`, met Contact eronder: een `mailto:` naar de maker,
+`MAIL_MAKER`). Een veldnaam
 herhaalt zijn groepskop niet. De lange lijsten staan op hun eigen scherm,
 `#s-kaarten`, één lijst per bezoek: de titel zegt welke ("Gewone kaarten",
 "Eigen kaarten"), zonder tabbladen, met de uitgang rechtsboven, Moeilijkheid
