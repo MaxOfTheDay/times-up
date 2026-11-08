@@ -1611,6 +1611,40 @@ Max koos de golf (`golfMee()`), voorlopig. Bij beperkte beweging valt hij
 weg, zoals elke rimpel. Wat in de lucht beweegt (sprongen, de vliegende
 kaart, snippers) duwt de punten niet.
 
+### Snelle tikken klonteren niet
+
+Max vroeg of de rimpel beter kon. Gefilmd op 390x844 (de klok van
+Playwright stilgezet, beeld voor beeld): een tik is scherp na 200 ms en
+op 550 ms zo goed als weg, zo'n 200 px van de vinger. Dat is goed zo: Max
+wil de rimpel laten uitdoven, en dat hij het merk niet haalt is geen
+gemis.
+
+Wel mis: de duw van elke rimpel telde op. Zes tikken binnen een halve
+seconde (zo tikt een kind) duwden punten tot 44 px van hun plek, in
+klonten. Nu duwen alle rimpels samen een punt hoogstens zo ver als één
+rimpel (`STIP_DUW`, 12 px), in de shader en in `reken()`. Eén tik ziet er
+precies hetzelfde uit; snel tikken geeft een woelige zee in plaats van
+bulten.
+
+`test/stip.test.js` kreeg daarvoor zes tikken op een kluitje, en bleek
+sinds de context pas bij het eerste beeld komt twee keer de grafische kaart
+te vergelijken: de 2D-weg kreeg haar "geen WebGL" alleen tijdens
+`stipveld()`. Nu hangt dat aan het canvas zelf, en toetst de test na het
+eerste beeld welk canvas welke context heeft. Een grens alleen in de
+shader valt nu op.
+
+Bekeken in een live mock-up en niet gekozen:
+
+- **Verder.** Langzamer uitdempen, zodat de ring over het hele scherm
+  loopt. Max vindt het uitdoven goed.
+- **Drukken en loslaten.** De punten onder de vinger zakken in zolang je
+  drukt, de ring vertrekt bij het loslaten. Dan wacht de ring (en de plop)
+  op de vinger, en een snelle tik toont de deuk nauwelijks.
+- **Een spoor.** Een vinger die over de punten sleept, trekt zwakke ringen
+  mee zoals `golfMee()`. Een nieuw speeltje op het bord.
+- **Krachtiger.** Een tik op 1,4: dan overstemt hij de ring van de
+  startknop (1,2), die de grotere gebeurtenis is.
+
 ## Het titelscherm heeft twee dingen
 
 Het merk en de knop. Vos en Uil stonden eerst klein naast de knop, op de

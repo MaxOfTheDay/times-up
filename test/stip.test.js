@@ -4,8 +4,8 @@
  * stipveld()), voor een toestel zonder kaart. Ze moeten hetzelfde beeld
  * geven. Deze test zet twee velden over elkaar, één per weg, geeft ze
  * dezelfde aanroepen op een stilgezette klok (rimpels rond en vanaf een
- * rand, onthullen, toon, stralen, de handtekening) en vergelijkt elke
- * pixel. Wat mag verschillen is de zachte rand van een punt: een paar
+ * rand, snelle tikken op een kluitje, onthullen, toon, stralen, de
+ * handtekening) en vergelijkt elke pixel. Wat mag verschillen is de zachte rand van een punt: een paar
  * pixels per punt, een paar tientallen op 255.
  *
  * De 2D-weg tekent alleen wat veranderde; met grote stappen in de tijd
@@ -19,6 +19,8 @@ const STANDEN = {
   rand: ['{ ploeg: () => 0 }', [[0, 'v.rimpelRand({ x: 400, y: 200, width: 400, height: 300 }, 1.2); v.rimpel(1000,600,.7,30)'], [250], [600], [1100]]],
   onthul: ['{ inkt: true }', [[0, 'v.onthul(640,700,40,"#e94b2e",900,()=>{}); v.rimpel(640,700,1)'], [200], [500], [880], [1000]]],
   stralen: ['{ ploeg: () => 1 }', [[0, 'v.stralen(true); v.rimpel(600,400,1)'], [400], [3000]]],
+  /* Zes tikken vlak naast elkaar: hun duw samen blijft STIP_DUW. */
+  klont: ['{ ploeg: () => 1 }', [[0, 'for (let i = 0; i < 6; i++) v.rimpel(500 + i * 30, 400, 1)'], [150], [400], [800]]],
   toon: ['{ ploeg: () => 0 }', [[0, 'v.toon(640,400,false,900)'], [300], [600], [900, 'v.toon(200,200,true,700)'], [1300]]],
 };
 
@@ -36,11 +38,12 @@ const STANDEN = {
       const raf = window.requestAnimationFrame.bind(window);
       window.requestAnimationFrame = f => raf(() => f(performance.now()));
       /* Het 2D-veld krijgt geen WebGL; het GL-veld bewaart zijn beeld,
-         zodat het hier uit te lezen is. */
+         zodat het hier uit te lezen is. Per canvas, want het veld maakt
+         zijn context pas bij het eerste beeld. */
       const ctxVan = HTMLCanvasElement.prototype.getContext;
       HTMLCanvasElement.prototype.getContext = function (t, o, ...r) {
         if (!/webgl/.test(t)) return ctxVan.call(this, t, o, ...r);
-        return window.__geenGl ? null : ctxVan.call(this, t, { ...(o || {}), preserveDrawingBuffer: true });
+        return this.dataset.geenGl ? null : ctxVan.call(this, t, { ...(o || {}), preserveDrawingBuffer: true });
       };
     });
     const page = await ctx.newPage();
@@ -48,24 +51,26 @@ const STANDEN = {
     await page.goto(APP_URL);
     await page.waitForTimeout(800);
     for (const [naam, [opt, stappen]] of Object.entries(STANDEN)) {
-      const gl = await page.evaluate(opt => {
+      await page.evaluate(opt => {
         document.querySelectorAll('.stiptest').forEach(c => c.remove());
         window.__nu = 1e6;
         window.__v = [false, true].map(geen => {
           const c = document.createElement('canvas');
           c.className = 'stiptest';
           c.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;z-index:99999;pointer-events:none';
+          if (geen) c.dataset.geenGl = '1';
           document.body.appendChild(c);
-          window.__geenGl = geen;
           const v = stipveld(c, { ...eval('(' + opt + ')'), zichtbaar: () => true });
-          window.__geenGl = false;
           v.aan();
           return { c, v };
         });
-        return !!__v[0].c.getContext('webgl2') || !!__v[0].c.getContext('webgl');
       }, opt);
-      assert.ok(gl, `${naam}: het GL-veld kreeg geen WebGL`);
       await page.waitForTimeout(100);
+      /* Na het eerste beeld: een canvas met een WebGL-context geeft geen
+         2D-context meer, en omgekeerd. */
+      const [glAan, tweeDAan] = await page.evaluate(() => [!__v[0].c.getContext('2d'), !!__v[1].c.getContext('2d')]);
+      assert.ok(glAan, `${naam}: het GL-veld tekent niet op de grafische kaart`);
+      assert.ok(tweeDAan, `${naam}: het 2D-veld tekent niet op een 2D-canvas`);
       for (const [t, actie] of stappen) {
         await page.evaluate(([t, actie]) => { window.__nu = 1e6 + t; if (actie) __v.forEach(({ v }) => eval(actie)); }, [t, actie]);
         await page.waitForTimeout(120);
