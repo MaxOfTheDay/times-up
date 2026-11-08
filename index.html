@@ -4051,6 +4051,8 @@ const Snd = (() => {
   let bus = null;                // één uitgang, zodat gestapelde cues niet klippen
   let on = true;                 // te wisselen in de instellingen
   let houd = null;               // de toon van de lange druk (houdAan())
+  let laatstePlop = -1e9;        // zie plop()
+  const PLOP_MS = 70;
   const HOUD_F = 520, HOUD_VOL = .1;
   function ac() {
     if (!ctx) {
@@ -4205,18 +4207,39 @@ const Snd = (() => {
        een kwart hoger is hij even luid en nog steeds de lagere. Ze klinkt
        waar het dier zelf iets doet: de worp landt, de overdracht opent, na
        de fanfare, en een tik op het dier op de titel (zacht, `v`). Niet in
-       het aftellen, dat is één opbouw. */
-    ploeg(t, at, v) {
-      const a = at || 0, s = v || 1;
-      if (t === 0) { tone(880, .07, "triangle", .18 * s, a); tone(1319, .11, "triangle", .18 * s, a + .08); }
-      else { tone(784, .16, "triangle", .2 * s, a, 740); tone(659, .24, "triangle", .2 * s, a + .2, 622); }
+       het aftellen, dat is één opbouw. `k` zet de stem k halve tonen hoger:
+       een reeks tikken op de titel klimt, zoals goed() in een beurt. */
+    ploeg(t, at, v, k) {
+      const a = at || 0, s = v || 1, m = Math.pow(2, (k || 0) / 12);
+      if (t === 0) { tone(880 * m, .07, "triangle", .18 * s, a); tone(1319 * m, .11, "triangle", .18 * s, a + .08); }
+      else { tone(784 * m, .16, "triangle", .2 * s, a, 740 * m); tone(659 * m, .24, "triangle", .2 * s, a + .2, 622 * m); }
     },
     /* Eén noot van die stem: het antwoord van het andere dier op de titel,
-       en elke stap van de worp, waar de kant die oplicht zo klinkt. */
-    roep(t, at, v) {
-      const a = at || 0, s = v || 1;
-      if (t === 0) tone(1319, .06, "triangle", .12 * s, a);
-      else tone(784, .08, "triangle", .12 * s, a, 740);
+       elke stap van de worp, waar de kant die oplicht zo klinkt, en het dier
+       dat thuis boven de rand uitkomt. */
+    roep(t, at, v, k) {
+      const a = at || 0, s = v || 1, m = Math.pow(2, (k || 0) / 12);
+      if (t === 0) tone(1319 * m, .06, "triangle", .12 * s, a);
+      else tone(784 * m, .08, "triangle", .12 * s, a, 740 * m);
+    },
+    /* De eindstand telt op: per drie punten een zachte noot uit de familie
+       van goed(), die over de hele telling een octaaf klimt (k van 0 tot
+       12). Niet de tik: die is van de klok en betekent "de tijd loopt". */
+    tel(k) { tone(659 * Math.pow(2, Math.min(Math.max(k || 0, 0), 12) / 12), .05, "triangle", .16, 0); },
+    /* De kroon landt op de kop van wie won: een helder belletje met een
+       kwint erboven, op de klets. Het vult de stilte tussen de telling en
+       de fanfare; het klinkt nergens anders. */
+    kroon() { tone(2093, .3, "triangle", .14, 0); tone(3136, .22, "triangle", .07, .025); },
+    /* Een vinger op de punten: een korte druppel die omhoog glijdt, steeds
+       dezelfde. Hij betekent één ding: je raakte het bord. Alleen bij een
+       tik op de grond zelf, niet bij de rimpel van een knop of een dier
+       (die hebben hun eigen klank of zijn een gevolg). Hoogstens één per
+       PLOP_MS: een roffel of twee vingers worden geen ratel. */
+    plop() {
+      const nu = performance.now();
+      if (nu - laatstePlop < PLOP_MS) return;
+      laatstePlop = nu;
+      tone(720, .05, "triangle", .16, 0, 1500); tone(1500, .03, "sine", .05, .03);
     },
     /* Een nieuwe ronde: zoveel klokjes als het rondenummer, hoog en
        zacht, samen met de tekening die opkomt. Geeft terug hoe lang ze
@@ -4287,8 +4310,11 @@ const Tril = (() => {
     ijk()   { buzz(20); },                    // lange druk, op een derde en twee derde
     doe()   { buzz(50); },                    // lange druk voltooid
     klik()  { buzz(30); },                    // foto genomen, als de sluiter dicht is
-    om()    { buzz([60, 70, 60]); },          // tijd om
-    leeg()  { buzz([30, 50, 30, 50, 60]); },  // stapel leeg, op de noten van Snd.leeg (0, 80, 160 ms)
+    /* Een einde: de laatste puls (280 ms) valt op het stempel dat landt (--t-kom). */
+    om()    { buzz([60, 70, 60, 90, 50]); },          // tijd om, en het stempel
+    leeg()  { buzz([30, 50, 30, 50, 30, 90, 50]); },  // stapel leeg: de noten van Snd.leeg (0, 80, 160 ms), en het stempel
+    dier()  { buzz(20); },                    // een tik op Vos of Uil op de titel
+    kroon() { buzz(20); },                    // de kroon landt
     /* Gewonnen: een puls op elke uitbarsting van het vuurwerk (de noten
        van de fanfare, 130 ms uit elkaar) en een lange op de slotring (550). */
     feest() { buzz([40, 90, 40, 90, 40, 90, 40, 120, 120]); }
@@ -8231,21 +8257,24 @@ const veldCd = stipveld($("#cdVeld"), {
 });
 
 /* De rimpel op de grond van de overdracht. Alleen een tik op de grond zelf,
-   niet op de kaart of de knoppen. */
+   niet op de kaart of de knoppen. Hij klinkt (Snd.plop()), maar trilt niet. */
 $("#s-handoff").addEventListener("pointerdown", e => {
   if (e.target !== e.currentTarget) return;
   const r = e.currentTarget.getBoundingClientRect();
   veldHo.rimpel(e.clientX - r.left, e.clientY - r.top, 1);
+  Snd.plop();
 });
 $("#s-winner").addEventListener("pointerdown", e => {
   if (e.target !== e.currentTarget) return;
   const r = e.currentTarget.getBoundingClientRect();
   veldWn.rimpel(e.clientX - r.left, e.clientY - r.top, 1);
+  Snd.plop();
 });
 $("#s-title").addEventListener("pointerdown", e => {
   if (e.target !== e.currentTarget) return;
   const r = e.currentTarget.getBoundingClientRect();
   veldTi.rimpel(e.clientX - r.left, e.clientY - r.top, 1);
+  Snd.plop();
 });
 
 /* Elke ronde knop op een stippengrond stuurt bij de druk een rimpel vanaf
@@ -8303,12 +8332,21 @@ function rimpelDoor(k, vanKaart) {
    geluisterd wordt. Zonder dit zakt op een iPhone geen enkele knop in. */
 document.addEventListener("touchstart", () => {}, { passive: true });
 
+/* Een reeks snelle tikken op hetzelfde dier klimt: elke tik binnen REEKS_MS
+   een halve toon hoger, tot zeven, zoals goed() in een beurt. */
+const REEKS_MS = 1200;
+const reeks = [{ n: 0, t: -1e9 }, { n: 0, t: -1e9 }];
 $$(".gluur").forEach(g => g.addEventListener("pointerdown", () => {
   Snd.unlock();
   /* Het dier roept zijn eigen stem, zacht; het andere antwoordt hieronder
      met één noot. Niet goed(): dat betekent een geraden kaart. */
   const wie = g.dataset.team === "0" ? 0 : 1;
-  Snd.ploeg(wie, 0, .72);
+  const r = reeks[wie], nu = performance.now();
+  r.n = nu - r.t < REEKS_MS ? Math.min(r.n + 1, 7) : 0;
+  r.t = nu;
+  const k = r.n;
+  Tril.dier();
+  Snd.ploeg(wie, 0, .72, k);
   /* Een hoge wip met een blij gezicht, geen salto: wie achter een rand
      gluurt, draait daar niet rond, en een salto werd door de rand doorsneden. */
   wipOpRand(g, 7);
@@ -8322,7 +8360,7 @@ $$(".gluur").forEach(g => g.addEventListener("pointerdown", () => {
     /* .gluur staat ook op de overdracht en de eindstand; alleen op de titel
        antwoordt de ander. */
     if (current !== "title") return;
-    Snd.roep(1 - wie);
+    Snd.roep(1 - wie, 0, 1, k);
     wipOpRand(ander, 1);
     zetGezicht(ander.querySelector("svg"), "-blij", 400);
   });
@@ -8909,6 +8947,8 @@ function winner() {
       { duration: VAL, delay: KROON, easing: curve("weg"), fill: "backwards" });
     na(KROON + VAL, () => mascotte(k.parentNode, "klets"));
   });
+  /* Eén belletje voor de landing, ook als er bij gelijkspel twee kronen vallen. */
+  if ($("#wnPiles .kroon")) na(KROON + VAL, () => { Snd.kroon(); Tril.kroon(); });
   nums.forEach(n => { n.textContent = "0"; });
   const t0 = performance.now();
   let vorig = -1;
@@ -8919,7 +8959,7 @@ function winner() {
     // Allebei met dezelfde snelheid per punt: wie meer had, telt langer door.
     const waarde = Math.round(e * hoogst);
     nums.forEach((n, i) => { n.textContent = Math.min(doel[i], waarde); });
-    if (waarde !== vorig && waarde % 3 === 0) Snd.tick(1500 + waarde * 6, .04);
+    if (waarde !== vorig && waarde % 3 === 0 && waarde > 0) Snd.tel(Math.round(12 * waarde / hoogst));
     vorig = waarde;
     if (p < 1) requestAnimationFrame(stap);
     else na(KROON - OPTEL + VAL + 300, () => { juichen(); feest(); });
@@ -8997,11 +9037,16 @@ $("#btnHome").addEventListener("click", e => {
    Het oude scherm (en bij stoppen de sluier) blijft eronder staan tot de
    cirkel rond is. k is de knop, gemeten voor hij verdween. Zonder knop, of
    bij beperkte beweging: meteen. */
+/* Thuis na een potje: elk dier roept één noot op het moment dat zijn kop
+   boven de rand komt (de vertraging van gluurOp plus zo'n 170 ms veer).
+   Alleen hier, niet bij terug uit Instellingen: daar kom je niet thuis. */
+const THUIS_ROEP = [320 + 170, 460 + 170];
 function naarTitel(k, sluier) {
   const van = $(".screen.on");
   /* Uit het huisje gegroeid (thuisGluur()): de titel staat al vol in beeld. */
   const al = thuisOpen();
   show("title");
+  if (!stilAan()) THUIS_ROEP.forEach((ms, t) => na(ms, () => Snd.roep(t)));
   if (!al) groeiUit($("#s-title"), van, k, sluier);
 }
 /* Het scherm naar (al getoond) groeit als cirkel uit knop k over het scherm

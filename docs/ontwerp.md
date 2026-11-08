@@ -2527,6 +2527,51 @@ twintig keer achter elkaar, en trillen kent alleen duur en ritme, met 20 ms
 als ondergrens; elke extra trilling maakt `tik` en `tel` minder te
 onderscheiden.
 
+**Ronde twee: waar geluid en beeld nog los liepen (8 november).** Elke cue
+naast zijn animatie gelegd. Het aftellen, goed en pas, de worp, de
+overdracht en het huisje klopten; de tik van de laatste tien tellen valt
+gemeten op elke hele seconde mee met het cijfer en het wiebelen (hooguit
+33 ms ernaast). Vier gaten:
+
+- *De telling van de eindstand leende de klok.* Ze tikte met `Snd.tick`
+  (square vanaf 1500 Hz), en die tik betekent "de tijd loopt". Nu
+  `Snd.tel(k)`: een triangle uit de familie van `goed()`, die over de hele
+  telling een octaaf klimt, hoe hoog de stand ook is (`k = 12 * waarde /
+  hoogst`). In het telefoonmodel -25,8 tot -21,8 dB, binnen 8 dB van
+  `goed()` (de oude tik zat op -32,3).
+- *De kroon viel stil.* Tussen het einde van de telling en de fanfare lag
+  840 ms waarin het dier opstaat en de kroon valt, zonder klank. Nu op de
+  klets `Snd.kroon()` (2093 Hz met een kwint, -16,9 dB) en `Tril.kroon()`
+  (20 ms): telling, ting, fanfare. Bij gelijkspel één belletje.
+- *Het stempel landde na de trilling.* Het stempel valt in `--t-kom`
+  (280 ms); `Tril.om` was na 190 ms voorbij, `Tril.leeg` na 220. Beide
+  ritmes krijgen er een puls van 50 ms bij, op 280 ms. Geen eigen geluid:
+  de zoemer en de drie noten zeggen het al.
+- *De titel praatte niet terug.* Thuiskomen na een potje (`naarTitel()`)
+  was stil terwijl de dieren opkwamen. Nu roept elk één noot als zijn kop
+  boven de rand komt (`THUIS_ROEP`: de vertraging van `gluurOp` plus
+  170 ms). Niet bij terug uit Instellingen, daar kom je niet thuis; bij de
+  eerste start kan het niet (nog geen tik). Een tik op een dier trilt nu
+  licht (`Tril.dier()`, op het neerzetten van de vinger), en een reeks
+  tikken binnen `REEKS_MS` (1,2 s) klimt een halve toon per tik, tot zeven,
+  met het antwoord van de ander mee. Dat trilt bij elke tik; de rimpel van
+  de landing trilt nog steeds niet.
+
+**Een vinger op de punten klinkt.** De rimpel van een tik op de grond was
+stil. Nu `Snd.plop()`: een triangle die in 50 ms van 720 naar 1500 Hz
+glijdt, met een korte sinus erachter (-23,1 dB in het telefoonmodel, 5 dB
+onder `goed()`). Steeds dezelfde plop, op de titel, de overdracht en de
+eindstand: dezelfde rimpel klinkt overal hetzelfde. Geprobeerd en niet
+gekozen: een xylofoon, waar de hoogte van de tik een van vijf noten kiest
+(een instrument erbij op een scherm met twee dingen). Niet bij de druk op
+Beginnen (de worp begint meteen met de stem van de dieren) en niet bij de
+landing van een dier (die tik klinkt al twee keer). Hoogstens één per
+`PLOP_MS` (70 ms), en geen trilling: een rimpel trilt niet.
+
+Niet gedaan: zand bij het omdraaien van de zandloper (opnieuw voorgesteld,
+opnieuw niet: het betekent niets), een eigen klank voor het stempel, en een
+klank voor de startknop die na de bel opveert (wachten is stil).
+
 **Geen muziek.** De raders moeten de uitbeelder horen, en de klok bouwt de
 spanning al op in de laatste tien seconden.
 
