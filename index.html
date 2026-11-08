@@ -7517,6 +7517,9 @@ const STIP_PAPIER = [.23, .16];
    STIP_MAX_RIMPELS rimpels tegelijk: de oudste vallen weg, in beide. Een cirkel krijgt zijn zachte rand zoals op een canvas: per
    schermpixel de dekking van straal min afstand plus een halve pixel. */
 const STIP_MAX_RIMPELS = 32;
+/* Zo ver duwen alle rimpels samen een punt opzij, net zoveel als één rimpel.
+   Zonder grens telden snelle tikken hun duw op tot klonten van 44 px. */
+const STIP_DUW = 12;
 const STIP_VS = `
   precision highp float;
   attribute vec2 hoek;          // de hoek van het vierkant om de punt, -1..1
@@ -7554,6 +7557,8 @@ const STIP_VS = `
       golf = max(golf, min(1.6, max(0.0, pak) * demp));
       dal = max(dal, min(1.0, max(0.0, -pak) * demp));
     }
+    float le = length(e);
+    if (le > ${STIP_DUW}.0) e *= ${STIP_DUW}.0 / le;
     vec2 o = plek - onthul.xy;
     bool papier = inkt < 0.5 || (onthul.z >= 0.0 && dot(o, o) < onthul.z * onthul.z);
     float a0 = papier ? papierA : 0.12;
@@ -7946,6 +7951,8 @@ function stipveld(cv, opt) {
         golf = Math.max(golf, Math.min(1.6, Math.max(0, pak) * demp));
         dal = Math.max(dal, Math.min(1, Math.max(0, -pak) * demp));
       }
+      const le = Math.hypot(ex, ey);
+      if (le > STIP_DUW) { ex *= STIP_DUW / le; ey *= STIP_DUW / le; }
       const papier = !inkt || (straal >= 0 && (p.x - onthul.x) ** 2 + (p.y - onthul.y) ** 2 < straal * straal);
       let A0 = papier ? papierA : INKT[0];
       const LICHT_R = papier ? PAPIER[2] : INKT[2];

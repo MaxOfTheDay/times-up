@@ -302,8 +302,8 @@ op één canvas per grond (`stipveld()`). Wat beweegt is rastertoon: een punt
 groeit, hij licht niet alleen op. Ze lopen van rand tot rand, zonder
 uitsparing: de stukken liggen erop (`opt.masker` is een haak, geen
 standaard). Ze bewegen alleen als iets ze indrukt (geen deining): een tik op de grond geeft een rimpel die de
-punten opzij duwt en terug laat veren: 12 px opzij en een punt tot ruim het
-dubbele, want minder leest op een telefoon als niets; in het dal achter de
+punten opzij duwt en terug laat veren: 12 px opzij (alle rimpels samen
+niet verder, `STIP_DUW`) en een punt tot ruim het dubbele, want minder leest op een telefoon als niets; in het dal achter de
 kam krimpen ze. Het canvas tekent tot 3x. Ze staan op de
 overdracht, het aftellen en het spelen, de eindstand (in de ploegkleur van wie won, bij
 gelijkspel inkt op papier) en de titel, die van allebei de ploegen is en dus
