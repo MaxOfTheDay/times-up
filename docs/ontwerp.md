@@ -2822,8 +2822,9 @@ op dat vel staat:
 - **ios** -- de weg via het deelmenu, als tegels: het deel-teken
   (`#i-deel`) en het plus-vierkant (`#i-erbij`) met "Zet op beginscherm",
   op Safari 26 met ••• ervoor.
-- **menu** -- de weg via het menu van de browser (⋮, App installeren): de
-  dialoog is weggetikt, of een Android-browser gaf geen signaal.
+- **menu** -- de weg via het menu van de browser (⋮, App installeren; op
+  Firefox ⋮, Installeren): de dialoog is weggetikt, of een Android-browser
+  gaf geen signaal.
 - **inapp** -- de browser van een andere app (Instagram, Facebook): open in
   Safari of Chrome, met een knop die de link kopieert.
 - **mac** -- Safari op de Mac: Archief, Voeg toe aan Dock. De rij heet dan
@@ -2928,6 +2929,10 @@ een weg die niet werkte of niets:
   zegt Chrome in dat menu "Openen in app" in plaats van "App installeren";
   dat is niet te zien van binnen een tabblad, en de rij staat er dan te
   veel. De goede kant om op te raden, om dezelfde reden als op iOS.
+  Firefox heet in dat menu niet "App installeren" maar "Installeren"
+  (zo staat het in de hulp van Mozilla), en is aan de user-agent te
+  herkennen: hij krijgt `menu` meteen, met zijn eigen woord. Met de drie
+  tellen sprong het vel op als je al naar de titel keek.
 
 Safari op de Mac kan het sinds 17 (Archief, Voeg toe aan Dock) en kreeg
 ook niets. Dat is de minst belangrijke van de vier, maar kost één regel.
