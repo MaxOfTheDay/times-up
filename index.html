@@ -9689,6 +9689,9 @@ const UA = navigator.userAgent;
 const isIOS = () =>
   /iPad|iPhone|iPod/.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1);
 const isAndroid = () => /Android/.test(UA);
+/* Firefox op Android geeft nooit het signaal; zijn menu heeft de weg wel,
+   onder een ander woord dan Chrome ("Installeren"). */
+const isFirefoxAndroid = () => isAndroid() && /Firefox\//.test(UA);
 /* De browser in een andere app (Instagram, Facebook, TikTok, een Android
    WebView): daar bestaat geen weg naar het beginscherm, dus ook geen
    uitleg die werkt. Het tabblad van Chrome binnen WhatsApp of Gmail is
@@ -9747,7 +9750,8 @@ function paintVel() {
     pad = deelAchterMeer()
       ? tegel("•••", "meer") + dan(tegel(teken("i-deel"), "deel")) + dan(tegel(teken("i-erbij") + "Zet op beginscherm"))
       : tegel(teken("i-deel"), "deel") + dan(tegel(teken("i-erbij") + "Zet op beginscherm"));
-  else if (st === "menu") pad = tegel("⋮", "menu") + dan(tegel("App installeren"));
+  else if (st === "menu")
+    pad = tegel("⋮", "menu") + dan(tegel(isFirefoxAndroid() ? "Installeren" : "App installeren"));
   else if (st === "mac") pad = tegel("Archief") + dan(tegel("Voeg toe aan Dock"));
   else if (st === "inapp") {
     pad = '<span class="los">Open in</span>' + tegel(isIOS() ? "Safari" : "Chrome");
@@ -9876,6 +9880,7 @@ function kiesInstallStand() {
   else if (inAppBrowser()) toonInstall("inapp");
   else if (isIOS()) toonInstall("ios");
   else if (isMacSafari()) toonInstall("mac");
+  else if (isFirefoxAndroid()) toonInstall(deferredInstall ? "knop" : "menu");
   else toonInstall(deferredInstall ? "knop" : "weg");
 }
 kiesInstallStand();
@@ -9883,6 +9888,8 @@ kiesInstallStand();
 /* Op Android heeft elke browser de weg via zijn menu, maar niet elke browser
    geeft het signaal (Firefox, het tabblad binnen WhatsApp), en Chrome geeft
    het pas na wat gebruik. Drie tellen zonder signaal: de weg via het menu.
+   Firefox is aan de user-agent te herkennen en wacht die drie tellen niet:
+   anders springt het vel pas op als je al naar de titel kijkt.
    Komt het signaal later toch, dan wordt het de knop. */
 if (isAndroid()) setTimeout(() => {
   if (installStand === "weg" && !inAppModus()) toonInstall("menu");
