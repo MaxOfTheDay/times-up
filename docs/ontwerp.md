@@ -2387,6 +2387,37 @@ en stilzetten gaan over dezelfde klok.
 - Liggend krimpen de tegels niet meer tot 40 px: de klokknop is een knop en
   houdt `--tap`, en de andere twee horen even hoog te zijn.
 
+## Met een muis is het spel één bord
+
+Op een desktop (1910x926, november 2026) liep het spelscherm uit elkaar. De
+liggende opmaak is gemaakt voor een telefoon dwars in twee handen: goed en
+pas aan de randen, waar de duimen zitten. Op een breed scherm hingen ze
+daardoor tot 800 px van de kaart, goed op 10 px van de rand, en de balk
+liep van hoek tot hoek. De kaart werd zo hoog als het scherm (zo'n 800 px),
+terwijl het teken op `GLYPH_MAX` (300 px) stopt: vooral leeg papier, met
+het woord klein in het midden. Titel, overdracht, eindstand en
+instellingen stonden al in het midden en bleven zoals ze waren.
+
+Drie standen vergeleken: zo laten, de kaart groot houden en de bediening
+ertegenaan schuiven, of één bord. Gekozen: één bord. De kaart is hoogstens
+600 px (`--kol`), goed en pas staan er 40 px naast (`--spleet`), de balk is
+zo breed als dat geheel, en het geheel staat midden in het scherm. Zo leest
+het als een bordspel op tafel, reist de muis een paar centimeter, en is de
+speelkaart ongeveer zo groot als de opdrachtkaart waaruit ze omdraait.
+
+- Alleen bij `(hover: hover) and (pointer: fine)`: een tablet of telefoon
+  dwars houdt de knoppen aan de randen. Een laptop met aanraakscherm en
+  muis telt als muis.
+- Alleen vanaf 560 px hoog: lager is er geen plek voor een vaste kaart en
+  geldt de gewone liggende opmaak.
+- `.cardwrap` krijgt een vaste hoogte, geen `max-height`: `sizeCard()` meet
+  de kaart aan dit vak, en een vak dat zich naar zijn inhoud voegt kromp
+  tot een kaart van 60 px.
+- "Pas" hangt aan het scherm (zie `.controls`) en rekent hier zijn plek
+  vanaf het midden: `50% - --kol/2 - --spleet - --skip`.
+- `npm run foto` heeft er een vierde maat voor: desktop, 1910x926, zonder
+  aanraking.
+
 ## Eén stand
 
 De stand staat alleen nog op de overdracht (`#hoTally`); de pauze laat hem

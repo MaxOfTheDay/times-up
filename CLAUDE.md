@@ -26,8 +26,8 @@ een controle vooraf gevraagd wordt.
   px, een derde rechthoek om het merk, een kroon door de bovenrand, een
   stapel fiches die de startknop van het scherm duwde. Maak bij elke
   zichtbare wijziging screenshots (staand 390x844, liggend 844x390, klein
-  320x568) en kijk ernaar: `npm run foto` zet elf standen per maat op een
-  contactblad in `foto/` en meldt een knop buiten beeld, een svg van 0 bij
+  320x568, en desktop 1910x926 met een muis) en kijk ernaar: `npm run foto`
+  zet elf standen per maat op een contactblad in `foto/` en meldt een knop buiten beeld, een svg van 0 bij
   0 en een bedekte hoofdknop. Een stand die hij niet heeft, maak je erbij.
 - Alles staat in `index.html`: geen build, geen externe assets, werkt met de
   wifi uit. Houd dat zo. Het enige andere bestand dat de app nodig heeft is
@@ -379,6 +379,12 @@ scheidt een inktlijn; niets ligt over een ander stuk heen. Alleen de
 klokknop heeft lift. Op het aftellen staat de balk er al; alleen ligt
 `#cdBack` dan op de gemeten plek van de klokknop. Tekst in de balk staat op papier of op het groen, nooit op de
 ploegkleur.
+
+**Met een muis is het spel één bord.** Op een desktop (`hover: hover`,
+`pointer: fine`, liggend en minstens 560 px hoog) is de speelkaart hoogstens
+600 px (`--kol`), staan goed en pas pal naast de kaart (`--spleet`) en is
+de balk zo breed als dat geheel, alles samen in het midden. Aanraking houdt
+de knoppen aan de randen, waar de duimen zitten.
 
 **Pauze legt het spel weg en draait de kaart om, zonder sluier.** De grond
 blijft vlak in de ploegkleur (hij zegt wie er speelt); wat verandert is de

@@ -2448,6 +2448,29 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
   .btn-skip svg { width: 60%; }
 }
 
+/* Met een muis (desktop) is het spel één bord: de kaart hoogstens 600 px,
+   goed en pas pal ernaast, de balk zo breed als dat geheel, en alles samen
+   in het midden. Op een breed scherm hingen ze anders in de verre hoeken,
+   tot 800 px van een kaart die vooral leeg papier was (het teken stopt op
+   GLYPH_MAX). Alleen met een fijne aanwijzer: een tablet of telefoon dwars
+   houdt de knoppen aan de randen, waar de duimen zitten. Zie "Met een muis
+   is het spel één bord" in docs/ontwerp.md. */
+@media (orientation: landscape) and (min-width: 640px) and (min-height: 560px) and (hover: hover) and (pointer: fine) {
+  #s-play.on {
+    --kol: min(600px, calc(100vh - 170px)); --spleet: 40px;
+    grid-template-columns: var(--ctrl) var(--kol) var(--ctrl);
+    grid-template-rows: auto auto;
+    justify-content: center; align-content: center;
+    column-gap: var(--spleet);
+  }
+  .controls { align-items: flex-start; }
+  /* Een vaste hoogte, geen max-height: sizeCard() meet de kaart aan dit vak,
+     en een vak dat zich naar zijn inhoud voegt, kromp tot niets. */
+  .cardwrap { height: var(--kol); flex: none; align-self: center; }
+  /* "Pas" hangt aan het scherm; hier rekent hij naar de kaart toe. */
+  .btn-skip { left: calc(50% - var(--kol) / 2 - var(--spleet) - var(--skip)); }
+}
+
 /* Laag scherm (telefoon liggend): de overzichtsschermen worden een rij. De
    stand blijft één blok, anders drijven de ploegen uit elkaar. */
 @media (max-height: 520px) {
