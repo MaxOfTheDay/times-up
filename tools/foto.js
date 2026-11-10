@@ -19,7 +19,9 @@ const fs = require('fs');
 const path = require('path');
 const { launch, APP_URL, echteKaart } = require('../test/browser.js');
 
-const MATEN = [['staand', 390, 844], ['liggend', 844, 390], ['klein', 320, 568]];
+/* De vierde maat is een desktop met een muis: daar is het spelscherm één bord
+   (zie "Met een muis is het spel één bord"). De andere drie zijn aanraking. */
+const MATEN = [['staand', 390, 844], ['liggend', 844, 390], ['klein', 320, 568], ['desktop', 1910, 926]];
 const SCHAAL = process.argv.includes('--scherp') ? 2 : 1;
 const UIT = path.resolve(__dirname, '..', 'foto');
 
@@ -97,9 +99,10 @@ async function standen(page) {
   const browser = await launch();
   const missers = [];
   for (const [maat, w, h] of MATEN) {
+    const muis = maat === 'desktop';
     const map = path.join(UIT, maat);
     fs.mkdirSync(map, { recursive: true });
-    const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: SCHAAL, hasTouch: true });
+    const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: SCHAAL, hasTouch: !muis });
     if (process.env.STIP === 'gl') await echteKaart(ctx);
     const page = await ctx.newPage();
     page.setDefaultTimeout(8000);   // een stand die niet komt, is een misser, geen wachten
