@@ -48,12 +48,18 @@ const APP_URL = new URL(".", self.registration.scope).href;
    netwerk is. Die fout zie je pas offline. */
 async function ververs() {
   const res = await fetch(new Request(APP_URL, { cache: "no-cache" }));
-  if (res.ok) {
+  /* Een wifi met een inlogpagina (hotel, trein, bibliotheek) stuurt door
+     naar zijn eigen pagina en antwoordt daar met 200. Die mag nooit de
+     kast in: een doorgestuurd antwoord kan een navigatie niet bedienen, dus
+     de volgende start toonde de foutpagina van de browser, ook mét net.
+     Alleen wat echt de app is (haar spelkern) gaat erin. */
+  if (res.ok && !res.redirected) {
+    const tekst = await res.clone().text();
+    if (!tekst.includes('id="spelkern"')) return res;
     const cache = await caches.open(CACHE_NAME);
     const oud = await cache.match(APP_URL);
-    const nieuw = res.clone();
     await cache.put(APP_URL, res.clone());
-    if (oud && (await oud.text()) !== (await nieuw.text())) meldNieuw();
+    if (oud && (await oud.text()) !== tekst) meldNieuw();
   }
   return res;
 }
@@ -98,7 +104,10 @@ self.addEventListener("fetch", event => {
   event.waitUntil(vers.catch(() => {}));
 
   event.respondWith((async () => {
-    const cached = await caches.match(APP_URL, { cacheName: CACHE_NAME });
+    const kast = await caches.match(APP_URL, { cacheName: CACHE_NAME });
+    /* Een inlogpagina die er vóór de controle in ververs() al in kwam:
+       niet tonen, het net beslist. */
+    const cached = kast && !kast.redirected ? kast : null;
     /* Niets in de kast -- eerste bezoek, of net opgeruimd na een
        versieverhoging -- dan tóch wachten op het netwerk. Dat is precies
        het oude gedrag, en het duurt één laadbeurt. */

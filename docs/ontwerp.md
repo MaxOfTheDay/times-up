@@ -4141,3 +4141,49 @@ doen.
   niet open. Het gratis plan bewaart logs drie dagen, dus dagelijks kijken
   mist niets. De logregel per aanvraag staat uit (`invocation_logs`),
   want die draagt het adres en de user-agent.
+
+## Het toestel
+
+Een scan in november zocht de plekken waar een telefoon, een instelling,
+een browser of een andere app iets stil breekt: geen uitzondering, geen
+melding in de foutenbak, en de app ziet er gewoon kapot uit. Vier ervan
+zijn nagebootst in Chromium en gerepareerd; elk heeft een regel in
+`test/toestel.test.js`, die op de oude code faalde.
+
+- **Wifi met een inlogpagina** (hotel, trein, bibliotheek). De verversing
+  van `sw.js` kreeg een doorverwijzing naar de inlogpagina met 200 terug en
+  zette die in de kast. Een doorgestuurd antwoord kan een navigatie niet
+  bedienen: de volgende start toonde de foutpagina van de browser, ook mét
+  net, en zonder net bleef het zo. Nu gaat alleen een antwoord zonder
+  doorverwijzing met `id="spelkern"` erin de kast in, en een doorgestuurd
+  antwoord dat er al lag wordt niet getoond.
+- **Gedwongen donker.** Chrome met "Websites donker maken" keert een pagina
+  met `color-scheme: light` toch om: het papier werd donkerbruin, de
+  inktschaduwen bleek. `only light` (in de meta en op `:root`) houdt het
+  bord zoals het gedrukt is. Samsung Internet is niet nagemeten.
+- **Een haperende fotokast.** `Beeld` bewaarde een mislukte verbinding met
+  IndexedDB voor altijd. Eén mislukking bij het opstarten (een iPhone die
+  de verbinding verbrak op de achtergrond) verborg de eigen kaarten de hele
+  sessie, haalde ze uit een hersteld potje, en elke Bewaren schudde tot
+  herladen. Nu wordt de verbinding vergeten (ook bij `onclose`) en één keer
+  opnieuw geprobeerd.
+- **Geluid dat een andere app heeft** (telefoontje, Siri, muziek). Met een
+  stilstaande context en een `resume()` die niet lukt, plande `tone()` elke
+  cue op de bevroren klok: twintig tonen in drie tellen, die samen
+  klonken zodra het geluid terugkwam, terwijl Geluid "aan" bleef zeggen.
+  Nu valt een cue weg als de context niet loopt en er geen vinger is die
+  hem wekt (`navigator.userActivation.isActive`); `ac()` blijft het wekken
+  proberen.
+
+Gemeten en nog open: emoji uit Unicode 12 en 13 (vijf in Makkelijk)
+tekenen op Android 9 en 10 als een leeg vak; het wakker houden van het
+scherm faalt stil in een app op het beginscherm van iOS vóór 18.4; met
+grote letters zoomt Android de hele pagina, en op 200% passen spelen en
+overdracht niet meer (op 150% alleen de titel van Instellingen, nu op
+`--fs-3` onder 300 px). Bewust gelaten, want een keuze van de
+gebruiker: mediavolume op nul, trillen uit of niet storen, een
+bluetoothspeaker in een andere kamer, automatisch vertalen, en een privévenster
+zonder IndexedDB (de rij Eigen verdwijnt dan met opzet). Op een iPhone
+zet `audioSession.type = "playback"` de muziek van een andere app
+waarschijnlijk stil bij de eerste cue; dat is de prijs van geluid met de
+stilteschakelaar aan, en is nog op een toestel na te kijken.

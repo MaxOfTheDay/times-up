@@ -12,7 +12,10 @@
      een gemengde tafel is het gewone geval. -->
 <meta name="description" content="Time's Up voor kinderen — ook voor wie nog niet kan lezen.">
 <meta name="theme-color" id="chromeColor" content="#F4EBDA">
-<meta name="color-scheme" content="light">
+<!-- "only light": met alleen "light" maakte Chrome met "Websites donker
+     maken" (en Samsung Internet in donkere modus) het papier donkerbruin en
+     de inktschaduwen bleek. Dit bord heeft één set inkten. -->
+<meta name="color-scheme" content="only light">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -118,6 +121,7 @@
 }
 
 :root {
+  color-scheme: only light;   /* zie de <meta>: geen gedwongen donker */
   /* ---- papier en inkt ---- */
   --paper:   #F4EBDA;   /* de achtergrond van alles                       */
   --paper-2: #E7D9C0;   /* verzonken vlakken: putjes, hulpknoppen, tracks */
@@ -784,6 +788,11 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
    titelband 34 px hoger maken. Eén trede lager past tot 320. */
 @media (max-width: 389px) {
   #s-kaarten h1, #s-maker h1 { font-size: var(--fs-4); }
+}
+/* Grote letters op Android zoomen de hele pagina: op 150% is een telefoon
+   van 390 px nog 260 breed, en dan schoof "INSTELLINGEN" onder het huisje. */
+@media (max-width: 300px) {
+  #s-setup h1, #s-kaarten h1, #s-regels h1, #s-maker h1 { font-size: var(--fs-3); }
 }
 
 /* De plakkende titelband: de uitgang ligt op papier in plaats van op de
@@ -4183,7 +4192,7 @@ const Snd = (() => {
     }
     /* Niet alleen "suspended": Safari zet de context op "interrupted" na
        een telefoongesprek of Siri, en dan bleef hij stil tot herladen. */
-    if (ctx && ctx.state !== "running" && ctx.state !== "closed") ctx.resume();
+    if (ctx && ctx.state !== "running" && ctx.state !== "closed") { const r = ctx.resume(); if (r && r.catch) r.catch(() => {}); }
     return ctx;
   }
   /* Alle noten monden hier samen uit voordat ze de luidspreker raken. Zonder
@@ -4202,9 +4211,15 @@ const Snd = (() => {
     }
     return bus;
   }
+  /* Staat de context stil en is er geen vinger die hem wekt (een telefoontje,
+     Siri, een andere app die het geluid heeft, of een geweigerde resume()),
+     dan valt de cue weg. Inplannen zette hem op de bevroren klok, en zodra
+     het geluid terugkwam klonk een hele beurt aan cues in één klap. */
+  const wekbaar = c => c.state === "running" ||
+    !navigator.userActivation || navigator.userActivation.isActive;
   function tone(freq, dur, type, vol, at, glide) {
     if (!on) return;
-    const c = ac(); if (!c) return;
+    const c = ac(); if (!c || !wekbaar(c)) return;
     const t0 = c.currentTime + (at || 0);
     const o = c.createOscillator(), g = c.createGain();
     o.type = type || "square";
@@ -4261,7 +4276,7 @@ const Snd = (() => {
        zolang je drukt, en de deur (dicht()) moet erboven uitkomen. */
     houdAan(p) {
       if (!on) return;
-      const c = ac(); if (!c) return;
+      const c = ac(); if (!c || !wekbaar(c)) return;
       const t = c.currentTime;
       if (!houd) {
         const o = c.createOscillator(), g = c.createGain();
@@ -5011,19 +5026,29 @@ let eigenStuk = false;       // geen IndexedDB (privévenster): veld weg
 
 /* IndexedDB in drie handelingen. Elke fout wordt een verworpen belofte;
    de aanroepers vangen ze. */
+/* Een mislukte verbinding wordt vergeten en één keer opnieuw geprobeerd:
+   een iPhone verbreekt hem soms als de app op de achtergrond lag
+   ("Connection to Indexed Database server lost"), en een bewaarde
+   mislukking verborg de eigen kaarten de hele sessie en liet elke Bewaren
+   schudden tot herladen. */
 const Beeld = (() => {
   let db = null;
   function open() {
     if (!db) db = new Promise((ok, nee) => {
       const r = indexedDB.open("tijdisom", 1);
       r.onupgradeneeded = () => r.result.createObjectStore("beelden");
-      r.onsuccess = () => ok(r.result);
+      r.onsuccess = () => {
+        const d = r.result;
+        d.onclose = () => { db = null; };
+        d.onversionchange = () => { d.close(); db = null; };
+        ok(d);
+      };
       r.onerror = () => nee(r.error);
       r.onblocked = () => nee(new Error("geblokkeerd"));
     });
     return db;
   }
-  async function doe(modus, werk) {
+  async function eenKeer(modus, werk) {
     const d = await open();
     return new Promise((ok, nee) => {
       const tx = d.transaction("beelden", modus);
@@ -5031,6 +5056,10 @@ const Beeld = (() => {
       tx.oncomplete = () => ok(uit && uit.result);
       tx.onerror = tx.onabort = () => nee(tx.error);
     });
+  }
+  async function doe(modus, werk) {
+    try { return await eenKeer(modus, werk); }
+    catch (e) { db = null; return eenKeer(modus, werk); }
   }
   return {
     zet: (id, blob) => doe("readwrite", s => s.put(blob, id)),
