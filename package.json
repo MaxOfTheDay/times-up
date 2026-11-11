@@ -4,7 +4,9 @@
   "private": true,
   "description": "Tijd is Om — Time's Up voor kinderen, ook voor wie nog niet kan lezen (één zelfstandig HTML-bestand). Deze package.json is alleen voor de tests en de beeld-scripts; de app zelf heeft geen build-stap en laadt niets uit node_modules.",
   "scripts": {
-    "test": "node test/kern.test.js && node test/regels.test.js && node test/tover.test.js && node test/fout.test.js && node test/deck.test.js && node test/stip.test.js && node test/toestel.test.js && node test/zintuigen.test.js && node test/snel.test.js && node test/game.test.js",
+    "test": "npm run test:kort && npm run test:zwaar && npm run test:spel",
+    "test:kort": "node test/kern.test.js && node test/regels.test.js && node test/tover.test.js && node test/fout.test.js && node test/deck.test.js && node test/stip.test.js",
+    "test:zwaar": "node test/toestel.test.js && node test/zintuigen.test.js && node test/snel.test.js",
     "test:stip": "node test/stip.test.js",
     "test:kern": "node test/kern.test.js",
     "test:regels": "node test/regels.test.js",

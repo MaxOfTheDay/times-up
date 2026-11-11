@@ -38,24 +38,26 @@ een controle vooraf gevraagd wordt.
 
 ## Gemerged is nog niet live
 
-De site draait op GitHub Pages vanaf `main`, via een eigen workflow
-(`pages build and deployment`), los van `Tests`. Kijk na een merge of díe op
-de merge-commit geslaagd is.
+De site draait op GitHub Pages vanaf `main`, uitgerold door de job
+`uitrollen` in `Tests` (`.github/workflows/test.yml`), en alleen als de drie
+testgroepen op die merge-commit groen zijn. Pages staat daarvoor op "GitHub
+Actions" als bron, nooit op "Deploy from a branch": dat zette elke commit
+binnen een halve minuut neer, ook een rode. Kijk na een merge of `uitrollen`
+geslaagd is.
 
-Het bekende falen: `deploy` blijft tien minuten op `deployment_queued` en
-stopt met `Timeout reached, aborting!`. Dat is een wachtrij bij GitHub, niet
-deze repo.
-
-- Eén geslaagde deploy haalt alles op; Pages zet de hele `main` neer.
-- Opnieuw draaien helpt niet: het deployment-ID is de commit-SHA en de
-  time-out heeft dat ID geannuleerd. Alleen een nieuwe commit op `main` geeft
-  een nieuwe poging.
-- Ligt de wachtrij plat, dan helpt ook die niet. Wacht tot GitHub bijtrekt en
-  duw dan één keer.
+- Eén geslaagde uitrol haalt alles op; hij zet de hele `main` neer.
+- Rood op `main` is niets uitgerold: de spelers houden de vorige versie.
+  Repareer met een nieuwe commit, niet met de hand.
+- Blijft de uitrol hangen op een wachtrij bij GitHub (`deployment_queued`,
+  `Timeout reached`), draai `uitrollen` opnieuw; helpt dat niet, wacht tot
+  GitHub bijtrekt en duw één nieuwe commit.
+- Een speler loopt één opstart achter (`sw.js`, cache eerst): een kapotte
+  release komt ook pas bij de tweede opstart aan, en een reparatie net zo.
 
 ## Opbouw
 
-`index.html` heeft twee scripts:
+`index.html` heeft twee scripts met het spel (vooraf gaan alleen de
+foutmelder en het manifest):
 
 - **`<script id="spelkern">`** definieert `Spel`: de spelregels, zonder DOM,
   geluid, klok of opslag. Trekken, raden, passen, beurtwissel, rondewissel
@@ -633,7 +635,10 @@ net, of als het dagbudget op is, werkt alles behalve de staf.
   dus kaal, zonder de pen van `.glyph` (`getoverd` op de kaart).
 
 **Een fout meldt zichzelf.** Een scriptfout (`error`,
-`unhandledrejection`) gaat via `meldFout()` naar de foutenbak, een tweede
+`unhandledrejection`) gaat via `meldFout()` naar de foutenbak. De melder is
+het eerste script van de pagina (`<script id="foutmelder">`), los van de
+spelkern en het hoofdscript, zodat ook een syntaxfout die de app tegenhoudt
+zich meldt. De foutenbak is een tweede
 Worker (`worker/fout.mjs`, met een Durable Object op SQLite, uitgerold door
 dezelfde workflow). Alleen de melding met de plek in de code, het scherm,
 de versie (`document.lastModified`) en de browser in een paar woorden;
@@ -674,8 +679,10 @@ vraagt geen beelden aan: `test/snel.test.js`.
 
 ## Tests
 
-`npm test` draait tien suites, en CI draait ze op elke pull request, in het
-Docker-image van Playwright. Wie playwright in `package-lock.json` ophoogt,
+`npm test` draait tien suites in drie groepen (`test:kort`, `test:zwaar`,
+`test:spel` in `package.json`). CI draait die groepen naast elkaar op elke
+pull request, in het Docker-image van Playwright; `test/regels.test.js` houdt
+de groepen, `npm test`, CI en deze lijst gelijk. Wie playwright in `package-lock.json` ophoogt,
 zet het image in `.github/workflows/test.yml` op dezelfde versie (CI breekt
 anders meteen af):
 
@@ -697,7 +704,7 @@ anders meteen af):
 - `test/toestel.test.js` bootst per regel een stand van het toestel na
   (wifi met inlogpagina, gedwongen donker, een haperende fotokast, geluid
   dat een andere app heeft, een scherm dat in een beurt vergrendelt, een
-  oud toestel zonder de nieuwste emoji) en toetst wat de speler dan ziet of hoort
+  oud toestel zonder de nieuwste emoji, een release met een syntaxfout) en toetst wat de speler dan ziet of hoort
   (`npm run test:toestel`).
 - `test/zintuigen.test.js` toetst het woordenboek van de zintuigen: elke
   cue staat erin, twee gebeurtenissen klinken niet hetzelfde, trillingen
@@ -709,7 +716,9 @@ anders meteen af):
   proces, zoals een speler de app opent), het rekenen en de geforceerde
   layout van elke tik, en rust (een scherm waarop niets beweegt vraagt
   geen beelden aan, ook de eindstand na het feest niet). De budgetten
-  schalen mee met de machine (`ijk()`) (`npm run test:snel`).
+  schalen mee met de machine (`ijk()`); valt er iets om, dan meet hij de
+  hele ronde nog een keer en telt alleen wat twee keer omvalt, want een
+  buurman op de machine is geen vertraging (`npm run test:snel`).
 - `test/game.test.js` speelt een volledig potje in een echte browser (en
   vraagt onderweg de toegankelijkheidsboom of alles een naam heeft), zo'n
   anderhalve tot twee minuten. Hij klikt bewust trager dan 280 ms, omdat

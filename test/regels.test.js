@@ -199,3 +199,40 @@ test('De spelkern verwijst naar niets buiten haar blok', () => {
   for (const w of ['document', 'window', 'localStorage', 'setTimeout', 'Date.now', 'performance', 'Snd', 'Tril', 'DECKS'])
     assert.ok(!new RegExp(`\\b${w.replace('.', '\\.')}\\b`).test(kern), `de spelkern gebruikt ${w}`);
 });
+
+test('Een fout meldt zichzelf: de melder is het eerste script, los van de rest', () => {
+  /* Zat hij in de spelkern of het hoofdscript, dan hield een syntaxfout daar
+     ook de melder tegen, en meldde juist een app die niet start zich nooit. */
+  const eerste = html.match(/<script\b[^>]*>/);
+  assert.equal(eerste && eerste[0], '<script id="foutmelder">', 'het eerste script is niet de foutmelder');
+  const blok = html.slice(eerste.index, html.indexOf('</script>', eerste.index));
+  for (const w of ['function meldFout', 'addEventListener("error"', 'addEventListener("unhandledrejection"'])
+    assert.ok(blok.includes(w), `${w} staat niet in de foutmelder`);
+  assert.ok(!hoofd.includes('function meldFout'), 'meldFout staat (ook) in het hoofdscript');
+});
+
+test('Tests: elke suite draait in npm test en in CI, in precies één groep', () => {
+  /* README en CLAUDE.md liepen achter op package.json ("zeven suites" bij
+     tien); de groepen in CI mogen dat niet. Eén bron: package.json. */
+  const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', 'package.json'), 'utf8')).scripts;
+  const groepen = [...pkg.test.matchAll(/npm run test:(\w+)/g)].map(m => m[1]);
+  assert.ok(groepen.length >= 2, 'npm test roept geen groepen meer aan');
+  const inGroep = {};
+  for (const g of groepen) for (const m of (pkg['test:' + g] || '').matchAll(/test\/([\w-]+)\.test\.js/g)) {
+    assert.ok(!inGroep[m[1]], `${m[1]} staat in twee groepen`);
+    inGroep[m[1]] = g;
+  }
+  const BUITEN = new Set(['chaos']);   // een paar minuten op een zaad: met de hand
+  for (const f of fs.readdirSync(__dirname).filter(f => f.endsWith('.test.js'))) {
+    const n = f.replace('.test.js', '');
+    if (!BUITEN.has(n)) assert.ok(inGroep[n], `test/${f} draait in geen enkele groep van npm test`);
+  }
+  const ci = fs.readFileSync(path.resolve(__dirname, '..', '.github', 'workflows', 'test.yml'), 'utf8');
+  const matrix = (ci.match(/groep:\s*\[([^\]]*)\]/) || [])[1];
+  assert.ok(matrix, 'test.yml heeft geen matrix met groep');
+  assert.deepEqual(matrix.split(',').map(s => s.trim()), groepen, 'de groepen in test.yml zijn niet die van npm test');
+  for (const d of ['README.md', 'CLAUDE.md']) {
+    const t = fs.readFileSync(path.resolve(__dirname, '..', d), 'utf8');
+    for (const n of Object.keys(inGroep)) assert.ok(t.includes(`test/${n}.test.js`), `${d} noemt test/${n}.test.js niet`);
+  }
+});

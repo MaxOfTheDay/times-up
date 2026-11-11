@@ -175,6 +175,26 @@ async function oudToestel(browser) {
   await page.context().close();
 }
 
+/* Een release met een syntaxfout in het hoofdscript: de app start niet, en
+   juist dat moet in de foutenbak komen. De pagina staat op de echte
+   herkomst (anders meldt ze niets), de foutenbak is nagebootst. */
+async function kapotteRelease(browser) {
+  const page = await (await browser.newContext()).newPage();
+  const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')
+    .replace('let current = "title";', 'let current = "title"; const const = 1;');
+  ok(html.includes('const const = 1'), 'kapotte release: de regel om te breken is weg; kies een andere');
+  const binnen = [];
+  await page.route('https://maxoftheday.github.io/**', r =>
+    r.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: html }));
+  await page.route('https://tijdisom-fout.maxheyrman.workers.dev/**', r => {
+    binnen.push(r.request().postData() || ''); return r.fulfill({ status: 204 });
+  });
+  await page.goto('https://maxoftheday.github.io/times-up/'); await page.waitForTimeout(800);
+  ok(binnen.some(b => /SyntaxError/.test(b)),
+     'kapotte release: een app die niet start, meldt zich niet in de foutenbak: ' + JSON.stringify(binnen));
+  await page.context().close();
+}
+
 (async () => {
   const browser = await launch();
   const STANDEN = [
@@ -184,6 +204,7 @@ async function oudToestel(browser) {
     ['geluid bezet', geluidBezet],
     ['scherm slaapt', () => schermSlaapt(browser)],
     ['oud toestel', () => oudToestel(browser)],
+    ['kapotte release', () => kapotteRelease(browser)],
   ];
   for (const [naam, toets] of STANDEN) {
     try { await toets(); }
