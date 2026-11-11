@@ -1737,7 +1737,9 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
 #s-handoff #hoTally .side.up .head {
   animation: gluurAdem calc(2.8s / max(var(--dur), .001)) var(--e-vloei) infinite;
 }
-#s-handoff #hoTally .side b { min-width: 0; font-size: max(var(--fs-5), min(9vw, var(--fs-6))); line-height: 1; }
+/* De stand is waar kinderen na een beurt naar roepen ("hoeveel hebben
+   we?"), dus de cijfers zijn het grootste op de kaart na de ronde. */
+#s-handoff #hoTally .side b { min-width: 0; font-size: max(var(--fs-6), min(12vw, 56px)); line-height: 1; }
 /* Vaste cijferbreedte en tabulaire cijfers: anders springt de rij opzij
    zodra iemand van 9 naar 10 gaat. */
 .mini-score b {
@@ -2456,8 +2458,11 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
    houdt de knoppen aan de randen, waar de duimen zitten. Zie "Met een muis
    is het spel één bord" in docs/ontwerp.md. */
 @media (orientation: landscape) and (min-width: 640px) and (min-height: 560px) and (hover: hover) and (pointer: fine) {
+  /* De maat van de speelkaart. Ook de opdrachtkaart en de eindkaart nemen
+     haar over (zie onder de tabletmaten): één kaart, twee kanten. */
+  :root { --kol: min(600px, calc(100vh - 170px)); }
   #s-play.on {
-    --kol: min(600px, calc(100vh - 170px)); --spleet: 40px;
+    --spleet: 40px;
     grid-template-columns: var(--ctrl) var(--kol) var(--ctrl);
     grid-template-rows: auto auto;
     justify-content: center; align-content: center;
@@ -2573,6 +2578,21 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
   .overlay .panel .btn-go { width: 148px; }
   .overlay .panel .btn-danger { width: 88px; height: 88px; }
   .overlay .panel .btn-danger .mark { width: 40px; }
+  /* De eindkaart is zo breed als de opdrachtkaart, ook hier. */
+  #wnPiles.wn-kaart { width: min(70vw, 34rem); }
+}
+
+/* Met een muis (zie "Met een muis is het spel één bord"): de opdrachtkaart,
+   de eindkaart en het merk groeien mee met de speelkaart (--kol). Zo heeft
+   de kaart die omdraait aan beide kanten dezelfde breedte, en staat de
+   titel niet als een postzegel op een breed scherm. Na de tabletmaten,
+   zodat dit wint. */
+@media (orientation: landscape) and (min-width: 640px) and (min-height: 560px) and (hover: hover) and (pointer: fine) {
+  .roundcard.big { width: var(--kol); max-width: var(--kol); }
+  #wnPiles.wn-kaart { width: var(--kol); max-width: var(--kol); }
+  .wordmark { --gluur: min(14vh, 130px); padding: 30px 44px 36px; }
+  .wordmark h1 { font-size: min(13vh, 120px); }
+  .wordmark > svg { width: min(9vh, 88px); margin-bottom: 10px; }
 }
 
 /* ============================================================
@@ -6550,16 +6570,39 @@ const RUST_MS = 600, STIL_MS = 500;
 let laatsteVinger = -1e9;
 addEventListener("pointerdown", () => { laatsteVinger = performance.now(); },
   { capture: true, passive: true });
-function rustKnop(knoppen) {
+function rustKnop(knoppen, rust) {
   const los = () => knoppen.forEach(k => k.classList.remove("neer"));
   knoppen.forEach(k => k.classList.add("neer"));
-  const t0 = performance.now();
+  const t0 = performance.now(), ms = Math.max(RUST_MS, rust || 0);
   const kijk = () => {
     const nu = performance.now();
-    const wacht = Math.max(t0 + RUST_MS, laatsteVinger + STIL_MS) - nu;
+    const wacht = Math.max(t0 + ms, laatsteVinger + STIL_MS) - nu;
     if (wacht > 0) na(wacht, kijk, los); else los();
   };
-  na(RUST_MS, kijk, los);
+  na(ms, kijk, los);
+}
+
+/* De buit telt erbij. Na een beurt of ronde staat eerst de stand van
+   vóór de beurt; als de kaart geland is (RAND_WEG) telt het getal van wie
+   net speelde op naar het nieuwe totaal, één tik per kaart, op dezelfde
+   Snd.tel() als de eindstand, en elke tik veert het cijfer even op. Het
+   blijft één getal, geen "+N" en geen fiche per punt. Samen hoogstens
+   TEL_BUIT lang, zodat het in de rust van de startknop past; die wacht
+   tot de laatste tik. Geeft terug hoe lang het duurt. */
+const TEL_BUIT = 700;
+function telBuit(t, vers) {
+  const num = $("#hoScore" + "AB"[t]);
+  const doel = total(t), van = doel - vers;
+  if (!num || vers <= 0 || van < 0) return 0;
+  num.textContent = van;
+  const stap = Math.max(60, Math.min(140, Math.round(TEL_BUIT / vers)));
+  const af = () => { num.textContent = doel; };
+  for (let i = 1; i <= vers; i++) na(RAND_WEG + i * stap, () => {
+    num.textContent = van + i;
+    Snd.tel(i - 1);
+    num.animate([{ scale: "1.3" }, { scale: "1" }], { duration: duur("los"), easing: curve("uit") });
+  }, af);
+  return RAND_WEG + vers * stap;
 }
 
 function handoff(mode, freshA, freshB, zelfdeGrond) {
@@ -6650,7 +6693,13 @@ function handoff(mode, freshA, freshB, zelfdeGrond) {
   saveGame(handoffMode);
   const naBeurt = current === "play" && !zelfdeGrond;
   show("handoff");
-  if (naBeurt) rustKnop([$("#btnStartTurn")]);
+  /* Na show(): de stappen van het optellen horen bij dit scherm. */
+  let tel = 0;
+  if (naBeurt && !stilAan()) {
+    const wie = (freshA || 0) > 0 ? 0 : (freshB || 0) > 0 ? 1 : -1;
+    if (wie >= 0) tel = telBuit(wie, wie === 0 ? freshA : freshB);
+  }
+  if (naBeurt) rustKnop([$("#btnStartTurn")], tel);
   veldHo.aan();
   /* Na een beurt of ronde stroomt de kleur vanaf papier, en de punten
      groeien vanuit de kaart naar de rand: het vlakke spelscherm eindigt waar

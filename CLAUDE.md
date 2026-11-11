@@ -236,7 +236,9 @@ als één rij: nu is de schijf, de andere zijn gelijke papieren tegels op
 tapmaat (`--vak: var(--tap)`, het teken 74%), en de plek links of rechts
 zegt geweest of nog te komen. Liggend is de kaart een vaste breedte
 (`min(46vw, 22rem)`), nooit `width: auto`. Geen kroon, geen "+N", geen
-fiche per punt op dit scherm. Na een beurt of ronde komt de startknop
+fiche per punt op dit scherm. Na een beurt telt het getal van wie speelde
+op naar het nieuwe totaal, één `Snd.tel()` per kaart (`telBuit()`), en
+wacht de startknop tot de laatste tik. Na een beurt of ronde komt de startknop
 ingedrukt aan en veert op na `RUST_MS` en `STIL_MS` zonder vinger op het
 glas (`rustKnop()`; op de eindstand ook nog een keer en het huisje): een
 vinger die na de bel doortikt op goed, start anders de andere ploeg. Vos en Uil zitten op de bovenrand van de
@@ -383,7 +385,9 @@ ploegkleur.
 **Met een muis is het spel één bord.** Op een desktop (`hover: hover`,
 `pointer: fine`, liggend en minstens 560 px hoog) is de speelkaart hoogstens
 600 px (`--kol`), staan goed en pas pal naast de kaart (`--spleet`) en is
-de balk zo breed als dat geheel, alles samen in het midden. Aanraking houdt
+de balk zo breed als dat geheel, alles samen in het midden. De opdrachtkaart
+en de eindkaart zijn dan even breed als de speelkaart, en het merk groeit
+mee. Aanraking houdt
 de knoppen aan de randen, waar de duimen zitten.
 
 **Pauze legt het spel weg en draait de kaart om, zonder sluier.** De grond
@@ -424,8 +428,8 @@ waar het dier zelf iets doet: de worp (elke stap `roep`, de landing
 in `handoff()`), na de fanfare, thuiskomen na een potje (`naarTitel()`,
 één `roep` per dier als zijn kop boven de rand komt) en een tik op het dier
 op de titel (een reeks snelle tikken klimt een halve toon per tik, tot
-zeven, zoals `goed()`). De eindstand telt op met `Snd.tel()`, niet met de
-tik van de klok; de kroon landt met `Snd.kroon()`. Een vinger op de
+zeven, zoals `goed()`). De eindstand en de overdracht tellen op met `Snd.tel()`, niet
+met de tik van de klok; de kroon landt met `Snd.kroon()`. Een vinger op de
 punten (een tik op de grond van de titel, de overdracht of de eindstand)
 klinkt als `Snd.plop()`, hoogstens één per `PLOP_MS`; de rimpel van een
 knop of van een landend dier niet. Een
@@ -606,13 +610,19 @@ net, of als het dagbudget op is, werkt alles behalve de staf.
 
 ## Tests
 
-`npm test` draait vijf suites, en CI draait ze op elke pull request, in het
+`npm test` draait zes suites, en CI draait ze op elke pull request, in het
 Docker-image van Playwright. Wie playwright in `package-lock.json` ophoogt,
 zet het image in `.github/workflows/test.yml` op dezelfde versie (CI breekt
 anders meteen af):
 
 - `test/kern.test.js` toetst de spelkern in Node, in milliseconden
   (`npm run test:kern`). Dit is de plek voor een nieuwe spelregel.
+- `test/regels.test.js` leest `index.html` en toetst de huisregels die je
+  aan de tekst kunt zien: trillingen, kale `setTimeout`, het vet van de
+  systeemletter, knoppen in 3. KNOPPEN, geen `screenIn` op het bord, geen
+  verloop of filter, `localStorage` in een `try`, niets van buiten, een
+  spelkern zonder buitenwereld (`npm run test:regels`). Een nieuwe timer met
+  een eigen clear zet je met een reden in zijn lijst `MAG`.
 - `test/tover.test.js` toetst de toverstaf-Worker met een nagebootste
   Workers AI (`npm run test:tover`).
 - `test/deck.test.js` bewaakt de kaartregels in een echte browser.
