@@ -618,8 +618,11 @@ nooit een kaart, een woord, een foto of iets van de speler. Alleen vanaf
 de echte site (`FOUT_URL` is leeg op elke andere herkomst, dus ook in de
 tests), elke fout één keer en hoogstens `FOUT_MAX` per bezoek. De bak
 houdt dezelfde fout op dezelfde versie als één regel met een teller,
-dertig dagen. Lezen gaat met de sleutel uit het repo-geheim `FOUT_SLEUTEL`
-(`/?sleutel=...`).
+dertig dagen. Lezen gaat met de sleutel `LEES` (`/?sleutel=...`, gezet in
+het dashboard van Cloudflare of uit het repo-geheim `FOUT_SLEUTEL`). Elke
+aanvaarde melding staat ook als één logregel in Workers Logs (drie dagen,
+zonder logregel per aanvraag), zodat een dagelijkse controle haar zonder
+sleutel via de API leest.
 
 ## Tests
 

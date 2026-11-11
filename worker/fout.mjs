@@ -21,7 +21,8 @@
 
    Alleen de eigen Pages-site mag melden (CORS); de body gaat als text/plain,
    zodat er geen preflight nodig is. Lezen kan alleen met de sleutel (het
-   geheim LEES). */
+   geheim LEES). Elke aanvaarde melding gaat ook als één logregel naar
+   Workers Logs, voor de dagelijkse controle. */
 const HERKOMST = /^https:\/\/maxoftheday\.github\.io$/;
 export const PER_DAG = 500;
 const BEWAAR_MS = 30 * 24 * 3600 * 1000;
@@ -111,6 +112,11 @@ export default {
       if (!r) return new Response(null, { status: 400, headers: cors });
       const uit = await doos().fetch('https://doos/meld', { method: 'POST', body: JSON.stringify({ r, nu: Date.now() }) });
       const { ok } = await uit.json();
+      /* Ook in de logs van Cloudflare (Workers Logs, drie dagen), zodat een
+         dagelijkse controle de nieuwe fouten leest met de API, zonder de
+         sleutel. Alleen deze vier velden; de aanvraag zelf logt niet
+         (invocation_logs uit in fout.toml). */
+      if (ok) console.log(JSON.stringify({ foutenbak: 1, b: r.b, s: r.s, v: r.v, w: r.w }));
       return new Response(null, { status: ok ? 204 : 429, headers: cors });
     }
 
