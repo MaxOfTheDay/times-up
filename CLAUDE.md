@@ -321,9 +321,9 @@ kam krimpen ze. Het canvas tekent tot 3x. Ze staan op de
 overdracht, het aftellen en het spelen, de eindstand (in de ploegkleur van wie won, bij
 gelijkspel inkt op papier) en de titel, die van allebei de ploegen is en dus
 inkt op papier krijgt (12%, `inkt: true`). De stralen van de eindstand
-zitten ín de punten: groter binnen twaalf stralen, die rond blijven draaien
-zolang het feest in beeld is (`veldWn.stralen()`), het enige dat buiten de
-dieren uit zichzelf beweegt; op het aftellen gaat bij elke tel
+zitten ín de punten: groter binnen twaalf stralen, die het feest lang rond
+draaien (`veldWn.stralen()`) en na `STRAAL_FEEST` (30 s) blijven staan waar
+ze waren, het enige dat buiten de dieren uit zichzelf beweegt; op het aftellen gaat bij elke tel
 een golf vanuit de rand van de kaart, in haar vorm (`rimpelRand()`), op de
 eindstand barst het vuurwerk in de punten (`vuurwerk()`). Na een beurt
 groeien ze op de overdracht als rastertoon terug vanuit de kaart
@@ -656,14 +656,25 @@ omkeert. `Beeld` vergeet een mislukte verbinding en probeert één keer
 opnieuw. Staat het geluid stil en wekt geen vinger het, dan valt een cue
 weg in plaats van in de rij te gaan staan (`wekbaar()`). Een emoji die
 het toestel als leeg vak tekent, gaat bij het opstarten uit `DECKS`
-(`zonderLeegVak()`). Valt het scherm uit midden in een beurt na
+(`zonderLeegVak()`, één keer per browserversie, onthouden in
+`tijdisom.leegvak`). Valt het scherm uit midden in een beurt na
 `SLAAP_MS` zonder aanraking, dan gaat dat als één regel naar de foutenbak
 (`slaapMelding()`), met hoe het wakker houden ervoor stond. Elke valkuil is
 een regel in `STANDEN` van `test/toestel.test.js`.
 
+**Snel op een trage telefoon.** Er zijn geen gegevens van spelers; meet
+met de CPU vier tot zes keer vertraagd, en meet script, niet beelden per
+seconde (zonder grafische kaart rastert de browser hier op de CPU). Wat
+eenmaal genoeg is, gebeurt niet bij elke start: onthoud het. Werk dat
+tussen twee tikken moet, valt meteen na de tik die in beeld staat
+(`penVooruit()`), niet op een willekeurig rustig moment. Een lus loopt
+alleen zolang er iets beweegt, ook een feest niet eindeloos. Een tik
+rekent hoogstens `TIK_MS`, een start `START_MS`, en een scherm in rust
+vraagt geen beelden aan: `test/snel.test.js`.
+
 ## Tests
 
-`npm test` draait negen suites, en CI draait ze op elke pull request, in het
+`npm test` draait tien suites, en CI draait ze op elke pull request, in het
 Docker-image van Playwright. Wie playwright in `package-lock.json` ophoogt,
 zet het image in `.github/workflows/test.yml` op dezelfde versie (CI breekt
 anders meteen af):
@@ -693,6 +704,12 @@ anders meteen af):
   van de ladder, elke cue in het telefoonmodel (niet meer dan 8 dB onder
   `goed()`, geen piek boven -3 dBFS), en in een gespeeld potje nooit twee
   cues tegelijk (`npm run test:zintuigen`).
+- `test/snel.test.js` draait de app met de CPU vier keer vertraagd en
+  geeft drie dingen een budget: het script van een start (in een nieuw
+  proces, zoals een speler de app opent), het rekenen en de geforceerde
+  layout van elke tik, en rust (een scherm waarop niets beweegt vraagt
+  geen beelden aan, ook de eindstand na het feest niet). De budgetten
+  schalen mee met de machine (`ijk()`) (`npm run test:snel`).
 - `test/game.test.js` speelt een volledig potje in een echte browser (en
   vraagt onderweg de toegankelijkheidsboom of alles een naam heeft), zo'n
   anderhalve tot twee minuten. Hij klikt bewust trager dan 280 ms, omdat
