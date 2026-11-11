@@ -136,10 +136,12 @@ npm install
 npm test
 ```
 
-`npm test` draait vijf suites:
+`npm test` draait zes suites:
 
 - `test/kern.test.js` toetst de spelregels zelf, zonder browser en in
   milliseconden (`npm run test:kern`).
+- `test/regels.test.js` toetst de huisregels uit `CLAUDE.md` die je aan de
+  tekst van `index.html` kunt zien, ook in milliseconden.
 - `test/tover.test.js` toetst de toverstaf-Worker met een nagebootste
   Workers AI.
 - `test/deck.test.js` bewaakt de kaartregels: het aantal, dubbels over alle

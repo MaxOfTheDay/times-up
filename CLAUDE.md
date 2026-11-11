@@ -610,13 +610,19 @@ net, of als het dagbudget op is, werkt alles behalve de staf.
 
 ## Tests
 
-`npm test` draait vijf suites, en CI draait ze op elke pull request, in het
+`npm test` draait zes suites, en CI draait ze op elke pull request, in het
 Docker-image van Playwright. Wie playwright in `package-lock.json` ophoogt,
 zet het image in `.github/workflows/test.yml` op dezelfde versie (CI breekt
 anders meteen af):
 
 - `test/kern.test.js` toetst de spelkern in Node, in milliseconden
   (`npm run test:kern`). Dit is de plek voor een nieuwe spelregel.
+- `test/regels.test.js` leest `index.html` en toetst de huisregels die je
+  aan de tekst kunt zien: trillingen, kale `setTimeout`, het vet van de
+  systeemletter, knoppen in 3. KNOPPEN, geen `screenIn` op het bord, geen
+  verloop of filter, `localStorage` in een `try`, niets van buiten, een
+  spelkern zonder buitenwereld (`npm run test:regels`). Een nieuwe timer met
+  een eigen clear zet je met een reden in zijn lijst `MAG`.
 - `test/tover.test.js` toetst de toverstaf-Worker met een nagebootste
   Workers AI (`npm run test:tover`).
 - `test/deck.test.js` bewaakt de kaartregels in een echte browser.
