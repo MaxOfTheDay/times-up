@@ -236,7 +236,9 @@ als één rij: nu is de schijf, de andere zijn gelijke papieren tegels op
 tapmaat (`--vak: var(--tap)`, het teken 74%), en de plek links of rechts
 zegt geweest of nog te komen. Liggend is de kaart een vaste breedte
 (`min(46vw, 22rem)`), nooit `width: auto`. Geen kroon, geen "+N", geen
-fiche per punt op dit scherm. Na een beurt of ronde komt de startknop
+fiche per punt op dit scherm. Na een beurt telt het getal van wie speelde
+op naar het nieuwe totaal, één `Snd.tel()` per kaart (`telBuit()`), en
+wacht de startknop tot de laatste tik. Na een beurt of ronde komt de startknop
 ingedrukt aan en veert op na `RUST_MS` en `STIL_MS` zonder vinger op het
 glas (`rustKnop()`; op de eindstand ook nog een keer en het huisje): een
 vinger die na de bel doortikt op goed, start anders de andere ploeg. Vos en Uil zitten op de bovenrand van de
@@ -424,8 +426,8 @@ waar het dier zelf iets doet: de worp (elke stap `roep`, de landing
 in `handoff()`), na de fanfare, thuiskomen na een potje (`naarTitel()`,
 één `roep` per dier als zijn kop boven de rand komt) en een tik op het dier
 op de titel (een reeks snelle tikken klimt een halve toon per tik, tot
-zeven, zoals `goed()`). De eindstand telt op met `Snd.tel()`, niet met de
-tik van de klok; de kroon landt met `Snd.kroon()`. Een vinger op de
+zeven, zoals `goed()`). De eindstand en de overdracht tellen op met `Snd.tel()`, niet
+met de tik van de klok; de kroon landt met `Snd.kroon()`. Een vinger op de
 punten (een tik op de grond van de titel, de overdracht of de eindstand)
 klinkt als `Snd.plop()`, hoogstens één per `PLOP_MS`; de rimpel van een
 knop of van een landend dier niet. Een

@@ -902,6 +902,29 @@ hersteld potje en een afgebroken aftelling krijgen geen rust: daar tikte
 niemand door. Op de eindstand rusten ook nog een keer en het huisje, dat op
 de plek van de pauzetegel ligt.
 
+### De buit telt erbij
+
+Na een beurt is "hoeveel hebben we?" het eerste wat kinderen roepen, en de
+stand gaf dat antwoord als een stille wissel van cijfer: de kaart draaide
+om en er stond een ander getal. Nu staat eerst de stand van vóór de beurt,
+en als de kaart geland is (`RAND_WEG`) telt het getal van wie net speelde
+op naar het nieuwe totaal (`telBuit()`): één tik per kaart, op dezelfde
+`Snd.tel()` als de eindstand en een halve toon hoger per punt, en elke tik
+veert het cijfer even op (`--t-los`, `--e-uit`). Samen hoogstens
+`TEL_BUIT` (700 ms, 60 tot 140 ms per punt); de startknop blijft ingedrukt
+tot de laatste tik (`rustKnop(knoppen, rust)`), zodat het tellen in de
+rust past die er toch al was.
+
+- **Eén getal, geen "+N".** Een los label of een fiche per punt zou een
+  tweede ding zijn dat hetzelfde zegt; het tellen van het getal zelf is
+  het enige kanaal erbij, met de klank als tweede.
+- **Groter.** De cijfers gingen van `min(9vw, 40px)` naar
+  `max(40px, min(12vw, 56px))`: na de ronde het grootste op de kaart,
+  in de lucht die er staand boven de kaart lag. Liggend en op een tablet
+  blijven de maten van hun eigen regels.
+- **Niet bij een hersteld potje, een afgebroken aftelling of beperkte
+  beweging**: daar staat meteen het totaal.
+
 ## Eén kaart, twee kanten
 
 Op de overdracht kijkt het kind naar de opdrachtkaart. Daarna kwam het
