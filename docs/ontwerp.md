@@ -4100,3 +4100,36 @@ inktlijn om het volgende teken. De testbrowser tekent canvassen op de
 processor, een telefoon op de grafische chip; het canvas verplaatsen in
 plaats van kopiëren en vooraf leegmaken in rusttijd veranderden in de
 testbrowser niets en staan er dus niet in.
+
+## Een fout meldt zichzelf
+
+Een fout op de telefoon van een andere familie zag niemand: er was geen
+log, en wie schrijft er nu "het bleef hangen op de overdracht"? Drie
+manieren lagen op tafel: niets, de laatste fouten meesturen met de
+Contact-mail, of ze vanzelf naar een eigen Worker sturen. Max koos het
+laatste (november): dan zie je een fout zonder dat iemand iets hoeft te
+doen.
+
+- **Wat er meegaat**: de melding met regel en kolom, het scherm
+  (`current`), de versie (`document.lastModified`, de datum van het
+  bestand zoals Pages en de service worker het geven) en de browser in een
+  paar woorden (`browserKort()`). Geen kaarten, geen woorden, geen foto's,
+  geen instellingen. Het adres ziet Cloudflare wel, maar de Worker bewaart
+  het niet: het dient alleen de rate limit.
+- **Hoe**: `navigator.sendBeacon` met tekst, zodat er geen preflight is en
+  een melding vlak voor het sluiten van de app nog weggaat. Elke fout één
+  keer per bezoek, hoogstens `FOUT_MAX` (5).
+- **Alleen vanaf de echte site.** Op elke andere herkomst (de tests, een
+  kopie, `file://`) is `FOUT_URL` leeg en gaat er niets weg.
+- **De bak** (`worker/fout.mjs`) is één Durable Object met SQLite: dat zit
+  in het gratis plan en vraagt geen KV of D1, waar het token van de
+  workflow geen rechten op heeft. Dezelfde fout op dezelfde versie is één
+  regel met een teller; een regel valt weg na dertig dagen zonder nieuwe
+  melding. Per adres tien meldingen per minuut, over de wereld `PER_DAG`
+  (500) per dag. Een fetch-handler in plaats van RPC, zodat het bestand
+  geen import van `cloudflare:workers` heeft en `test/fout.test.js` het op
+  Node draait.
+- **Lezen**: `https://tijdisom-fout.maxheyrman.workers.dev/?sleutel=...`,
+  met de sleutel uit het repo-geheim `FOUT_SLEUTEL`; de workflow zet hem
+  bij elke uitrol als geheim `LEES` bij Cloudflare. Zonder sleutel geeft
+  de pagina een 404.
