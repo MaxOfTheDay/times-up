@@ -118,6 +118,59 @@ async function geluidBezet() {
   await browser.close();
 }
 
+/* Een iPhone met de app op het beginscherm vóór iOS 18.4: het wakker houden
+   wordt beloofd en niet gehouden. Het scherm vergrendelt midden in een
+   beurt zonder aanraking; dat moet als één regel naar de foutenbak. */
+async function schermSlaapt(browser) {
+  const page = await (await browser.newContext()).newPage();
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'wakeLock', { configurable: true, value: {
+      request: async () => ({ released: false, release: async () => {} }) } });
+  });
+  await page.goto(APP_URL); await page.waitForTimeout(400);
+  await page.click('#btnStart'); await page.waitForTimeout(600);
+  await page.click('#btnStartTurn');
+  await page.waitForFunction(() => document.querySelector('#countdown').hidden === false, null, { timeout: 5000 });
+  await page.waitForFunction(() => document.querySelector('#countdown').hidden, null, { timeout: 10000 });
+  const meld = async na => page.evaluate(async na => {
+    window.__meld = []; window.meldFout = b => window.__meld.push(b);
+    SLAAP_MS = 400; await new Promise(k => setTimeout(k, na));
+    Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' });
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+    document.dispatchEvent(new Event('visibilitychange'));
+    const uit = window.__meld;
+    delete document.visibilityState; delete document.hidden;
+    document.dispatchEvent(new Event('visibilitychange'));
+    return uit;
+  }, na);
+  const stil = await meld(600);
+  ok(stil.some(b => /scherm sliep in een beurt \(wake lock aan\)/.test(b)),
+     'scherm slaapt: een vergrendeling midden in een beurt komt niet in de foutenbak: ' + JSON.stringify(stil));
+  await page.context().close();
+}
+
+/* Een tablet met Android 9 of 10 kent de emoji uit Unicode 12 en 13 niet en
+   tekent ze als het lege vak. Die kaarten mogen niet in de bak. */
+async function oudToestel(browser) {
+  const page = await (await browser.newContext()).newPage();
+  await page.addInitScript(() => {
+    const oud = new Set(['🦩', '🦭', '🪑', '\u{10FFFD}']);
+    const f = CanvasRenderingContext2D.prototype.fillText;
+    CanvasRenderingContext2D.prototype.fillText = function (t, x, y, ...r) {
+      if (oud.has(t)) { this.fillRect(x, y, 12, 18); return; }
+      return f.call(this, t, x, y, ...r);
+    };
+  });
+  await page.goto(APP_URL); await page.waitForTimeout(300);
+  const r = await page.evaluate(() => {
+    const alle = TIER_ORDER.flatMap(t => DECKS[t]);
+    return { n: alle.length, vak: alle.filter(k => ['🦩', '🦭', '🪑'].includes(k[0])).length };
+  });
+  ok(r.vak === 0, `oud toestel: ${r.vak} kaarten met een leeg vak blijven in de bak`);
+  ok(r.n > 250, `oud toestel: de controle haalde ${r.n} kaarten over, te veel weg`);
+  await page.context().close();
+}
+
 (async () => {
   const browser = await launch();
   const STANDEN = [
@@ -125,6 +178,8 @@ async function geluidBezet() {
     ['gedwongen donker', gedwongenDonker],
     ['opslag hapert', () => opslagHapert(browser)],
     ['geluid bezet', geluidBezet],
+    ['scherm slaapt', () => schermSlaapt(browser)],
+    ['oud toestel', () => oudToestel(browser)],
   ];
   for (const [naam, toets] of STANDEN) {
     try { await toets(); }

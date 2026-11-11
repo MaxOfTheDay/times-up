@@ -4166,6 +4166,33 @@ const DECKS = {
   ]
 };
 
+/* Een emoji die het toestel niet kent, staat op de kaart als een leeg vak,
+   en zo'n kaart kan een kind dat niet leest niet spelen. Android 9 en 10
+   (oude tablets) kennen Unicode 12 en 13 niet: de flamingo, de zeehond, de
+   stoel. Bij het opstarten tekent elke emoji één keer op een klein canvas,
+   naast een teken dat nooit bestaat (U+10FFFD): wie daar pixel voor pixel
+   op lijkt, is het lege vak en gaat uit DECKS, voor alle standen tegelijk.
+   Lijkt meer dan een vijfde te ontbreken, dan meet de controle iets anders
+   (een canvas dat vingerafdrukken weert) en blijft alles staan. */
+(function zonderLeegVak() {
+  try {
+    const c = document.createElement("canvas"); c.width = c.height = 28;
+    const g = c.getContext("2d", { willReadFrequently: true });
+    if (!g) return;
+    g.font = "22px sans-serif"; g.textBaseline = "top";
+    const beeld = e => {
+      g.clearRect(0, 0, 28, 28); g.fillStyle = "#000"; g.fillText(e, 2, 2);
+      return g.getImageData(0, 0, 28, 28).data;
+    };
+    const vak = beeld("\u{10FFFD}");
+    const leeg = e => beeld(e).every((v, i) => Math.abs(v - vak[i]) < 8);
+    const lijsten = Object.values(DECKS), alle = [].concat(...lijsten);
+    const weg = new Set(alle.filter(k => leeg(k[0])).map(k => k[0]));
+    if (!weg.size || weg.size > alle.length / 5) return;
+    for (const l of lijsten) for (let i = l.length - 1; i >= 0; i--) if (weg.has(l[i][0])) l.splice(i, 1);
+  } catch (e) { /* zonder canvas: alles blijft */ }
+})();
+
 /* ==============================================================
    2. GELUID — korte, gesynthetiseerde cues via Web Audio.
    Geen bestanden, geen externe assets: het geluid draagt hier een
@@ -9695,13 +9722,32 @@ function terug() {
    7. SCHERM WAKKER HOUDEN — stil falen waar het niet bestaat.
    ============================================================== */
 let wake = null;
+let wakeStand = "";   // "aan", "geweigerd" of "ontbreekt": zie slaapMelding()
 async function requestWake() {
   try {
     /* De browser laat een lock zelf los als het document verborgen raakt,
        maar zet wake niet op null: vandaar de toets op wake.released. */
-    if ("wakeLock" in navigator && (!wake || wake.released))
-      wake = await navigator.wakeLock.request("screen");
-  } catch (e) { wake = null; }
+    if (!("wakeLock" in navigator)) { wakeStand = "ontbreekt"; return; }
+    if (!wake || wake.released) wake = await navigator.wakeLock.request("screen");
+    wakeStand = "aan";
+  } catch (e) { wake = null; wakeStand = "geweigerd"; }
+}
+
+/* Het scherm viel uit midden in een beurt. Het wakker houden faalt stil:
+   in een app op het beginscherm van iOS vóór 18.4 belooft de browser het
+   en houdt hij het niet, en een oudere iPhone kent het niet. Dan
+   vergrendelt het toestel terwijl een kind staat uit te beelden, en zegt
+   niets waarom. Verborgen raken na SLAAP_MS zonder aanraking is meestal
+   die vergrendeling (de veeg naar huis komt niet bij de pagina, dus het is
+   een teken, geen bewijs): dat gaat als één regel naar de foutenbak, met
+   hoe het wakker houden ervoor stond. */
+let SLAAP_MS = 14000;
+let laatsteTik = 0;
+document.addEventListener("pointerdown", () => { laatsteTik = performance.now(); }, { capture: true, passive: true });
+function slaapMelding() {
+  if (current !== "play" || paused() || countRaf !== null || !G || G.card === null) return;
+  const stil = performance.now() - laatsteTik;
+  if (stil >= SLAAP_MS) meldFout("scherm sliep in een beurt (wake lock " + (wakeStand || "?") + ")");
 }
 function releaseWake() {
   clearTimeout(wakeTimer); wakeTimer = null;
@@ -9734,6 +9780,7 @@ document.addEventListener("visibilitychange", () => {
     return;
   }
   if (current !== "play" || document.visibilityState !== "hidden") return;
+  slaapMelding();
   /* Tijdens het aftellen: afbreken, terug naar de overdracht. Er is nog geen
      beurt begonnen, en het aftellen zou anders op de achtergrond doorlopen. */
   if (countRaf !== null) { stopCountdown(); releaseWake(); handoff(handoffMode); return; }
