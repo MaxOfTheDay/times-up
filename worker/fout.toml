@@ -1,0 +1,30 @@
+# De foutenbak (worker/fout.mjs). Uitgerold door .github/workflows/worker.yml
+# op tijdisom-fout.<naam>.workers.dev; zie docs/ontwerp.md, "Een fout meldt
+# zichzelf". Het geheim LEES (de sleutel om te lezen) staat bij Cloudflare,
+# niet hier: een deploy laat het staan.
+name = "tijdisom-fout"
+main = "fout.mjs"
+compatibility_date = "2026-10-01"
+workers_dev = true
+preview_urls = false
+
+[[durable_objects.bindings]]
+name = "FOUTEN"
+class_name = "Fouten"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Fouten"]
+
+# Per adres hoogstens tien meldingen per minuut. Over de dag begrenst PER_DAG
+# in fout.mjs de rest.
+[[ratelimits]]
+name = "PERKEER"
+namespace_id = "4142"
+
+  [ratelimits.simple]
+  limit = 10
+  period = 60
+
+[observability]
+enabled = false

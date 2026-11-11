@@ -595,8 +595,9 @@ vandaan kwam). De lijst staat in `tijdisom.eigen`, de beelden in IndexedDB
 (`worker/tover.mjs`, uitgerold door `.github/workflows/worker.yml`, adres in
 `TOVER_URL`; leeg is geen staf). **De staf staat uit**: `TOVER_URL` is
 leeg en het adres staat in `TOVER_ADRES`; alleen de test zet hem aan
-(`__tijd.zetTover()`). Het is de enige plek waar de app het net op
-gaat, alleen op een tik van de volwassene, en alleen met het woord. Zonder
+(`__tijd.zetTover()`). Naast de foutmelding hieronder is het de enige
+plek waar de app het net op gaat, alleen op een tik van de volwassene, en
+alleen met het woord. Zonder
 net, of als het dagbudget op is, werkt alles behalve de staf.
 
 - De staf ligt midden op het lege vel van Tekenen (`#mkStaf`, rond, de fiche
@@ -608,9 +609,21 @@ net, of als het dagbudget op is, werkt alles behalve de staf.
   tot de tekening (`snijBij()`). Ze heeft haar eigen zwarte lijn en ligt
   dus kaal, zonder de pen van `.glyph` (`getoverd` op de kaart).
 
+**Een fout meldt zichzelf.** Een scriptfout (`error`,
+`unhandledrejection`) gaat via `meldFout()` naar de foutenbak, een tweede
+Worker (`worker/fout.mjs`, met een Durable Object op SQLite, uitgerold door
+dezelfde workflow). Alleen de melding met de plek in de code, het scherm,
+de versie (`document.lastModified`) en de browser in een paar woorden;
+nooit een kaart, een woord, een foto of iets van de speler. Alleen vanaf
+de echte site (`FOUT_URL` is leeg op elke andere herkomst, dus ook in de
+tests), elke fout één keer en hoogstens `FOUT_MAX` per bezoek. De bak
+houdt dezelfde fout op dezelfde versie als één regel met een teller,
+dertig dagen. Lezen gaat met de sleutel uit het repo-geheim `FOUT_SLEUTEL`
+(`/?sleutel=...`).
+
 ## Tests
 
-`npm test` draait zes suites, en CI draait ze op elke pull request, in het
+`npm test` draait zeven suites, en CI draait ze op elke pull request, in het
 Docker-image van Playwright. Wie playwright in `package-lock.json` ophoogt,
 zet het image in `.github/workflows/test.yml` op dezelfde versie (CI breekt
 anders meteen af):
@@ -625,6 +638,8 @@ anders meteen af):
   een eigen clear zet je met een reden in zijn lijst `MAG`.
 - `test/tover.test.js` toetst de toverstaf-Worker met een nagebootste
   Workers AI (`npm run test:tover`).
+- `test/fout.test.js` toetst de foutenbak op kaal Node, het Durable Object
+  op `node:sqlite` (`npm run test:fout`).
 - `test/deck.test.js` bewaakt de kaartregels in een echte browser.
 - `test/stip.test.js` legt het stippenvlak op de grafische kaart en op het
   2D-canvas over elkaar en vergelijkt elke pixel (`npm run test:stip`).

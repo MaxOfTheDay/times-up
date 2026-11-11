@@ -1,7 +1,8 @@
-# Rolt de toverstaf (worker/tover.mjs) uit naar Cloudflare, en tekent op
-# verzoek een proefvel. Los van de app: GitHub Pages zet index.html neer, dit
-# zet alleen de Worker neer. Zonder het geheim CLOUDFLARE_API_TOKEN doet het
-# niets. Zie docs/ontwerp.md, Toveren.
+# Rolt de twee Workers uit naar Cloudflare: de toverstaf (worker/tover.mjs,
+# tekent op verzoek ook een proefvel) en de foutenbak (worker/fout.mjs). Los
+# van de app: GitHub Pages zet index.html neer, dit zet alleen de Workers
+# neer. Zonder het geheim CLOUDFLARE_API_TOKEN doet het niets. Zie
+# docs/ontwerp.md, Toveren en "Een fout meldt zichzelf".
 name: Toverstaf
 
 on:
@@ -57,6 +58,20 @@ jobs:
       - name: Uitrollen
         if: steps.token.outputs.er == 'ja'
         run: npx --yes wrangler@4 deploy --config worker/wrangler.toml
+
+      - name: Foutenbak uitrollen
+        if: steps.token.outputs.er == 'ja'
+        run: npx --yes wrangler@4 deploy --config worker/fout.toml
+
+      # De sleutel om de foutenbak te lezen komt uit het repo-geheim
+      # FOUT_SLEUTEL. Zonder dat geheim verzamelt hij wel, maar leest niemand.
+      - name: Leessleutel van de foutenbak
+        if: steps.token.outputs.er == 'ja'
+        env:
+          FOUT_SLEUTEL: ${{ secrets.FOUT_SLEUTEL }}
+        run: |
+          if [ -z "$FOUT_SLEUTEL" ]; then echo "Geen FOUT_SLEUTEL: lezen staat dicht."; exit 0; fi
+          printf '%s' "$FOUT_SLEUTEL" | npx --yes wrangler@4 secret put LEES --config worker/fout.toml
 
       - name: Adres van de Worker
         if: steps.token.outputs.er == 'ja'

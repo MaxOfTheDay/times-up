@@ -103,7 +103,9 @@ geldt tot twee uur later. Stoppen via het huisje gooit het potje wél weg.
 De app werkt zonder internet en is te installeren op het beginscherm: de
 service worker (`sw.js`) bewaart het ene bestand en haalt op de achtergrond
 een nieuwe versie op voor de volgende keer dat je opstart. Eigen kaarten
-blijven op de telefoon (IndexedDB); niets gaat het net op.
+blijven op de telefoon (IndexedDB). Het net op gaat alleen een scriptfout
+(de melding, het scherm, de versie en de browser, naar `worker/fout.mjs`),
+zodat de maker ziet wat er op een andere telefoon misgaat.
 
 ## Kaarten aanpassen
 
@@ -136,7 +138,7 @@ npm install
 npm test
 ```
 
-`npm test` draait zes suites:
+`npm test` draait zeven suites:
 
 - `test/kern.test.js` toetst de spelregels zelf, zonder browser en in
   milliseconden (`npm run test:kern`).
@@ -144,6 +146,7 @@ npm test
   tekst van `index.html` kunt zien, ook in milliseconden.
 - `test/tover.test.js` toetst de toverstaf-Worker met een nagebootste
   Workers AI.
+- `test/fout.test.js` toetst de foutenbak-Worker, met een nagebootste opslag.
 - `test/deck.test.js` bewaakt de kaartregels: het aantal, dubbels over alle
   standen heen, dat elke stand alles eronder bevat, en of elke emoji tekent.
 - `test/stip.test.js` legt het stippenveld op de grafische kaart en op het
