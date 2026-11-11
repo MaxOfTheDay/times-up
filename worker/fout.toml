@@ -26,5 +26,12 @@ namespace_id = "4142"
   limit = 10
   period = 60
 
+# Workers Logs aan voor de logregel per melding (de dagelijkse controle
+# leest die met de API), maar zonder een logregel per aanvraag: die draagt
+# het adres en de user-agent.
 [observability]
-enabled = false
+enabled = true
+head_sampling_rate = 1
+
+  [observability.logs]
+  invocation_logs = false

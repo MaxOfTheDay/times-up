@@ -60,6 +60,17 @@ const { DatabaseSync } = require('node:sqlite');
     assert.equal(rijen.find(r => r.v === 'v1').n, 3);
   });
 
+  await t('een aanvaarde melding is één logregel met alleen de vier velden', async () => {
+    const env = nepEnv(), regels = [], oud = console.log;
+    console.log = x => regels.push(x);
+    try {
+      await meld(env, { b: 'oeps (1:2)', s: 'play', v: 'v1', w: 'Chrome 142 Android', extra: 'weg' });
+      await meld(env, { b: 'x' }, 'https://elders.example');
+    } finally { console.log = oud; }
+    assert.equal(regels.length, 1);
+    assert.deepEqual(JSON.parse(regels[0]), { foutenbak: 1, b: 'oeps (1:2)', s: 'play', v: 'v1', w: 'Chrome 142 Android' });
+  });
+
   await t('een slechte body is een 400, een te lange een 413', async () => {
     const env = nepEnv();
     assert.equal((await meld(env, '{kapot')).status, 400);

@@ -4131,5 +4131,13 @@ doen.
   Node draait.
 - **Lezen**: `https://tijdisom-fout.maxheyrman.workers.dev/?sleutel=...`,
   met de sleutel uit het repo-geheim `FOUT_SLEUTEL`; de workflow zet hem
-  bij elke uitrol als geheim `LEES` bij Cloudflare. Zonder sleutel geeft
-  de pagina een 404.
+  bij elke uitrol als geheim `LEES` bij Cloudflare (Max zette hem in het
+  dashboard; een uitrol laat hem staan). Zonder sleutel geeft de pagina
+  een 404.
+- **Vanzelf nakijken**: elke aanvaarde melding schrijft ook één logregel
+  (`{ foutenbak: 1, b, s, v, w }`) naar Workers Logs. Die leest een
+  dagelijkse controle met de API van Cloudflare, met het token dat de
+  sessie al heeft: geen sleutel nodig, en het adres van de Worker hoeft
+  niet open. Het gratis plan bewaart logs drie dagen, dus dagelijks kijken
+  mist niets. De logregel per aanvraag staat uit (`invocation_logs`),
+  want die draagt het adres en de user-agent.
