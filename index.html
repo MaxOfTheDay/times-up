@@ -2458,8 +2458,11 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
    houdt de knoppen aan de randen, waar de duimen zitten. Zie "Met een muis
    is het spel één bord" in docs/ontwerp.md. */
 @media (orientation: landscape) and (min-width: 640px) and (min-height: 560px) and (hover: hover) and (pointer: fine) {
+  /* De maat van de speelkaart. Ook de opdrachtkaart en de eindkaart nemen
+     haar over (zie onder de tabletmaten): één kaart, twee kanten. */
+  :root { --kol: min(600px, calc(100vh - 170px)); }
   #s-play.on {
-    --kol: min(600px, calc(100vh - 170px)); --spleet: 40px;
+    --spleet: 40px;
     grid-template-columns: var(--ctrl) var(--kol) var(--ctrl);
     grid-template-rows: auto auto;
     justify-content: center; align-content: center;
@@ -2575,6 +2578,21 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
   .overlay .panel .btn-go { width: 148px; }
   .overlay .panel .btn-danger { width: 88px; height: 88px; }
   .overlay .panel .btn-danger .mark { width: 40px; }
+  /* De eindkaart is zo breed als de opdrachtkaart, ook hier. */
+  #wnPiles.wn-kaart { width: min(70vw, 34rem); }
+}
+
+/* Met een muis (zie "Met een muis is het spel één bord"): de opdrachtkaart,
+   de eindkaart en het merk groeien mee met de speelkaart (--kol). Zo heeft
+   de kaart die omdraait aan beide kanten dezelfde breedte, en staat de
+   titel niet als een postzegel op een breed scherm. Na de tabletmaten,
+   zodat dit wint. */
+@media (orientation: landscape) and (min-width: 640px) and (min-height: 560px) and (hover: hover) and (pointer: fine) {
+  .roundcard.big { width: var(--kol); max-width: var(--kol); }
+  #wnPiles.wn-kaart { width: var(--kol); max-width: var(--kol); }
+  .wordmark { --gluur: min(14vh, 130px); padding: 30px 44px 36px; }
+  .wordmark h1 { font-size: min(13vh, 120px); }
+  .wordmark > svg { width: min(9vh, 88px); margin-bottom: 10px; }
 }
 
 /* ============================================================

@@ -385,7 +385,9 @@ ploegkleur.
 **Met een muis is het spel één bord.** Op een desktop (`hover: hover`,
 `pointer: fine`, liggend en minstens 560 px hoog) is de speelkaart hoogstens
 600 px (`--kol`), staan goed en pas pal naast de kaart (`--spleet`) en is
-de balk zo breed als dat geheel, alles samen in het midden. Aanraking houdt
+de balk zo breed als dat geheel, alles samen in het midden. De opdrachtkaart
+en de eindkaart zijn dan even breed als de speelkaart, en het merk groeit
+mee. Aanraking houdt
 de knoppen aan de randen, waar de duimen zitten.
 
 **Pauze legt het spel weg en draait de kaart om, zonder sluier.** De grond

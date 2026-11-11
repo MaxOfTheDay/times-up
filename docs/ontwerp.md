@@ -2441,6 +2441,16 @@ speelkaart ongeveer zo groot als de opdrachtkaart waaruit ze omdraait.
 - `npm run foto` heeft er een vierde maat voor: desktop, 1910x926, zonder
   aanraking.
 
+### De andere schermen groeien mee
+
+Op de desktop bleef de rest op tabletmaat: de opdrachtkaart 544 px breed
+tegen een speelkaart van 600, de eindkaart 384 (24rem, terwijl de regel zegt
+"zo breed als de opdrachtkaart"), het merk 294. De kaart die omdraait
+sprong dus bij elke wissel van maat. Nu staat `--kol` op `:root` in de
+desktopregel, en nemen `.roundcard.big` en `#wnPiles.wn-kaart` die breedte
+over; het merk groeit naar `min(13vh, 120px)` letters. Op de tabletmaat is
+de eindkaart nu ook zo breed als de opdrachtkaart (`min(70vw, 34rem)`).
+
 ## Eén stand
 
 De stand staat op één plek: in de opdrachtkaart van de overdracht
