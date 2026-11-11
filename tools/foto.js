@@ -6,7 +6,8 @@
  *
  *   - een knop die in beeld is, maar (deels) buiten het scherm valt;
  *   - een mascotte of teken van 0 bij 0 px;
- *   - de hoofdknop van het scherm die onder een ander stuk ligt.
+ *   - de hoofdknop van het scherm die onder een ander stuk ligt;
+ *   - een speelkaart kleiner dan KAART_MIN.
  *
  *   node tools/foto.js            (of: npm run foto)
  *   node tools/foto.js --scherp   op 2x, om te delen
@@ -20,13 +21,18 @@ const path = require('path');
 const { launch, APP_URL, echteKaart } = require('../test/browser.js');
 
 /* De vierde maat is een desktop met een muis: daar is het spelscherm één bord
-   (zie "Met een muis is het spel één bord"). De andere drie zijn aanraking. */
-const MATEN = [['staand', 390, 844], ['liggend', 844, 390], ['klein', 320, 568], ['desktop', 1910, 926]];
+   (zie "Met een muis is het spel één bord"). De andere zijn aanraking: ook de
+   kleine telefoon dwars (daar viel de speelkaart terug tot 57 px) en een
+   tablet in beide standen. */
+const MATEN = [['staand', 390, 844], ['liggend', 844, 390], ['klein', 320, 568], ['klein-liggend', 568, 320],
+  ['tablet', 820, 1180], ['tablet-liggend', 1180, 820], ['desktop', 1910, 926]];
+/* De speelkaart draagt het spel: kleiner dan dit leest het woord niet meer. */
+const KAART_MIN = 150;
 const SCHAAL = process.argv.includes('--scherp') ? 2 : 1;
 const UIT = path.resolve(__dirname, '..', 'foto');
 
 /* Wat er op een scherm in beeld is en dus binnen het scherm moet liggen. */
-function meet(primair) {
+function meet([primair, kaartMin]) {
   const fout = [];
   const zichtbaar = el => {
     if (el.closest('[hidden], [inert]')) return false;
@@ -54,6 +60,12 @@ function meet(primair) {
     const ouder = s.parentElement.getBoundingClientRect();
     if ((r.width === 0 || r.height === 0) && ouder.width > 0 && ouder.height > 0 && getComputedStyle(s).visibility === 'visible')
       fout.push(`${naam(s.parentElement)} heeft een svg van 0 bij 0`);
+  }
+  const kaart = document.querySelector('#s-play.on .cardslot');
+  if (kaart && !kaart.closest('[hidden]')) {
+    const r = kaart.getBoundingClientRect();
+    if (Math.min(r.width, r.height) < kaartMin)
+      fout.push(`de speelkaart is ${Math.round(r.width)}x${Math.round(r.height)}, kleiner dan ${kaartMin} px`);
   }
   const p = primair && document.querySelector(primair);
   if (p && zichtbaar(p) && !p.closest('[inert]')) {
@@ -116,7 +128,7 @@ async function standen(page) {
       try { await ga(); } catch (e) { missers.push(`${maat}/${naam}: kwam er niet (${e.message.split('\n')[0]})`); continue; }
       const bestand = path.join(map, naam + '.png');
       await page.screenshot({ path: bestand });
-      const m = await page.evaluate(meet, primair);
+      const m = await page.evaluate(meet, [primair, KAART_MIN]);
       m.fout.forEach(f => missers.push(`${maat}/${naam}: ${f}`));
       gemaakt.push([naam, bestand]);
     }

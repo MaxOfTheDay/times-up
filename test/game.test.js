@@ -14,7 +14,7 @@
  * Duurt ruim 20 seconden: één beurt moet echt uitlopen om te zien wat er
  * gebeurt als de tijd om is.
  */
-const { launch, APP_URL, hold } = require('./browser');
+const { launch, APP_URL, hold, naamloos } = require('./browser');
 
 const fails = [];
 const ok = (c, m) => { if (!c) fails.push(m); };
@@ -105,6 +105,12 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(await page.$('#hoTally .crown') === null,
      'de kroon staat weer op het overdrachtscherm');
 
+  // Alles op het scherm heeft een naam voor wie niet kijkt: een beeld of
+  // knop zonder naam, of een label op een vak dat het niet doorgeeft, valt
+  // hier om (naamloos() in browser.js). Op de drie schermen van het spel.
+  const benoemd = async waar => (await naamloos(page)).forEach(f => fails.push(`${waar}: ${f}`));
+  await benoemd('overdracht');
+
   const seenPerRound = [];
   for (let round = 1; round <= 3; round++) {
     ok(await game(() => window.__tijd.G.round) === round, `ronde ${round} verwacht`);
@@ -156,6 +162,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
 
     await startTurn();
     ok(await screen() === 'play', `ronde ${round}: niet aan het spelen`);
+    if (round === 1) await benoemd('spelen');
     ok(await page.getAttribute('#countdown', 'hidden') !== null,
        `ronde ${round}: het aftellen blijft staan`);
     ok(await page.textContent('#glyph') !== '',
@@ -263,6 +270,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
 
   // --- de klok loopt af en geeft de beurt door ---
   // "Opnieuw" begint een nieuw potje; terug naar de titel is een eigen knop.
+  await benoemd('eindstand');
   await page.click('#btnHome');
   await page.waitForTimeout(100);
   ok(await screen() === 'title', 'de huisknop komt niet uit op de titel');

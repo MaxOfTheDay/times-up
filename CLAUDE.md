@@ -26,9 +26,11 @@ een controle vooraf gevraagd wordt.
   px, een derde rechthoek om het merk, een kroon door de bovenrand, een
   stapel fiches die de startknop van het scherm duwde. Maak bij elke
   zichtbare wijziging screenshots (staand 390x844, liggend 844x390, klein
-  320x568, en desktop 1910x926 met een muis) en kijk ernaar: `npm run foto`
-  zet elf standen per maat op een contactblad in `foto/` en meldt een knop buiten beeld, een svg van 0 bij
-  0 en een bedekte hoofdknop. Een stand die hij niet heeft, maak je erbij.
+  320x568 en dwars 568x320, tablet 820x1180 in beide standen, en desktop
+  1910x926 met een muis) en kijk ernaar: `npm run foto` zet elf standen per
+  maat op een contactblad in `foto/` en meldt een knop buiten beeld, een svg
+  van 0 bij 0, een bedekte hoofdknop en een speelkaart onder `KAART_MIN`.
+  Een stand die hij niet heeft, maak je erbij.
 - Alles staat in `index.html`: geen build, geen externe assets, werkt met de
   wifi uit. Houd dat zo. Het enige andere bestand dat de app nodig heeft is
   `sw.js`.
@@ -103,6 +105,13 @@ hetzelfde vertelt, nooit in plaats daarvan.
 - Verboden is tekst die iets toevoegt dat het beeld niet zegt: een hint die
   later verschijnt, een woord dat de kaart makkelijker of moeilijker maakt.
 - Alle tekst staat op papier, nooit rechtstreeks op de ploegkleur.
+- **Wie niet kijkt, hoort hetzelfde.** Elk beeld dat iets zegt heeft een
+  naam: op de knop, of `role="img"` met een `aria-label` op het vak eromheen
+  (`role="group"` als er een knop in zit). Een `aria-label` op een kale div
+  geeft Chrome niet door. Een teken uit `svgUse()` is `aria-hidden`. Eén
+  woord per ding, ook in de labels en in Zo speel je: goed, pas, het huisje,
+  een potje. `test/game.test.js` toetst het op de overdracht, het spel en
+  de eindstand (`naamloos()` in `test/browser.js`).
 
 ## Het speelbord
 
@@ -667,7 +676,8 @@ anders meteen af):
   dat een andere app heeft, een scherm dat in een beurt vergrendelt, een
   oud toestel zonder de nieuwste emoji) en toetst wat de speler dan ziet of hoort
   (`npm run test:toestel`).
-- `test/game.test.js` speelt een volledig potje in een echte browser, zo'n
+- `test/game.test.js` speelt een volledig potje in een echte browser (en
+  vraagt onderweg de toegankelijkheidsboom of alles een naam heeft), zo'n
   anderhalve tot twee minuten. Hij klikt bewust trager dan 280 ms, omdat
   een dubbele tik op "goed" met opzet als één telt.
 

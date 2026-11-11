@@ -905,6 +905,15 @@ button.mk-sluiter:active, button.mk-staf.klaar:active {
 .regel-zin { margin: 0; font-size: var(--fs-3); line-height: 1.5; color: var(--ink-2); }
 .regel-zin b { color: var(--ink); }
 .regel-zin .nb { white-space: nowrap; }
+/* Een knop uit het spel in de zin: dezelfde vorm en kleur, plat en zonder
+   lift, want hier druk je niets in. */
+.regel-knop {
+  display: inline-grid; place-items: center; width: 28px; height: 28px;
+  vertical-align: middle; margin: -4px 0 -2px;
+  border: 2px solid var(--ink); background: var(--paper-2);
+}
+.regel-knop.goed { border-radius: 50%; background: var(--good); }
+.regel-knop svg { width: 62%; height: 62%; }
 .regel-rondes { margin: 0; padding: 0; list-style: none; }
 .regel-rondes > .rij + .rij { border-top: 2px solid var(--rule); }
 .regel-rondes .rij-naam small { font-size: var(--fs-2); font-weight: 400; margin-top: 2px; }
@@ -2421,7 +2430,7 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
    daarom over de volle breedte en alleen de kaart en de bediening delen de
    hoogte -- met de balk in de rechterkolom paste die kolom niet meer in
    ~390 px en liep de knop van het scherm. */
-@media (orientation: landscape) and (min-width: 640px) {
+@media (orientation: landscape) and (min-width: 480px) {
   /* .on erbij: een id-selector met display zou anders de display: none van
      .screen overrulen. Drie kolommen: de knop rechts krijgt een even brede
      kolom links, zodat de kaart in het midden van het scherm staat; "pas"
@@ -3390,9 +3399,15 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
       <li class="rij"><span class="regel-teken"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#r-mimen"/></svg></span>
         <span class="rij-naam">Uitbeelden<small>Niet praten.</small></span></li>
     </ol>
-    <p class="regel-zin">Goed geraden: <b>1 punt</b>. Passen mag. Is de stapel leeg, dan
-      speel je door in de volgende ronde, met de tijd die je nog had.</p>
+    <!-- De knoppen staan in de zin zoals je ze in het spel ziet, maar plat:
+         hier valt niets in te drukken. Het woord ernaast is het label dat
+         een voorleesfunctie op die knop zegt. -->
+    <p class="regel-zin">Geraden? Tik op <span class="nb"><span class="regel-knop goed"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-check"/></svg></span> <b>goed</b></span>:
+      <b>1 punt</b>. Te moeilijk? Tik op <span class="nb"><span class="regel-knop"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-pass"/></svg></span> <b>pas</b></span>.
+      Is de stapel leeg, dan speel je door in de volgende ronde, met de tijd
+      die je nog had.</p>
     <p class="regel-zin">Te vroeg op goed getikt? Tik op het groene <span class="nb"><b>+</b>-getal</span> bovenaan.</p>
+    <p class="regel-zin">Stoppen? Houd het <span class="nb"><span class="regel-knop"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-huis"/></svg></span> <b>huisje</b></span> vast.</p>
   </div>
   <button class="btn-icon" id="btnRegelsTerug" aria-label="Terug naar Instellingen">
     <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-vorig"/></svg>
@@ -3421,7 +3436,7 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
 
   <!-- 2. WAT. Eén kaart: de stand, de drie rondes met die van nu als
        tekening, het woord en de regel. -->
-  <div class="roundcard surface" id="hoRoundCard">
+  <div class="roundcard surface" id="hoRoundCard" role="group">
     <!-- Hoeveel kaarten er nog liggen en hoe lang je krijgt: aan de voet, het
          dichtst bij de knop waar ze over gaan. -->
     <div class="ho-meta">
@@ -3445,7 +3460,7 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
        weggaan, en dat doet het huisje zelf: vasthouden, net als het huisje
        op de achterkant van de speelkaart (zie holdButton()). Geen paneel
        ertussen; dat gaf een huisje dat een tweede huisje opende. -->
-  <button class="btn-icon btn-houd" id="btnStopHo" aria-label="Spel stoppen — houd ingedrukt">
+  <button class="btn-icon btn-houd" id="btnStopHo" aria-label="Potje stoppen — houd ingedrukt">
     <i></i>
     <svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-stop"/></svg>
   </button>
@@ -3466,14 +3481,14 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
        uitleggen, en de klok met de knop die hem stilzet. Zie .play-top. -->
   <div class="play-top">
     <div class="who" id="plWho">
-      <div class="teamchip"><svg id="plMascot" viewBox="0 0 100 100"><use href="#m-vos"/></svg></div>
+      <div class="teamchip"><svg id="plMascot" viewBox="0 0 100 100" role="img" aria-label="Vos"><use href="#m-vos"/></svg></div>
       <!-- Het pijltje en de lont staan er alleen zolang het punt nog terug
            kan (TERUG_MS): zie .kan-terug. -->
       <b class="gain turn-gain" id="turnScore" aria-hidden="true" hidden><span class="n">+0</span><svg class="terug" viewBox="0 0 100 100"><use href="#i-terug"/></svg><i class="lont"></i></b>
     </div>
     <!-- Alleen het pictogram, geen <b> meer: zie .roundchip hieronder. -->
-    <div class="roundchip" id="plRoundChip">
-      <div class="ico"><svg viewBox="0 0 100 100"><use href="#r-praten"/></svg></div>
+    <div class="roundchip" id="plRoundChip" role="img">
+      <div class="ico"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#r-praten"/></svg></div>
     </div>
     <button class="btn-icon klokknop" id="btnPauze" aria-label="Pauze">
       <span class="secs-left" id="clockDigits" aria-hidden="true">30</span>
@@ -3512,7 +3527,7 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
   </div>
 
   <div class="controls">
-    <button class="btn-skip" id="btnPas" aria-label="Overslaan">
+    <button class="btn-skip" id="btnPas" aria-label="Pas">
       <svg viewBox="0 0 100 100" aria-hidden="true">
         <use href="#i-pass"/>
         <!-- De streep snijdt door de pijlen: eronder een rand in de kleur
@@ -3524,7 +3539,7 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
         </g>
       </svg>
     </button>
-    <button class="btn-good" id="btnGoed" aria-label="Geraden">
+    <button class="btn-good" id="btnGoed" aria-label="Goed">
       <svg viewBox="0 0 100 100" aria-hidden="true"><use href="#i-check"/></svg>
     </button>
   </div>
@@ -3712,7 +3727,7 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
          klein) staan ze naast elkaar. -->
 
     <div class="doors">
-      <button class="btn-danger btn-houd" id="btnStop" aria-label="Spel stoppen — houd ingedrukt">
+      <button class="btn-danger btn-houd" id="btnStop" aria-label="Potje stoppen — houd ingedrukt">
         <i></i>
         <svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><use href="#i-stop"/></svg>
       </button>
@@ -7022,6 +7037,7 @@ function startTurn() {
   Spel.beurtKlaar(G);
   const t = TEAMS[G.team];
   $("#plMascot").firstElementChild.setAttribute("href", t.mascot);
+  $("#plMascot").setAttribute("aria-label", t.naam);
   paintRound($("#plRoundChip .ico"), "chip", $("#plRoundChip"));
   $("#s-play").style.setProperty("--team", t.color);
   $("#s-play").style.setProperty("--stip", STIP_PAPIER[G.team]);
@@ -7391,7 +7407,7 @@ function syncControls() {
   const btn = $("#btnPas");
   btn.dataset.spent = spent ? "1" : "0";
   btn.setAttribute("aria-disabled", String(spent));
-  btn.setAttribute("aria-label", spent ? "Overslaan — dit is de laatste kaart" : "Overslaan");
+  btn.setAttribute("aria-label", spent ? "Pas — dit is de laatste kaart" : "Pas");
   paintStack();
 }
 
@@ -8810,6 +8826,9 @@ function buildTally(host, prefix) {
     const side = document.createElement("div");
     side.className = "side";
     side.id = prefix + "Side" + kant;
+    /* role="img": een kale div geeft zijn aria-label niet door, en dan
+       leest een voorleesfunctie alleen "0 0". */
+    side.setAttribute("role", "img");
 
     const head = document.createElement("span");
     head.className = "head";
@@ -8984,6 +9003,9 @@ function svgUse(href, cls) {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("viewBox", "0 0 100 100");
   if (cls) svg.setAttribute("class", cls);
+  /* Een teken is voor het oog; de naam staat op het vak eromheen (een
+     knop, of role="img" met een aria-label). */
+  svg.setAttribute("aria-hidden", "true");
   const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
   use.setAttribute("href", href);
   svg.appendChild(use);
@@ -9053,6 +9075,7 @@ function tallyNode(t) {
     foot.appendChild(row);
   }
 
+  wrap.setAttribute("role", "img");
   wrap.setAttribute("aria-label", TEAMS[t].naam + ": " + total(t) + " punten");
   wrap.append(head, num, foot);
   return wrap;
