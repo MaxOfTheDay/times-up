@@ -143,7 +143,8 @@ pijl die "passen" heette, en hoe je een potje stopt stond er niet.
 Een test leest de toegankelijkheidsboom van Chrome zelf (`naamloos()` in
 `test/browser.js`), niet de opmaak: die ziet ook wat een script erin hangt,
 en rekent `hidden`, `inert` en `aria-hidden` mee. Op de oude code vond hij
-precies de twaalf plekken hierboven.
+precies de twaalf plekken hierboven. Hij kijkt op elk scherm dat de spelers
+zien: de titel, de overdracht, het spel, de pauze en de eindstand.
 
 ## Klein en dwars
 
@@ -4059,6 +4060,11 @@ toveren); de afwegingen staan hieronder.
   wifi-teken op de staf, met het dagbudget op de zandloper (`#i-glass`);
   een afgekeurd woord of een andere fout laat de staf schudden.
 
+**De Workers.** `worker.yml` rolde de toverstaf en de foutenbak uit zonder
+hun tests, en met de nieuwste `wrangler@4`. Nu draaien `tover.test.js` en
+`fout.test.js` eerst (een tel, op kaal Node), en is de versie vast
+(`WRANGLER`, 4.159.0: de versie van de laatste geslaagde uitrol).
+
 ## Al in het spel
 
 Wie een eigen kaart maakt met een woord dat al een gewone kaart is, ziet
@@ -4302,6 +4308,17 @@ zonder IndexedDB (de rij Eigen verdwijnt dan met opzet). Op een iPhone
 zet `audioSession.type = "playback"` de muziek van een andere app
 waarschijnlijk stil bij de eerste cue; dat is de prijs van geluid met de
 stilteschakelaar aan, en is nog op een toestel na te kijken.
+
+**Een update.** Een update komt bij een speler terwijl er een potje en
+instellingen bewaard staan van de vorige versie. Dat ging tot nu goed, maar
+niets bewaakte het: de tests van `herstel()` bouwden hun potje met de code
+van nu, en de oude velden in `load()` (`cardsOpen`, `rulesOpen`,
+`eigenDeel`, een tijd van de schuif) had niemand meer gezien. Nu staan er
+in `test/opslag/` een potje midden in een beurt en instellingen zoals een
+uitgebrachte versie ze echt schreef (november), en een met de oude velden.
+`kern.test.js` herstelt het potje, `toestel.test.js` start de app erop en
+wil de overdracht met dezelfde stand zien en de keuzes van nu. Een nieuwe
+vorm krijgt een nieuw bestand; de oude blijven.
 
 ## Snel op een trage telefoon
 

@@ -73,6 +73,13 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   await page.reload();
   await page.waitForTimeout(250);
 
+  // Alles op het scherm heeft een naam voor wie niet kijkt: een beeld of
+  // knop zonder naam, of een label op een vak dat het niet doorgeeft, valt
+  // hier om (naamloos() in browser.js). Op elk scherm dat de spelers zien:
+  // de titel, de overdracht, het spel, de pauze en de eindstand.
+  const benoemd = async waar => (await naamloos(page)).forEach(f => fails.push(`${waar}: ${f}`));
+  await benoemd('titel');
+
   // Het tandwiel is een gewone tik: instellingen openen is niets
   // onomkeerbaars, en het tandwiel bestaat toch al alleen op dit scherm.
   await page.click('#btnGear');
@@ -105,10 +112,6 @@ const ok = (c, m) => { if (!c) fails.push(m); };
   ok(await page.$('#hoTally .crown') === null,
      'de kroon staat weer op het overdrachtscherm');
 
-  // Alles op het scherm heeft een naam voor wie niet kijkt: een beeld of
-  // knop zonder naam, of een label op een vak dat het niet doorgeeft, valt
-  // hier om (naamloos() in browser.js). Op de drie schermen van het spel.
-  const benoemd = async waar => (await naamloos(page)).forEach(f => fails.push(`${waar}: ${f}`));
   await benoemd('overdracht');
 
   const seenPerRound = [];
@@ -379,6 +382,7 @@ const ok = (c, m) => { if (!c) fails.push(m); };
            Math.abs(pr.left + pr.width / 2 - kx) < 1.5 && Math.abs(pr.top + pr.height / 2 - ky) < 1.5;
   });
   ok(dekt, 'het pauzepaneel ligt niet als achterkant op de kaart');
+  await benoemd('pauze');
 
   // --- de achtergrond mag dicht terwijl het paneel openstaat ---
   // Eerst het toestel zelf: inert maakt de speelknop niet meer focusbaar,

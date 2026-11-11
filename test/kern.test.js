@@ -477,3 +477,27 @@ test('herstel: eigen kaarten zonder beeld vallen eruit, en niets over is geen sp
   assert.equal(Spel.herstel(s, t, () => true), null);
   assert.notEqual(Spel.herstel({ ...s, mode: 'uit' }, t, () => true), null, 'een eindstand mag blijven');
 });
+
+/* Een update mag geen potje kosten. In test/opslag/ staat een potje zoals
+   een uitgebrachte versie het echt bewaarde (midden in een beurt, via
+   bewaarBeurt()). Wie de vorm van G of herstel() verandert, moet die nog
+   steeds terugkrijgen; komt er een nieuwe vorm bij, dan komt er een bestand
+   bij, en het oude blijft. */
+test('herstel: een potje van een vorige versie komt terug', () => {
+  const map = path.resolve(__dirname, 'opslag');
+  const bestanden = fs.readdirSync(map).filter(f => /-potje\.json$/.test(f));
+  assert.ok(bestanden.length > 0, 'geen bewaarde potjes in test/opslag');
+  for (const f of bestanden) {
+    const s = JSON.parse(fs.readFileSync(path.join(map, f), 'utf8'));
+    const nu = Date.now();
+    const h = Spel.herstel({ ...s, t: nu - 60000 }, nu);
+    assert.ok(h, `${f}: herstel() geeft niets terug`);
+    assert.equal(h.mode, s.mode, f);
+    assert.deepEqual(h.G.deck, s.G.deck, f);
+    assert.deepEqual(h.G.pile, s.G.pile, f);
+    assert.deepEqual(h.G.scores, s.G.scores, f);
+    assert.equal(h.G.team, s.G.team, f);
+    assert.equal(h.G.round, s.G.round, f);
+    assert.equal(h.G.pendingMs, s.G.pendingMs, f);
+  }
+});

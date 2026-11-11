@@ -195,6 +195,45 @@ async function kapotteRelease(browser) {
   await page.context().close();
 }
 
+/* Een update terwijl er iets bewaard staat: instellingen en een potje uit
+   test/opslag/, zoals een vorige versie ze schreef. Na de update moet het
+   potje terug op de overdracht staan, en oude instellingen (een schuif voor
+   de tijd, een deel in plaats van een aantal eigen kaarten, vouwregels die
+   er niet meer zijn) worden de keuzes van nu. */
+async function update(browser) {
+  const lees = f => fs.readFileSync(path.join(__dirname, 'opslag', f), 'utf8');
+  const potje = JSON.parse(lees('2026-11-potje.json'));
+  for (const [naam, verwacht] of [
+    ['2026-11-instellingen.json', { size: 16, secs: 30, eigenAantal: 4, lade: null, hidden: [] }],
+    ['oud-instellingen.json', { size: 24, secs: 30, eigenAantal: 4, lade: 'gewoon', hidden: ['kat', 'hond'] }]
+  ]) {
+    const page = await (await browser.newContext()).newPage();
+    await page.addInitScript(([inst, potje]) => {
+      try {
+        if (sessionStorage.getItem('gezet')) return;
+        sessionStorage.setItem('gezet', '1');
+        localStorage.setItem('tijdisom.welkom', '1');
+        localStorage.setItem('tijdisom.settings', inst);
+        localStorage.setItem('tijdisom.game', JSON.stringify(Object.assign({}, potje, { t: Date.now() - 60000 })));
+      } catch (e) {}
+    }, [lees(naam), potje]);
+    await page.goto(APP_URL); await page.waitForTimeout(1200);
+    const r = await page.evaluate(() => ({
+      scherm: window.__tijd.screen, G: window.__tijd.G,
+      s: JSON.parse(localStorage.getItem('tijdisom.settings') || 'null') || {}
+    }));
+    ok(r.scherm === 'handoff', `update (${naam}): het bewaarde potje komt niet terug op de overdracht, maar op ${r.scherm}`);
+    ok(r.G && JSON.stringify(r.G.scores) === JSON.stringify(potje.G.scores) && JSON.stringify(r.G.pile) === JSON.stringify(potje.G.pile),
+       `update (${naam}): de stand of de stapel van het potje is anders`);
+    const inst = await page.evaluate(() => window.__tijd.settings);
+    for (const [k, v] of Object.entries(verwacht))
+      ok(JSON.stringify(inst && inst[k]) === JSON.stringify(v), `update (${naam}): ${k} is ${JSON.stringify(inst && inst[k])}, verwacht ${JSON.stringify(v)}`);
+    for (const k of ['cardsOpen', 'rulesOpen', 'eigenDeel'])
+      ok(!(inst && k in inst), `update (${naam}): het oude veld ${k} blijft staan`);
+    await page.context().close();
+  }
+}
+
 (async () => {
   const browser = await launch();
   const STANDEN = [
@@ -205,6 +244,7 @@ async function kapotteRelease(browser) {
     ['scherm slaapt', () => schermSlaapt(browser)],
     ['oud toestel', () => oudToestel(browser)],
     ['kapotte release', () => kapotteRelease(browser)],
+    ['update', () => update(browser)],
   ];
   for (const [naam, toets] of STANDEN) {
     try { await toets(); }

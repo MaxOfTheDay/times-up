@@ -1,0 +1,10 @@
+{
+ "tier": "klein",
+ "size": 16,
+ "secs": 30,
+ "sound": true,
+ "haptics": true,
+ "eigenAantal": 4,
+ "lade": null,
+ "hidden": []
+}

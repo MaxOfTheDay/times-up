@@ -79,7 +79,10 @@ Regels voor die grens:
 - De vorm van de spelstand `G` staat in de kop van de spelkern. Zo staat hij
   ook in `localStorage` (`tijdisom.game`, hoogstens twee uur oud). Wie een
   veld toevoegt, past `Spel.herstel()` aan, anders verdwijnt elk bewaard
-  potje bij de volgende update.
+  potje bij de volgende update. `test/opslag/` bewaart een potje en
+  instellingen zoals een uitgebrachte versie ze schreef; die moeten blijven
+  terugkomen. Verandert de vorm, dan komt er een bestand bij en blijft het
+  oude.
 - **Weggaan kost niets.** Bewaard wordt op de overdracht én bij
   `visibilitychange`/`pagehide` midden in een beurt (`bewaarBeurt()`, via
   `Spel.onderbreek()`). Twee terugvegen zonder tik ertussen sluiten de app
@@ -112,8 +115,8 @@ hetzelfde vertelt, nooit in plaats daarvan.
   (`role="group"` als er een knop in zit). Een `aria-label` op een kale div
   geeft Chrome niet door. Een teken uit `svgUse()` is `aria-hidden`. Eén
   woord per ding, ook in de labels en in Zo speel je: goed, pas, het huisje,
-  een potje. `test/game.test.js` toetst het op de overdracht, het spel en
-  de eindstand (`naamloos()` in `test/browser.js`).
+  een potje. `test/game.test.js` toetst het op de titel, de overdracht,
+  het spel, de pauze en de eindstand (`naamloos()` in `test/browser.js`).
 
 ## Het speelbord
 
@@ -617,7 +620,8 @@ vandaan kwam). De lijst staat in `tijdisom.eigen`, de beelden in IndexedDB
   bewaart het vel erna (`a.na`), zodat stap terug niet alles overdoet.
 
 **Toveren.** De toverstaf vraagt een tekening aan een Cloudflare Worker
-(`worker/tover.mjs`, uitgerold door `.github/workflows/worker.yml`, adres in
+(`worker/tover.mjs`, uitgerold door `.github/workflows/worker.yml` na zijn
+test en met een vaste wrangler (`WRANGLER`), adres in
 `TOVER_URL`; leeg is geen staf). **De staf staat uit**: `TOVER_URL` is
 leeg en het adres staat in `TOVER_ADRES`; alleen de test zet hem aan
 (`__tijd.zetTover()`). Naast de foutmelding hieronder is het de enige
@@ -704,7 +708,8 @@ anders meteen af):
 - `test/toestel.test.js` bootst per regel een stand van het toestel na
   (wifi met inlogpagina, gedwongen donker, een haperende fotokast, geluid
   dat een andere app heeft, een scherm dat in een beurt vergrendelt, een
-  oud toestel zonder de nieuwste emoji, een release met een syntaxfout) en toetst wat de speler dan ziet of hoort
+  oud toestel zonder de nieuwste emoji, een release met een syntaxfout, een
+  update met een bewaard potje en oude instellingen uit `test/opslag/`) en toetst wat de speler dan ziet of hoort
   (`npm run test:toestel`).
 - `test/zintuigen.test.js` toetst het woordenboek van de zintuigen: elke
   cue staat erin, twee gebeurtenissen klinken niet hetzelfde, trillingen
