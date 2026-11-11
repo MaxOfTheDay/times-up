@@ -28,6 +28,10 @@ jobs:
       contents: write
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      # Een vaste versie: met "wrangler@4" kwam elke uitrol met de nieuwste,
+      # en een stuk nieuwe wrangler brak dan een uitrol die niemand aanraakte.
+      # Ophogen is een eigen commit, met een geslaagde uitrol als proef.
+      WRANGLER: 4.159.0
     steps:
       - uses: actions/checkout@v4
 
@@ -55,13 +59,20 @@ jobs:
         with:
           node-version: 22
 
+      # Eerst de tests van de twee Workers, op kaal Node en in een tel: een
+      # Worker die zijn test niet haalt, gaat niet naar Cloudflare. Tests
+      # wacht hier niet op (een andere workflow), dus ze staan ook hier.
+      - name: Tests van de Workers
+        if: steps.token.outputs.er == 'ja'
+        run: node test/tover.test.js && node test/fout.test.js
+
       - name: Uitrollen
         if: steps.token.outputs.er == 'ja'
-        run: npx --yes wrangler@4 deploy --config worker/wrangler.toml
+        run: npx --yes wrangler@$WRANGLER deploy --config worker/wrangler.toml
 
       - name: Foutenbak uitrollen
         if: steps.token.outputs.er == 'ja'
-        run: npx --yes wrangler@4 deploy --config worker/fout.toml
+        run: npx --yes wrangler@$WRANGLER deploy --config worker/fout.toml
 
       # De sleutel om de foutenbak te lezen komt uit het repo-geheim
       # FOUT_SLEUTEL. Zonder dat geheim verzamelt hij wel, maar leest niemand.
@@ -71,7 +82,7 @@ jobs:
           FOUT_SLEUTEL: ${{ secrets.FOUT_SLEUTEL }}
         run: |
           if [ -z "$FOUT_SLEUTEL" ]; then echo "Geen FOUT_SLEUTEL: lezen staat dicht."; exit 0; fi
-          printf '%s' "$FOUT_SLEUTEL" | npx --yes wrangler@4 secret put LEES --config worker/fout.toml
+          printf '%s' "$FOUT_SLEUTEL" | npx --yes wrangler@$WRANGLER secret put LEES --config worker/fout.toml
 
       - name: Adres van de Worker
         if: steps.token.outputs.er == 'ja'

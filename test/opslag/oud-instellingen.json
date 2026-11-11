@@ -1,0 +1,15 @@
+{
+ "tier": "midden",
+ "size": 24,
+ "secs": 35,
+ "sound": false,
+ "haptics": true,
+ "cardsOpen": true,
+ "rulesOpen": true,
+ "eigenDeel": 0.25,
+ "hidden": [
+  "kat",
+  7,
+  "hond"
+ ]
+}
