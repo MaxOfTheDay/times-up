@@ -624,9 +624,19 @@ aanvaarde melding staat ook als één logregel in Workers Logs (drie dagen,
 zonder logregel per aanvraag), zodat een dagelijkse controle haar zonder
 sleutel via de API leest.
 
+**Het toestel.** Wat een telefoon, browser of andere app stil breekt, vang
+je in de app op, niet in een melding: een uitzondering komt er niet. Een
+antwoord van het net gaat alleen de kast van `sw.js` in als het geen
+doorverwijzing is en de spelkern bevat (een wifi met inlogpagina). De
+kleuren zijn `only light`, zodat een gedwongen donkere modus het papier niet
+omkeert. `Beeld` vergeet een mislukte verbinding en probeert één keer
+opnieuw. Staat het geluid stil en wekt geen vinger het, dan valt een cue
+weg in plaats van in de rij te gaan staan (`wekbaar()`). Elke valkuil is
+een regel in `STANDEN` van `test/toestel.test.js`.
+
 ## Tests
 
-`npm test` draait zeven suites, en CI draait ze op elke pull request, in het
+`npm test` draait acht suites, en CI draait ze op elke pull request, in het
 Docker-image van Playwright. Wie playwright in `package-lock.json` ophoogt,
 zet het image in `.github/workflows/test.yml` op dezelfde versie (CI breekt
 anders meteen af):
@@ -646,6 +656,10 @@ anders meteen af):
 - `test/deck.test.js` bewaakt de kaartregels in een echte browser.
 - `test/stip.test.js` legt het stippenvlak op de grafische kaart en op het
   2D-canvas over elkaar en vergelijkt elke pixel (`npm run test:stip`).
+- `test/toestel.test.js` bootst per regel een stand van het toestel na
+  (wifi met inlogpagina, gedwongen donker, een haperende fotokast, geluid
+  dat een andere app heeft) en toetst wat de speler dan ziet of hoort
+  (`npm run test:toestel`).
 - `test/game.test.js` speelt een volledig potje in een echte browser, zo'n
   anderhalve tot twee minuten. Hij klikt bewust trager dan 280 ms, omdat
   een dubbele tik op "goed" met opzet als één telt.
