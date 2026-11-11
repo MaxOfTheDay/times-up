@@ -119,6 +119,44 @@ en een woord dat de kaart moeilijker of makkelijker maakt ook. Blijf dus bij
 "zoals een vierjarige het zou zeggen", en zet het in `--ink-2` zonder kader:
 het teken is de mededeling, het woord is het bijschrift.
 
+## Wie niet kijkt, hoort hetzelfde
+
+Alle knoppen hadden al een label, maar wat ernaast stond niet. Een
+voorleesfunctie las op de eindstand "afbeelding 12, afbeelding 5,
+afbeelding 4", op de overdracht "0 0" en in de balk twee keer
+"afbeelding". De bedoeling stond er wel: de stand, de rondechip en de
+kaart op de eindstand kregen een `aria-label`. Maar op een kale `div`
+zonder rol gooit Chrome dat label weg en leest hij de inhoud. Zo'n vak
+krijgt daarom een rol: `role="img"` als het label alles zegt ("Vos: 12
+punten"), `role="group"` als er nog iets in staat dat zelf gelezen moet
+worden (de opdrachtkaart, met de knop van de stapel erin). De tekens
+zelf (`svgUse()`) zijn `aria-hidden`: hun naam staat op het vak.
+
+De labels gebruikten ook andere woorden dan de regels: "Geraden" en
+"Overslaan" op de knoppen, "goed geraden" en "passen" in Zo speel je,
+"Spel stoppen" waar Instellingen "potje" zegt. Nu is het overal goed,
+pas, het huisje en een potje. Zo speel je zet de knoppen ook als teken
+in de zin, plat en zonder lift, net als Vos en Uil ernaast: wie de regels
+voorleest wees anders naar een vinkje dat "goed" heette en een dubbele
+pijl die "passen" heette, en hoe je een potje stopt stond er niet.
+
+Een test leest de toegankelijkheidsboom van Chrome zelf (`naamloos()` in
+`test/browser.js`), niet de opmaak: die ziet ook wat een script erin hangt,
+en rekent `hidden`, `inert` en `aria-hidden` mee. Op de oude code vond hij
+precies de twaalf plekken hierboven.
+
+## Klein en dwars
+
+Op 568x320 (een kleine telefoon dwars, of een telefoon in gesplitst
+scherm) was de speelkaart 57 px en viel het woord eraf. De liggende
+indeling (balk boven, pas links, kaart in het midden, goed rechts) begon
+pas bij 640 px breed; daaronder kreeg een dwars scherm de staande
+stapeling, en die past niet in 320 px hoogte. Ze begint nu bij 480 px: de
+kaart wordt 196 px. De pauze valt daar nog terug op het losse paneel,
+zoals "Pauze legt het spel weg" toelaat. `npm run foto` kent deze maat en
+een tablet in beide standen nu ook, en meldt een speelkaart onder
+`KAART_MIN` (150 px).
+
 ## Kleur betekent één ding
 
 Rood is Vos en blauw is Uil, en verder niets. Wie een kleur nodig heeft voor

@@ -72,4 +72,46 @@ async function echteKaart(ctx) {
   });
 }
 
-module.exports = { launch, APP_URL, hold, echteKaart };
+/* Wat een voorleesfunctie op dit scherm niet kan noemen. Uit de
+   toegankelijkheidsboom van Chrome zelf, niet uit de opmaak: die rekent
+   aria-hidden, inert en hidden mee, en ziet ook wat een script erin hing.
+   Twee missers:
+   - een beeld of knop zonder naam (een svg zonder aria-hidden of label);
+   - een aria-label op een vak zonder rol: een kale div of span geeft zijn
+     label niet door, dus het leest alleen wat erin staat ("0 0"). Geef zo'n
+     vak role="img" (het label vervangt de inhoud) of role="group" (het
+     label komt vóór de inhoud, die zelf ook gelezen wordt). */
+async function naamloos(page) {
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await cdp.send('DOM.getDocument', { depth: -1 });
+    const { nodes } = await cdp.send('Accessibility.getFullAXTree');
+    const uit = new Set();
+    for (const n of nodes) {
+      if (n.ignored || !n.backendDOMNodeId) continue;
+      const rol = n.role && n.role.value, naam = n.name && n.name.value;
+      const geen = (rol === 'image' || rol === 'img' || rol === 'button') && !naam;
+      const kaal = rol === 'generic';
+      if (!geen && !kaal) continue;
+      const { object } = await cdp.send('DOM.resolveNode', { backendNodeId: n.backendDOMNodeId });
+      const { result } = await cdp.send('Runtime.callFunctionOn', {
+        objectId: object.objectId, returnByValue: true, arguments: [{ value: geen }],
+        functionDeclaration: `function (geen) {
+          if (!geen && !(this.getAttribute && this.hasAttribute('aria-label'))) return null;
+          const r = this.getBoundingClientRect();
+          if (!r.width || !r.height) return null;
+          const naam = el => el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') +
+            (el.getAttribute('class') ? '.' + el.getAttribute('class').split(' ')[0] : '');
+          const use = this.querySelector && this.querySelector('use');
+          return (geen ? 'zonder naam: ' : 'aria-label zonder rol: ') +
+            (this.parentElement ? naam(this.parentElement) + ' > ' : '') + naam(this) +
+            (use ? ' ' + use.getAttribute('href') : '');
+        }`
+      });
+      if (result.value) uit.add(result.value);
+    }
+    return [...uit];
+  } finally { await cdp.detach(); }
+}
+
+module.exports = { launch, APP_URL, hold, echteKaart, naamloos };
