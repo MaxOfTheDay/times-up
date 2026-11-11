@@ -2420,42 +2420,21 @@ speelkaart ongeveer zo groot als de opdrachtkaart waaruit ze omdraait.
 
 ## Eén stand
 
-De stand staat alleen nog op de overdracht (`#hoTally`); de pauze laat hem
-weg (zie "Het spel gaat van het bord"). Wat hieronder staat, is waarom er
-één bouwer is, uit de tijd dat hij op twee schermen stond.
+De stand staat op één plek: in de opdrachtkaart van de overdracht
+(`#hoTally`). De pauze laat hem weg (zie "Het spel gaat van het bord"):
+midden in een beurt helpt hij je niet verder. `buildTally()` bouwt hem één
+keer bij het laden, `paintHoTally()` zet de getallen.
 
-`#hoTally` en de stand in het pauzepaneel waren hetzelfde onderdeel: per ploeg
-een mascotte en een getal, en wie aan zet is is de grote mascotte. Ze waren
-losse kopieën, en die groeiden uit elkaar: de kopie in het paneel miste de
-`.head`-omhulling en viel daardoor buiten `.mini-score .head > svg`, zodat
-beide mascottes op 0 bij 0 pixels stonden en er twee kale getallen overbleven
-zonder eigenaar -- precies het soort tekst-zonder-beeld dat de harde eis
-verbiedt.
+Dat er één bouwer is, komt uit de tijd dat de stand ook in het pauzepaneel
+stond. Die twee waren losse kopieën, en ze groeiden uit elkaar: de kopie in
+het paneel miste de `.head`-omhulling, zodat beide mascottes op 0 bij 0
+pixels stonden en er twee kale getallen overbleven zonder eigenaar --
+precies het soort tekst-zonder-beeld dat de harde eis verbiedt. Komt de
+stand ooit op een tweede plek terug, dan via `buildTally()` en met de
+stijlen in één selectorlijst voor allebei de plekken, niet onder
+`#s-handoff` alleen.
 
-Hier stond "wie de ene aanpast, past de andere mee aan, of voegt ze samen".
-Ze zijn nu samengevoegd: `buildTally()` bouwt de twee zijden en wordt bij het
-laden twee keer aangeroepen, voor `#hoTally` en voor `#pauseTally`. In de
-opmaak staan allebei de vakken leeg. De ids blijven dezelfde (`hoSideA`,
-`pauseScoreB`, ...) zodat `paintHoTally()` en `paintPauseScore()` ze gewoon
-blijven vinden.
-
-**En die garantie dekt de opmaak, niet de stijlen.** Dat is precies waar het
-een tweede keer misging: de hele herziening van de stand stond onder
-`#hoRoundCard`, en het paneel volgde daardoor niet. Nagemeten waren de twee
-standen toen weer twee verschillende dingen -- op de overdracht een mascotte
-met een getal, in het paneel een opgetilde papieren tegel mét kroon, in een
-paneel dat zelf al een omrand vlak is. Een kader in een kader.
-
-De maten staan daarom in één selectorlijst met allebei de plekken erin
-(`#s-handoff .mini-score ..., #pauze .mini-score ...`). De ids staan er om in
-specificiteit te winnen van de bestaande `#s-handoff`-regels, niet omdat de
-twee schermen iets verschillends krijgen. Wie hier een waarde wijzigt,
-wijzigt hem op allebei -- en wie hier iets toevoegt onder alleen `#s-handoff`,
-laat het paneel weer achter.
-
-Het enige echte verschil is beweging: op de overdracht ademt de mascotte van
-wie aan zet is, in het paneel niet. Daar staat een beurt stil, en iets dat
-ademt spreekt dat tegen.
+Op de overdracht ademt de mascotte van wie aan zet is.
 
 ### De dieren op de rand
 
@@ -2488,10 +2467,6 @@ onder zijn dier.
   scherm, dus de regel "wat de dieren uit zichzelf doen rimpelt niet" staat
   er niet tegenover. Bij de worp wippen ze om beurten op tot hij landt, zonder
   rimpel: daar groeit de ploegkleur al uit de knop.
-- **Alleen op de overdracht.** De regel hierboven zegt dat de stand op twee
-  schermen dezelfde stijlen heeft. Dit is de uitzondering: het pauzepaneel
-  ligt op de speelkaart, en boven die kaart ligt de balk. Daar blijft de
-  stand een mascotte met een getal.
 
 ## Geluid en trilling
 
