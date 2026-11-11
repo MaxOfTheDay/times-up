@@ -168,6 +168,10 @@ async function oudToestel(browser) {
   });
   ok(r.vak === 0, `oud toestel: ${r.vak} kaarten met een leeg vak blijven in de bak`);
   ok(r.n > 250, `oud toestel: de controle haalde ${r.n} kaarten over, te veel weg`);
+  // De tweede start tekent niets meer, maar onthoudt wat er weg moest.
+  await page.reload(); await page.waitForTimeout(300);
+  const r2 = await page.evaluate(() => TIER_ORDER.flatMap(t => DECKS[t]).filter(k => ['🦩', '🦭', '🪑'].includes(k[0])).length);
+  ok(r2 === 0, `oud toestel: na een herstart staan er weer ${r2} kaarten met een leeg vak in de bak`);
   await page.context().close();
 }
 

@@ -4181,27 +4181,49 @@ const DECKS = {
 /* Een emoji die het toestel niet kent, staat op de kaart als een leeg vak,
    en zo'n kaart kan een kind dat niet leest niet spelen. Android 9 en 10
    (oude tablets) kennen Unicode 12 en 13 niet: de flamingo, de zeehond, de
-   stoel. Bij het opstarten tekent elke emoji één keer op een klein canvas,
+   stoel. Bij het opstarten tekent elke emoji één keer in een eigen vak,
    naast een teken dat nooit bestaat (U+10FFFD): wie daar pixel voor pixel
    op lijkt, is het lege vak en gaat uit DECKS, voor alle standen tegelijk.
    Lijkt meer dan een vijfde te ontbreken, dan meet de controle iets anders
-   (een canvas dat vingerafdrukken weert) en blijft alles staan. */
+   (een canvas dat vingerafdrukken weert) en blijft alles staan.
+   Een emoji de eerste keer tekenen kost: op een trage telefoon een halve
+   tel, bij elke start. Daarom één keer per browserversie (een toestel dat
+   emoji mist, krijgt geen nieuwe zonder update van het systeem, en dan
+   verandert de user-agent), en de uitkomst in tijdisom.leegvak. Alles
+   staat op één vel en wordt in één keer gelezen: tekenen en meteen lezen,
+   per emoji, liet de browser elke keer zijn vel afmaken. */
+const KEY_LEEGVAK = "tijdisom.leegvak";
 (function zonderLeegVak() {
   try {
-    const c = document.createElement("canvas"); c.width = c.height = 28;
+    const lijsten = Object.values(DECKS), alle = [].concat(...lijsten);
+    const haal = weg => { for (const l of lijsten) for (let i = l.length - 1; i >= 0; i--) if (weg.has(l[i][0])) l.splice(i, 1); };
+    const wie = navigator.userAgent + "|" + alle.map(k => k[0]).join("");
+    let oud = null;
+    try { oud = JSON.parse(localStorage.getItem(KEY_LEEGVAK) || "null"); } catch (e) {}
+    if (oud && oud.wie === wie && Array.isArray(oud.weg)) { haal(new Set(oud.weg)); return; }
+    /* Vak 0 is het teken dat nooit bestaat; daarna elke emoji. 40 px per
+       vak voor een teken van 22, met lucht erboven: een emoji steekt boven
+       "top" uit, en liep anders in het vak erboven. */
+    const V = 40, KOL = 16, tekens = ["\u{10FFFD}"].concat(alle.map(k => k[0]));
+    const c = document.createElement("canvas");
+    c.width = KOL * V; c.height = Math.ceil(tekens.length / KOL) * V;
     const g = c.getContext("2d", { willReadFrequently: true });
     if (!g) return;
-    g.font = "22px sans-serif"; g.textBaseline = "top";
-    const beeld = e => {
-      g.clearRect(0, 0, 28, 28); g.fillStyle = "#000"; g.fillText(e, 2, 2);
-      return g.getImageData(0, 0, 28, 28).data;
+    g.font = "22px sans-serif"; g.textBaseline = "top"; g.fillStyle = "#000";
+    tekens.forEach((e, i) => g.fillText(e, (i % KOL) * V + 4, Math.floor(i / KOL) * V + 8));
+    const d = g.getImageData(0, 0, c.width, c.height).data, rij = c.width * 4;
+    const plek = i => Math.floor(i / KOL) * V * rij + (i % KOL) * V * 4;
+    const leeg = i => {
+      const a = plek(i), b = plek(0);
+      for (let y = 0; y < V; y++)
+        for (let x = 0; x < V * 4; x++)
+          if (Math.abs(d[a + y * rij + x] - d[b + y * rij + x]) >= 8) return false;
+      return true;
     };
-    const vak = beeld("\u{10FFFD}");
-    const leeg = e => beeld(e).every((v, i) => Math.abs(v - vak[i]) < 8);
-    const lijsten = Object.values(DECKS), alle = [].concat(...lijsten);
-    const weg = new Set(alle.filter(k => leeg(k[0])).map(k => k[0]));
-    if (!weg.size || weg.size > alle.length / 5) return;
-    for (const l of lijsten) for (let i = l.length - 1; i >= 0; i--) if (weg.has(l[i][0])) l.splice(i, 1);
+    let weg = alle.filter((k, i) => leeg(i + 1)).map(k => k[0]);
+    if (weg.length > alle.length / 5) weg = [];
+    try { localStorage.setItem(KEY_LEEGVAK, JSON.stringify({ wie, weg })); } catch (e) {}
+    haal(new Set(weg));
   } catch (e) { /* zonder canvas: alles blijft */ }
 })();
 
@@ -7067,7 +7089,7 @@ function startTurn() {
   $("#s-play").classList.remove("over");
   show("play");
   sizeCard();                  // pas ná show(): daarvoor heeft de kaart geen maat
-  penVooruit();                // de eerste kaart door de pen, onder het aftellen
+  penVooruit(true);            // de eerste kaart door de pen, onder het aftellen
   /* De klok van deze beurt staat er al onder het aftellen. Anders ligt er de
      klok van de vorige beurt, op nul: de warme kaart met de pruimen rand,
      die bij het opengaan van de schijf nog een tel afkoelt. */
@@ -7292,21 +7314,30 @@ function paintCard(how) {
   $("#cardWord").textContent = G.deck[G.card][1];
   penVooruit();
 }
-/* De volgende kaart alvast door de pen, als de telefoon even niets doet:
-   dan kost goed of pas niets meer dan het ophangen van een klaar beeld.
-   Alleen een emoji; een tekening wacht toch op haar beeld. */
+/* De volgende kaart alvast door de pen: dan kost goed of pas niets meer
+   dan het ophangen van een klaar beeld. Alleen een emoji; een tekening wacht
+   toch op haar beeld.
+   Wanneer telt. Na een tik meteen nadat de tik in beeld staat (een beeld,
+   dan na()): de volgende vinger is dan nog ver weg, en de vlucht van de
+   kaart loopt op de grafische kaart door. In een "rustig moment" lukte dat
+   niet: tijdens een beurt tekent de klok elk beeld, er bleef nooit genoeg
+   rust over, en na de time-out viel de pen (op een trage telefoon 40 ms) op
+   een willekeurig moment, soms net onder de volgende tik. Onder het
+   aftellen wordt er niet getikt: daar wel in de rust. */
 let penWacht = null;
-function penVooruit() {
-  const rust = window.requestIdleCallback || (f => setTimeout(f, 50));
+function penVooruit(inRust) {
   if (penWacht !== null) return;
-  penWacht = rust(tijd => {
+  const teken = () => {
     penWacht = null;
-    /* Te weinig rust over (de klok tekent elk beeld): de volgende keer. */
-    if (tijd && !tijd.didTimeout && tijd.timeRemaining() < 8) { penVooruit(); return; }
     if (!G || !G.pile.length || current !== "play") return;
     const kaart = G.deck[G.pile[0]], g = $("#glyph");
     if (Spel.eigenId(kaart) === null && g.isConnected) Pen.teken(kaart[0], Pen.maat(g, 4));
-  }, { timeout: 1000 });
+  };
+  if (inRust && window.requestIdleCallback) {
+    penWacht = requestIdleCallback(teken, { timeout: 1000 });
+    return;
+  }
+  penWacht = requestAnimationFrame(() => na(0, teken, () => { penWacht = null; }));
 }
 
 /* Twee tikken binnen 280 ms op dezelfde knop zijn één enthousiaste vinger. De
@@ -7749,6 +7780,10 @@ function balkMascotte() { return $("#plMascot"); }
    alleen dat beeld. */
 /* Papier op de ploegkleur, per ploeg: Vos rood, Uil blauw. */
 const STIP_PAPIER = [.23, .16];
+/* De stralen van de eindstand draaien het feest lang rond en blijven
+   daarna staan waar ze waren: een eindstand blijft vaak liggen tot het
+   scherm uitgaat, en tot dan tekende het hele bord elk beeld opnieuw. */
+let STRAAL_FEEST = 30000;
 /* ---------- de punten op de grafische kaart ----------
    Hetzelfde stipveld, maar elke punt rekent zichzelf uit in een
    vertex-shader: plek, maat, dekking en kleur, uit zijn vaste plek op het
@@ -8093,7 +8128,7 @@ function stipveld(cv, opt) {
     return true;
   }
   function actief(nu) {
-    return rimpels.some(r => nu - r.t < LEEF) || !!onthul || !!toon || stralen >= 0;
+    return rimpels.some(r => nu - r.t < LEEF) || !!onthul || !!toon || (stralen >= 0 && nu - stralen < STRAAL_FEEST);
   }
   /* Onthullen: de ploegkleur groeit als een cirkel uit de knop, en binnen die
      cirkel worden de punten papier. Klaar: de kleur staat op het scherm zelf,
@@ -8124,7 +8159,7 @@ function stipveld(cv, opt) {
     }
     const ploeg = opt.ploeg ? opt.ploeg() : null;
     const papierA = ploeg === null || ploeg === undefined ? PAPIER[0] : STIP_PAPIER[ploeg];
-    const draai = stralen < 0 ? 0 : (stilAan() ? 0 : (nu - stralen) / STRAAL_RONDE * 6.2832);
+    const draai = stralen < 0 ? 0 : (stilAan() ? 0 : Math.min(nu - stralen, STRAAL_FEEST) / STRAAL_RONDE * 6.2832);
     const vak = 6.2832 / STRALEN;
     if (gpu) {
       gpu.teken({ W, H, dpr: DPR, inkt, onthul, straal, papierA, tg,
@@ -10212,6 +10247,8 @@ if (location.search.indexOf("debug") !== -1) {
     // De lock op de overdracht is anders alleen te controleren door er drie
     // minuten voor te gaan zitten.
     get wake() { return wake; }, zetWakeMax(ms) { WAKE_MAX = ms; },
+    // Idem voor de stralen: anders een halve minuut wachten.
+    zetStraalFeest(ms) { STRAAL_FEEST = ms; },
     // De staf staat uit voor spelers; de test zet hem aan.
     zetTover(aan) { TOVER_URL = aan ? TOVER_ADRES : ""; }
   };

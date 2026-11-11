@@ -1533,7 +1533,9 @@ Bij het nalopen van het volle bord, live naast elkaar gezet:
   het scherm in beeld is: het feest is het enige dat hier uit zichzelf
   loopt. Bij gelijkspel blijft de grond papier en worden het inkten punten,
   zoals op de titel (de gouden wiggen vielen weg met de svg). Bij beperkte
-  beweging staan ze stil.
+  beweging staan ze stil. Sinds november 2026 draaien ze het feest lang,
+  `STRAAL_FEEST` (30 s), en blijven dan staan waar ze waren: zie "Snel op
+  een trage telefoon".
 - **Scherp op 3x.** Het canvas stopte bij 2x, dus op de meeste telefoons van
   nu was elke punt zacht aan de rand. Nu tot 3x.
 
@@ -4269,7 +4271,9 @@ Daarna nog twee, ook met een regel in de test:
   op lijkt uit `DECKS`. Eerst keek ze of er kleur in zat, maar dan vielen
   op een gewoon toestel zeventien grijze en zwarte emoji weg (panda, wolf,
   wolk). Lijkt meer dan een vijfde te ontbreken, dan meet ze iets anders
-  (een canvas dat vingerafdrukken weert) en blijft alles staan.
+  (een canvas dat vingerafdrukken weert) en blijft alles staan. Ze tekent
+  één keer per browserversie en onthoudt de uitkomst
+  (`tijdisom.leegvak`): zie "Snel op een trage telefoon".
 - **Het scherm valt uit.** Het wakker houden faalt stil in een app op het
   beginscherm van iOS vóór 18.4 (beloofd, niet gehouden) en ontbreekt op
   een oudere iPhone. Voorkomen kan niet zonder een video als lus, dus
@@ -4290,3 +4294,64 @@ zonder IndexedDB (de rij Eigen verdwijnt dan met opzet). Op een iPhone
 zet `audioSession.type = "playback"` de muziek van een andere app
 waarschijnlijk stil bij de eerste cue; dat is de prijs van geluid met de
 stilteschakelaar aan, en is nog op een toestel na te kijken.
+
+## Snel op een trage telefoon
+
+Een meting in november 2026, op de toestellen van echte spelers en vooral
+de traagste. Gegevens van spelers zijn er niet: geen analytics, en de
+foutenbak was drie dagen leeg. Gemeten is daarom in Chromium op 390x844,
+met de CPU vier en zes keer vertraagd (een goedkope Android) en traag 4G,
+met lange beelden (LoAF) en Event Timing per tik, een trace om script te
+scheiden van wat de browser hier zonder grafische kaart op de CPU rastert,
+zes volle potjes achter elkaar voor het geheugen, en twee oudere versies
+ernaast.
+
+Drie dingen waren traag, alle drie opgelost:
+
+- **De start.** `zonderLeegVak()` (november 2026) tekende bij elke start
+  alle 275 emoji en las ze een voor een terug. Een emoji de eerste keer
+  tekenen kost, en elke lees dwong de browser zijn vel af te maken: op 6x
+  280 tot 640 ms, en een app die opent werd pas na 0,9 tot 1,4 s
+  aantikbaar in plaats van 0,5 tot 0,7. Nu staat alles op één vel dat in
+  één keer gelezen wordt, en de uitkomst blijft per browserversie bewaard:
+  een toestel dat emoji mist (Android 9 en 10) krijgt geen nieuwe zonder
+  systeemupdate, en dan verandert de user-agent. Script bij de start, in
+  een nieuw proces op 4x: 285 ms, nu rond 100.
+- **Goed op een oud toestel.** De volgende kaart ging door de pen in een
+  "rustig moment" (`requestIdleCallback`). Tijdens een beurt tekent de klok
+  elk beeld: er bleef 8 tot 14 ms rust over, de pen kost op 6x 40 tot 55
+  ms, dus viel hij na de time-out van een tel op een willekeurig moment,
+  soms net onder de volgende tik (tot 46 ms wachten voor die tik
+  begon). Nu tekent hij meteen nadat de tik in beeld staat (een beeld,
+  dan `na()`): de volgende vinger is dan nog ver weg, en de vlucht van de
+  kaart loopt op de grafische kaart door. Onder het aftellen, waar niet
+  getikt wordt, blijft het de rust.
+- **De eindstand.** De stralen draaiden zolang de eindstand in beeld
+  was, en die blijft vaak liggen tot het scherm uitgaat: elk beeld het
+  hele bord opnieuw, op het 2D-canvas 10% van de hoofddraad op volle
+  snelheid. Nu draaien ze `STRAAL_FEEST` (30 s) en blijven dan staan waar
+  ze waren; een tik op de grond rimpelt nog gewoon.
+
+Gemeten en goed, niet aangeraakt:
+
+- Elke andere tik rekent op 6x hoogstens 0,18 s van tik tot beeld, onder
+  de grens van 0,2 s. Een paar schermwissels (het tandwiel, Gewone)
+  meten de pagina na een schrijfactie, 40 tot 60 ms op 6x: binnen budget.
+- Lang spelen: na zes potjes blijven knopen, luisteraars en lopende
+  intervallen gelijk; de heap groeit 0,2 MB per potje (`tijdisom.gezien`).
+- Offline na het eerste bezoek werkt, en de app opent uit de kast in
+  ongeveer 0,3 s. Het eerste bezoek haalt 208 kB (gzip), op traag 4G 1,2 s.
+- De gemiste beelden onder het aftellen op 4x zijn de compositor die
+  zonder grafische kaart rastert, geen script: op 1x vallen er geen.
+
+De bewaker is `test/snel.test.js`, met de CPU 4x vertraagd: het script van
+een start (de tweede, in een nieuw proces met de opslag van de eerste, zoals
+een speler de app opent) onder `START_MS`, per tik het rekenen onder
+`TIK_MS` en de geforceerde layout onder `DWING_MS`, en geen enkele
+`requestAnimationFrame` in twee tellen op de titel, Instellingen, de
+overdracht, de pauze en de eindstand na het feest. Hij meet script, nooit
+beelden per seconde, want het rasteren hier zegt niets over een telefoon.
+Een vaste rekensom (`ijk()`) zegt hoeveel trager de machine is dan die
+waarop de budgetten gezet zijn, en de budgetten schalen mee. Op de oude
+code faalt hij op de start (285 ms) en op de eindstand (120 beelden in
+2 s).
