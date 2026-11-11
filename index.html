@@ -235,6 +235,7 @@
   --e-los:   cubic-bezier(.3, 1.6, .5, 1);   /* veren: loslaten en ploppen */
   --e-weg:   cubic-bezier(.45, 0, .8, .6);   /* vertrekken: versnelt weg */
   --e-vloei: cubic-bezier(.3, 0, .2, 1);     /* heen en weer: vliegen, ademen */
+  --veer:    1.18;   /* een getal dat verandert: van zoveel terug naar 1, op --t-los en --e-uit (veer()) */
   --dur: 1;        /* animatieschaal, 0 bij prefers-reduced-motion */
 
   font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -320,7 +321,9 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
                    uit elkaar, hoogstens drie stappen. (slotIn, markIn/goIn)
    3. OPKOMEN.     Schaal naar 1 in --t-kom of --t-groot met --e-los. Alleen voor
                    iets dat net ontstaat of verdiend is. (panelIn,
-                   freshIn, gainPop, roundPop)
+                   freshIn, roundPop). Een getal dat verandert veert
+                   terug van --veer in --t-los met --e-uit (veer(),
+                   digitPulse, gainPop).
    4. FEEST.       Alleen het winnaarsscherm: 1 en 3 plus de lussen.
 
    Los daarvan, omdat het honderd keer per potje speelt: EEN KAART GAAT
@@ -2016,11 +2019,10 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
    cijfer dan staat; de groei zelf zit in de lettergrootte (.secs-left.crit),
    dus de klop begint op 1. */
 @keyframes digitPulse {
-  0%   { transform: scale(1); }
-  35%  { transform: scale(1.14); }
-  100% { transform: scale(1); }
+  from { transform: scale(var(--veer)); }
+  to   { transform: scale(1); }
 }
-.secs-left.pulse { animation: digitPulse calc(var(--t-kom) / max(var(--dur), .001)) var(--e-los); }
+.secs-left.pulse { animation: digitPulse calc(var(--t-los) / max(var(--dur), .001)) var(--e-uit); }
 /* Onder vijf seconden blijft het cijfer groter staan: van 20 naar 34 px, in
    de lettergrootte, want het vaste vak van .secs-left vangt dat op zonder
    iets te verschuiven. Naast het papier van de kaart is dit wat groeit
@@ -2041,8 +2043,8 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
 /* In de bovenbalk mag het groter dan op de stand: daar deelt het label de
    regel met twee mascottes en twee totalen, hier staat het alleen. */
 .turn-gain { font-size: var(--fs-3); line-height: 1.3; padding: 0 7px; }
-@keyframes gainPop { from { transform: scale(.62); } to { transform: scale(1); } }
-.turn-gain.pop { animation: gainPop calc(var(--t-kom) / max(var(--dur), .001)) var(--e-los); }
+@keyframes gainPop { from { transform: scale(var(--veer)); } to { transform: scale(1); } }
+.turn-gain.pop { animation: gainPop calc(var(--t-los) / max(var(--dur), .001)) var(--e-uit); }
 
 /* ---- de kaart ----
    De kaart is zo groot als de plek waar ze in ligt, en het teken zo groot als
@@ -2187,11 +2189,6 @@ button.ho-count:enabled:active { transform: translate(2px, 2px); }
    kopie, en wat je ervan zag (een scheve hoek, een kaart met klokband die
    14 px zakte) betekende niets. Welke knop het deed, zie je aan de kopie:
    omhoog naar de teller, of omlaag en onder de stapel. */
-/* Een tik die niet meetelt (twee vingers op dezelfde kaart binnen 280 ms)
-   werd stilletjes weggegooid. Nu knippert de rand één keer, zodat je ziet
-   dát hij binnenkwam. */
-@keyframes seen { 0%, 100% { border-color: var(--ink); } 40% { border-color: var(--go); } }
-.card.seen { animation: seen calc(var(--t-kom) / max(var(--dur), .001)) var(--e-uit); }
 
 /* Eén kaart, één teken, zo groot als de kaart toelaat. --glyph wordt
    door sizeCard() van de gemeten kaart afgeleid. */
@@ -4221,6 +4218,10 @@ const Snd = (() => {
   let laatstePlop = -1e9;        // zie plop()
   const PLOP_MS = 70;
   const HOUD_F = 520, HOUD_VOL = .1;
+  /* Hoe hoger de toon, hoe zachter: op een telefoon klinkt het octaaf
+     erboven veel luider, en bovenaan moet de deur (dicht()) er nog boven
+     uitkomen. 2^(-.8p) is bovenaan 5 dB minder. */
+  const houdVol = p => HOUD_VOL * Math.pow(2, -.8 * (p || 0));
   function ac() {
     if (!ctx) {
       /* Op een iPhone volgt Web Audio standaard de stilteschakelaar, en
@@ -4309,7 +4310,7 @@ const Snd = (() => {
        noten, vlak en zonder veeg -- alles in deze app glijdt of stijgt, dus
        vlak is hier vrij en betekent precies één ding: dit kan niet. Nooit
        hetzelfde geluid als pas(), want dat is een ander bericht. */
-    nee()   { tone(554, .06, "triangle", .2, 0); tone(554, .06, "triangle", .2, .12); },
+    nee()   { tone(554, .06, "triangle", .22, 0); tone(554, .06, "triangle", .22, .12); },
     tick(f, v) { tone(f || 1600, .022, "square", v || .08, 0); },
     /* De lange druk op stoppen: één toon die met de cirkel naar huis
        meeloopt, een octaaf omhoog terwijl je houdt (HOUD_F tot 2x) en weer
@@ -4327,15 +4328,22 @@ const Snd = (() => {
         g.gain.setValueAtTime(0.0001, t);
         o.connect(g).connect(out() || c.destination);
         o.start(t);
-        houd = { o, g, stop: 0 };
+        houd = { o, g, stop: 0, vers: true };
       }
+      /* Een nieuwe knoop meldt als gain.value nog 1, de standaard, ook al
+         staat er 0.0001 gepland: daarvandaan begon elke lange druk met 30 ms
+         op tien keer zijn sterkte, een klik op 0 dBFS. Een verse toon begint
+         dus bij stilte. */
       clearTimeout(houd.stop);
       houd.g.gain.cancelScheduledValues(t);
-      houd.g.gain.setValueAtTime(Math.max(0.0001, houd.g.gain.value), t);
-      houd.g.gain.exponentialRampToValueAtTime(HOUD_VOL, t + .03);
+      houd.g.gain.setValueAtTime(houd.vers ? 0.0001 : Math.max(0.0001, houd.g.gain.value), t);
+      houd.vers = false;
+      houd.g.gain.exponentialRampToValueAtTime(houdVol(p), t + .03);
     },
     houdNaar(p) {
-      if (houd && ctx) houd.o.frequency.setTargetAtTime(HOUD_F * Math.pow(2, p), ctx.currentTime, .012);
+      if (!houd || !ctx) return;
+      houd.o.frequency.setTargetAtTime(HOUD_F * Math.pow(2, p), ctx.currentTime, .012);
+      houd.g.gain.setTargetAtTime(houdVol(p), ctx.currentTime, .03);
     },
     houdUit(ms) {
       if (!houd || !ctx) return;
@@ -4349,9 +4357,10 @@ const Snd = (() => {
         if (houd === h) houd = null;
       }, s * 1000 + 60);
     },
-    /* Het aftellen is de klok niet: drie triangle-noten die klimmen naar go()
-       toe, één opbouw van "zet je klaar" naar "daar gaat ie". Eén geluid, één
-       betekenis -- wie uitbeeldt, kijkt niet naar het scherm. */
+    /* Het aftellen is de klok die zich opwindt: elke tel klinkt de tik van
+       de klok (de ratel), met erboven een van drie triangle-noten die
+       klimmen naar go() toe, één opbouw van "zet je klaar" naar "daar gaat
+       ie". Wie uitbeeldt, kijkt niet naar het scherm. */
     count(i){ tone([784, 880, 990][Math.min(Math.max(i || 0, 0), 2)], .10, "triangle", .13, 0); },
     /* Het startsein: één noot met een veeg omhoog, het enige moment waarop er
        iets begint. Volume .16 (-15,3 dBFS), naast timeUp() en goed() en niet
@@ -4395,9 +4404,11 @@ const Snd = (() => {
       if (t === 0) tone(1319 * m, .06, "triangle", .12 * s, a);
       else tone(784 * m, .08, "triangle", .12 * s, a, 740 * m);
     },
-    /* De eindstand telt op: per drie punten een zachte noot uit de familie
-       van goed(), die over de hele telling een octaaf klimt (k van 0 tot
-       12). Niet de tik: die is van de klok en betekent "de tijd loopt". */
+    /* Er telt een getal op (de overdracht, de eindstand): per stap een
+       zachte noot uit de familie van goed(), een halve toon hoger, en over
+       meer dan dertien stappen verdeeld over één octaaf (telToon()). Dit is
+       de buit van een beurt: er is geen tweede cue voor. Niet de tik: die
+       is van de klok en betekent "de tijd loopt". */
     tel(k) { tone(659 * Math.pow(2, Math.min(Math.max(k || 0, 0), 12) / 12), .05, "triangle", .16, 0); },
     /* De kroon landt op de kop van wie won: een helder belletje met een
        kwint erboven, op de klets. Het vult de stilte tussen de telling en
@@ -4426,16 +4437,6 @@ const Snd = (() => {
        onder wat een telefoon afspeelt, zachter dan één goed(); een octaaf
        hoger, tot 220 Hz, is hij daar 3 dB luider dan goed(). */
     timeUp(){ tone(840, .55, "sawtooth", .2, 0, 220); tone(420, .6, "square", .12, .05, 140); },
-    /* De buit van de hele beurt in één cue; de omvang zit in het interval
-       (twee kaarten een kleine terts, een dozijn een octaaf), vanaf de
-       grondtoon van goed(): een kleine buit viel op 523 Hz 5 dB weg op een
-       telefoon. Alleen via turnEnd(), BEURT_ADEM na timeUp(); bij een lege
-       stapel speelt leeg(). */
-    haul(n) {
-      if (!n) return;
-      const top = 659 * Math.pow(2, Math.min(n, 12) / 12);
-      tone(659, .10, "triangle", .18, 0); tone(top, .22, "triangle", .18, .09);
-    },
     /* De stapel leeggespeeld: tot nu toe het enige einde van een beurt
        zonder eigen geluid, terwijl het de beste uitkomst is -- het loont om
        de stapel leeg te spelen. Drie stijgende noten, de grote broer van
@@ -4483,6 +4484,7 @@ const Tril = (() => {
     ijk()   { buzz(20); },                    // lange druk, op een derde en twee derde
     doe()   { buzz(50); },                    // lange druk voltooid
     klik()  { buzz(30); },                    // foto genomen, als de sluiter dicht is
+    gelukt(){ buzz(20); },                    // gelukt, op het scherm van de volwassene (gekopieerd)
     /* Een einde: de laatste puls (280 ms) valt op het stempel dat landt (--t-kom). */
     om()    { buzz([60, 70, 60, 90, 50]); },          // tijd om, en het stempel
     leeg()  { buzz([30, 50, 30, 50, 30, 90, 50]); },  // stapel leeg: de noten van Snd.leeg (0, 80, 160 ms), en het stempel
@@ -6527,6 +6529,7 @@ function nudge(el) {
   void el.offsetWidth;
   el.classList.add("nudge", "refuse");
   setTimeout(() => el.classList.remove("nudge", "refuse"), 500);
+  Snd.nee();
   Tril.nee();
 }
 
@@ -6706,19 +6709,31 @@ function rustKnop(knoppen, rust) {
    Snd.tel() als de eindstand, en elke tik veert het cijfer even op. Het
    blijft één getal, geen "+N" en geen fiche per punt. Samen hoogstens
    TEL_BUIT lang, zodat het in de rust van de startknop past; die wacht
-   tot de laatste tik. Geeft terug hoe lang het duurt. */
+   tot de laatste tik. Geeft terug hoe lang het duurt.
+   Eén geluid tegelijk: na een beurt is de telling de buit (er is geen
+   tweede cue voor) en komt de volgende ploeg pas op als ze klaar is
+   (telLengte(), zie turnEnd). Bij een rondewissel spreken de klokjes van
+   de ronde, en telt het getal stil (`stil`). Bij beperkte beweging
+   springt het getal meteen, maar klinkt de telling wel. */
 const TEL_BUIT = 700;
-function telBuit(t, vers) {
+const telStap = vers => Math.max(60, Math.min(140, Math.round(TEL_BUIT / vers)));
+const telLengte = vers => vers > 0 ? vers * telStap(vers) : 0;
+/* De noot van stap i (vanaf 0) van n: een halve toon per stap, en over
+   meer dan dertien stappen één octaaf verdeeld. Voor beide tellingen. */
+const telToon = (i, n) => n > 13 ? Math.round(12 * i / (n - 1)) : i;
+function telBuit(t, vers, stil) {
   const num = $("#hoScore" + "AB"[t]);
   const doel = total(t), van = doel - vers;
   if (!num || vers <= 0 || van < 0) return 0;
-  num.textContent = van;
-  const stap = Math.max(60, Math.min(140, Math.round(TEL_BUIT / vers)));
+  const beeld = !stilAan();
+  if (beeld) num.textContent = van;
+  const stap = telStap(vers);
   const af = () => { num.textContent = doel; };
   for (let i = 1; i <= vers; i++) na(RAND_WEG + i * stap, () => {
+    if (!stil) Snd.tel(telToon(i - 1, vers));
+    if (!beeld) return;
     num.textContent = van + i;
-    Snd.tel(i - 1);
-    num.animate([{ scale: "1.3" }, { scale: "1" }], { duration: duur("los"), easing: curve("uit") });
+    veer(num);
   }, af);
   return RAND_WEG + vers * stap;
 }
@@ -6754,13 +6769,14 @@ function handoff(mode, freshA, freshB, zelfdeGrond) {
   // Vak 1: de stand, met de ploeg die aan zet is op de rand.
   paintHoTally(freshA || 0, freshB || 0);
   /* Bij een beurtwissel vanuit het spel staat eerst nog wie net speelde
-     rechtop; als de kaart geland is, duikt die weg en komt de ander op, op de
-     ploegklank (Snd.ploeg in turnEnd, RAND_OP na het begin). Een hersteld
+     rechtop; als de kaart geland is, duikt die weg; na de telling van zijn
+     buit komt de ander op, op de ploegklank (Snd.ploeg in turnEnd, RAND_OP
+     plus telLengte() na het begin). Een hersteld
      potje, een afgebroken aftelling en beperkte beweging krijgen meteen de
      stand van nu. */
   clearTimeout(randTimer);
   if (!round && current === "play" && !zelfdeGrond && !stilAan()) {
-    const nu = G.team;
+    const nu = G.team, telMs = telLengte((1 - nu) === 0 ? freshA || 0 : freshB || 0);
     zetOpRand(1 - nu);
     randTimer = setTimeout(() => {
       $("#hoSide" + "AB"[1 - nu]).classList.remove("up");
@@ -6776,7 +6792,7 @@ function handoff(mode, freshA, freshB, zelfdeGrond) {
           const k = $("#hoRoundCard").getBoundingClientRect(), v = $("#hoVeld").getBoundingClientRect();
           if (h.width) veldHo.rimpel(h.left + h.width / 2 - v.left, k.top - v.top, .6, h.width * .3);
         }, RAND_LAND);
-      }, RAND_OP - RAND_WEG);
+      }, RAND_OP - RAND_WEG + telMs);
     }, RAND_WEG);
   }
   if (tossPending) { tossPending = false; tossTeams(); } else veldHo.inkt(false);
@@ -6813,9 +6829,12 @@ function handoff(mode, freshA, freshB, zelfdeGrond) {
   show("handoff");
   /* Na show(): de stappen van het optellen horen bij dit scherm. */
   let tel = 0;
-  if (naBeurt && !stilAan()) {
+  if (naBeurt) {
     const wie = (freshA || 0) > 0 ? 0 : (freshB || 0) > 0 ? 1 : -1;
-    if (wie >= 0) tel = telBuit(wie, wie === 0 ? freshA : freshB);
+    if (wie >= 0) tel = telBuit(wie, wie === 0 ? freshA : freshB, round);
+    /* Na een beurt komt de volgende ploeg pas na de telling op; de
+       startknop wacht tot ze op de rand staat. */
+    if (tel && !round) tel += RAND_OP - RAND_WEG + RAND_LAND;
   }
   if (naBeurt) rustKnop([$("#btnStartTurn")], tel);
   veldHo.aan();
@@ -7141,7 +7160,7 @@ function countdown(done) {
       rukBand(n / COUNT_FROM, (n + 1) / COUNT_FROM);
       num.textContent = COUNT_FROM - n;
       drukKaart();
-      if (!stilAan()) num.animate([{ scale: "1.18" }, { scale: "1" }], { duration: duur("los"), easing: curve("uit") });
+      veer(num);
       Snd.tick(2200, .05); Snd.count(n); Tril.tel();
       /* Bij het terugveren, en elke tel iets sterker. */
       setTimeout(() => { if (countRaf !== null) veldCd.rimpelRand(kaartIn(), .7 + n * .15); }, 60);
@@ -7385,17 +7404,12 @@ addEventListener("click", e => {
 function acts(key) {
   if (current !== "play" || !G || G.card === null || paused()) return false;
   const now = performance.now();
-  if (now - lastAct[key] < 280) { flash("seen"); Tril.zag(); return false; }
+  /* Een tik die niet meetelt (twee vingers op dezelfde kaart binnen 280 ms)
+     werd stilletjes weggegooid. Nu zakt de kaart één keer in, zodat je ziet
+     dát hij binnenkwam: drukken, zonder kleur (goud is "druk hier nu"). */
+  if (now - lastAct[key] < 280) { drukKaart(); Tril.zag(); return false; }
   lastAct[key] = now;
   return true;
-}
-
-function flash(cls) {
-  const c = $("#card");
-  c.classList.remove(cls);
-  void c.offsetWidth;
-  c.classList.add(cls);
-  setTimeout(() => c.classList.remove(cls), 400);
 }
 
 /* Ligt er nog maar één kaart, dan valt er niets te passen. De knop blijft
@@ -7517,6 +7531,14 @@ function duur(naam) {
   const n = parseFloat(v);
   return n ? (v.indexOf("ms") > -1 ? n : n * 1000) : 0;
 }
+/* Een getal dat verandert, veert: overal dezelfde --veer, op --t-los en
+   --e-uit (het aftellen, de telling op de overdracht en de eindstand; in
+   CSS de klok en het +N). */
+function veer(el) {
+  if (stilAan() || !el.animate) return;
+  const s = getComputedStyle(document.documentElement).getPropertyValue("--veer").trim() || "1.18";
+  el.animate([{ scale: s }, { scale: "1" }], { duration: duur("los"), easing: curve("uit") });
+}
 function vlucht() { return duur("fly") || 220; }
 /* Een curve uit :root als functie van 0..1 naar 0..1, voor een lus die zelf
    per frame tekent (holdButton()). Zoekt t bij x door te halveren: twintig
@@ -7590,8 +7612,8 @@ tikKnop($("#btnPas"), () => {
   if (current !== "play" || !G || G.card === null || paused()) return;
   // Laatste kaart: er valt niets over te slaan. Antwoorden doet hij wel.
   // Eigen geluid: dit is een weigering, geen overslag, en die twee moeten
-  // niet hetzelfde klinken. nudge() verzorgt de trilling.
-  if (G.pile.length === 0) { Snd.nee(); nudge($("#btnPas")); return; }
+  // niet hetzelfde klinken. nudge() verzorgt geluid en trilling.
+  if (G.pile.length === 0) { nudge($("#btnPas")); return; }
   if (!acts("pas")) return;
   Snd.pas();
   Tril.pas();
@@ -8666,7 +8688,7 @@ function kaartSpook(soort, naar) {
   k.removeAttribute("id");
   k.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
   k.querySelectorAll(".stempel").forEach(e => e.remove());
-  k.classList.remove("seen", "terug");
+  k.classList.remove("terug");
   k.classList.add("kaart-spook");
   let frames, opties;
   if (soort === "goed" && naar) {
@@ -8915,8 +8937,9 @@ function tossTeams() {
     $("#hoSideB").classList.toggle("up", nu === 1);
     /* Elke stap klinkt als de kant die oplicht, één noot van zijn stem, en
        vertraagt mee tot hij landt op de hele roep. Niet de tik: die is van
-       de klok. */
-    Snd.roep(nu);
+       de klok. Op de landing alleen de hele roep, niet ook de noot van de
+       stap: die vielen samen, op dezelfde toon. */
+    if (i < stappen) Snd.roep(nu);
     i++;
     if (i > stappen) {
       tossTimer = null;
@@ -8955,14 +8978,14 @@ function turnEnd() {
   if (!G || current !== "play") return;
   draaiOm(p => {
     if (!G || current !== "play") return;
-    /* Eén cue voor de hele buit, samen met het scherm dat hem toont. Daarna
-       wie er nu aan zet is, met de mascotte die opkomt (zie #hoTally .side.up);
-       na een buit wacht de ploeg tot die uitgeklonken is. Hier en niet in
+    /* De buit klinkt als de telling op de overdracht (telBuit()). Daarna
+       wie er nu aan zet is, met de mascotte die opkomt (zie #hoTally .side.up),
+       pas als de telling klaar is: één geluid tegelijk. Hier en niet in
        handoff(): die opent ook na een afgebroken aftelling en na herladen,
        en dan is er niets nieuws te melden. */
-    if (G.gained) Snd.haul(G.gained);
+    const buit = G.gained;
     const [freshA, freshB] = Spel.beurtWissel(G);
-    Snd.ploeg(G.team, RAND_OP / 1000);
+    Snd.ploeg(G.team, (RAND_OP + telLengte(buit)) / 1000);
     handoff("turn", freshA, freshB);
     landOm($("#hoRoundCard"), p);
   });
@@ -9160,7 +9183,15 @@ function winner() {
     // uit in de instellingen.
     Tril.feest();
   };
-  if (stilAan()) { $$("#wnPiles .tally.winner").forEach(t => t.classList.add("adem")); feest(); return; }
+  /* Bij beperkte beweging valt de kroon niet, maar ze is er wel: het
+     belletje klinkt (minder beweging is niet minder geluid), en de fanfare
+     wacht tot het uitgeklonken is, zoals na de val. */
+  if (stilAan()) {
+    $$("#wnPiles .tally.winner").forEach(t => t.classList.add("adem"));
+    if ($("#wnPiles .kroon")) { Snd.kroon(); Tril.kroon(); na(300, feest); }
+    else feest();
+    return;
+  }
   const OPTEL = 1100;
   const nums = $$("#wnPiles .tally .num");
   const doel = nums.map(n => Number(n.textContent) || 0);
@@ -9187,7 +9218,8 @@ function winner() {
   if ($("#wnPiles .kroon")) na(KROON + VAL, () => { Snd.kroon(); Tril.kroon(); });
   nums.forEach(n => { n.textContent = "0"; });
   const t0 = performance.now();
-  let vorig = -1;
+  let vorig = -1, vorigeToon = -1;
+  const stappen = Math.floor(hoogst / 3);
   const stap = now => {
     if (current !== "winner") return;
     const p = Math.min(1, (now - t0) / OPTEL);
@@ -9195,7 +9227,17 @@ function winner() {
     // Allebei met dezelfde snelheid per punt: wie meer had, telt langer door.
     const waarde = Math.round(e * hoogst);
     nums.forEach((n, i) => { n.textContent = Math.min(doel[i], waarde); });
-    if (waarde !== vorig && waarde % 3 === 0 && waarde > 0) Snd.tel(Math.round(12 * waarde / hoogst));
+    if (waarde !== vorig && waarde % 3 === 0 && waarde > 0) {
+      /* Dezelfde regel als de overdracht (telToon), en nooit twee keer
+         dezelfde noot na elkaar: dat klonk als een hapering. */
+      const k = telToon(waarde / 3 - 1, stappen);
+      if (k !== vorigeToon) {
+        Snd.tel(k);
+        // Elk getal dat nog onderweg is, veert mee op de noot.
+        nums.forEach((n, i) => { if (waarde <= doel[i]) veer(n); });
+      }
+      vorigeToon = k;
+    }
     vorig = waarde;
     if (p < 1) requestAnimationFrame(stap);
     else na(KROON - OPTEL + VAL + 300, () => { juichen(); feest(); });
@@ -10038,7 +10080,7 @@ async function kopieerLink() {
   if (!ok && navigator.share) {
     try { await navigator.share({ url: appUrl() }); ok = true; } catch (e) {}
   }
-  if (ok) { knop.textContent = "Gekopieerd"; Tril.klik(); }
+  if (ok) { knop.textContent = "Gekopieerd"; Tril.gelukt(); }
   else nudge(knop);
 }
 

@@ -246,8 +246,10 @@ tapmaat (`--vak: var(--tap)`, het teken 74%), en de plek links of rechts
 zegt geweest of nog te komen. Liggend is de kaart een vaste breedte
 (`min(46vw, 22rem)`), nooit `width: auto`. Geen kroon, geen "+N", geen
 fiche per punt op dit scherm. Na een beurt telt het getal van wie speelde
-op naar het nieuwe totaal, één `Snd.tel()` per kaart (`telBuit()`), en
-wacht de startknop tot de laatste tik. Na een beurt of ronde komt de startknop
+op naar het nieuwe totaal, één `Snd.tel()` per kaart (`telBuit()`); pas
+daarna komt de ander op met zijn stem (`telLengte()`), en de startknop
+wacht tot hij staat. Bij een rondewissel telt het getal stil: daar spreken
+de klokjes van de ronde. Na een beurt of ronde komt de startknop
 ingedrukt aan en veert op na `RUST_MS` en `STIL_MS` zonder vinger op het
 glas (`rustKnop()`; op de eindstand ook nog een keer en het huisje): een
 vinger die na de bel doortikt op goed, start anders de andere ploeg. Vos en Uil zitten op de bovenrand van de
@@ -381,7 +383,10 @@ en ze krimpt tot precies de hoogte van het vak. De kaart eronder ligt er al
 en beweegt niet, ook niet na pas. Terugnemen
 (`kaartTerug()`) is dezelfde vlucht achterstevoren. Via Web
 Animations; het getal plus de wip horen bij de landing (`landFly()`), ook
-bij een schermwissel.
+bij een schermwissel. Een getal dat verandert veert overal hetzelfde: van
+`--veer` terug naar 1 op `--t-los` en `--e-uit` (`veer()`, en in CSS de klok
+en het +N). Een tik die niet meetelt (dubbel op goed) drukt de kaart in
+(`drukKaart()`), zonder kleur.
 
 **De balk heeft drie stukken.** Wie (`.who`: mascotte | buit), hoe (het
 rondeteken, alleen, in het midden) en de klok (`.klokknop`: seconden |
@@ -430,7 +435,14 @@ Alle cues lopen door `Snd` en `Tril`, naar één bus met compressor. Geen
 muziek. Elke cue moet op een telefoonluidspreker hoorbaar zijn: geen sinus
 onder 400 Hz als drager, en geen cue die in het telefoonmodel uit
 `docs/ontwerp.md` meer dan 8 dB onder `goed()` zakt (de klok uitgezonderd).
-Leen geen klank: een cue klinkt alleen waar haar betekenis geldt.
+Leen geen klank: een cue klinkt alleen waar haar betekenis geldt. **Eén
+geluid tegelijk**: een gebeurtenis die er een andere opvolgt, wacht tot die
+uitgeklonken is (alleen de tik van de klok mag eronder). Het woordenboek
+(gebeurtenis -> geluid, trilling, plekken) staat in `WOORDENBOEK` van
+`test/zintuigen.test.js`; een nieuwe `Snd.x()` of `Tril.x()` krijgt daar een
+regel. Weigeren is overal `nudge()`: schudden, `Snd.nee()` en `Tril.nee()`.
+Minder beweging is niet minder geluid: bij beperkte beweging klinkt wat
+anders bij een beweging hoorde (de telling, de kroon) gewoon.
 `Snd.ploeg` en `Snd.roep` zijn de stem van Vos en Uil en klinken alleen
 waar het dier zelf iets doet: de worp (elke stap `roep`, de landing
 `ploeg`), waar een beurt of ronde overgaat (in `turnEnd`/`endRound`, niet
@@ -651,7 +663,7 @@ een regel in `STANDEN` van `test/toestel.test.js`.
 
 ## Tests
 
-`npm test` draait acht suites, en CI draait ze op elke pull request, in het
+`npm test` draait negen suites, en CI draait ze op elke pull request, in het
 Docker-image van Playwright. Wie playwright in `package-lock.json` ophoogt,
 zet het image in `.github/workflows/test.yml` op dezelfde versie (CI breekt
 anders meteen af):
@@ -676,6 +688,11 @@ anders meteen af):
   dat een andere app heeft, een scherm dat in een beurt vergrendelt, een
   oud toestel zonder de nieuwste emoji) en toetst wat de speler dan ziet of hoort
   (`npm run test:toestel`).
+- `test/zintuigen.test.js` toetst het woordenboek van de zintuigen: elke
+  cue staat erin, twee gebeurtenissen klinken niet hetzelfde, trillingen
+  van de ladder, elke cue in het telefoonmodel (niet meer dan 8 dB onder
+  `goed()`, geen piek boven -3 dBFS), en in een gespeeld potje nooit twee
+  cues tegelijk (`npm run test:zintuigen`).
 - `test/game.test.js` speelt een volledig potje in een echte browser (en
   vraagt onderweg de toegankelijkheidsboom of alles een naam heeft), zo'n
   anderhalve tot twee minuten. Hij klikt bewust trager dan 280 ms, omdat

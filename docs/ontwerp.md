@@ -2696,6 +2696,52 @@ klank voor de startknop die na de bel opveert (wachten is stil).
 **Geen muziek.** De raders moeten de uitbeelder horen, en de klok bouwt de
 spanning al op in de laatste tien seconden.
 
+**Eén woordenboek voor de zintuigen (11 november).** Een volledig potje in
+Chromium, met elke `Snd`- en `Tril`-aanroep, elke oscillator, elke
+trilling en elke Web Animation op de milliseconde gelogd, en elke cue door
+het telefoonmodel. De tokens hielden stand (geen losse kleur, hoek, schaduw
+of curve); de fouten zaten in de tijd:
+
+- De overdracht zei drie dingen tegelijk sinds de telling erbij kwam: na
+  een beurt begonnen `haul()`, de stem van de volgende ploeg en de eerste
+  `tel()` binnen 5 ms van elkaar (320 ms); bij een rondewissel liepen de
+  klokjes, dertien noten telling en de stem 700 ms door elkaar. Nu één
+  geluid tegelijk: na een beurt is de telling de buit (`haul()` is weg, het
+  zei hetzelfde) en komt de volgende ploeg pas daarna op, met haar stem;
+  bij een rondewissel telt het getal stil en spreken de klokjes, dan de
+  stem. De startknop wachtte al op de telling, dus starten gaat niet trager.
+- De lange druk begon met een klik: een nieuwe `GainNode` meldt
+  `gain.value` 1 ook als er 0,0001 gepland staat, en `houdAan()` begon
+  daarvandaan: 30 ms op tien keer de sterkte, 0 dBFS, het luidste stuk
+  van de app. Bovenaan was de toon ook 2 dB luider dan de deur die erboven
+  moet uitkomen. Nu begint hij bij stilte en wordt hij zachter naarmate
+  hij stijgt (`2^(-.8p)`, bovenaan -22,8 tegen -20,7 voor `dicht()`).
+- De worp landde op twee noten tegelijk (de laatste `roep()` en `ploeg()`,
+  dezelfde toon): de landing is nu alleen de roep.
+- `nee()` klonk alleen bij pas op de laatste kaart; de zeven andere
+  weigeringen schudden en trilden, dus op een iPhone gebeurde er niets
+  hoorbaars. Nu zit het geluid in `nudge()`. Het staat 0,8 dB hoger (.22),
+  want het lag precies op de grens van 8 dB onder `goed()`.
+- Twee tellingen, twee regels: de eindstand spreidde een octaaf maar
+  herhaalde noten (een hapering), de overdracht klom per kaart en bleef na
+  twaalf op de bovenste noot hangen. Nu één regel (`telToon()`): een halve
+  toon per stap, boven dertien stappen één octaaf verdeeld, nooit twee keer
+  dezelfde noot na elkaar.
+- Vijf maten voor "een getal verandert" (1,14, 1,18, 1,3, 0,62 en niets op
+  de eindstand): nu één, `--veer` 1,18 op `--t-los` en `--e-uit` (`veer()`).
+- Een dubbele tik liet de rand van de kaart goud oplichten, en goud is
+  "druk hier nu". Nu zakt de kaart één keer in (`drukKaart()`).
+- "Gekopieerd" leende de sluiter (30 ms); nu de lichte 20 (`Tril.gelukt`).
+- Beperkte beweging zette ook de kroon en de telling stil. Nu klinken ze,
+  zonder de beweging.
+
+De bewaker is `test/zintuigen.test.js`: het woordenboek als tabel, elke
+aanroep moet erin staan, geen twee gebeurtenissen met dezelfde klank en
+trilling (behalve terugnemen en pas, en de voorproef in de instellingen),
+trillingen van de ladder, de luidheid en de piek in het telefoonmodel, en
+een gespeeld potje waarin geen twee cues overlappen. Op de code van vóór
+deze ronde vond hij alle punten hierboven die te horen zijn.
+
 ## App-pictogram en installeerbaarheid
 
 Het manifest staat niet als los bestand naast `index.html` -- dat zou de
