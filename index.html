@@ -33,6 +33,59 @@
      geen pad om tegenaan te resolven, dus start_url en scope staan er
      volledig uitgeschreven. -->
 <link rel="manifest" id="appManifest">
+<script id="foutmelder">
+"use strict";
+/* Dit blok staat als eerste script in de pagina, los van de rest. Een
+   syntaxfout in de spelkern of het hoofdscript houdt dat hele script tegen,
+   en zat de melder daarin, dan meldde juist de zwaarste breuk (een app die
+   niet start) zich nooit. test/regels.test.js houdt hem hier. */
+/* Een fout meldt zichzelf. Een scriptfout op een andere telefoon zag
+   niemand; nu gaat ze naar de foutenbak van Max (worker/fout.mjs): de
+   melding met de plek in de code, het scherm, de versie (de datum van dit
+   bestand) en de browser in een paar woorden. Niets anders: geen kaarten,
+   geen woorden, geen foto's, geen adres. Alleen vanaf de echte site (een
+   test of een kopie meldt niets), elke fout één keer, hoogstens FOUT_MAX
+   per bezoek. Naast de toverstaf de enige plek waar de app het net op gaat.
+   Zie docs/ontwerp.md, "Een fout meldt zichzelf". */
+const FOUT_URL = location.origin === "https://maxoftheday.github.io"
+  ? "https://tijdisom-fout.maxheyrman.workers.dev/fout" : "";
+const FOUT_MAX = 5;
+const foutGemeld = new Set();
+function browserKort() {
+  const ua = navigator.userAgent;
+  const m = ua.match(/(SamsungBrowser|EdgA?|Firefox|FxiOS|CriOS|OPR)\/(\d+)/) ||
+    ua.match(/(Chrome)\/(\d+)/) || ua.match(/Version\/(\d+).*(Safari)/);
+  const naam = !m ? "?" : m[2] === "Safari" ? "Safari " + m[1] : m[1] + " " + m[2];
+  const os = /Android/.test(ua) ? "Android" : /iPhone|iPad|iPod/.test(ua) ? "iOS" :
+    /Macintosh/.test(ua) ? (navigator.maxTouchPoints > 1 ? "iPadOS" : "Mac") :
+    /Windows/.test(ua) ? "Windows" : /Linux/.test(ua) ? "Linux" : "?";
+  return naam + " " + os;
+}
+function meldFout(bericht) {
+  const b = String(bericht || "").replace(/\s+/g, " ").trim().slice(0, 300);
+  if (!FOUT_URL || !b || foutGemeld.has(b) || foutGemeld.size >= FOUT_MAX) return;
+  foutGemeld.add(b);
+  let scherm = "";
+  try { scherm = current; } catch (e) { scherm = "start"; }
+  const d = new Date(document.lastModified);
+  const v = isNaN(d) ? "" : d.toISOString().slice(0, 16).replace("T", " ");
+  const body = JSON.stringify({ b, s: scherm, v, w: browserKort() });
+  try {
+    if (navigator.sendBeacon) navigator.sendBeacon(FOUT_URL, body);
+    else fetch(FOUT_URL, { method: "POST", body, keepalive: true, mode: "no-cors" }).catch(() => {});
+  } catch (e) { /* een melding mag zelf nooit iets breken */ }
+}
+addEventListener("error", e => {
+  if (!e.message) return;
+  meldFout(e.message + " (" + (e.lineno || 0) + ":" + (e.colno || 0) + ")");
+});
+addEventListener("unhandledrejection", e => {
+  const r = e.reason;
+  const plek = r && r.stack ? (String(r.stack).split("\n").find(l => /:\d+:\d+/.test(l)) || "") : "";
+  const rk = (plek.match(/:(\d+:\d+)\)?\s*$/) || [])[1];
+  meldFout("belofte: " + (r && r.message ? r.message : String(r)) + (rk ? " (" + rk + ")" : ""));
+});
+</script>
 <script>
 (function () {
   var dir = location.href.replace(/[^\/]*$/, "");
@@ -4037,53 +4090,6 @@ const Spel = (() => {
 </script>
 <script>
 "use strict";
-
-/* Een fout meldt zichzelf. Een scriptfout op een andere telefoon zag
-   niemand; nu gaat ze naar de foutenbak van Max (worker/fout.mjs): de
-   melding met de plek in de code, het scherm, de versie (de datum van dit
-   bestand) en de browser in een paar woorden. Niets anders: geen kaarten,
-   geen woorden, geen foto's, geen adres. Alleen vanaf de echte site (een
-   test of een kopie meldt niets), elke fout één keer, hoogstens FOUT_MAX
-   per bezoek. Naast de toverstaf de enige plek waar de app het net op gaat.
-   Zie docs/ontwerp.md, "Een fout meldt zichzelf". */
-const FOUT_URL = location.origin === "https://maxoftheday.github.io"
-  ? "https://tijdisom-fout.maxheyrman.workers.dev/fout" : "";
-const FOUT_MAX = 5;
-const foutGemeld = new Set();
-function browserKort() {
-  const ua = navigator.userAgent;
-  const m = ua.match(/(SamsungBrowser|EdgA?|Firefox|FxiOS|CriOS|OPR)\/(\d+)/) ||
-    ua.match(/(Chrome)\/(\d+)/) || ua.match(/Version\/(\d+).*(Safari)/);
-  const naam = !m ? "?" : m[2] === "Safari" ? "Safari " + m[1] : m[1] + " " + m[2];
-  const os = /Android/.test(ua) ? "Android" : /iPhone|iPad|iPod/.test(ua) ? "iOS" :
-    /Macintosh/.test(ua) ? (navigator.maxTouchPoints > 1 ? "iPadOS" : "Mac") :
-    /Windows/.test(ua) ? "Windows" : /Linux/.test(ua) ? "Linux" : "?";
-  return naam + " " + os;
-}
-function meldFout(bericht) {
-  const b = String(bericht || "").replace(/\s+/g, " ").trim().slice(0, 300);
-  if (!FOUT_URL || !b || foutGemeld.has(b) || foutGemeld.size >= FOUT_MAX) return;
-  foutGemeld.add(b);
-  let scherm = "";
-  try { scherm = current; } catch (e) { scherm = "start"; }
-  const d = new Date(document.lastModified);
-  const v = isNaN(d) ? "" : d.toISOString().slice(0, 16).replace("T", " ");
-  const body = JSON.stringify({ b, s: scherm, v, w: browserKort() });
-  try {
-    if (navigator.sendBeacon) navigator.sendBeacon(FOUT_URL, body);
-    else fetch(FOUT_URL, { method: "POST", body, keepalive: true, mode: "no-cors" }).catch(() => {});
-  } catch (e) { /* een melding mag zelf nooit iets breken */ }
-}
-addEventListener("error", e => {
-  if (!e.message) return;
-  meldFout(e.message + " (" + (e.lineno || 0) + ":" + (e.colno || 0) + ")");
-});
-addEventListener("unhandledrejection", e => {
-  const r = e.reason;
-  const plek = r && r.stack ? (String(r.stack).split("\n").find(l => /:\d+:\d+/.test(l)) || "") : "";
-  const rk = (plek.match(/:(\d+:\d+)\)?\s*$/) || [])[1];
-  meldFout("belofte: " + (r && r.message ? r.message : String(r)) + (rk ? " (" + rk + ")" : ""));
-});
 
 /* ==============================================================
    1. DE KAARTEN

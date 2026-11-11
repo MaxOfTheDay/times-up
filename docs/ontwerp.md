@@ -4207,6 +4207,14 @@ doen.
   keer per bezoek, hoogstens `FOUT_MAX` (5).
 - **Alleen vanaf de echte site.** Op elke andere herkomst (de tests, een
   kopie, `file://`) is `FOUT_URL` leeg en gaat er niets weg.
+- **Het eerste script.** De melder stond eerst in het hoofdscript. Een
+  proefrelease met één foute regel (november) liet zien wat dat kostte: een
+  syntaxfout houdt het hele script tegen, ook de luisteraars, en de app die
+  niet startte meldde niets. Juist die breuk wil je horen. Nu is de melder
+  een eigen `<script id="foutmelder">` vóór alles; het scherm leest hij in
+  een `try`, want `current` bestaat dan misschien nog niet ("start").
+  `test/toestel.test.js` zet de app met een syntaxfout op de echte
+  herkomst, met een nagebootste bak, en wacht op de melding.
 - **De bak** (`worker/fout.mjs`) is één Durable Object met SQLite: dat zit
   in het gratis plan en vraagt geen KV of D1, waar het token van de
   workflow geen rechten op heeft. Dezelfde fout op dezelfde versie is één
@@ -4355,3 +4363,11 @@ Een vaste rekensom (`ijk()`) zegt hoeveel trager de machine is dan die
 waarop de budgetten gezet zijn, en de budgetten schalen mee. Op de oude
 code faalt hij op de start (285 ms) en op de eindstand (120 beelden in
 2 s).
+
+Wat eerst een op de drie runs omviel, was een buurman en geen vertraging:
+de tik op het tandwiel mat 88, 97 en 121 ms bij een budget van 120, en de
+121 viel samen met ander werk op dezelfde machine. `ijk()` meet de machine
+één keer, aan het begin, en ziet dat niet. Daarom meet de test bij een
+misser de hele ronde nog een keer, en telt alleen wat beide keren omvalt.
+De budgetten bleven staan. Let wel: het tandwiel zit dicht tegen zijn
+budget aan (tot 130 ms gemeten); dat is het eerste dat om zal vallen.

@@ -138,7 +138,8 @@ npm install
 npm test
 ```
 
-`npm test` draait zeven suites:
+`npm test` draait tien suites, in drie groepen (`test:kort`, `test:zwaar`,
+`test:spel`):
 
 - `test/kern.test.js` toetst de spelregels zelf, zonder browser en in
   milliseconden (`npm run test:kern`).
@@ -151,12 +152,19 @@ npm test
   standen heen, dat elke stand alles eronder bevat, en of elke emoji tekent.
 - `test/stip.test.js` legt het stippenveld op de grafische kaart en op het
   2D-canvas over elkaar.
+- `test/toestel.test.js` bootst per regel een stand van het toestel na (wifi
+  met inlogpagina, gedwongen donker, een kapotte release, ...).
+- `test/zintuigen.test.js` toetst het woordenboek van geluid en trilling.
+- `test/snel.test.js` geeft de start, elke tik en rust een budget, met de CPU
+  vier keer vertraagd.
 - `test/game.test.js` speelt een volledig potje in een echte browser; dat
   duurt anderhalve tot twee minuten, omdat één beurt echt moet uitlopen.
 
-Ze draaien ook op elke pull request, via `.github/workflows/test.yml`.
+Ze draaien ook op elke pull request, via `.github/workflows/test.yml`, de
+drie groepen naast elkaar. Op `main` zet dezelfde workflow daarna de site op
+GitHub Pages, alleen als alles groen is.
 Daarnaast: `npm run test:chaos` tikt willekeurig op een vaste reeks, en
-`npm run foto` zet elke stand op vier schermmaten op een contactblad.
+`npm run foto` zet elke stand op zeven schermmaten op een contactblad.
 
 Twee scripts maken ingebakken beelden opnieuw: `npm run pictogrammen` voor de
 app-pictogrammen (na een wijziging aan de zandloper) en `npm run schermen`

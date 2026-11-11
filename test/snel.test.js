@@ -31,8 +31,13 @@ const TIK_MS = 120;       // de handlers van één tik samen
 const DWING_MS = 60;      // geforceerde layout binnen één tik
 const IJK_REF = 170;      // ijk() op de machine waar de budgetten gezet zijn
 
-const fails = [];
-const ok = (c, m) => { if (!c) fails.push(m); };
+/* Een tik die net over zijn budget gaat, kan een buurman op dezelfde machine
+   zijn (een andere test, een CI-runner die gedeeld wordt): ijk() meet de
+   machine één keer, aan het begin. Valt er iets om, dan meet de hele ronde
+   nog een keer, en telt alleen wat beide keren omvalt. Een echte vertraging
+   valt twee keer om; rust en fouten op de pagina zijn toch niet toevallig. */
+let fails = [];
+const ok = (c, m, sleutel) => { if (!c) fails.push({ m, sleutel: sleutel || m }); };
 
 const meter = () => {
   window.__snel = { loaf: [], ev: [], raf: 0 };
@@ -72,8 +77,8 @@ function server() {
   });
 }
 
-(async () => {
-  const srv = await server();
+async function ronde(srv) {
+  fails = [];
   const APP_URL = `http://127.0.0.1:${srv.address().port}/index.html?debug`;
   const browser = await launch();
   /* ---- de start ----
@@ -100,7 +105,7 @@ function server() {
   const f = await ijk(page);
   const start = await page.evaluate(() => __snel.loaf.flatMap(l => l.scripts)
     .filter(s => s.soort === 'classic-script').reduce((a, s) => a + s.d, 0));
-  ok(start <= START_MS * f, `start: ${Math.round(start)} ms script voor de titel (budget ${Math.round(START_MS * f)})`);
+  ok(start <= START_MS * f, `start: ${Math.round(start)} ms script voor de titel (budget ${Math.round(START_MS * f)})`, 'start');
 
   /* ---- tikken ---- */
   const scherm = () => page.evaluate(() => window.__tijd.screen);
@@ -110,7 +115,7 @@ function server() {
     const a = await page.evaluate(() => __snel.raf);
     await page.waitForTimeout(2000);
     const n = (await page.evaluate(() => __snel.raf)) - a;
-    ok(n === 0, `rust: ${naam} vraagt ${n} beelden in 2 s, terwijl er niets beweegt`);
+    ok(n === 0, `rust: ${naam} vraagt ${n} beelden in 2 s, terwijl er niets beweegt`, `rust ${naam}`);
   };
   await page.waitForTimeout(1500);
   await rust('de titel');
@@ -151,16 +156,29 @@ function server() {
                wie: scripts.map(s => s.wie).filter((w, i, a) => a.indexOf(w) === i).join(' ') };
     });
   });
-  ok(tikken.length >= 12, `tikken: maar ${tikken.length} gemeten`);
+  ok(tikken.length >= 12, `tikken: maar ${tikken.length} gemeten`, 'tikken');
   for (const t of tikken) {
-    ok(t.reken <= TIK_MS * f, `tik ${t.wie || '?'}: ${Math.round(t.reken)} ms rekenen (budget ${Math.round(TIK_MS * f)})`);
-    ok(t.dwing <= DWING_MS * f, `tik ${t.wie || '?'}: ${Math.round(t.dwing)} ms geforceerde layout (budget ${Math.round(DWING_MS * f)})`);
+    ok(t.reken <= TIK_MS * f, `tik ${t.wie || '?'}: ${Math.round(t.reken)} ms rekenen (budget ${Math.round(TIK_MS * f)})`, `reken ${t.wie}`);
+    ok(t.dwing <= DWING_MS * f, `tik ${t.wie || '?'}: ${Math.round(t.dwing)} ms geforceerde layout (budget ${Math.round(DWING_MS * f)})`, `dwing ${t.wie}`);
   }
-  ok(!errs.length, 'fouten: ' + errs.join('; '));
+  ok(!errs.length, 'fouten: ' + errs.join('; '), 'fouten');
 
   const zwaarst = tikken.reduce((a, t) => t.reken > a.reken ? t : a, { reken: 0, wie: '' });
   await browser.close();
+  return { fails, regel: `start ${Math.round(start)} ms, zwaarste tik ${Math.round(zwaarst.reken)} ms (${zwaarst.wie}), machine x${f.toFixed(2)}` };
+}
+
+(async () => {
+  const srv = await server();
+  const een = await ronde(srv);
+  let blijft = een.fails, regel = een.regel;
+  if (blijft.length) {
+    console.log('  over budget, nog een keer meten: ' + blijft.map(x => x.m).join('; '));
+    const twee = await ronde(srv);
+    blijft = twee.fails.filter(x => een.fails.some(y => y.sleutel === x.sleutel));
+    regel = twee.regel;
+  }
   srv.close();
-  if (fails.length) { console.log('\nFOUT:\n' + fails.map(x => ' - ' + x).join('\n')); process.exit(1); }
-  console.log(`  snel in orde: start ${Math.round(start)} ms, zwaarste tik ${Math.round(zwaarst.reken)} ms (${zwaarst.wie}), machine x${f.toFixed(2)}`);
+  if (blijft.length) { console.log('\nFOUT (twee keer):\n' + blijft.map(x => ' - ' + x.m).join('\n')); process.exit(1); }
+  console.log(`  snel in orde: ${regel}`);
 })();

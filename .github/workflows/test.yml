@@ -2,6 +2,14 @@
 # Die komt uit het Docker-image van Playwright: browser en systeembibliotheken
 # zitten er al in, zodat er geen apt-download is die op een trage spiegel van
 # Ubuntu de run over zijn tien minuten duwt.
+#
+# Drie groepen naast elkaar, dezelfde als `npm test` na elkaar draait
+# (test:kort, test:zwaar, test:spel in package.json; test/regels.test.js houdt
+# ze gelijk). Na elkaar liep één job op naar zijn tien minuten.
+#
+# Op main zet daarna `uitrollen` de site op GitHub Pages, en alleen als alle
+# drie groen zijn. Pages staat daarvoor op "GitHub Actions", niet op "Deploy
+# from a branch": zie CLAUDE.md, "Gemerged is nog niet live".
 name: Tests
 
 on:
@@ -18,6 +26,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        groep: [kort, zwaar, spel]
     # De versie hoort gelijk aan playwright in package-lock.json; de eerste
     # stap hieronder breekt de run af als ze uit elkaar lopen.
     container: mcr.microsoft.com/playwright:v1.62.1-noble
@@ -32,6 +44,32 @@ jobs:
 
       - run: npm ci
 
-      # Duurt ruim een halve minuut: één beurt moet echt uitlopen om te zien
-      # wat er gebeurt als de tijd om is.
-      - run: npm test
+      # spel duurt het langst: één beurt moet echt uitlopen om te zien wat er
+      # gebeurt als de tijd om is.
+      - run: npm run test:${{ matrix.groep }}
+
+  uitrollen:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.uit.outputs.page_url }}
+    # Een uitrol die al loopt, maakt hij af: een nieuwere push wacht erachter.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      # Pages zette de hele main neer; dat blijft zo (index.html, sw.js en
+      # de rest, zonder .git en .github).
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: uit
+        uses: actions/deploy-pages@v4
