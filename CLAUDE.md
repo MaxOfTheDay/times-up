@@ -520,7 +520,9 @@ plafond: `poolFor()` geeft alle kaarten tot en met die moeilijkheid (90, 183,
 - geen ZWJ-reeksen en geen huidskleur-modifiers.
 
 Hoe nieuw een emoji mag zijn is een keuze: de test meet alleen de machine die
-hem draait. Kijk bij twijfel op het oudste toestel in huis.
+hem draait. Op het toestel zelf haalt `zonderLeegVak()` wat als leeg vak
+tekent uit de bak, dus een nieuwe emoji kost een oud toestel een kaart,
+geen leeg vak. Kijk bij twijfel op het oudste toestel in huis.
 
 **De bak en de greep.** De bak is alles waar uit getrokken kan worden:
 in Instellingen twee rijen (Gewone, Eigen), elk met haar getal; een tik
@@ -631,7 +633,11 @@ doorverwijzing is en de spelkern bevat (een wifi met inlogpagina). De
 kleuren zijn `only light`, zodat een gedwongen donkere modus het papier niet
 omkeert. `Beeld` vergeet een mislukte verbinding en probeert één keer
 opnieuw. Staat het geluid stil en wekt geen vinger het, dan valt een cue
-weg in plaats van in de rij te gaan staan (`wekbaar()`). Elke valkuil is
+weg in plaats van in de rij te gaan staan (`wekbaar()`). Een emoji die
+het toestel als leeg vak tekent, gaat bij het opstarten uit `DECKS`
+(`zonderLeegVak()`). Valt het scherm uit midden in een beurt na
+`SLAAP_MS` zonder aanraking, dan gaat dat als één regel naar de foutenbak
+(`slaapMelding()`), met hoe het wakker houden ervoor stond. Elke valkuil is
 een regel in `STANDEN` van `test/toestel.test.js`.
 
 ## Tests
@@ -658,7 +664,8 @@ anders meteen af):
   2D-canvas over elkaar en vergelijkt elke pixel (`npm run test:stip`).
 - `test/toestel.test.js` bootst per regel een stand van het toestel na
   (wifi met inlogpagina, gedwongen donker, een haperende fotokast, geluid
-  dat een andere app heeft) en toetst wat de speler dan ziet of hoort
+  dat een andere app heeft, een scherm dat in een beurt vergrendelt, een
+  oud toestel zonder de nieuwste emoji) en toetst wat de speler dan ziet of hoort
   (`npm run test:toestel`).
 - `test/game.test.js` speelt een volledig potje in een echte browser, zo'n
   anderhalve tot twee minuten. Hij klikt bewust trager dan 280 ms, omdat

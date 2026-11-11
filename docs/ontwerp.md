@@ -4175,10 +4175,29 @@ zijn nagebootst in Chromium en gerepareerd; elk heeft een regel in
   hem wekt (`navigator.userActivation.isActive`); `ac()` blijft het wekken
   proberen.
 
-Gemeten en nog open: emoji uit Unicode 12 en 13 (vijf in Makkelijk)
-tekenen op Android 9 en 10 als een leeg vak; het wakker houden van het
-scherm faalt stil in een app op het beginscherm van iOS vóór 18.4; met
-grote letters zoomt Android de hele pagina, en op 200% passen spelen en
+Daarna nog twee, ook met een regel in de test:
+
+- **Een oud toestel.** Dertien emoji komen uit Unicode 12 en 13 (vijf in
+  Makkelijk: flamingo, zeehond, stoel, tandenborstel, vlieger) en tekenen
+  op Android 9 en 10, de oude tablets, als een leeg vak. `zonderLeegVak()`
+  tekent bij het opstarten elke emoji op een canvas van 28 px naast
+  U+10FFFD, een teken dat nooit bestaat, en haalt wat daar pixel voor pixel
+  op lijkt uit `DECKS`. Eerst keek ze of er kleur in zat, maar dan vielen
+  op een gewoon toestel zeventien grijze en zwarte emoji weg (panda, wolf,
+  wolk). Lijkt meer dan een vijfde te ontbreken, dan meet ze iets anders
+  (een canvas dat vingerafdrukken weert) en blijft alles staan.
+- **Het scherm valt uit.** Het wakker houden faalt stil in een app op het
+  beginscherm van iOS vóór 18.4 (beloofd, niet gehouden) en ontbreekt op
+  een oudere iPhone. Voorkomen kan niet zonder een video als lus, dus
+  wordt het gemeten: raakt de app midden in een beurt verborgen na
+  `SLAAP_MS` (14 s, Androids kortste time-out is 15) zonder aanraking, dan
+  gaat er één regel naar de foutenbak met de stand van het wakker houden
+  ("aan", "geweigerd", "ontbreekt"). Wie na veertien stille tellen zelf
+  weggaat, telt ook mee (de veeg naar huis komt niet bij de pagina): het
+  is een teken, geen bewijs, en pas veel meldingen met "aan" uit één
+  browser zeggen dat het wakker houden daar niet werkt.
+
+Nog open: met grote letters zoomt Android de hele pagina, en op 200% passen spelen en
 overdracht niet meer (op 150% alleen de titel van Instellingen, nu op
 `--fs-3` onder 300 px). Bewust gelaten, want een keuze van de
 gebruiker: mediavolume op nul, trillen uit of niet storen, een
