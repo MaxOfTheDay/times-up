@@ -20,14 +20,15 @@ Het spelscherm houdt de blik op die ene kaart. De kaart is het grootste
 vierkant dat op het scherm past en het teken erin is zo groot als de kaart
 toelaat -- op een tablet vult dat bijna het hele beeld. De klok loopt als een
 rand om de kaart heen in plaats van in een wijzerplaat ernaast, dus de tijd
-zit in dezelfde blik als het beeld; hij verkleurt van goud naar wijnrood en
-de laatste seconden klopt de kaart mee. De kaart ligt op een stapel waarvan de randen verdwijnen naarmate
-je opschiet — leegspelen levert tijd op voor de volgende ronde, dus dat is
-het zien waard, en bij de laatste kaart ligt er niets meer onder.
-Linksboven, naast de mascotte, staat een groen "+N": wat deze beurt al binnen
-is. Bij elke geraden kaart vliegt er een "+1" van de kaart naar dat label, en
-het geluid gaat per kaart een halve toon omhoog. Op het overdrachtscherm
-staat het daarna niet nog eens: daar staat alleen de stand.
+zit in dezelfde blik als het beeld; de band windt af vanaf twaalf uur,
+verkleurt van goud naar paars, en de laatste vijf tellen wiebelt de kaart op
+de tik. De kaart ligt op een stapel waarvan de randen verdwijnen naarmate je
+opschiet -- leegspelen levert tijd op voor de volgende ronde, dus dat is het
+zien waard, en bij de laatste kaart ligt er niets meer onder. Bovenaan, naast
+de mascotte, staat een groen "+N": wat deze beurt al binnen is. Een geraden
+kaart vliegt zelf naar dat label, en het geluid gaat per kaart een halve toon
+omhoog. Op het overdrachtscherm staat het daarna niet nog eens: daar staat
+alleen de stand.
 
 Alleen de klok is een meter. Alles wat langzaam leegloopt leest als tijd, dus
 de stapel is een voorwerp en de punten zijn een label — geen tweede en derde
@@ -49,29 +50,29 @@ Dat je dezelfde kaarten drie keer ziet is de bedoeling: tegen ronde drie kent
 iedereen ze half uit het hoofd, en beginnen de jongsten te winnen.
 
 Tussen twee beurten krijg je het toestel aangereikt op één scherm: de stand,
-de opdracht en één knop. Een tik telt af van drie — genoeg om je klaar te
-zetten, en genoeg om een strijkende vinger tijdens het doorgeven op te
-vangen. Terug kan tijdens het aftellen met de tegel rechtsboven. De kaart blijft tot nul
-toe verborgen.
+de opdracht en één knop. De opdrachtkaart is de achterkant van de
+speelkaart: een tik draait haar om en telt af van drie -- genoeg om je klaar
+te zetten, en genoeg om een strijkende vinger tijdens het doorgeven op te
+vangen. Terug kan tijdens het aftellen met de tegel rechtsboven. De kaart
+blijft tot nul toe verborgen.
 
 Geraden kaart is een punt en meteen de volgende. Passen mag, zonder straf:
 de kaart gaat onderaan terug. Loopt de stapel leeg, dan stopt de ronde
-meteen — ook midden in een beurt — en opent de andere ploeg de volgende
-ronde, met een volle beurt. Te vroeg op goed getikt? Tik binnen drie tellen
-op het groene +-getal bovenaan: het punt gaat eraf en de kaart komt terug.
+meteen, en dezelfde ploeg speelt door in de volgende ronde met de tijd die
+ze nog had (minstens vijf tellen). Te vroeg op goed getikt? Tik binnen drie
+tellen op het groene +-getal bovenaan: het punt gaat eraf en de kaart komt
+terug.
 
-De instellingen (het knopje rechtsboven op de titel) regelen de
-moeilijkheid, het aantal kaarten per potje, de tijd per beurt, het geluid en
-— waar het toestel het kan — het trillen. Onder "Alle kaarten" staat de hele
-bak waaruit getrokken wordt, op alfabet. Tik een kaart aan om haar weg te
-leggen (zolang er in elke stand minstens 40 overblijven), en nog eens om haar
-terug te leggen; die keuze blijft staan. Welke kaarten een potje krijgt, wordt
-pas getrokken als het begint.
-
-Het is ook het scherm met de korte uitleg voor wie Time's Up niet kent. Die
-uitleg staat open tot je één keer een spel gestart hebt en klapt daarna dicht
-tot één regel — terug te vinden, maar niet meer het eerste wat je elke avond
-ziet.
+De instellingen (het knopje rechtsboven op de titel) zijn voor de
+volwassene: het aantal kaarten per potje, de tijd per beurt, welke kaarten
+erin kunnen, geluid en trilling, installeren, en "Zo speel je" met de korte
+uitleg. Onder Kaarten staan twee lijsten. Gewone: de moeilijkheid en de hele
+bak waaruit getrokken wordt; tik een kaart aan om haar weg te leggen
+(zolang er in elke stand minstens 40 overblijven), en nog eens om haar terug
+te leggen. Eigen: kaarten die je zelf maakt, met een foto of een tekening en
+het woord dat telt, en hoeveel daarvan er in elk potje gaan. Welke kaarten
+een potje krijgt, wordt pas getrokken als het begint, de langst niet
+gespeelde eerst.
 
 De moeilijkheid van de kaarten (makkelijk, medium, moeilijk) werkt als een
 bovengrens, niet als een band: elke stand speelt met zijn eigen kaarten én
@@ -81,31 +82,28 @@ winnen, terwijl de oudste er af en toe een krijgt om over na te denken. Dat
 kan omdat de helft van de moeilijkheid uit de ronde komt en niet uit de
 kaart: "hond" zwijgend uitbeelden is op elke leeftijd werk.
 
-Rechtsboven staat op elk scherm een knopje op dezelfde plek en in dezelfde
-maat: op de titel een tandwiel, tijdens het spelen een pauzeteken, tussen de
-beurten een huisje (daar loopt geen klok, dus valt er niets te pauzeren).
-Achter de laatste twee zit hetzelfde paneel: de bevroren klok (alleen tijdens
-een beurt), de stand met de grote mascotte bij wie aan zet is, en daaronder de
-twee keuzes naast elkaar — verdergaan is een tik, stoppen een lange druk. De
-kroon staat alleen op het winnaarsscherm. Passen staat altijd linksonder en
-geraden altijd rechtsonder, ook als je het toestel draait.
+Rechtsboven staat op elk scherm de uitgang. Op de titel is dat het tandwiel.
+Tijdens een beurt is het de klokknop (seconden en pauzeteken): pauze draait
+de kaart om, en op haar achterkant liggen de ronde, verder en het huisje.
+Op de overdracht is het huisje zelf de uitgang, want daar loopt geen klok.
+Naar huis is het enige wat je moet vasthouden: de titel groeit uit het
+huisje zolang je drukt, en loslaten zet alles terug. Passen staat altijd
+links en geraden rechts, ook als je het toestel draait.
 
 Tijdens het spelen staat bovenaan altijd wie aan de beurt is én wat de
-opdracht van deze ronde is — praten, één woord of uitbeelden — zodat wie het
-toestel aangereikt krijgt niet hoeft te vragen. Wordt de app weggeklikt of
-het scherm vergrendeld, dan gaat het pauzepaneel open: de klok staat stil tot
-iemand op verder tikt. Gebeurt het tijdens het aftellen, dan is er nog geen
-beurt begonnen en sta je terug op het overdrachtscherm.
+opdracht van deze ronde is -- praten, één woord of uitbeelden -- zodat wie het
+toestel aangereikt krijgt niet hoeft te vragen.
 
-Een lopend potje wordt op elk overdrachtscherm bewaard. Wordt de app herladen
-of door het toestel gesloten, dan kom je daar terug, tot twee uur later; een
-beurt die half gespeeld was, wordt overgespeeld, met dezelfde kaarten en
-zonder de punten die er half in stonden. Stoppen via het paneel gooit het
-potje wél weg.
+Weggaan kost niets. Een lopend potje wordt op elke overdracht bewaard, en ook
+als de app midden in een beurt wegraakt (weggeveegd, vergrendeld, herladen):
+dan kom je terug op de overdracht van dezelfde ploeg, met de punten die al
+binnen waren, de kaart van daarnet bovenop en de tijd die nog over was. Dat
+geldt tot twee uur later. Stoppen via het huisje gooit het potje wél weg.
 
 De app werkt zonder internet en is te installeren op het beginscherm: de
 service worker (`sw.js`) bewaart het ene bestand en haalt op de achtergrond
-een nieuwe versie op voor de volgende keer dat je opstart.
+een nieuwe versie op voor de volgende keer dat je opstart. Eigen kaarten
+blijven op de telefoon (IndexedDB); niets gaat het net op.
 
 ## Kaarten aanpassen
 
@@ -138,20 +136,22 @@ npm install
 npm test
 ```
 
-`test/kern.test.js` toetst de spelregels zelf, zonder browser en in
-milliseconden: trekken, raden, passen, de beurt- en rondewissel, een
-geraden kaart terugnemen, de winnaar en het terugzetten van een bewaard potje
-(`npm run test:kern`).
-`test/deck.test.js` bewaakt de kaartregels: het aantal, dubbels over alle
-standen heen, dat elke stand alles eronder bevat, en of elke emoji tekent.
-`test/game.test.js` speelt een volledig potje in een echte browser: de drie
-rondes, passen, de klok die afloopt, de ploegwissel, de rondewissel naar de andere ploeg, dat
-een herlaadbeurt midden in een beurt terugkomt op de overdracht ervoor, de
-terugveeg, pauzeren en stoppen, de laatste kaart op de bel, en wegklikken
-tijdens een beurt of het aftellen. Die duurt anderhalve tot twee minuten,
-omdat één beurt echt moet uitlopen.
+`npm test` draait vijf suites:
 
-Alle drie draaien ook op elke pull request, via `.github/workflows/test.yml`.
+- `test/kern.test.js` toetst de spelregels zelf, zonder browser en in
+  milliseconden (`npm run test:kern`).
+- `test/tover.test.js` toetst de toverstaf-Worker met een nagebootste
+  Workers AI.
+- `test/deck.test.js` bewaakt de kaartregels: het aantal, dubbels over alle
+  standen heen, dat elke stand alles eronder bevat, en of elke emoji tekent.
+- `test/stip.test.js` legt het stippenveld op de grafische kaart en op het
+  2D-canvas over elkaar.
+- `test/game.test.js` speelt een volledig potje in een echte browser; dat
+  duurt anderhalve tot twee minuten, omdat één beurt echt moet uitlopen.
+
+Ze draaien ook op elke pull request, via `.github/workflows/test.yml`.
+Daarnaast: `npm run test:chaos` tikt willekeurig op een vaste reeks, en
+`npm run foto` zet elke stand op vier schermmaten op een contactblad.
 
 Twee scripts maken ingebakken beelden opnieuw: `npm run pictogrammen` voor de
 app-pictogrammen (na een wijziging aan de zandloper) en `npm run schermen`
