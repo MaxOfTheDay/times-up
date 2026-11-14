@@ -1047,6 +1047,20 @@ veel spannender en het is de eerlijkste vertaling van "de kleur wordt
 geloot", maar het zijn zeven volledige schermwisselingen in een seconde,
 waarvan de eerste paar 50 ms uit elkaar -- dat zet je niet voor kinderen neer.
 
+### Ook de balk van het venster wacht
+
+De grond wachtte, maar de balk van de browser niet: `show()` gaf
+`<meta name="theme-color">` de kleur van `G.team` zodra de overdracht
+opende. Als geïnstalleerde app op een desktop is dat de titelbalk van het
+venster, op Android de statusbalk: een seconde lang zei de rand al wie
+begon. Max zag het in de desktop-app. De balk volgt nu de grond die in beeld
+is (`hoChrome()` leest `--team` van `#s-handoff`), en wie die grond verzet,
+doet dat via `zetHoGrond()`, die de balk meeneemt. Zo landt de kleur in de
+balk op hetzelfde moment als de cirkel uit de startknop klaar is, ook na een
+gewone beurt. Voor wie niet kijkt geldt hetzelfde: tot de landing zegt de
+stand niet wie aan de beurt is. `test/game.test.js` kijkt naar de balk
+tijdens en na de worp.
+
 ### Tussen de knop en de worp gaat de grond niet uit
 
 Neutraal was eerst `--paper-2`, met de papieren punten van de ploeggrond

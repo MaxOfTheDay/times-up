@@ -294,7 +294,8 @@ heen-en-weer per seconde op de tik (`.cardslot.hurry`), symmetrisch, met
 **De worp verklapt zichzelf niet.** Zolang er geloot wordt is de grond die
 van de titel (papier, inkten punten); de ploegkleur groeit als een cirkel uit
 de startknop als de worp landt (`veldHo.onthul()`). Laat de achtergrond niet
-meeflikkeren. Een druk die de grond verandert, laat de nieuwe grond uit die
+meeflikkeren. De balk van het venster (`theme-color`) en de namen voor wie
+niet kijkt wachten mee: ze volgen de grond (`zetHoGrond()`), nooit `G.team`. Een druk die de grond verandert, laat de nieuwe grond uit die
 knop groeien; de knop zelf glijdt mee (`rimpelDoor()`), en de kaart die je
 zag (het merk, de eindstand) draait om naar de eerste opdracht. Naar huis
 ook: de titel groeit als cirkel uit de knop (`naarTitel()`), en Nog een

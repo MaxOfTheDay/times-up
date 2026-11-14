@@ -4702,12 +4702,25 @@ const PRIMARY = {
 
 let started = false;
 
-/* De balk van de browser (in app-modus de statusbalk) krijgt de kleur van het
-   scherm eronder: papier, of de ploegkleur op de overdracht. */
+/* De balk van de browser (in app-modus de statusbalk, op een desktop de
+   titelbalk van het venster) krijgt de kleur van het scherm eronder: papier,
+   of de ploegkleur op de overdracht. Hij volgt de grond die je ziet, niet
+   G.team: tijdens de worp is die nog papier, en een gekleurde balk zou
+   verklappen wie begint. */
 const PAPER_HEX = "#F4EBDA";
 function paintChrome(kleur) {
   const m = $("#chromeColor");
   if (m) m.setAttribute("content", kleur);
+}
+function hoChrome() {
+  const v = $("#s-handoff").style.getPropertyValue("--team").trim();
+  const t = TEAMS.find(t => t.color === v);
+  return t ? t.hex : PAPER_HEX;
+}
+/* De grond van de overdracht, en de balk mee als ze in beeld is. */
+function zetHoGrond(kleur) {
+  $("#s-handoff").style.setProperty("--team", kleur);
+  if (current === "handoff") paintChrome(hoChrome());
 }
 
 /* Elk stipveld() meldt hier zijn ruimOp(): na een schermwissel geeft een
@@ -4743,7 +4756,7 @@ function show(name) {
   /* Het overdrachtscherm is het enige dat van rand tot rand ploegkleur is.
      Het spelscherm staat op papier, ook tijdens het aftellen: dat gekleurde
      vlak ligt nu ónder de balk bovenaan, en die is crème. */
-  paintChrome(name === "handoff" && G ? TEAMS[G.team].hex : PAPER_HEX);
+  paintChrome(name === "handoff" ? hoChrome() : PAPER_HEX);
   /* De terugveeg wordt overal opgevangen behalve op de titel -- daar is de
      bodem van de app en hoort ze de app te verlaten. Zie guardBack(). */
   if (name === "title") releaseBack(); else guardBack();
@@ -6791,8 +6804,7 @@ function handoff(mode, freshA, freshB, zelfdeGrond) {
      vanaf papier stromen zou haar even uit- en weer aanzetten. */
   const vloed = current !== "handoff" && !tossPending && !zelfdeGrond &&
     !matchMedia("(prefers-reduced-motion: reduce)").matches;
-  $("#s-handoff").style.setProperty("--team",
-    tossPending || vloed ? "var(--paper)" : t.color);
+  zetHoGrond(tossPending || vloed ? "var(--paper)" : t.color);
 
   // Vak 1: de stand, met de ploeg die aan zet is op de rand.
   paintHoTally(freshA || 0, freshB || 0);
@@ -6875,7 +6887,7 @@ function handoff(mode, freshA, freshB, zelfdeGrond) {
   }
   /* De kleur groeit als cirkel uit de kaart die hier landt. */
   if (vloed) kleurUitKaart($("#s-handoff"), veldHo, $("#hoVeld"), $("#hoRoundCard"), t.hex,
-    () => $("#s-handoff").style.setProperty("--team", t.color));
+    () => zetHoGrond(t.color));
   if (wissel) na(RIJ_WACHT, () => {
     if (!G) return;
     $("#hoRondes").classList.add("wissel");
@@ -8946,13 +8958,16 @@ let tossPending = false, tossTimer = null;
    een beurt: een timer die doortikt op een verborgen scherm laat de stand op
    de verkeerde ploeg staan. */
 function landToss() {
-  if (tossTimer !== null) { clearTimeout(tossTimer); tossTimer = null; }
+  const liep = tossTimer !== null;
+  if (liep) { clearTimeout(tossTimer); tossTimer = null; }
   if (!G) return;
+  // De namen weer met wie aan de beurt is (zie tossTeams()).
+  if (liep) paintHoTally(0, 0);
   /* De kleur hoort bij de uitkomst, dus ze komt hier -- ook als de worp
      wordt afgebroken door een schermwissel, en ook bij beperkte beweging,
      waar tossTeams() hieronder meteen terugkeert. */
   veldHo.inkt(false);
-  $("#s-handoff").style.setProperty("--team", TEAMS[G.team].color);
+  zetHoGrond(TEAMS[G.team].color);
   $("#hoSideA").classList.toggle("up", G.team === 0);
   $("#hoSideB").classList.toggle("up", G.team === 1);
 }
@@ -8968,8 +8983,12 @@ function tossTeams() {
      weer op neutraal zolang er geloot wordt. Neutraal is de grond van de
      titel, papier met inkten punten: tussen de knop en de worp gaat de grond
      niet uit. */
-  $("#s-handoff").style.setProperty("--team", "var(--paper)");
+  zetHoGrond("var(--paper)");
   veldHo.inkt(true);
+  /* Wie niet kijkt, hoort de worp ook niet vooraf: tot de landing zegt de
+     stand nog niet wie aan de beurt is. */
+  ["#hoSideA", "#hoSideB"].forEach(s =>
+    $(s).setAttribute("aria-label", $(s).getAttribute("aria-label").replace(", is aan de beurt", "")));
   const stappen = 7;
   let i = 0;
   const stap = () => {
@@ -8984,6 +9003,7 @@ function tossTeams() {
     i++;
     if (i > stappen) {
       tossTimer = null;
+      paintHoTally(0, 0);
       /* En hier landt hij: de kleur komt binnen met het antwoord, en het
          geluid. Ze groeit uit de startknop, zoals de schijf van het aftellen
          opengaat op de kaart: de grond verandert vanaf wat je net indrukte. */
@@ -8995,7 +9015,7 @@ function tossTeams() {
              overgang van het scherm zou weer vanaf papier beginnen. */
           const ho = $("#s-handoff");
           ho.style.transition = "none";
-          ho.style.setProperty("--team", TEAMS[team].color);
+          zetHoGrond(TEAMS[team].color);
           ho.getBoundingClientRect();
           ho.style.transition = "";
         });
