@@ -91,6 +91,14 @@ const ok = (c, m) => { if (!c) fails.push(m); };
 
   await setup({ tier: 'klein', size: 16, secs: 60 });
   ok(await screen() === 'handoff', 'na start niet op het overdrachtscherm');
+  // De balk van de browser (op een desktop de titelbalk van het venster)
+  // volgt de grond: zolang er geloot wordt papier, pas na de landing de
+  // ploeg die begint. Eerder verklapte hij de worp.
+  const balk = () => page.getAttribute('#chromeColor', 'content');
+  ok(await balk() === '#F4EBDA', `de titelbalk verklapt de worp (${await balk()})`);
+  await page.waitForTimeout(1800);
+  const begint = await game(() => ['#E8452B', '#1B6FC4'][window.__tijd.G.team]);
+  ok(await balk() === begint, `de titelbalk volgt de worp niet (${await balk()} i.p.v. ${begint})`);
   ok(await game(() => window.__tijd.G.deck.length) === 16, 'deck is geen 16 kaarten');
   ok(await page.getAttribute('#hoTally', 'hidden') === null,
      'de stand ontbreekt bij de eerste overdracht');
