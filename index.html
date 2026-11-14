@@ -9203,7 +9203,10 @@ function winner() {
   if (win === null) scherm.style.removeProperty("--wn-grond");
   else scherm.style.setProperty("--wn-grond", vloed ? "var(--paper)" : TEAMS[win].color);
   wnPloeg = win;
-  veldWn.inkt(win === null);
+  /* Tijdens het optellen verklapt de grond niets: papier met inkten punten,
+     zoals bij de worp. De kleur van wie won groeit pas uit de kaart als de
+     kroon landt (zie KROON hieronder). */
+  veldWn.inkt(win === null || vloed);
   veldWn.stralen(true);
   /* Uitgespeeld, maar de eindstand blijft bewaard tot je het scherm verlaat:
      een herlaadbeurt of een toestel dat de app opruimt toont haar opnieuw,
@@ -9215,8 +9218,6 @@ function winner() {
   show("winner");
   if (naSpel) rustKnop([$("#btnAgain"), $("#btnHome")]);
   veldWn.aan();
-  if (vloed) kleurUitKaart(scherm, veldWn, $("#wnVeld"), $("#wnPiles"), TEAMS[win].hex,
-    () => scherm.style.setProperty("--wn-grond", TEAMS[win].color));
 
   /* De onthulling: de totalen tellen samen op, dan valt de kroon en pas dán
      het feest. Bij beperkte beweging staat alles er meteen. */
@@ -9277,7 +9278,16 @@ function winner() {
   });
   /* Eén belletje voor de landing, ook als er bij gelijkspel twee kronen vallen. */
   if ($("#wnPiles .kroon")) na(KROON + VAL, () => { Snd.kroon(); Tril.kroon(); });
+  /* Met de kroon komt de kleur: ze groeit uit de kaart, over de inkten
+     punten van het optellen heen. */
+  if (vloed) na(KROON + VAL, () => kleurUitKaart(scherm, veldWn, $("#wnVeld"), $("#wnPiles"), TEAMS[win].hex,
+    () => scherm.style.setProperty("--wn-grond", TEAMS[win].color)));
+  /* De rondes eronder tellen mee, elk tot haar eigen getal: stonden ze
+     meteen vol, dan rekende je de uitslag uit voor de totalen klaar waren. */
+  const rondes = $$("#wnPiles .tally .foot b");
+  const rondeDoel = rondes.map(n => Number(n.textContent) || 0);
   nums.forEach(n => { n.textContent = "0"; });
+  rondes.forEach(n => { n.textContent = "0"; });
   const t0 = performance.now();
   let vorig = -1, vorigeToon = -1;
   const stappen = Math.floor(hoogst / 3);
@@ -9288,6 +9298,7 @@ function winner() {
     // Allebei met dezelfde snelheid per punt: wie meer had, telt langer door.
     const waarde = Math.round(e * hoogst);
     nums.forEach((n, i) => { n.textContent = Math.min(doel[i], waarde); });
+    rondes.forEach((n, i) => { n.textContent = Math.min(rondeDoel[i], waarde); });
     if (waarde !== vorig && waarde % 3 === 0 && waarde > 0) {
       /* Dezelfde regel als de overdracht (telToon), en nooit twee keer
          dezelfde noot na elkaar: dat klonk als een hapering. */
