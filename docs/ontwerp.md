@@ -2261,6 +2261,19 @@ daar te laten groeien, maar dan zeggen kroon, mascotte én cijfergrootte
 alle drie hetzelfde, terwijl twee cijfers van verschillend formaat juist
 lastiger naast elkaar te leggen zijn.
 
+### De grond wacht op de kroon
+
+De kleur van wie won groeide uit de kaart zodra ze landde, terwijl de
+totalen nog op 2 tegen 2 stonden, en de rondes eronder stonden meteen op
+hun eindgetal: wie een beetje optelde, wist de uitslag voor de telling klaar
+was. Max zag het na de titelbalk van de worp (zie "De worp verklapt zichzelf
+niet") en koos uit een mock-up met twee varianten deze: tijdens het optellen
+is de grond die van de worp, papier met inkten punten (`veldWn.inkt(true)`),
+en de kleur groeit uit de kaart op het moment dat de kroon landt
+(`kleurUitKaart()` op `KROON + VAL`). De rondes tellen mee, elk tot haar
+eigen getal. Bij beperkte beweging, na herladen en bij gelijkspel staat alles
+er meteen, zoals eerst.
+
 **De stand ligt op papier.** Elk scherm tussen twee beurten is nu
 hetzelfde: een papieren kaart op de grond, de gouden knop eronder. De
 overdracht had dat al, de pauze ook; de eindstand stond als enige los op de

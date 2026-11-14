@@ -310,7 +310,8 @@ palet): uit de knop die je indrukte, of uit de kaart waar de beurt gebeurde.
 Bij tijd om en een lege stapel groeit het papier uit de kaart over de
 ploegkleur (`papierUitKaart()`, `#plVloed`); op de overdracht en de
 eindstand groeit de ploegkleur uit de kaart die daar landt
-(`kleurUitKaart()`, op `onthul()`). Nooit rechtstreeks naar de andere
+(`kleurUitKaart()`, op `onthul()`); op de eindstand pas als de kroon landt,
+daarvoor zijn de punten inkt op papier en tellen ook de rondes op. Nooit rechtstreeks naar de andere
 ploeg, want dat mengt door paars. Het spelscherm verandert van grond niet:
 het is de ploegkleur met de punten van het aftellen, die de hele beurt
 stil blijven liggen: het canvas van het aftellen (`veldCd`) tot `NA_NUL`
