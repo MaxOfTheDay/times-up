@@ -245,6 +245,42 @@ async function uitklinken(page) {
   ok(db <= -30, `de lange druk klinkt bij loslaten niet uit: ${db.toFixed(1)} dB aan het eind van het terugkrimpen (hoogstens -30)`);
 }
 
+/* 3c: geen toon springt van hoorbaar naar stil. Elke cue los, met elke
+   geplande sterkte vastgelegd: twee punten op één knoop die minder dan
+   2 ms uit elkaar liggen en meer dan 40 dB verschillen, zijn een afgekapte
+   toon, een knetter. De snelste echte uitklink (de tik) valt 66 dB in
+   10 ms. Renderen ziet het niet als er een tweede toon onder klinkt. */
+async function zonderKnip(page) {
+  const bron = sndBron.replace(/const wekbaar = c =>[^;]*;/, 'const wekbaar = c => true;');
+  const r = await page.evaluate(async ({ bron, CUES }) => {
+    const uit = {}, P = AudioParam.prototype;
+    for (const [naam, c] of Object.entries(CUES)) {
+      const oc = new OfflineAudioContext(1, 48000, 48000);
+      window.AudioContext = function () { return oc; };
+      const S = eval('(() => {' + bron + '; return Snd; })()');
+      S.unlock();
+      const pad = new Map(), oud = {};
+      for (const k of ['setValueAtTime', 'exponentialRampToValueAtTime', 'linearRampToValueAtTime']) {
+        oud[k] = P[k];
+        P[k] = function (v, t) { if (!pad.has(this)) pad.set(this, []); pad.get(this).push([t, v]); return oud[k].apply(this, arguments); };
+      }
+      try { eval(c); } finally { Object.assign(P, oud); }
+      let ergst = 0;
+      for (const [param, l] of pad) {
+        if (param.defaultValue !== 1) continue;   // alleen sterktes (een gain)
+        l.sort((a, b) => a[0] - b[0]);
+        for (let k = 1; k < l.length; k++) {
+          const [t0, v0] = l[k - 1], [t1, v1] = l[k];
+          if (t1 - t0 < .002 && t1 > t0 - 1e-9) ergst = Math.max(ergst, Math.abs(20 * Math.log10(Math.max(v0, 1e-5) / Math.max(v1, 1e-5))));
+        }
+      }
+      uit[naam] = ergst;
+    }
+    return uit;
+  }, { bron, CUES });
+  for (const [naam, db] of Object.entries(r)) ok(db <= 40, `${naam}: een toon springt ${db.toFixed(0)} dB in minder dan 2 ms (afgekapt, hoogstens 40)`);
+}
+
 /* 4: een potje, met elke oscillator op zijn cue. Een overlap tussen twee
    verschillende cues is een fout, behalve de tik van de klok en de lange
    druk die onder de deur uitklinkt. */
@@ -320,6 +356,7 @@ async function overlap(page) {
     await p1.goto('about:blank');
     const r = await luidheid(p1);
     await uitklinken(p1);
+    await zonderKnip(p1);
     if (process.env.LUID) for (const [n, v] of Object.entries(r)) console.log(n.padEnd(14), v.db.toFixed(1), v.piek.toFixed(1));
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
     await ctx.addInitScript(() => {

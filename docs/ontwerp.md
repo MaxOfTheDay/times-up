@@ -521,6 +521,15 @@ dan alleen nog de toonhoogte. Zette hij per frame ook de sterkte, dan
 bleef de toon op vol (bij p 0 zelfs luider dan bovenaan) en kapte de stop
 hem af: Max hoorde een knetter bij het terugkrimpen. `test/zintuigen.test.js`
 meet het eind van het terugkrimpen (`uitklinken()`, minstens 30 dB stiller).
+Daarna is elk geluid op zo'n sprong nagelopen. Alles gaat door `tone()`,
+met 12 ms aanzet en een uitklink tot stil vóór de stop; geen cue klipte,
+ook gestapeld niet (de fanfare met haar stemmen, een reeks goed). Eén
+noot was korter dan haar aanzet: de 12 ms van de sluiter in `klik()`,
+waar aanzet en uitklink op hetzelfde moment eindigden en de toon 56 dB
+in één stap viel. De aanzet is nu hoogstens 40% van de noot.
+`zonderKnip()` legt van elke cue elke geplande sterkte vast en weigert een
+sprong van meer dan 40 dB binnen 2 ms; renderen zag deze niet, omdat de
+tweede noot van de sluiter eronder doorklonk.
 
 **Een duim rolt.** Max zag dat vasthouden niet altijd lukte. Gemeten met
 echte aanraking (CDP, touch-toestel): een vinger die tijdens de 1,1 s 16 px
