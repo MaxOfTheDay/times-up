@@ -515,7 +515,12 @@ houdt en weer daalt als huis terugkrimpt, en `Tril.ijk()` op een derde en
 twee derde. In het telefoonmodel ligt de toon op het laagste punt 6 dB
 onder `goed()` en op het hoogste even luid. De korte klik halverwege
 (`Snd.ijk()`) is daarmee weg: de toon zegt het de hele druk lang. Op vol
-klinkt de deur (`dicht()`), de toon valt dan in 40 ms weg.
+klinkt de deur (`dicht()`), de toon valt dan in 40 ms weg. Bij loslaten valt
+de toon in dezelfde 280 ms weg als huis terugkrimpt; `houdNaar()` volgt
+dan alleen nog de toonhoogte. Zette hij per frame ook de sterkte, dan
+bleef de toon op vol (bij p 0 zelfs luider dan bovenaan) en kapte de stop
+hem af: Max hoorde een knetter bij het terugkrimpen. `test/zintuigen.test.js`
+meet het eind van het terugkrimpen (`uitklinken()`, minstens 30 dB stiller).
 
 **Een duim rolt.** Max zag dat vasthouden niet altijd lukte. Gemeten met
 echte aanraking (CDP, touch-toestel): een vinger die tijdens de 1,1 s 16 px

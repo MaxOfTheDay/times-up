@@ -4356,26 +4356,32 @@ const Snd = (() => {
         g.gain.setValueAtTime(0.0001, t);
         o.connect(g).connect(out() || c.destination);
         o.start(t);
-        houd = { o, g, stop: 0, vers: true };
+        houd = { o, g, stop: 0, vers: true, uit: false };
       }
       /* Een nieuwe knoop meldt als gain.value nog 1, de standaard, ook al
          staat er 0.0001 gepland: daarvandaan begon elke lange druk met 30 ms
          op tien keer zijn sterkte, een klik op 0 dBFS. Een verse toon begint
          dus bij stilte. */
       clearTimeout(houd.stop);
+      houd.uit = false;
       houd.g.gain.cancelScheduledValues(t);
       houd.g.gain.setValueAtTime(houd.vers ? 0.0001 : Math.max(0.0001, houd.g.gain.value), t);
       houd.vers = false;
       houd.g.gain.exponentialRampToValueAtTime(houdVol(p), t + .03);
     },
+    /* Tijdens het uitklinken (houdUit()) volgt alleen de toonhoogte het
+       terugkrimpen. Een sterkte per frame zette de toon telkens weer op vol
+       (bij p 0 zelfs luider dan bovenaan), zodat hij na het terugkrimpen op
+       volle sterkte werd afgekapt: een knetter bij het loslaten. */
     houdNaar(p) {
       if (!houd || !ctx) return;
       houd.o.frequency.setTargetAtTime(HOUD_F * Math.pow(2, p), ctx.currentTime, .012);
-      houd.g.gain.setTargetAtTime(houdVol(p), ctx.currentTime, .03);
+      if (!houd.uit) houd.g.gain.setTargetAtTime(houdVol(p), ctx.currentTime, .03);
     },
     houdUit(ms) {
       if (!houd || !ctx) return;
       const h = houd, t = ctx.currentTime, s = Math.max(.03, (ms || 0) / 1000);
+      h.uit = true;
       h.g.gain.cancelScheduledValues(t);
       h.g.gain.setValueAtTime(Math.max(0.0001, h.g.gain.value), t);
       h.g.gain.exponentialRampToValueAtTime(0.0001, t + s);

@@ -210,6 +210,41 @@ async function luidheid(page) {
   return r;
 }
 
+/* 3b: loslaten klinkt uit. De lange druk houdt de toon aan, loslaten laat
+   huis in --t-kom terugkrimpen terwijl houdNaar() per frame de toonhoogte
+   laat dalen. Aan het eind van die 280 ms moet de toon weg zijn: bleef hij
+   op sterkte, dan kapte de stop hem af met een knetter. */
+async function uitklinken(page) {
+  const bron = sndBron.replace(/const wekbaar = c =>[^;]*;/, 'const wekbaar = c => true;');
+  const r = await page.evaluate(async bron => {
+    const SR = 48000, oc = new OfflineAudioContext(1, SR, SR);
+    window.AudioContext = function () { return oc; };
+    const S = eval('(() => {' + bron + '; return Snd; })()');
+    S.unlock();
+    const F = 1 / 60, A = .05, LOS = .45, KOM = .28, MS = 1.1;
+    const q = t => Math.round(t * SR / 128) * 128 / SR;
+    let p = 0, p0 = 0;
+    for (let t = A; t < .95; t += F) {
+      oc.suspend(q(t)).then(() => {
+        const n = oc.currentTime;
+        if (n < A + F / 2) S.houdAan(0);
+        else if (n < LOS) { p = (n - A) / MS; S.houdNaar(p); }
+        else {
+          if (!p0) { p0 = p; S.houdUit(KOM * 1000); }
+          const k = Math.min(1, (n - LOS) / KOM);
+          S.houdNaar(p0 * Math.pow(1 - k, 3));
+        }
+        oc.resume();
+      });
+    }
+    const d = (await oc.startRendering()).getChannelData(0);
+    const piek = (a, b) => { let m = 0; for (let i = Math.round(a * SR); i < b * SR; i++) m = Math.max(m, Math.abs(d[i])); return m; };
+    return { voor: piek(LOS - .05, LOS), na: piek(LOS + KOM - .02, LOS + KOM) };
+  }, bron);
+  const db = 20 * Math.log10((r.na + 1e-9) / r.voor);
+  ok(db <= -30, `de lange druk klinkt bij loslaten niet uit: ${db.toFixed(1)} dB aan het eind van het terugkrimpen (hoogstens -30)`);
+}
+
 /* 4: een potje, met elke oscillator op zijn cue. Een overlap tussen twee
    verschillende cues is een fout, behalve de tik van de klok en de lange
    druk die onder de deur uitklinkt. */
@@ -284,6 +319,7 @@ async function overlap(page) {
     const p1 = await browser.newPage();
     await p1.goto('about:blank');
     const r = await luidheid(p1);
+    await uitklinken(p1);
     if (process.env.LUID) for (const [n, v] of Object.entries(r)) console.log(n.padEnd(14), v.db.toFixed(1), v.piek.toFixed(1));
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
     await ctx.addInitScript(() => {
