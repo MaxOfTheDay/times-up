@@ -4296,8 +4296,11 @@ const Snd = (() => {
     o.type = type || "square";
     o.frequency.setValueAtTime(freq, t0);
     if (glide) o.frequency.exponentialRampToValueAtTime(Math.max(40, glide), t0 + dur);
+    /* De aanzet is 12 ms, maar nooit meer dan 40% van de noot: bij een noot
+       van 12 ms (de sluiter in klik()) eindigden aanzet en uitklink op
+       hetzelfde moment, en sprong de toon van vol naar stil, een knetter. */
     g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(vol || .18, t0 + 0.012);
+    g.gain.exponentialRampToValueAtTime(vol || .18, t0 + Math.min(.012, dur * .4));
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
     o.connect(g).connect(out() || c.destination);
     o.start(t0); o.stop(t0 + dur + .02);
