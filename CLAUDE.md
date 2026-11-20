@@ -716,7 +716,8 @@ anders meteen af):
 - `test/zintuigen.test.js` toetst het woordenboek van de zintuigen: elke
   cue staat erin, twee gebeurtenissen klinken niet hetzelfde, trillingen
   van de ladder, elke cue in het telefoonmodel (niet meer dan 8 dB onder
-  `goed()`, geen piek boven -3 dBFS), en in een gespeeld potje nooit twee
+  `goed()`, geen piek boven -3 dBFS), de lange druk die bij loslaten
+  uitklinkt, en in een gespeeld potje nooit twee
   cues tegelijk (`npm run test:zintuigen`).
 - `test/snel.test.js` draait de app met de CPU vier keer vertraagd en
   geeft drie dingen een budget: het script van een start (in een nieuw
